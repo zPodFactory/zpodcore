@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "zpodapi"
+version = "0.1.0"
+description = ""
+authors = ["Kelby Valenti <kelby@valenti.ws>", "Timo Sugliani <timo.sugliani@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+alembic = "1.8.1"
+email-validator = "1.3.0"
+fastapi = "0.88.0"
+gunicorn = "20.1.0"
+httpx = "0.23.1"
+ipython = "8.7.0"
+passlib = "1.7.4"
+psycopg2-binary = "2.9.5"
+python = "^3.11.1"
+python-dotenv = "0.21.0"
+python-jose = {extras = ["cryptography"], version = "3.3.0"}
+python-multipart = "0.0.5"
+rich = "12.6.0"
+sqlmodel = "0.0.8"
+tenacity = "8.1.0"
+uvicorn = "0.20.0"
+
+[tool.poetry.dev-dependencies]
+black = "22.10.0"
+coverage = "6.5.0"
+debugpy = "1.6.4"
+flake8 = "6.0.0"
+flake8-bugbear = "22.12.6"
+isort = "5.10.1"
+pytest = "7.2.0"
+pytest-cov = "4.0.0"
+pytest-xdist = "3.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88 # override black's default line-length
+
+[tool.isort]
+profile = "black"
+line_length = 88
