@@ -1,0 +1,18 @@
+__pycache__/
+.env
+.venv
+.coverage
+.pytest_cache/
+.python-version
+
+# VS Code
+**/.vscode/*
+!**/.vscode/*.default
+**/zpodcore.code-workspace
+
+# Traefik
+traefik/acme.json
+
+# Logs
+logs/*
+!logs/README.rst

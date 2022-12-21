@@ -1,0 +1,76 @@
+# zPod Core
+zPodFactory Core Engine
+
+
+
+
+## DEVELOPMENT ENVIRONMENT SETUP
+
+Complete the following steps to set up your development environment:
+
+1. Install Docker and Docker Compose
+
+2. Install pyenv
+
+    ```bash
+    brew install pyenv
+    ```
+
+3. Install Poetry:
+
+    ```bash
+    pip install poetry
+    ```
+
+4. Configure Virtual Environment.  In the `/zpodapi` directory, run:
+
+    ```bash
+    pyenv install 3.10.7
+    pyenv local 3.10.7
+    poetry config virtualenvs.in-project true
+    poetry install
+    ```
+
+5. Configure Environment Variables.  (See `/zpodapi/settings.py` file for all available settings)  In the root directory, run:
+
+    ```bash
+    cp .env.default .env
+    vim .env
+    ```
+
+6. For Visual Studios Code, do the following:
+
+    a. Configure the zpodcore.code-workspace.  In `/` run:
+
+    ```bash
+    cp zpodcore.code-workspace.default zpodcore.code-workspace
+    ```
+
+    b. Configure the settings.json.  In `/.vscode` run:
+
+    ```bash
+    cp settings.json.default settings.json
+    ```
+
+    c. Configure the debugger for Visual Studios Code.  In `/zpodapi/.vscode` run:
+
+    ```bash
+    cp launch.json.default launch.json
+    ```
+
+    Make sure that the port variable in the launch.json file matches the port stored in the `ZPODAPI_DEBUG_HOSTPORT` environment variables.
+
+7. Build the Docker containers.  (For DEV, make sure that the `COMPOSE_FILE` environment variable is set to `docker-compose.dev.yml`.  In the root directory, run:
+
+    ```bash
+    docker-compose build
+    ```
+
+
+8. Start the environment.  In the root directory, run:
+
+    ```bash
+    docker-compose up
+    ```
+
+9. Verify that everything is working by opening a browser and going to `http://localhost:[8000 or ZPODAPI_HOSTPORT]` and `http://localhost:[8000 or ZPODAPI_HOSTPORT]/docs`

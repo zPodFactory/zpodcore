@@ -1,0 +1,30 @@
+FROM python:3.11.1-slim as requirements-stage
+WORKDIR /tmp
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir poetry
+COPY ./zpodapi/pyproject.toml ./zpodapi/poetry.lock* /tmp/
+ARG INSTALL_DEV=false
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f requirements.txt --output requirements.txt --without-hashes ; else poetry export -f requirements.txt --output requirements.txt --without-hashes ; fi"
+
+# BASE
+FROM python:3.11.1-slim as base
+RUN pip install --no-cache-dir --upgrade pip
+WORKDIR /zpodcore
+ENV PYTHONPATH=/zpodcore/zpodapi/src
+COPY --from=requirements-stage /tmp/requirements.txt /requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+CMD ["tail", "-f", "/dev/null"]
+
+# DEV
+FROM base as dev
+RUN apt-get update && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir poetry
+RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.zpodapi_bash_history" && echo $SNIPPET >> "/root/.bashrc"
+CMD ["python", "/zpodcore/zpodapi/scripts/startup/start_reload.py"]
+
+# PROD
+FROM base as production
+COPY ./zpodapi /zpodcore/zpodapi
+CMD ["python", "/zpodcore/zpodapi/scripts/startup/start.py"]
