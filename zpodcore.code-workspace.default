@@ -1,0 +1,51 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "Root"
+		},
+		{
+			"path": "zpodapi",
+			"name": "zPod API"
+		},
+	],
+	"settings": {
+		"python.analysis.extraPaths": [
+			"../zpodapi/src", // Allow vscode to see zpodapi modules
+		],
+		"[python]": {
+			"editor.codeActionsOnSave": {
+				"source.organizeImports": true
+			}
+		},
+		"python.linting.enabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.linting.flake8Path": "flake8",
+		"python.formatting.provider": "black",
+		"editor.formatOnSave": true,
+		"files.exclude": {
+			"**/.DS_Store": true,
+			"**/.git": true,
+			"**/.hg": true,
+			"**/.svn": true,
+			"**/CVS": true,
+			"**/Thumbs.db": true,
+			"**/.venv": true,
+		},
+		"isort.args": [
+			"--profile",
+			"black",
+			"--line-length",
+			"88",
+			"--project",
+			"zpodapi,",
+		],
+		"remote.SSH.defaultForwardedPorts": [
+			{
+				"name": "zPodAPI",
+				"localPort": 8000,
+				"remotePort": 8000,
+			},
+		]
+	}
+}

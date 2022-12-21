@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+  zpodapi:
+    build:
+      context: .
+      dockerfile: ./zpodapi/dockerfile
+      target: dev
+      args:
+        INSTALL_DEV: "${ZPODAPI_DEV_MODE:-false}"
+    container_name: zpodapi
+    depends_on:
+      - zpodpostgres
+    env_file:
+      - .env
+    environment:
+      - PYDEVD_DISABLE_FILE_VALIDATION=1
+    init: true
+    ports:
+      - ${ZPODAPI_HOSTPORT:-127.0.0.1:8000}:8000
+      - ${ZPODAPI_DEBUG_HOSTPORT:-127.0.0.1:5678}:5678
+    restart: always
+    tty: true
+    volumes:
+      - ./zpodapi:/zpodcore/zpodapi:cached
+      - ./logs:/zpodcore/logs:cached
+      - zpod-history-vol:/commandhistory
+
+  zpodpostgres:
+    container_name: zpodpostgres
+    environment:
+      - POSTGRES_PASSWORD=${ZPODAPI_POSTGRES_PASSWORD}
+    image: postgres:13.9
+    ports:
+      - ${ZPODAPI_POSTGRES_HOSTPORT:-127.0.0.1:5432}:5432
+    restart: always
+    volumes:
+      - zpod-postgres-vol:/var/lib/postgresql/data
+
+volumes:
+  zpod-history-vol: null
+  zpod-postgres-vol: null

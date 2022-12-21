@@ -1,0 +1,57 @@
+version: '3.7'
+services:
+  traefik:
+    init: true
+    image: traefik:v2.5
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "$PWD/traefik:/etc/traefik"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.traefik.rule: Host(`${ZPODAPI_TRAEFIK_HOST}`)
+      traefik.http.routers.traefik.service: api@internal
+      traefik.http.routers.traefik.entrypoints: websecure
+      traefik.http.routers.traefik.tls: true
+      traefik.http.routers.traefik.tls.certresolver: default
+      traefik.http.routers.traefik.middlewares: traefik-auth
+      traefik.http.middlewares.traefik-auth.basicauth.users: ${ZPODAPI_TRAEFIK_BASICAUTH}
+
+  zpodapi:
+    build:
+      context: .
+      dockerfile: ./zpodapi/dockerfile
+      target: production
+    container_name: zpodapi
+    depends_on:
+      - zpodpostgres
+    env_file:
+      - .env
+    init: true
+    restart: always
+    ports:
+      - ${ZPODAPI_HOSTPORT:-0.0.0.0:8000}:8000
+    labels:
+      traefik.enable: true
+      traefik.http.routers.zpod-api.rule: Host(`${ZPODAPI_TRAEFIK_HOST_API}`)
+      traefik.http.routers.zpod-api.entrypoints: websecure
+      traefik.http.routers.zpod-api.tls.certresolver: default
+      traefik.http.routers.zpod-api.tls: true
+    volumes:
+      - ./logs:/zpodcore/logs
+
+  zpodpostgres:
+    container_name: zpodpostgres
+    environment:
+      - POSTGRES_PASSWORD=${ZPODAPI_POSTGRES_PASSWORD}
+    image: postgres:13.4
+    ports:
+      - ${ZPODAPI_POSTGRES_HOSTPORT:-127.0.0.1:5432}:5432
+    restart: always
+    volumes:
+      - zpod-postgres-vol:/var/lib/postgresql/data
+
+volumes:
+  zpod-postgres-vol: null
