@@ -9,6 +9,27 @@
 			"name": "zPod API"
 		},
 	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Debug zPodAPI",
+				"type": "python",
+				"request": "attach",
+				"connect": {
+					"host": "localhost",
+					"port": 5678
+				},
+				"pathMappings": [
+					{
+						"localRoot": "${workspaceFolder:zPod API}",
+						"remoteRoot": "/zpodcore/zpodapi"
+					}
+				]
+			}
+		],
+		"compounds": []
+	},
 	"settings": {
 		"python.analysis.extraPaths": [
 			"../zpodapi/src", // Allow vscode to see zpodapi modules
@@ -31,6 +52,7 @@
 			"**/CVS": true,
 			"**/Thumbs.db": true,
 			"**/.venv": true,
+			"zpodapi": true, // Hide zpodapi from Workspace Root folder
 		},
 		"isort.args": [
 			"--profile",
