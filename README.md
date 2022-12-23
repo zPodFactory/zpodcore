@@ -46,19 +46,7 @@ Complete the following steps to set up your development environment:
     cp zpodcore.code-workspace.default zpodcore.code-workspace
     ```
 
-    b. Configure the settings.json.  In `/.vscode` run:
-
-    ```bash
-    cp settings.json.default settings.json
-    ```
-
-    c. Configure the debugger for Visual Studios Code.  In `/zpodapi/.vscode` run:
-
-    ```bash
-    cp launch.json.default launch.json
-    ```
-
-    Make sure that the port variable in the launch.json file matches the port stored in the `ZPODAPI_DEBUG_HOSTPORT` environment variables.
+    Make sure that the port variable in launch.configurations.connect.port matches the port stored in the `ZPODAPI_DEBUG_HOSTPORT` environment variable.
 
 7. Build the Docker containers.  (For DEV, make sure that the `COMPOSE_FILE` environment variable is set to `docker-compose.dev.yml`.  In the root directory, run:
 
