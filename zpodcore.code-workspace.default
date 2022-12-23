@@ -69,5 +69,16 @@
                 "remotePort": 8000,
             },
         ]
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-vscode-remote.remote-ssh",
+            "ms-vscode-remote.vscode-remote-extensionpack",
+            "ms-vscode.remote-explorer",
+            "skellock.just",
+            "sourcery.sourcery",
+        ]
     }
 }
