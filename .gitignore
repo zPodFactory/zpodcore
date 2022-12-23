@@ -7,7 +7,6 @@ __pycache__/
 
 # VS Code
 **/.vscode/*
-!**/.vscode/*.default
 **/zpodcore.code-workspace
 
 # Traefik
