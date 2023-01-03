@@ -43,6 +43,6 @@ class UserView(SQLModel):
     description: str = Field(..., example="Sample User")
     api_token: str = Field(..., index=True)
     ssh_key: str = Field(...)
-    creation_date: datetime = Field(None, example=example_creation_date)
-    last_connection: datetime = Field(None, example=example_last_connection)
+    creation_date: datetime = Field(..., example=example_creation_date)
+    last_connection: datetime = Field(..., example=example_last_connection)
     superadmin: bool = Field(...)
