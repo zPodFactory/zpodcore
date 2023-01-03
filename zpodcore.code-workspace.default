@@ -60,7 +60,9 @@
             "**/CVS": true,
             "**/Thumbs.db": true,
             "**/.venv": true,
-            "zpodapi": true, // Hide zpodapi from Workspace Root folder
+            "zpodapi": true, // Hide zpodapi from Workspace Root folder,
+            "zpodcli": true, // Hide zpodcli from Workspace Root folder,
+            "zpodsdk": true, // Hide zpodsdk from Workspace Root folder,
         },
         "isort.args": [
             "--profile",
