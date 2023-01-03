@@ -1,13 +1,13 @@
 version: '3.7'
 services:
   zpodapi:
+    container_name: zpodapi
     build:
       context: .
       dockerfile: ./zpodapi/dockerfile
       target: dev
       args:
         INSTALL_DEV: "${ZPODAPI_DEV_MODE:-false}"
-    container_name: zpodapi
     depends_on:
       - zpodpostgres
     env_file:
