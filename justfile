@@ -15,12 +15,26 @@ zpodapi-exec *args="bash":
 
 # Start Docker Environment
 zpodapi-start:
-  docker-compose up
+  docker compose up
 
 # Stop Docker Environment
 zpodapi-stop:
-  docker-compose down
+  docker compose down
 
+# Generate openapi json
+zpodapi-generate-openapi:
+  docker exec -t zpodapi python zpodapi/scripts/openapi/generate_openapi_json.py
+
+zpodsdk-build:
+  cp -vf zpodapi/scripts/openapi/openapi.json zpodsdk_builder/openapi.json
+  docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
+  docker run -v "$(pwd)/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder 
+
+# docker prune everything
+docker-fullclean:
+    docker system prune -af
+    docker volume prune -f
+  
 # Run alembic command in zpodapi container
 alembic *args:
   docker exec -t zpodapi bash -c 'cd /zpodcore/zpodapi/scripts/alembic && alembic {{args}}'
