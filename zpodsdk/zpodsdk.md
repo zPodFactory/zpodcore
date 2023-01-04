@@ -4,10 +4,9 @@ This is the zPod SDK. It is self-generated, we should not commit anything in thi
 
 ## Getting Started
 
-You will be able to generate the zpodsdk python bindings by running the following commands:
+You will be able to generate the zpodsdk python bindings by running the following command:
 
 ```bash
-just zpodapi-generate-openapi
 just zpodsdk-build
 ```
 
@@ -17,13 +16,10 @@ Sample output:
 
 ```bash
 zpodcore on main [?⇡] via 🐳 desktop-linux
-❯ just zpodapi-generate-openapi
+❯ just zpodsdk-build
 docker exec -t zpodapi python zpodapi/scripts/openapi/generate_openapi_json.py
 Generating openapi.json...
-
-zpodcore on main [?⇡] via 🐳 desktop-linux
-❯ just zpodsdk-build
-cp -vf zpodapi/scripts/openapi/openapi.json zpodsdk_builder/openapi.json
+mv -vf zpodapi/scripts/openapi/openapi.json zpodsdk_builder/openapi.json
 zpodapi/scripts/openapi/openapi.json -> zpodsdk_builder/openapi.json
 docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
 [+] Building 34.4s (19/19) FINISHED
