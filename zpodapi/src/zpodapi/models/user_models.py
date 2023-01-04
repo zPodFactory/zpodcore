@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import EmailStr
+from pydantic import Field as PField
 from sqlmodel import SQLModel
 
 from zpodapi.models.base import Field
@@ -44,5 +45,9 @@ class UserView(SQLModel):
     api_token: str = Field(..., index=True)
     ssh_key: str = Field(...)
     creation_date: datetime = Field(..., example=example_creation_date)
-    last_connection: datetime = Field(..., example=example_last_connection)
+    last_connection: datetime | None = PField(
+        None,
+        example=example_last_connection,
+        nullable=True,
+    )
     superadmin: bool = Field(...)
