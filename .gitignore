@@ -15,3 +15,7 @@ traefik/acme.json
 # Logs
 logs/*
 !logs/README.rst
+
+# Openapi files
+zpodsdk_builder/openapi.json
+zpodapi/scripts/openapi/openapi.json

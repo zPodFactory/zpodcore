@@ -16,6 +16,8 @@ def generate_openapi_json():
                 routes=api.routes,
             ),
             f,
+            indent=2,
+            sort_keys=True,
         )
 
 
