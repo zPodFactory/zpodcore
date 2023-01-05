@@ -9,12 +9,13 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 rich = "^13.0.0"
-zpodsdk = {path = "../zpodsdk"}
+zpodsdk = {path = "../zpodsdk", develop = true}
 
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
 black = {version = "^23.1a1", allow-prereleases = true}
+ipython = "^8.8.0"
 
 [build-system]
 requires = ["poetry-core"]
