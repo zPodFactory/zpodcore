@@ -1,60 +1,75 @@
 import argparse
-import os
+import pkgutil
 
 MAIN_TEMPLATE = """\
-import importlib
 from functools import cache, partial
 
-from {package_name} import AuthenticatedClient, Client
-from {package_name}.api.token import token
-from {package_name}.models import BodyTokenTokenPost
+from {package_name} import Client
+
+class {class_name}Methods:
+    def __init__(self, mod, client):
+        self._mod = mod
+        self._client = client
+
+        self.asyncio = self._load_method("asyncio")
+        self.asyncio_detailed = self._load_method("asyncio_detailed")
+        self.sync = self._load_method("sync")
+        self.sync_detailed = self._load_method("sync_detailed")
+
+    def _load_method(self, method):
+        if mod_method := getattr(self._mod, method, None):
+            return partial(mod_method, client=self._client)
+        else:
+            return self._not_implemented(method)
+
+    def _not_implemented(self, method):
+        def not_implemented(*args, **kwargs):
+            raise NotImplementedError(f"{{method}} not found in {{self._mod.__name__}}")
+
+        return not_implemented
 
 
 class {class_name}:
-    def __init__(self, base_url):
-        self.client = Client(base_url=base_url)
-
-    def load_mod(self, mod):
-        mod = importlib.import_module(mod)
-        for attr in ("asyncio", "asyncio_detailed", "sync", "sync_detailed"):
-            if method := getattr(mod, attr):
-                setattr(mod, attr, partial(method, client=self.client))
-        return mod
+    def __init__(self, base_url, token):
+        self._client = Client(
+            base_url=base_url,
+            headers=dict(access_token=token),
+        )
 """
 
 METHOD_TEMPLATE = """\
     @property
     @cache
-    def {module_name}(self):
-        return self.load_mod('{package_name}.api.{api_name}.{module_name}')
+    def {tag_name}_{module_name}(self) -> {class_name}Methods:
+        from {package_name}.api.{tag_name} import {module_name}
+        return {class_name}Methods({module_name}, self._client)
 """
 
 
-def build_methods(package_name):
-    out = []
-    api_path = f"{package_name}/api"
-    for api_item in os.scandir(path=api_path):
-        if api_item.is_dir() and not api_item.name.startswith("__"):
-            api_name = api_item.name
-            for module_item in os.scandir(path=f"{api_path}/{api_name}"):
-                if module_item.is_file() and not module_item.name.startswith("__"):
-                    # Strip ".py"
-                    module_name = module_item.name[0:-3]
-                    out.append(
-                        METHOD_TEMPLATE.format(
-                            package_name=package_name,
-                            api_name=api_name,
-                            module_name=module_name,
-                        )
-                    )
-    return "\n".join(sorted(out))
+def build_methods(package_name, class_name):
+    method_definitions = []
+    base = f"{package_name}/api"
+    for (_, tag_name, _) in pkgutil.iter_modules([base]):
+        method_definitions.extend(
+            METHOD_TEMPLATE.format(
+                class_name=class_name,
+                module_name=module_name,
+                package_name=package_name,
+                tag_name=tag_name or 'default',
+            )
+            for _, module_name, _ in pkgutil.iter_modules([f"{base}/{tag_name}"])
+        )
+    return sorted(method_definitions)
 
 
 def build(package_name, class_name="SdkClient"):
     return "\n".join(
         [
-            MAIN_TEMPLATE.format(package_name=package_name, class_name=class_name),
-            build_methods(package_name),
+            MAIN_TEMPLATE.format(
+                package_name=package_name,
+                class_name=class_name,
+            ),
+            *build_methods(package_name, class_name),
         ]
     )
 
@@ -72,6 +87,5 @@ if __name__ == "__main__":
         class_name = "".join([*map(str.title, sections), "Client"])
 
     output = build(package_name=package_name, class_name=class_name)
-    f = open(f"{package_name}/{package_name}_client.py", "w+")
-    f.write(output)
-    f.close()
+    with open(f"{package_name}/{package_name}_client.py", "w+") as f:
+        f.write(output)
