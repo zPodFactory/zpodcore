@@ -40,7 +40,7 @@ class {class_name}:
 METHOD_TEMPLATE = """\
     @property
     @cache
-    def {tag_name}_{module_name}(self) -> {class_name}Methods:
+    def {module_name}(self) -> {class_name}Methods:
         from {package_name}.api.{tag_name} import {module_name}
         return {class_name}Methods({module_name}, self._client)
 """
