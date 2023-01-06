@@ -35,49 +35,49 @@ class ZpodClient:
 
     @property
     @cache
-    def root_root_root(self) -> ZpodClientMethods:
+    def root_root(self) -> ZpodClientMethods:
         from zpod.api.root import root_root
 
         return ZpodClientMethods(root_root, self._client)
 
     @property
     @cache
-    def users_users_create(self) -> ZpodClientMethods:
+    def users_create(self) -> ZpodClientMethods:
         from zpod.api.users import users_create
 
         return ZpodClientMethods(users_create, self._client)
 
     @property
     @cache
-    def users_users_delete(self) -> ZpodClientMethods:
+    def users_delete(self) -> ZpodClientMethods:
         from zpod.api.users import users_delete
 
         return ZpodClientMethods(users_delete, self._client)
 
     @property
     @cache
-    def users_users_get(self) -> ZpodClientMethods:
+    def users_get(self) -> ZpodClientMethods:
         from zpod.api.users import users_get
 
         return ZpodClientMethods(users_get, self._client)
 
     @property
     @cache
-    def users_users_get_all(self) -> ZpodClientMethods:
+    def users_get_all(self) -> ZpodClientMethods:
         from zpod.api.users import users_get_all
 
         return ZpodClientMethods(users_get_all, self._client)
 
     @property
     @cache
-    def users_users_get_me(self) -> ZpodClientMethods:
+    def users_get_me(self) -> ZpodClientMethods:
         from zpod.api.users import users_get_me
 
         return ZpodClientMethods(users_get_me, self._client)
 
     @property
     @cache
-    def users_users_update(self) -> ZpodClientMethods:
+    def users_update(self) -> ZpodClientMethods:
         from zpod.api.users import users_update
 
         return ZpodClientMethods(users_update, self._client)
