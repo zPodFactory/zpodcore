@@ -1,6 +1,6 @@
 # zPod SDK
 
-This is the zPod SDK. It is self-generated, we should not commit anything in this folder for now.
+This is the self-generated zPod SDK.
 
 ## Getting Started
 
