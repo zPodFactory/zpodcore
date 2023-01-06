@@ -36,7 +36,7 @@ async def get_user_record(
     "/users",
     response_model=list[UserView],
 )
-def get_users(
+def get_all(
     *,
     session: Session = Depends(deps.get_session),
 ):
@@ -47,7 +47,7 @@ def get_users(
     "/user",
     response_model=UserView,
 )
-def get_user(
+def get(
     *,
     db_user: User = Depends(get_user_record),
 ):
@@ -59,7 +59,7 @@ def get_user(
     response_model=UserView,
     status_code=status.HTTP_201_CREATED,
 )
-def create_user(
+def create(
     *,
     session: Session = Depends(deps.get_session),
     user: UserCreate,
@@ -86,7 +86,7 @@ def create_user(
     response_model=UserView,
     status_code=status.HTTP_201_CREATED,
 )
-def update_user(
+def update(
     *,
     session: Session = Depends(deps.get_session),
     db_user: User = Depends(get_user_record),
@@ -105,7 +105,7 @@ def update_user(
     "/user",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_user(
+def delete(
     *,
     session: Session = Depends(deps.get_session),
     db_user: User = Depends(get_user_record),
