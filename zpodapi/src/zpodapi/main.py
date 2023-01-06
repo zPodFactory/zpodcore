@@ -17,14 +17,15 @@ async def log_request(request: Request):
     log_obj(out, f"INCOMING REQUEST {request.method} {request.url.path}")
 
 
-def use_route_names_as_operation_ids(api: FastAPI) -> None:
+def simplify_operation_ids(api: FastAPI) -> None:
     """
-    Simplify operation IDs so that generated API clients have simpler function
+    Update operation IDs so that generated API clients have simpler function
     names.
     """
     for route in api.routes:
         if isinstance(route, APIRoute):
-            route.operation_id = route.name
+            tag = route.tags[0] if route.tags else "default"
+            route.operation_id = f"{tag}_{route.name}"
 
 
 api = FastAPI(title="zPod API")
@@ -35,4 +36,4 @@ include_router_logged = partial(
 include_router_logged(root.router)
 include_router_logged(users.router)
 
-use_route_names_as_operation_ids(api)
+simplify_operation_ids(api)
