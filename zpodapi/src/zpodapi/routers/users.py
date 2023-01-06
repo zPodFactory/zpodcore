@@ -44,6 +44,17 @@ def get_all(
 
 
 @router.get(
+    "/user/me",
+    response_model=UserView,
+)
+def get_me(
+    *,
+    current_user: User = Depends(deps.get_active_current_user),
+):
+    return current_user
+
+
+@router.get(
     "/user",
     response_model=UserView,
 )
