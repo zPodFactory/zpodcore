@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security.api_key import APIKey, APIKeyHeader
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from zpodapi.lib.database import get_session
@@ -21,5 +22,12 @@ def get_current_user(
         )
 
 
-def get_active_current_user(user: User = Depends(get_current_user)):
+def get_current_user_and_update(
+    session: Session = Depends(get_session),
+    user: User = Depends(get_current_user),
+):
+    # Update last connection
+    user.last_connection = func.now()
+    session.add(user)
+    session.commit()
     return user
