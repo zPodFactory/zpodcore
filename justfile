@@ -24,11 +24,12 @@ zpodapi-stop:
 # Generate openapi json
 zpodapi-generate-openapi:
   docker exec -t zpodapi python zpodapi/scripts/openapi/generate_openapi_json.py
-
-zpodsdk-build: zpodapi-generate-openapi
   mv -vf zpodapi/scripts/openapi/openapi.json zpodsdk_builder/openapi.json
+
+# Update zpodsdk
+zpodsdk-update: zpodapi-generate-openapi
   docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
-  docker run -v "$(pwd)/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder
+  docker run -v "$(pwd)/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh"
 
 # docker prune everything
 docker-fullclean:
