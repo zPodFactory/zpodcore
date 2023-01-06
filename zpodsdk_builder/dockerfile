@@ -18,4 +18,4 @@ CMD ["tail", "-f", "/dev/null"]
 # PROD
 FROM base as production
 COPY . /zpodcore/zpodsdk_builder
-CMD ["bash", "-c", "openapi-python-client generate --path openapi.json --config config.yaml"]
+
