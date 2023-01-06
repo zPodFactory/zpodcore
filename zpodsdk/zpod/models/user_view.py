@@ -44,7 +44,9 @@ class UserView:
         username = self.username
         last_connection: Union[Unset, None, str] = UNSET
         if not isinstance(self.last_connection, Unset):
-            last_connection = self.last_connection.isoformat() if self.last_connection else None
+            last_connection = (
+                self.last_connection.isoformat() if self.last_connection else None
+            )
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
