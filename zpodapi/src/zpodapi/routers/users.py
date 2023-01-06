@@ -9,7 +9,7 @@ from zpodapi.models import User, UserCreate, UserUpdate, UserView
 
 router = APIRouter(
     tags=["users"],
-    dependencies=[Depends(deps.get_active_current_user)],
+    dependencies=[Depends(deps.get_current_user_and_update)],
 )
 
 
@@ -49,7 +49,7 @@ def get_all(
 )
 def get_me(
     *,
-    current_user: User = Depends(deps.get_active_current_user),
+    current_user: User = Depends(deps.get_current_user_and_update),
 ):
     return current_user
 
