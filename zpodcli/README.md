@@ -12,8 +12,8 @@ Every operation on the zPodFactory manager will require to be logged with a Toke
 Token format could look like `f"{user}_{generatedhash}"` in Python. (open to suggestions)
 PS: This would provide from a quick glance which user is trying to connect, unless we want to hide that.
 
-`zpodctl connect --server "manager.zpodfactory.io" --auth "[token]"`  
-`zpodctl connect -s "manager.zpodfactory.io" -a "[token]"`  
+`zcli connect --server "manager.zpodfactory.io" --token "[token]"`  
+`zcli connect -s "manager.zpodfactory.io" -t "[token]"`  
   
 PS: Will accept long & short format for `typer.Option()`  
   
@@ -68,22 +68,22 @@ class User(ZpodFactoryDocument):
 
 Listing users:
 
-`zpodctl users list`  
+`zcli user list`  
 
 Adding a user:
 
-`zpodctl users add --username "tsugliani" --email "tsugliani@vmware.com" --superadmin true`  
+`zcli user add --username "tsugliani" --email "tsugliani@vmware.com" --superadmin true`  
 
 Editing a user:
 
-`zpodctl users edit --username "tsugliani" --superadmin false --ssh_key "ssh-rsa AAAAB3N..."`  
-`zpodctl users edit --username "tsugliani" --enabled false`  
+`zcli user edit --username "tsugliani" --superadmin false --ssh_key "ssh-rsa AAAAB3N..."`  
+`zcli user edit --username "tsugliani" --enabled false`  
 
 PS: A normal `User` can only edit his `description`, `ssh_key`, and regenerate his `api_token`, evertyhing else is restricted to `superadmin`
 
 Deleting a user:
 
-`zpodctl users del --username "tsugliani" --confirm true`  
+`zcli user del --username "tsugliani" --confirm true`  
 
 Some insights:  
 
@@ -96,21 +96,21 @@ Group is a simple construct with a groupname & description that will hold a list
 
 Listing groups:
 
-`zpodctl groups list`
+`zcli group list`
 
 Adding a group:
 
-`zpodctl groups add --groupname "MCA" --description "Multi-Cloud Architects"`  
-`zpodctl groups add --groupname "VMware-SE-France" --description "French VCPP SEs"`  
+`zcli group add --groupname "MCA" --description "Multi-Cloud Architects"`  
+`zcli group add --groupname "VMware-SE-France" --description "French VCPP SEs"`  
 
 Editing a group entitlements:
 
-`zpodctl groups entitlements add --groupname "MCA" --username "tsugliani"`  
-`zpodctl groups entitlements del --groupname "MCA" --username "tsugliani"`  
+`zcli group entitlements add --groupname "MCA" --username "tsugliani"`  
+`zcli group entitlements del --groupname "MCA" --username "tsugliani"`  
 
 Deleting a group:
 
-`zpodctl groups del --groupname "MCA"`  
+`zcli group del --groupname "MCA"`  
 
 ### Permissions Management
 
@@ -118,17 +118,17 @@ Permissions will allow to link a zPod to a `Group` with a specific `Role` that w
 
 Listing permissions:
 
-`zpodctl permissions list`  
+`zpodctl permission list`  
 
 Adding a permission:
 
-`zpodctl permissions add --zpodname "tanzu" --groupname "MCA" --rolename "zpod_admin"`  
-`zpodctl permissions add --zpodname "tanzu" --groupname "VMware-SE-France" --rolename "zpod_user"`  
+`zpodctl permission add --zpodname "tanzu" --groupname "MCA" --rolename "zpod_admin"`  
+`zpodctl permission add --zpodname "tanzu" --groupname "VMware-SE-France" --rolename "zpod_user"`  
 
 Deleting a permission:
 
-`zpodctl permissions del --zpodname "tanzu" --groupname "MCA"`  
-`zpodctl permissions del --zpodname "tanzu" --groupname "VMware-SE-France"`  
+`zpodctl permission del --zpodname "tanzu" --groupname "MCA"`  
+`zpodctl permission del --zpodname "tanzu" --groupname "VMware-SE-France"`  
 
 ## Profiles management
   
@@ -140,22 +140,22 @@ a zPod Profile is a JSON file representing the components that will be orderly d
   
 Listing profiles:  
   
-`zpodctl profiles list`  
-`zpodctl profiles update` // (will very likely update from github repo with latest profiles `git pull`)  
+`zcli profile list`  
+`zcli profile update` // (will very likely update from github repo with latest profiles `git pull`)  
 
 Getting info on a specific profile:  
   
-`zpodctl profiles info --profilename "sddc-basic-7.0u3i"` // will display the components in order  
-`zpodctl profiles info -p "sddc-basic-7.0u3i"`  
+`zcli profile info --profilename "sddc-basic-7.0u3i"` // will display the components in order  
+`zcli profile info -p "sddc-basic-7.0u3i"`  
   
 Getting status of a specific profile:  
   
-`zpodctl profiles status --profilename "sddc-basic-7.0u3i"` // will display the components in order with their status (available, not available)  
+`zcli profile status --profilename "sddc-basic-7.0u3i"` // will display the components in order with their status (available, not available)  
   
 For a profile to be available, all the components it contains must be available in the zPodFactory Library.
 PS: Remember that without binaries of the various components, zPodFactory will not be able to deploy them, so we will have scheduled task & zpodctl command to verify/resync the status.
   
-`zpodctl profile status --rescan/verify`  
+`zcli profile status --rescan/verify`  
 
 ## Components management
 
@@ -174,56 +174,54 @@ It will also provide some specific non VMware components that are necessary for 
 
 Listing components:  
   
-`zpodctl components list`  
+`zcli component list`  
   
 Updating components:  
   
-`zpodctl components update` // (will very likely update from github repo with latest components `git pull`)  
+`zcli component update` // (will very likely update from github repo with latest components `git pull`)  
   
 Getting info on a specific component:  
   
-`zpodctl components info --componentname "vcsa-7.0u3i"` // will display the components JSON data.  
+`zcli component info --componentname "vcsa-7.0u3i"` // will display the components JSON data.  
   
 For now I'll not put commands to create/update/delete components, but we can discuss it later when we need it.  
 This shouldn't be a big problem anyway as the structure is pretty detailed now for the zpodlibrary/components etc...  
 
+## Scripts management
+
+`zcli script list`
 
 ## Library management
 
 TBD
 
-`zpod libraries list`
-
-
+`zcli library list`
 
 ## Endpoints management
 
-`zpodctl endpoints list`
+`zcli endpoint list`
 
-`zpodctl endpoints add --endpointname "RAX-MCA"`
+`zcli endpoint add --endpointname "RAX-MCA"`
 
-`zpodctl endpoints compute add --endpointname "RAX-MCA" --server "vc01.rax.lab" --username "zpod_svc@vmc.lab" --password "XXYYZZ"`
-`zpodctl endpoints storage add --endpointname "RAX-MCA" --datastore "vSanDatastore"`
+`zcli endpoint compute add --endpointname "RAX-MCA" --server "vc01.rax.lab" --username "zpod_svc@vmc.lab" --password "XXYYZZ"`
+`zcli endpoint storage add --endpointname "RAX-MCA" --datastore "vSanDatastore"`
 
+`zcli endpoint network xyz` // NOW THIS IS THE COMPLEX PART :D
 
-`zpodctl endpoints network xyz` // NOW THIS IS THE COMPLEX PART :D
+`zcli endpoint network add --endpointname "RAX-MCA" --driver "NSXT+VyOS" --nsxt_manager "nsx01.rax.lab" --nsxt_username "admin" --nsxt_password "XXYYZZ"`
 
-`zpodctl endpoints network add --endpointname "RAX-MCA" --driver "NSXT+VyOS" --nsxt_manager "nsx01.rax.lab" --nsxt_username "admin" --nsxt_password "XXYYZZ"`
+`zcli endpoint network add --endpointname "HomeLab" --driver "VyOS"`
 
-
-`zpodctl endpoints network add --endpointname "HomeLab" --driver "VyOS"`
-
-`zpodctl endpoints validate --endpointname "RAX-MCA"`
-`zpodctl endpoints validate --endpointname "Homelab"`
+`zcli endpoint validate --endpointname "RAX-MCA"`
+`zcli endpoint validate --endpointname "Homelab"`
 
 ## zPod management
 
-`zpodctl pod list`
-`zpodctl pod info --name "tanzeu"`
+`zcli pod list`
+`zcli pod info --name "tanzeu"`
 
-`zpodctl pod deploy --name "tanzu" --profilename "sddc-basic-7.0u3i" --endpoint "rax-mca"`
-`zpodctl pod deploy -n "tanzu" -p "sddc-basic-7.0u3i" -e "rax-mca"`
+`zcli pod deploy --name "tanzu" --profilename "sddc-basic-7.0u3i" --endpoint "rax-mca"`
+`zcli pod deploy -n "tanzu" -p "sddc-basic-7.0u3i" -e "rax-mca"`
 
-
-`zpodctl pod permissions add --zpodname "tanzu" --groupname "MCA" --rolename "zpod_admin"`
-`zpodctl pod permissions add --zpodname "tanzu" --groupname "VMware-SE-France" --rolename "zpod_user"`
+`zcli pod permissions add --zpodname "tanzu" --groupname "MCA" --rolename "zpod_admin"`
+`zcli pod permissions add --zpodname "tanzu" --groupname "VMware-SE-France" --rolename "zpod_user"`
