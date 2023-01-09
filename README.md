@@ -1,8 +1,6 @@
 # zPod Core
+
 zPodFactory Core Engine
-
-
-
 
 ## DEVELOPMENT ENVIRONMENT SETUP
 
@@ -51,14 +49,13 @@ Complete the following steps to set up your development environment:
 7. Build the Docker containers.  (For DEV, make sure that the `COMPOSE_FILE` environment variable is set to `docker-compose.dev.yml`.  In the root directory, run:
 
     ```bash
-    docker-compose build
+    docker compose build
     ```
-
 
 8. Start the environment.  In the root directory, run:
 
     ```bash
-    docker-compose up
+    docker compose up
     ```
 
 9. Verify that everything is working by opening a browser and going to `http://localhost:[8000 or ZPODAPI_HOSTPORT]` and `http://localhost:[8000 or ZPODAPI_HOSTPORT]/docs`
