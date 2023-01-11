@@ -2,10 +2,9 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
-from zpod import zpod_client
 
+from zpodcli.lib import zpod_client
 from zpodcli.lib.callback import isauthenticated
-from zpodcli.lib.config import config
 
 app = typer.Typer(help="Manage users", callback=isauthenticated)
 
@@ -17,12 +16,7 @@ def list():
     """
     print("Listing users...")
 
-    # TODO: Fix this, should not be here, but automatically available/loaded elsewhere...
-    cfg = config()
-    server = cfg.get("zpod_api_url")
-    token = cfg.get("zpod_api_token")
-
-    z = zpod_client.ZpodClient(base_url=server, token=token)
+    z = zpod_client.ZpodClient()
 
     users = z.users_get_all.sync()
 
