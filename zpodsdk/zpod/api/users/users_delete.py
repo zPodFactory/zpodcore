@@ -85,7 +85,7 @@ class UsersDelete:
 
         Returns:
             Response[Union[Any, HTTPValidationError]]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs(
             username=username,
@@ -117,7 +117,7 @@ class UsersDelete:
 
         Returns:
             Response[Union[Any, HTTPValidationError]]
-        """
+        """  # noqa e501
 
         return self.sync_detailed(
             username=username,
@@ -142,7 +142,7 @@ class UsersDelete:
 
         Returns:
             Response[Union[Any, HTTPValidationError]]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs(
             username=username,
@@ -172,7 +172,7 @@ class UsersDelete:
 
         Returns:
             Response[Union[Any, HTTPValidationError]]
-        """
+        """  # noqa e501
 
         return (
             await self.asyncio_detailed(
