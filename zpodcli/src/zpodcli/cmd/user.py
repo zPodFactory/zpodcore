@@ -3,7 +3,6 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 from zpod import zpod_client
-from zpod.models.user_view import UserView
 
 from zpodcli.lib.callback import isauthenticated
 from zpodcli.lib.config import config
@@ -24,9 +23,8 @@ def list():
     token = cfg.get("zpod_api_token")
 
     z = zpod_client.ZpodClient(base_url=server, token=token)
-    # TODO: Potentially retrieve pydantic/type from the fastapi response model ?
-    # This would be list[UserView] for this call
-    users: list[UserView] = z.users_get_all.sync()
+
+    users = z.users_get_all.sync()
 
     print("Server UserView list")
     print(users)
