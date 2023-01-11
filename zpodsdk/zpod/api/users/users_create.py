@@ -80,7 +80,7 @@ class UsersCreate:
 
         Returns:
             Response[Union[HTTPValidationError, UserView]]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs(
             json_body=json_body,
@@ -109,7 +109,7 @@ class UsersCreate:
 
         Returns:
             Response[Union[HTTPValidationError, UserView]]
-        """
+        """  # noqa e501
 
         return self.sync_detailed(
             json_body=json_body,
@@ -131,7 +131,7 @@ class UsersCreate:
 
         Returns:
             Response[Union[HTTPValidationError, UserView]]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs(
             json_body=json_body,
@@ -158,7 +158,7 @@ class UsersCreate:
 
         Returns:
             Response[Union[HTTPValidationError, UserView]]
-        """
+        """  # noqa e501
 
         return (
             await self.asyncio_detailed(

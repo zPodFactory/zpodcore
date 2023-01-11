@@ -69,7 +69,7 @@ class UsersGetAll:
 
         Returns:
             Response[List['UserView']]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs()
 
@@ -91,7 +91,7 @@ class UsersGetAll:
 
         Returns:
             Response[List['UserView']]
-        """
+        """  # noqa e501
 
         return self.sync_detailed().parsed
 
@@ -106,7 +106,7 @@ class UsersGetAll:
 
         Returns:
             Response[List['UserView']]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs()
 
@@ -126,6 +126,6 @@ class UsersGetAll:
 
         Returns:
             Response[List['UserView']]
-        """
+        """  # noqa e501
 
         return (await self.asyncio_detailed()).parsed

@@ -57,7 +57,7 @@ class RootRoot:
 
         Returns:
             Response[Any]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs()
 
@@ -79,7 +79,7 @@ class RootRoot:
 
         Returns:
             Response[Any]
-        """
+        """  # noqa e501
 
         kwargs = self._get_kwargs()
 
