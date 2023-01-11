@@ -2,32 +2,9 @@ import argparse
 import pkgutil
 
 MAIN_TEMPLATE = """\
-from functools import cache, partial
+from functools import cache
 
 from {package_name} import Client
-
-class {class_name}Methods:
-    def __init__(self, mod, client):
-        self._mod = mod
-        self._client = client
-
-        self.asyncio = self._load_method("asyncio")
-        self.asyncio_detailed = self._load_method("asyncio_detailed")
-        self.sync = self._load_method("sync")
-        self.sync_detailed = self._load_method("sync_detailed")
-
-    def _load_method(self, method):
-        if mod_method := getattr(self._mod, method, None):
-            return partial(mod_method, client=self._client)
-        else:
-            return self._not_implemented(method)
-
-    def _not_implemented(self, method):
-        def not_implemented(*args, **kwargs):
-            raise NotImplementedError(f"{{method}} not found in {{self._mod.__name__}}")
-
-        return not_implemented
-
 
 class {class_name}:
     def __init__(self, base_url, token):
@@ -40,9 +17,10 @@ class {class_name}:
 METHOD_TEMPLATE = """\
     @property
     @cache
-    def {module_name}(self) -> {class_name}Methods:
+    def {module_name}(self):
         from {package_name}.api.{tag_name} import {module_name}
-        return {class_name}Methods({module_name}, self._client)
+
+        return {module_name}.{endpoint_name}(self._client)
 """
 
 
@@ -54,8 +32,9 @@ def build_methods(package_name, class_name):
             METHOD_TEMPLATE.format(
                 class_name=class_name,
                 module_name=module_name,
+                endpoint_name=module_name.replace("_", " ").title().replace(" ", ""),
                 package_name=package_name,
-                tag_name=tag_name or 'default',
+                tag_name=tag_name or "default",
             )
             for _, module_name, _ in pkgutil.iter_modules([f"{base}/{tag_name}"])
         )

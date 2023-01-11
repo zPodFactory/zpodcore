@@ -8,87 +8,82 @@ from ...client import Client
 from ...types import Response
 
 
-def _get_kwargs(
-    *,
-    client: Client,
-) -> Dict[str, Any]:
-    url = "{}/".format(client.base_url)
+class RootRoot:
+    def __init__(self, client: Client) -> None:
+        self.client = client
 
-    headers: Dict[str, str] = client.get_headers()
-    cookies: Dict[str, Any] = client.get_cookies()
+    def _get_kwargs(
+        self,
+    ) -> Dict[str, Any]:
+        url = "{}/".format(self.client.base_url)
 
-    return {
-        "method": "get",
-        "url": url,
-        "headers": headers,
-        "cookies": cookies,
-        "timeout": client.get_timeout(),
-    }
+        headers: Dict[str, str] = self.client.get_headers()
+        cookies: Dict[str, Any] = self.client.get_cookies()
 
+        return {
+            "method": "get",
+            "url": url,
+            "headers": headers,
+            "cookies": cookies,
+            "timeout": self.client.get_timeout(),
+        }
 
-def _parse_response(*, client: Client, response: httpx.Response) -> Optional[Any]:
-    if response.status_code == HTTPStatus.OK:
-        return None
-    if client.raise_on_unexpected_status:
-        raise errors.UnexpectedStatus(f"Unexpected status code: {response.status_code}")
-    else:
-        return None
+    def _parse_response(self, *, response: httpx.Response) -> Optional[Any]:
+        if response.status_code == HTTPStatus.OK:
+            return None
+        if self.client.raise_on_unexpected_status:
+            raise errors.UnexpectedStatus(
+                f"Unexpected status code:     {response.status_code}"
+            )
+        else:
+            return None
 
+    def _build_response(self, *, response: httpx.Response) -> Response[Any]:
+        return Response(
+            status_code=HTTPStatus(response.status_code),
+            content=response.content,
+            headers=response.headers,
+            parsed=self._parse_response(response=response),
+        )
 
-def _build_response(*, client: Client, response: httpx.Response) -> Response[Any]:
-    return Response(
-        status_code=HTTPStatus(response.status_code),
-        content=response.content,
-        headers=response.headers,
-        parsed=_parse_response(client=client, response=response),
-    )
+    def sync_detailed(
+        self,
+    ) -> Response[Any]:
+        """Root
 
+        Raises:
+            errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+            httpx.TimeoutException: If the request takes longer than Client.timeout.
 
-def sync_detailed(
-    *,
-    client: Client,
-) -> Response[Any]:
-    """Root
+        Returns:
+            Response[Any]
+        """
 
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
+        kwargs = self._get_kwargs()
 
-    Returns:
-        Response[Any]
-    """
+        response = httpx.request(
+            verify=self.client.verify_ssl,
+            **kwargs,
+        )
 
-    kwargs = _get_kwargs(
-        client=client,
-    )
+        return self._build_response(response=response)
 
-    response = httpx.request(
-        verify=client.verify_ssl,
-        **kwargs,
-    )
+    async def asyncio_detailed(
+        self,
+    ) -> Response[Any]:
+        """Root
 
-    return _build_response(client=client, response=response)
+        Raises:
+            errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+            httpx.TimeoutException: If the request takes longer than Client.timeout.
 
+        Returns:
+            Response[Any]
+        """
 
-async def asyncio_detailed(
-    *,
-    client: Client,
-) -> Response[Any]:
-    """Root
+        kwargs = self._get_kwargs()
 
-    Raises:
-        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
-        httpx.TimeoutException: If the request takes longer than Client.timeout.
+        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
+            response = await _client.request(**kwargs)
 
-    Returns:
-        Response[Any]
-    """
-
-    kwargs = _get_kwargs(
-        client=client,
-    )
-
-    async with httpx.AsyncClient(verify=client.verify_ssl) as _client:
-        response = await _client.request(**kwargs)
-
-    return _build_response(client=client, response=response)
+        return self._build_response(response=response)
