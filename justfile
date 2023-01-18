@@ -7,7 +7,7 @@ zpodapi-pytest *args:
 
 # Generate coverage docs
 zpodapi-coverage:
-  pytest --cov-report term-missing:skip-covered --cov-report html:zpodapi/cov_html --cov zpodapi
+  docker exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:zpodapi/cov_html --cov zpodapi"
 
 # Connect to zpodapi container and run command
 zpodapi-exec *args="bash":
@@ -45,7 +45,7 @@ alembic-upgrade rev="head":
   docker exec -t zpodapi bash -c "cd /zpodcore/zpodapi/scripts/alembic && alembic upgrade {{rev}}"
 
 # Downgrade database schema -1
-alembic-downgrade rev="head":
+alembic-downgrade rev="-1":
   docker exec -t zpodapi bash -c "cd /zpodcore/zpodapi/scripts/alembic && alembic downgrade {{rev}}"
 
 # Generate alembic revision

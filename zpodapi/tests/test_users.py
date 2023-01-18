@@ -2,7 +2,16 @@ from fastapi.testclient import TestClient
 
 
 def ignore(data, *keys):
+    if type(data) == list:
+        return [{k: row[k] for k in row if k not in keys} for row in data]
     return {k: data[k] for k in data if k not in keys}
+
+
+def test_bad_token(client: TestClient):
+    client.headers["access_token"] = "BADTOKEN"
+
+    response = client.get("/users")
+    assert response.status_code == 403
 
 
 def test_create_user(authed_client: TestClient):
@@ -40,32 +49,42 @@ def test_get_users(authed_client: TestClient):
     response = authed_client.get("/users")
     data = response.json()
     assert response.status_code == 200
-    assert data == [
+    assert ignore(data, "creation_date", "last_connection") == [
         dict(
             username="superuser",
             email="superuser@zpodfactory.io",
             description="",
             api_token="APITOKEN",
             ssh_key="",
-            creation_date="2022-01-01T00:00:00",
-            last_connection=None,
             superadmin=True,
         )
     ]
+
+
+def test_get_user_me(authed_client: TestClient):
+    response = authed_client.get("/user/me")
+    data = response.json()
+    assert response.status_code == 200
+    assert ignore(data, "creation_date", "last_connection") == {
+        "username": "superuser",
+        "email": "superuser@zpodfactory.io",
+        "description": "",
+        "api_token": "APITOKEN",
+        "ssh_key": "",
+        "superadmin": True,
+    }
 
 
 def test_get_user_by_username(authed_client: TestClient):
     response = authed_client.get("/user?username=superuser")
     data = response.json()
     assert response.status_code == 200
-    assert data == {
+    assert ignore(data, "creation_date", "last_connection") == {
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
         "api_token": "APITOKEN",
         "ssh_key": "",
-        "creation_date": "2022-01-01T00:00:00",
-        "last_connection": None,
         "superadmin": True,
     }
 
@@ -74,14 +93,12 @@ def test_get_user_by_email(authed_client: TestClient):
     response = authed_client.get("/user?email=superuser@zpodfactory.io")
     data = response.json()
     assert response.status_code == 200
-    assert data == {
+    assert ignore(data, "creation_date", "last_connection") == {
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
         "api_token": "APITOKEN",
         "ssh_key": "",
-        "creation_date": "2022-01-01T00:00:00",
-        "last_connection": None,
         "superadmin": True,
     }
 
