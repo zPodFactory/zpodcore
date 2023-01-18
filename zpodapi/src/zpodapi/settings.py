@@ -1,7 +1,9 @@
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseSettings, Field, PostgresDsn
+
+_Debug = Literal["debug"]
 
 ENV_PREFIX = "ZPODAPI_"
 
@@ -15,6 +17,9 @@ class Settings(BaseSettings):
 
     DEBUGPY: bool = False
     DEV_MODE: bool = False
+
+    ECHO_POOL: bool | _Debug = False
+    ECHO_SQL: bool | _Debug = False
 
     GUNICORN_ACCESS_LOG: str = "-"
     GUNICORN_BIND: Optional[str] = None

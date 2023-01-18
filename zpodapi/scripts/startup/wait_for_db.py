@@ -19,8 +19,8 @@ wait_seconds = 1
 )
 def init() -> None:
     try:
-        session = database.get_session_one()
-        session.execute("SELECT 1")
+        with database.get_session_ctx() as session:
+            session.execute("SELECT 1")
     except Exception as e:
         logger.error(e)
         raise e
