@@ -17,10 +17,10 @@ Sample output:
 ```bash
 zpodcore on main [?⇡] via 🐳 desktop-linux
 ❯ just zpodsdk-build
-docker exec -t zpodapi python zpodapi/scripts/openapi/generate_openapi_json.py
+docker exec -t zpodapi python scripts/openapi/generate_openapi_json.py
 Generating openapi.json...
-mv -vf zpodapi/scripts/openapi/openapi.json zpodsdk_builder/openapi.json
-zpodapi/scripts/openapi/openapi.json -> zpodsdk_builder/openapi.json
+mv -vf scripts/openapi/openapi.json zpodsdk_builder/openapi.json
+scripts/openapi/openapi.json -> zpodsdk_builder/openapi.json
 docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
 [+] Building 34.4s (19/19) FINISHED
 ...

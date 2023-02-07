@@ -4,15 +4,15 @@ import secrets
 from datetime import datetime
 
 from zpodapi.lib import database
-from zpodapi.models import User
 from zpodapi.settings import settings
+from zpodcommon import models as M
 
 with database.get_session_ctx() as session:
-    userCnt = session.query(User).count()
+    userCnt = session.query(M.User).count()
     if not userCnt:
         # Create a super user with very simple api token for quick tests
 
-        user = User(
+        user = M.User(
             username="superuser",
             email="superuser@zpodfactory.io",
             api_token=(

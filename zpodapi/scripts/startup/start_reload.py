@@ -35,5 +35,5 @@ if __name__ == "__main__":
         use_colors=True,
         log_config=None,
         reload=True,
-        reload_dirs=["../../.."],
+        reload_dirs=["../.."],
     )
