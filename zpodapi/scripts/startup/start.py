@@ -25,7 +25,7 @@ subprocess.run(
         "-k",
         "uvicorn.workers.UvicornWorker",
         "-c",
-        "/zpodcore/zpodapi/scripts/startup/gunicorn_conf.py",
+        "/zpodcore/scripts/startup/gunicorn_conf.py",
         "zpodapi.main:api",
     ]
 )

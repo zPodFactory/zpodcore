@@ -4,24 +4,10 @@ from pydantic import EmailStr
 from pydantic import Field as PField
 from sqlmodel import SQLModel
 
-from zpodapi.models.base import Field
+from zpodapi.schemas.base import Field
 
 example_creation_date = datetime(2023, 1, 1)
 example_last_connection = datetime(2023, 1, 1, 0, 1)
-
-
-class User(SQLModel, table=True):
-    __tablename__ = "users"
-
-    id: int | None = Field(default=None, primary_key=True, nullable=False)
-    username: str = Field(..., unique=True, index=True, nullable=False)
-    email: EmailStr = Field(..., unique=True, index=True, nullable=False)
-    description: str = Field("", nullable=False)
-    api_token: str = Field("", index=True, nullable=False)
-    ssh_key: str = Field("", nullable=False)
-    creation_date: datetime = Field(None, nullable=False)
-    last_connection: datetime = Field(None)
-    superadmin: bool = Field(False, nullable=False)
 
 
 class UserCreate(SQLModel, extra="forbid"):

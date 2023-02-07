@@ -5,7 +5,7 @@ from sqlmodel.pool import StaticPool
 
 from zpodapi.lib.deps import get_session
 from zpodapi.main import api
-from zpodapi.models import User
+from zpodcommon import models as M
 
 
 @pytest.fixture(name="session")
@@ -38,7 +38,7 @@ def authed_client_fixture(client: TestClient):
 
 @pytest.fixture(autouse=True, name="add_base_user")
 def add_base_user(session: Session):
-    user = User(
+    user = M.User(
         username="superuser",
         email="superuser@zpodfactory.io",
         api_token="APITOKEN",

@@ -1,0 +1,149 @@
+# Powershell Version
+ARG PS_VERSION=7.3.2
+ARG PS_INSTALL_VERSION=7-3-2
+ARG POWERCLI_VERSION=13.0.0.20829139
+ARG POWERNSX_VERSION=3.0.1192
+ARG GOVC_VERSION=0.30.2
+
+#################################################
+# Prep
+FROM python:3.11.1-slim as prep
+WORKDIR /tmp
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir poetry
+COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
+ARG INSTALL_DEV=false
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f requirements.txt --output requirements.txt --without-hashes ; else poetry export -f requirements.txt --output requirements.txt --without-hashes ; fi"
+
+# Build Powershell
+# Define Args for the needed to add the package
+ARG PS_VERSION
+ARG PS_INSTALL_VERSION
+ARG TARGETARCH
+ARG PS_PACKAGE=powershell-${PS_VERSION}-linux-${TARGETARCH}.tar.gz
+ARG PS_PACKAGE_URL=https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/${PS_PACKAGE}
+
+# Download the Linux tar.gz and save it
+ADD ${PS_PACKAGE_URL} /tmp/linux.tar.gz
+
+# define the folder we will be installing PowerShell to
+ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
+
+# Create the install folder
+RUN mkdir -p ${PS_INSTALL_FOLDER}
+
+# Unzip the Linux tar.gz
+RUN tar zxf /tmp/linux.tar.gz -C ${PS_INSTALL_FOLDER}
+
+
+#################################################
+# BASE
+FROM python:3.11.1-slim as base
+ARG PS_INSTALL_VERSION
+ARG POWERCLI_VERSION
+ARG POWERNSX_VERSION
+ARG GOVC_VERSION
+ARG TARGETARCH
+
+# Finish Powershell install
+COPY --from=prep ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
+
+ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
+    \
+    # Define ENVs for Localization/Globalization
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    # set a fixed location for the Module analysis cache
+    PSModuleAnalysisCachePath=/var/cache/microsoft/powershell/PSModuleAnalysisCache/ModuleAnalysisCache \
+    POWERSHELL_DISTRIBUTION_CHANNEL=PSDocker-Debian-11
+
+# Install dependencies and clean up
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        curl \
+    # less is required for help in powershell
+        less \
+    # requied to setup the locale
+        locales \
+    # required for SSL
+        ca-certificates \
+        gss-ntlmssp \
+        libicu67 \
+        libssl1.1 \
+        libc6 \
+        libgcc1 \
+        libgssapi-krb5-2 \
+        libstdc++6 \
+        zlib1g \
+    # PowerShell remoting over SSH dependencies
+        openssh-client \
+    && apt-get dist-upgrade -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # enable en_US.UTF-8 locale
+    && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen \
+    # generate locale
+    && locale-gen && update-locale
+
+# Give all user execute permissions and remove write permissions for others
+RUN chmod a+x,o-w ${PS_INSTALL_FOLDER}/pwsh \
+    # Create the pwsh symbolic link that points to powershell
+    && ln -s ${PS_INSTALL_FOLDER}/pwsh /usr/bin/pwsh \
+    # intialize powershell module cache
+    # and disable telemetry
+    && export POWERSHELL_TELEMETRY_OPTOUT=1 \
+    && pwsh \
+        -NoLogo \
+        -NoProfile \
+        -Command " \
+          \$ErrorActionPreference = 'Stop' ; \
+          \$ProgressPreference = 'SilentlyContinue' ; \
+          while(!(Test-Path -Path \$env:PSModuleAnalysisCachePath)) {  \
+            Write-Host "'Waiting for $env:PSModuleAnalysisCachePath'" ; \
+            Start-Sleep -Seconds 6 ; \
+          }"
+
+SHELL [ "pwsh", "-command" ]
+RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+RUN Install-Module -Scope AllUsers VMware.PowerCLI -RequiredVersion ${POWERCLI_VERSION}
+RUN Install-Module -Scope AllUsers PowerNSX -RequiredVersion ${POWERNSX_VERSION}
+
+# On by default to suppress nagging. Set to $false if you don't want to help us make PowerCLI better.
+RUN Set-PowerCLIConfiguration -ParticipateInCeip $true -Confirm:$false
+RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:$false
+
+# Remove those "Write-Progress" that try to make a nice ascii animation bar which causes problems when no TTY
+SHELL ["/bin/sh", "-c"]
+RUN sed -i '/Write-Progress/d' /usr/local/share/powershell/Modules/PowerNSX/${POWERNSX_VERSION}/PowerNSX.psm1
+
+
+# Install govc
+RUN curl -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${TARGETARCH}.tar.gz | tar -xvz -C /usr/local/bin/
+RUN chmod +x /usr/local/bin/govc
+
+# Install ovftool
+# FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
+# COPY ./VMware-ovftool-4.4.1-16812187-lin.aarch64.zip /tmp/ovftool.zip
+# RUN curl -L https://www.dropbox.com/s/rrvhvewwi3zrr4p/VMware-ovftool-4.4.1-16812187-lin.x86_64.bundle?dl=1 -o /tmp/ovftool.bundle
+# RUN sh /tmp/ovftool.bundle --console --eulas-agreed --required
+# RUN rm -f /tmp/ovftool.bundle
+
+# Install python packages
+RUN pip install --no-cache-dir --upgrade pip
+COPY --from=prep /tmp/requirements.txt /requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+WORKDIR /zpodcore/src/zpodengine
+ENV PYTHONPATH=/zpodcore/src
+
+CMD ["tail", "-f", "/dev/null"]
+
+#################################################
+# DEV
+FROM base as dev
+
+#################################################
+# PROD
+FROM base as production
+COPY ./zpodengine/src/zpodengine /zpodcore/src/zpodengine
+COPY ./zpodcommon/src/zpodcommon /zpodcore/src/zpodcommon
