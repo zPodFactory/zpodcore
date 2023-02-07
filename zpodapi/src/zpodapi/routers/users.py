@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlmodel import Session, or_, select
 
+from zpodapi import schemas as S
 from zpodapi.lib import deps
-from zpodapi.models import User, UserCreate, UserUpdate, UserView
+from zpodcommon import models as M
 
 router = APIRouter(
     tags=["users"],
@@ -21,10 +22,10 @@ async def get_user_record(
 ):
     try:
         return session.exec(
-            select(User).where(
+            select(M.User).where(
                 or_(
-                    User.username == username,
-                    User.email == email,
+                    M.User.username == username,
+                    M.User.email == email,
                 )
             )
         ).one()
@@ -34,58 +35,58 @@ async def get_user_record(
 
 @router.get(
     "/users",
-    response_model=list[UserView],
+    response_model=list[S.UserView],
 )
 def get_all(
     *,
     session: Session = Depends(deps.get_session),
 ):
-    return session.exec(select(User)).all()
+    return session.exec(select(M.User)).all()
 
 
 @router.get(
     "/user/me",
-    response_model=UserView,
+    response_model=S.UserView,
 )
 def get_me(
     *,
-    current_user: User = Depends(deps.get_current_user_and_update),
+    current_user: M.User = Depends(deps.get_current_user_and_update),
 ):
     return current_user
 
 
 @router.get(
     "/user",
-    response_model=UserView,
+    response_model=S.UserView,
 )
 def get(
     *,
-    db_user: User = Depends(get_user_record),
+    db_user: M.User = Depends(get_user_record),
 ):
     return db_user
 
 
 @router.post(
     "/user",
-    response_model=UserView,
+    response_model=S.UserView,
     status_code=status.HTTP_201_CREATED,
 )
 def create(
     *,
     session: Session = Depends(deps.get_session),
-    user: UserCreate,
+    user: S.UserCreate,
 ):
     if session.exec(
-        select(User).where(
+        select(M.User).where(
             or_(
-                User.username == user.username,
-                User.email == user.email,
+                M.User.username == user.username,
+                M.User.email == user.email,
             )
         )
     ).first():
         raise HTTPException(status_code=422, detail="Conflicting record found")
 
-    db_user = User(**user.dict(), creation_date=datetime.now())
+    db_user = M.User(**user.dict(), creation_date=datetime.now())
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
@@ -94,14 +95,14 @@ def create(
 
 @router.patch(
     "/user",
-    response_model=UserView,
+    response_model=S.UserView,
     status_code=status.HTTP_201_CREATED,
 )
 def update(
     *,
     session: Session = Depends(deps.get_session),
-    db_user: User = Depends(get_user_record),
-    user: UserUpdate,
+    db_user: M.User = Depends(get_user_record),
+    user: S.UserUpdate,
 ):
     for key, value in user.dict(exclude_unset=True).items():
         setattr(db_user, key, value)
@@ -119,7 +120,7 @@ def update(
 def delete(
     *,
     session: Session = Depends(deps.get_session),
-    db_user: User = Depends(get_user_record),
+    db_user: M.User = Depends(get_user_record),
 ):
     session.delete(db_user)
     session.commit()

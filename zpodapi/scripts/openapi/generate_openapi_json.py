@@ -6,7 +6,7 @@ from zpodapi.main import api
 
 
 def generate_openapi_json():
-    with open("/zpodcore/zpodapi/scripts/openapi/openapi.json", "w") as f:
+    with open("/zpodcore/scripts/openapi/openapi.json", "w") as f:
         json.dump(
             get_openapi(
                 title=api.title,

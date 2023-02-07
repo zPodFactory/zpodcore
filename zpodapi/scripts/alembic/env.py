@@ -4,8 +4,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from zpodapi import models  # noqa f401
 from zpodapi import settings
+from zpodcommon import models  # noqa f401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

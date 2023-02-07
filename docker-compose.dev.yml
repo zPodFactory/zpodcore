@@ -14,6 +14,7 @@ services:
       - .env
     environment:
       - PYDEVD_DISABLE_FILE_VALIDATION=1
+      - HISTFILE=/commandhistory/.zpodapi_bash_history
     init: true
     ports:
       - ${ZPODAPI_HOSTPORT:-127.0.0.1:8000}:8000
@@ -21,7 +22,10 @@ services:
     restart: always
     tty: true
     volumes:
-      - ./zpodapi:/zpodcore/zpodapi:cached
+      - ./zpodapi/scripts:/zpodcore/scripts:cached
+      - ./zpodapi/tests:/zpodcore/tests:cached
+      - ./zpodapi/src/zpodapi:/zpodcore/src/zpodapi:cached
+      - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
       - ./logs:/zpodcore/logs:cached
       - zpod-history-vol:/commandhistory
 
@@ -36,6 +40,62 @@ services:
     volumes:
       - zpod-postgres-vol:/var/lib/postgresql/data
 
+  # Prefect Orion API
+  zpodengineorion:
+    container_name: zpodengineorion
+    image: prefecthq/prefect:2.7.12-python3.11
+    depends_on:
+      - zpodpostgres
+    entrypoint: [ "prefect", "orion", "start" ]
+    environment:
+      - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
+      - PREFECT_ORION_API_HOST=0.0.0.0
+      - PREFECT_ORION_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODAPI_POSTGRES_PASSWORD}@zpodpostgres/orion
+    ports:
+      - ${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}:4200
+    restart: always
+    volumes:
+      - prefect:/root/.prefect
+
+  # Prefect Agent
+  zpodengineagent:
+    container_name: zpodengineagent
+    image: prefecthq/prefect:2.7.12-python3.11
+    depends_on:
+      - zpodpostgres
+    entrypoint: [ "prefect", "agent", "start", "-q", "default" ]
+    environment:
+      - PREFECT_API_URL=http://zpodengineorion:4200/api
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # Prefect CLI
+  zpodenginecli:
+    container_name: zpodenginecli
+    build:
+      context: .
+      dockerfile: ./zpodengine/dockerfile
+      target: dev
+      args:
+        INSTALL_DEV: "${ZPODENGINE_DEV_MODE:-false}"
+    depends_on:
+      - zpodpostgres
+    entrypoint: [ "/bin/bash" ]
+    environment:
+      - PREFECT_API_URL=http://zpodengineorion:4200/api
+      - ZPODCORE_PATH=${PWD}
+      - HISTFILE=/commandhistory/.zpodenginecli_bash_history
+    env_file:
+      - .env
+    profiles: [ "cli" ]
+    volumes:
+      - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
+      - ./zpodengine/src/zpodengine:/zpodcore/src/zpodengine:cached
+      - ./zpodengine/scripts:/zpodcore/scripts:cached
+      - zpod-history-vol:/commandhistory
+
 volumes:
   zpod-history-vol: null
   zpod-postgres-vol: null
+  prefect: null

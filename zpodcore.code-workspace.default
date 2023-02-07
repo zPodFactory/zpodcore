@@ -13,6 +13,14 @@
             "name": "zPod CLI"
         },
         {
+            "path": "zpodcommon",
+            "name": "zPod Common"
+        },
+        {
+            "path": "zpodengine",
+            "name": "zPod Engine"
+        },
+        {
             "path": "zpodsdk",
             "name": "zPod SDK"
         },
@@ -41,12 +49,16 @@
     "settings": {
         "python.analysis.extraPaths": [
             "../zpodapi/src", // Allow vscode to see zpodapi modules
+            "../zpodcommon/src", // Allow vscode to see zpodcommon modules
+            "../zpodengine/src", // Allow vscode to see zpodengine modules
         ],
         "[python]": {
+            "editor.defaultFormatter": "ms-python.python",
             "editor.codeActionsOnSave": {
                 "source.organizeImports": true
             }
         },
+        "python.languageServer": "Pylance",
         "python.linting.enabled": true,
         "python.linting.flake8Enabled": true,
         "python.linting.flake8Path": "flake8",
@@ -60,9 +72,11 @@
             "**/CVS": true,
             "**/Thumbs.db": true,
             "**/.venv": true,
-            "zpodapi": true, // Hide zpodapi from Workspace Root folder,
-            "zpodcli": true, // Hide zpodcli from Workspace Root folder,
-            "zpodsdk": true, // Hide zpodsdk from Workspace Root folder,
+            "zpodapi": true, // Hide from Workspace Root folder,
+            "zpodcli": true, // Hide from Workspace Root folder,
+            "zpodcommon": true, // Hide from Workspace Root folder,
+            "zpodengine": true, // Hide from Workspace Root folder,
+            "zpodsdk": true, // Hide from Workspace Root folder,
         },
         "isort.args": [
             "--profile",
@@ -70,7 +84,11 @@
             "--line-length",
             "88",
             "--project",
-            "zpodapi,",
+            "zpodapi",
+            "--project",
+            "zpodcommon",
+            "--project",
+            "zpodengine",
         ],
         "remote.SSH.defaultForwardedPorts": [
             {
