@@ -26,7 +26,9 @@ class ZpodEngineBase:
 
 class ZpodEngineAsync(ZpodEngineBase):
     def __init__(self):
-        self.aclient = httpx.AsyncClient(base_url="http://zpodengineorion:4200/api")
+        self.aclient = httpx.AsyncClient(
+            base_url="http://zpodengineorion:4200/api",
+        )
 
     async def __aenter__(self):
         await self.aclient.__aenter__()
@@ -36,7 +38,7 @@ class ZpodEngineAsync(ZpodEngineBase):
         self,
         exc_type=None,
         exc_value=None,
-        traceback=None
+        traceback=None,
     ):
         await self.aclient.__aexit__(exc_type, exc_value, traceback)
 
@@ -88,7 +90,9 @@ class ZpodEngineAsync(ZpodEngineBase):
 
 class ZpodEngine(ZpodEngineBase):
     def __init__(self):
-        self.client = httpx.Client(base_url="http://zpodengineorion:4200/api")
+        self.client = httpx.Client(
+            base_url="http://zpodengineorion:4200/api",
+        )
 
     def __enter__(self):
         self.client.__enter__()

@@ -27,7 +27,7 @@ METHOD_TEMPLATE = """\
 def build_methods(package_name, class_name):
     method_definitions = []
     base = f"{package_name}/api"
-    for (_, tag_name, _) in pkgutil.iter_modules([base]):
+    for _, tag_name, _ in pkgutil.iter_modules([base]):
         method_definitions.extend(
             METHOD_TEMPLATE.format(
                 class_name=class_name,
