@@ -33,7 +33,9 @@ services:
     container_name: zpodpostgres
     environment:
       - POSTGRES_PASSWORD=${ZPODAPI_POSTGRES_PASSWORD}
-    image: postgres:13.9
+    build:
+      context: .
+      dockerfile: ./zpodpostgres/dockerfile
     ports:
       - ${ZPODAPI_POSTGRES_HOSTPORT:-127.0.0.1:5432}:5432
     restart: always
