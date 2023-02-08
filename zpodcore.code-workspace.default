@@ -78,18 +78,6 @@
             "zpodengine": true, // Hide from Workspace Root folder,
             "zpodsdk": true, // Hide from Workspace Root folder,
         },
-        "isort.args": [
-            "--profile",
-            "black",
-            "--line-length",
-            "88",
-            "--project",
-            "zpodapi",
-            "--project",
-            "zpodcommon",
-            "--project",
-            "zpodengine",
-        ],
         "remote.SSH.defaultForwardedPorts": [
             {
                 "name": "zPodAPI",

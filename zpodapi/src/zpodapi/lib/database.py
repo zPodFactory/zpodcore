@@ -4,8 +4,8 @@ from contextlib import contextmanager
 
 from sqlmodel import Session, SQLModel, create_engine
 
-from zpodcommon import models  # noqa: F401
 from zpodapi import settings
+from zpodcommon import models  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
