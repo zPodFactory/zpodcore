@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "zpodcore"
+version = "0.1.0"
+description = ""
+authors = ["Kelby Valenti <kelby.valenti@gmail.com>", "Timo Sugliani <timo.sugliani@gmail.com>"]
+readme = "README.md"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["zpodapi", "zpodcli", "zpodcommon", "zpodengine", "zpodsdk"]
