@@ -1,0 +1,3 @@
+FROM postgres:13.9
+
+COPY /zpodpostgres/db-create.sql /docker-entrypoint-initdb.d/
