@@ -13,13 +13,13 @@ include = ["CHANGELOG.md", "zpod/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-httpx = ">=0.15.4,<0.24.0"
-attrs = ">=21.3.0"
-python-dateutil = "^2.8.0"
+httpx = "0.23.3"
+attrs = "22.2.0"
+python-dateutil = "2.8.2"
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^6.0.0"
-black = {version = "^23.1a1", allow-prereleases = true}
+black = "23.1.0"
+flake8 = "6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
