@@ -19,12 +19,21 @@ RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f require
 # Define Args for the needed to add the package
 ARG PS_VERSION
 ARG PS_INSTALL_VERSION
-ARG TARGETARCH
-ARG PS_PACKAGE=powershell-${PS_VERSION}-linux-${TARGETARCH}.tar.gz
-ARG PS_PACKAGE_URL=https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/${PS_PACKAGE}
+ARG TARGETPLATFORM
+RUN echo "I'm building for $TARGETPLATFORM"
 
-# Download the Linux tar.gz and save it
-ADD ${PS_PACKAGE_URL} /tmp/linux.tar.gz
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
+    "linux/amd64")   echo "x64"  ;; \
+    "linux/arm64")   echo "arm64" ;; \
+    *)               echo ""        ;; esac) \
+    && echo "ARCH=$ARCH" \
+    && curl -o /tmp/linux.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz 
 
 # define the folder we will be installing PowerShell to
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
@@ -43,7 +52,6 @@ ARG PS_INSTALL_VERSION
 ARG POWERCLI_VERSION
 ARG POWERNSX_VERSION
 ARG GOVC_VERSION
-ARG TARGETARCH
 
 # Finish Powershell install
 COPY --from=prep ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
@@ -61,23 +69,23 @@ ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
 # Install dependencies and clean up
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-        curl \
+    curl \
     # less is required for help in powershell
-        less \
+    less \
     # requied to setup the locale
-        locales \
+    locales \
     # required for SSL
-        ca-certificates \
-        gss-ntlmssp \
-        libicu67 \
-        libssl1.1 \
-        libc6 \
-        libgcc1 \
-        libgssapi-krb5-2 \
-        libstdc++6 \
-        zlib1g \
+    ca-certificates \
+    gss-ntlmssp \
+    libicu67 \
+    libssl1.1 \
+    libc6 \
+    libgcc1 \
+    libgssapi-krb5-2 \
+    libstdc++6 \
+    zlib1g \
     # PowerShell remoting over SSH dependencies
-        openssh-client \
+    openssh-client \
     && apt-get dist-upgrade -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -94,15 +102,15 @@ RUN chmod a+x,o-w ${PS_INSTALL_FOLDER}/pwsh \
     # and disable telemetry
     && export POWERSHELL_TELEMETRY_OPTOUT=1 \
     && pwsh \
-        -NoLogo \
-        -NoProfile \
-        -Command " \
-          \$ErrorActionPreference = 'Stop' ; \
-          \$ProgressPreference = 'SilentlyContinue' ; \
-          while(!(Test-Path -Path \$env:PSModuleAnalysisCachePath)) {  \
-            Write-Host "'Waiting for $env:PSModuleAnalysisCachePath'" ; \
-            Start-Sleep -Seconds 6 ; \
-          }"
+    -NoLogo \
+    -NoProfile \
+    -Command " \
+    \$ErrorActionPreference = 'Stop' ; \
+    \$ProgressPreference = 'SilentlyContinue' ; \
+    while(!(Test-Path -Path \$env:PSModuleAnalysisCachePath)) {  \
+    Write-Host "'Waiting for $env:PSModuleAnalysisCachePath'" ; \
+    Start-Sleep -Seconds 6 ; \
+    }"
 
 SHELL [ "pwsh", "-command" ]
 RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
@@ -117,10 +125,14 @@ RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:$false
 SHELL ["/bin/sh", "-c"]
 RUN sed -i '/Write-Progress/d' /usr/local/share/powershell/Modules/PowerNSX/${POWERNSX_VERSION}/PowerNSX.psm1
 
-
 # Install govc
-RUN curl -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${TARGETARCH}.tar.gz | tar -xvz -C /usr/local/bin/
-RUN chmod +x /usr/local/bin/govc
+RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
+    "linux/amd64")   echo "x86_64"  ;; \
+    "linux/arm64")   echo "arm64" ;; \
+    *)               echo ""        ;; esac) \
+    && echo "ARCH=$ARCH" \
+    && curl -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz | tar -xvz -C /usr/local/bin/ \
+    && chmod +x /usr/local/bin/govc
 
 # Install ovftool
 # FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
