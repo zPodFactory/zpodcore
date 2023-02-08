@@ -38,5 +38,3 @@ pytest-xdist = "3.2.0"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 88 # override black's default line-length
