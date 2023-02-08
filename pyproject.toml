@@ -9,3 +9,6 @@ readme = "README.md"
 profile = "black"
 line_length = 88
 known_first_party = ["zpodapi", "zpodcli", "zpodcommon", "zpodengine", "zpodsdk"]
+
+[tool.black]
+line-length = 88 # override black's default line-length
