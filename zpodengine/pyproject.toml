@@ -6,18 +6,18 @@ authors = ["Kelby Valenti <kvalenti@vmware.com>", "Timo Sugliani <tsugliani@vmwa
 readme = "README.md"
 
 [tool.poetry.dependencies]
-ipython = "8.7.0"
+ipython = "8.9.0"
 python = "^3.11.1"
 prefect = "2.7.12"
 
-[tool.poetry.dev-dependencies]
-black = "22.10.0"
+[tool.poetry.group.dev.dependencies]
+black = "23.1.0"
 flake8 = "6.0.0"
-flake8-bugbear = "22.12.6"
-isort = "5.10.1"
-pytest = "7.2.0"
+flake8-bugbear = "23.1.20"
+isort = "5.12.0"
+pytest = "7.2.1"
 pytest-cov = "4.0.0"
-pytest-xdist = "3.1.0"
+pytest-xdist = "3.2.0"
 
 [build-system]
 requires = ["poetry-core"]
