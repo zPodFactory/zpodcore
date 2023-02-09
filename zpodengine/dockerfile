@@ -20,6 +20,7 @@ RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f require
 ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
+ARG GOVC_VERSION
 RUN echo "I'm building for $TARGETPLATFORM"
 
 RUN apt-get update \
@@ -28,12 +29,14 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Download packages
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     "linux/amd64")   echo "x64"  ;; \
     "linux/arm64")   echo "arm64" ;; \
     *)               echo ""        ;; esac) \
     && echo "ARCH=$ARCH" \
-    && curl -o /tmp/linux.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz 
+    && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz \
+    && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz
 
 # define the folder we will be installing PowerShell to
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
@@ -41,9 +44,12 @@ ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
 # Create the install folder
 RUN mkdir -p ${PS_INSTALL_FOLDER}
 
-# Unzip the Linux tar.gz
-RUN tar zxf /tmp/linux.tar.gz -C ${PS_INSTALL_FOLDER}
+# Decompress the Powershell tar.gz
+RUN tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 
+# Decompress govc and make executable
+RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
+    && chmod +x /usr/local/bin/govc
 
 #################################################
 # BASE
@@ -51,7 +57,6 @@ FROM python:3.11.1-slim as base
 ARG PS_INSTALL_VERSION
 ARG POWERCLI_VERSION
 ARG POWERNSX_VERSION
-ARG GOVC_VERSION
 
 # Finish Powershell install
 COPY --from=prep ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
@@ -126,13 +131,7 @@ SHELL ["/bin/sh", "-c"]
 RUN sed -i '/Write-Progress/d' /usr/local/share/powershell/Modules/PowerNSX/${POWERNSX_VERSION}/PowerNSX.psm1
 
 # Install govc
-RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "x86_64"  ;; \
-    "linux/arm64")   echo "arm64" ;; \
-    *)               echo ""        ;; esac) \
-    && echo "ARCH=$ARCH" \
-    && curl -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz | tar -xvz -C /usr/local/bin/ \
-    && chmod +x /usr/local/bin/govc
+COPY --from=prep ["/usr/local/bin/govc", "/usr/local/bin/govc"]
 
 # Install ovftool
 # FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
