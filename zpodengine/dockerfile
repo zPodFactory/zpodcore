@@ -1,4 +1,4 @@
-# Powershell Version
+# Define Versions
 ARG PS_VERSION=7.3.2
 ARG PS_INSTALL_VERSION=7-3-2
 ARG POWERCLI_VERSION=13.0.0.20829139
@@ -15,8 +15,7 @@ COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
 ARG INSTALL_DEV=false
 RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f requirements.txt --output requirements.txt --without-hashes ; else poetry export -f requirements.txt --output requirements.txt --without-hashes ; fi"
 
-# Build Powershell
-# Define Args for the needed to add the package
+# Define Args needed to add the package
 ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
@@ -29,16 +28,23 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Download packages
+# Download powershell
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     "linux/amd64")   echo "x64"  ;; \
     "linux/arm64")   echo "arm64" ;; \
     *)               echo ""        ;; esac) \
     && echo "ARCH=$ARCH" \
-    && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz \
+    && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz
+
+# Download govc
+RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
+    "linux/amd64")   echo "x86_64"  ;; \
+    "linux/arm64")   echo "arm64" ;; \
+    *)               echo ""        ;; esac) \
+    && echo "ARCH=$ARCH" \
     && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz
 
-# define the folder we will be installing PowerShell to
+# Define the folder where we will be installing PowerShell
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
 
 # Create the install folder
@@ -51,6 +57,7 @@ RUN tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
     && chmod +x /usr/local/bin/govc
 
+
 #################################################
 # BASE
 FROM python:3.11.1-slim as base
@@ -62,7 +69,6 @@ ARG POWERNSX_VERSION
 COPY --from=prep ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
 
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
-    \
     # Define ENVs for Localization/Globalization
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
     LC_ALL=en_US.UTF-8 \
@@ -77,7 +83,7 @@ RUN apt-get update \
     curl \
     # less is required for help in powershell
     less \
-    # requied to setup the locale
+    # required to setup the locale
     locales \
     # required for SSL
     ca-certificates \
