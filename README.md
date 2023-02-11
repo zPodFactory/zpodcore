@@ -8,6 +8,21 @@ Complete the following steps to set up your development environment:
 
 1. Install Docker and Docker Compose
 
+1. Install gnu-sed on macos which uses bsd sed by default. 
+
+    This will allow consistent behavior between macos and linux
+
+    ```bash
+    brew install gnu-sed
+    ```
+
+    Add the following to your `~/.zshrc` or any shell configuration file:
+
+    ```bash
+    export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+    ```
+
+
 1. Install pyenv
 
     ```bash
