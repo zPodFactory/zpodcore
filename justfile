@@ -1,6 +1,11 @@
 @_default:
   just --list
 
+# This calculates the number of columns for rich to aligne with docker-compose logs
+# 16 is the length of the longest container name
+# 3 is the length of the docker-compose padding
+rich_cols := `echo $(tput cols) - $(echo $(whoami) | wc -c) - 16 - 3 | bc`
+
 # Run alembic command in zpodapi container
 alembic *args:
   docker exec -t zpodapi bash -c 'cd /zpodcore/scripts/alembic && alembic {{args}}'
@@ -22,6 +27,10 @@ docker-fullclean:
   docker system prune -af
   docker volume prune -f
 
+# docker column setting for rich
+docker-setup-rich:
+  @ sed -i "s/^COLUMNS=.*/COLUMNS={{rich_cols}}/" .env
+
 # Generate coverage docs
 zpodapi-coverage:
   docker exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon"
@@ -40,7 +49,8 @@ zpodapi-pytest *args:
   docker exec -t zpodapi pytest {{args}}
 
 # Start Docker Environment
-zpodcore-start:
+zpodcore-start: 
+  @ just docker-setup-rich
   docker compose up
 
 # Stop Docker Environment
@@ -59,17 +69,17 @@ zpodengine-build-docker-image:
 
 # Open zpodengine CLI
 zpodengine-cli:
-  docker-compose run --rm zpodenginecli
+  docker compose run --rm zpodenginecli
 
 # Deploy zpodengine Blocks
 zpodengine-create-blocks:
-  docker-compose run --rm zpodenginecli -c /zpodcore/scripts/create_blocks.py
+  docker compose run --rm zpodenginecli -c /zpodcore/scripts/create_blocks.py
 
 # Deploy zpodengine Flows
 zpodengine-create-deployments:
-  docker-compose run --rm zpodenginecli -c /zpodcore/scripts/create_deployments.py
+  docker compose run --rm zpodenginecli -c /zpodcore/scripts/create_deployments.py
 
 # zpodengine initial config
 zpodengine-init:
   just zpodengine-build-docker-image
-  docker-compose run --rm zpodenginecli -c "/zpodcore/scripts/create_blocks.py && /zpodcore/scripts/create_deployments.py"
+  docker compose run --rm zpodenginecli -c "/zpodcore/scripts/create_blocks.py && /zpodcore/scripts/create_deployments.py"
