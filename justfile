@@ -1,10 +1,12 @@
-@_default:
-  just --list
+set dotenv-load
 
 # This calculates the number of columns for rich to aligne with docker-compose logs
 # 16 is the length of the longest container name
 # 3 is the length of the docker-compose padding
 rich_cols := `echo $(tput cols) - $(echo ${COMPOSE_PROJECT_NAME:-zpodcore} | wc -c) - 16 - 3 | bc`
+
+@_default:
+  just --list
 
 # Run alembic command in zpodapi container
 alembic *args:
