@@ -13,8 +13,9 @@ services:
     env_file:
       - .env
     environment:
-      - PYDEVD_DISABLE_FILE_VALIDATION=1
+      - COLUMNS=$COLUMNS
       - HISTFILE=/commandhistory/.zpodapi_bash_history
+      - PYDEVD_DISABLE_FILE_VALIDATION=1
     init: true
     ports:
       - ${ZPODAPI_HOSTPORT:-127.0.0.1:8000}:8000

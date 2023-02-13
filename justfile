@@ -27,10 +27,6 @@ docker-fullclean:
   docker system prune -af
   docker volume prune -f
 
-# docker column setting for rich
-docker-setup-rich:
-  @ sed -i "s/^COLUMNS=.*/COLUMNS={{rich_cols}}/" .env
-
 # Generate coverage docs
 zpodapi-coverage:
   docker exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon"
@@ -49,14 +45,12 @@ zpodapi-pytest *args:
   docker exec -t zpodapi pytest {{args}}
 
 # Start Docker Environment
-zpodcore-start: 
-  @ just docker-setup-rich
+zpodcore-start $COLUMNS=rich_cols:
   docker compose up
 
 # Stop Docker Environment
 zpodcore-stop:
   docker compose down
-
 
 # Update zpodsdk
 zpodsdk-update: zpodapi-generate-openapi
