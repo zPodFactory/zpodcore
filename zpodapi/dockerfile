@@ -7,6 +7,10 @@ ARG POETRY_VENV=/opt/venv
 # BASE
 FROM python:3.11.1-slim as base
 
+ARG POETRY_VENV
+
+ENV PATH="${POETRY_VENV}/bin:${PATH}"
+
 
 
 ######################################
@@ -24,7 +28,6 @@ RUN apt-get update && \
     gcc && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PATH="${POETRY_VENV}/bin:${PATH}"
 
 COPY ./zpodapi/pyproject.toml ./zpodapi/poetry.lock* /tmp/
 RUN python3 -m venv $POETRY_VENV \
@@ -48,8 +51,7 @@ RUN apt-get update && \
 
 COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
 
-ENV PATH="${POETRY_VENV}/bin:${PATH}" \
-    PYTHONPATH=/zpodcore/src
+ENV PYTHONPATH=/zpodcore/src
 
 WORKDIR /zpodcore
 CMD ["tail", "-f", "/dev/null"]
