@@ -4,6 +4,7 @@ ARG PS_INSTALL_VERSION=7-3-2
 ARG POWERCLI_VERSION=13.0.0.20829139
 ARG POWERNSX_VERSION=3.0.1192
 ARG GOVC_VERSION=0.30.2
+ARG VCC_VERSION=1.1.2
 
 #################################################
 # Prep
@@ -20,6 +21,7 @@ ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
 ARG GOVC_VERSION
+ARG VCC_VERSION
 RUN echo "I'm building for $TARGETPLATFORM"
 
 RUN apt-get update \
@@ -30,19 +32,20 @@ RUN apt-get update \
 
 # Download powershell
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "x64"  ;; \
+    "linux/amd64")   echo "x64"   ;; \
     "linux/arm64")   echo "arm64" ;; \
-    *)               echo ""        ;; esac) \
+    *)               echo ""      ;; esac) \
     && echo "ARCH=$ARCH" \
     && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz
 
 # Download govc
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "x86_64"  ;; \
+    "linux/amd64")   echo "x86_64";; \
     "linux/arm64")   echo "arm64" ;; \
-    *)               echo ""        ;; esac) \
+    *)               echo ""      ;; esac) \
     && echo "ARCH=$ARCH" \
-    && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz
+    && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz \
+    && curl -o /usr/local/bin/vcc -L https://cloud.tsugliani.fr/vcc/vcc-${VCC_VERSION}-${ARCH}
 
 # Define the folder where we will be installing PowerShell
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
@@ -53,9 +56,10 @@ RUN mkdir -p ${PS_INSTALL_FOLDER}
 # Decompress the Powershell tar.gz
 RUN tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 
-# Decompress govc and make executable
+# Decompress govc/vcc and make executable
 RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
-    && chmod +x /usr/local/bin/govc
+    && chmod +x /usr/local/bin/govc \
+    && chmod +x /usr/local/bin/vcc
 
 
 #################################################
@@ -136,8 +140,9 @@ RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:$false
 SHELL ["/bin/sh", "-c"]
 RUN sed -i '/Write-Progress/d' /usr/local/share/powershell/Modules/PowerNSX/${POWERNSX_VERSION}/PowerNSX.psm1
 
-# Install govc
+# Install govc and vcc
 COPY --from=prep ["/usr/local/bin/govc", "/usr/local/bin/govc"]
+COPY --from=prep ["/usr/local/bin/vcc", "/usr/local/bin/vcc"]
 
 # Install ovftool
 # FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
