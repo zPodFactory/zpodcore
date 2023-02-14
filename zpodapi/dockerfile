@@ -1,26 +1,71 @@
-FROM python:3.11.1-slim as requirements-stage
-WORKDIR /tmp
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir poetry
-COPY ./zpodapi/pyproject.toml ./zpodapi/poetry.lock* /tmp/
-ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f requirements.txt --output requirements.txt --without-hashes ; else poetry export -f requirements.txt --output requirements.txt --without-hashes ; fi"
+ARG POETRY_VERSION=1.3.2
+ARG POETRY_VENV=/opt/venv
 
+
+
+######################################
 # BASE
 FROM python:3.11.1-slim as base
-RUN pip install --no-cache-dir --upgrade pip
-COPY --from=requirements-stage /tmp/requirements.txt /requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+
+
+
+######################################
+# BUILDER
+FROM base as builder
+
+ARG INSTALL_DEV=false
+ARG POETRY_VERSION
+ARG POETRY_VENV
+WORKDIR /tmp
+
+RUN apt-get update && \
+    apt-get install -y \
+    libpq-dev \
+    gcc && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PATH="${POETRY_VENV}/bin:${PATH}"
+
+COPY ./zpodapi/pyproject.toml ./zpodapi/poetry.lock* /tmp/
+RUN python3 -m venv $POETRY_VENV \
+    && . $POETRY_VENV/bin/activate \
+    && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
+    && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
+    && poetry install --no-interaction --no-cache $(test "$INSTALL_DEV" != "true" && echo "--without dev")
+
+
+
+######################################
+# MAIN
+FROM base as main
+
+ARG POETRY_VENV
+
+RUN apt-get update && \
+    apt-get install -y \
+    libpq5 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
+
+ENV PATH="${POETRY_VENV}/bin:${PATH}" \
+    PYTHONPATH=/zpodcore/src
+
 WORKDIR /zpodcore
-ENV PYTHONPATH=/zpodcore/src
 CMD ["tail", "-f", "/dev/null"]
 
+
+
+######################################
 # DEV
-FROM base as dev
+FROM main as dev
 CMD ["python", "/zpodcore/scripts/startup/start_reload.py"]
 
+
+
+######################################
 # PROD
-FROM base as production
+FROM main as production
 COPY ./zpodapi/scripts /zpodcore/scripts
 COPY ./zpodapi/tests /zpodcore/tests
 COPY ./zpodapi/src/zpodapi /zpodcore/src/zpodapi
