@@ -46,7 +46,7 @@ services:
   # Prefect Orion API
   zpodengineorion:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineorion
-    image: prefecthq/prefect:2.7.12-python3.11
+    image: prefecthq/prefect:2.8.0-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "orion", "start" ]
@@ -64,7 +64,7 @@ services:
   # Prefect Agent
   zpodengineagent:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineagent
-    image: prefecthq/prefect:2.7.12-python3.11
+    image: prefecthq/prefect:2.8.0-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "agent", "start", "-q", "default" ]
