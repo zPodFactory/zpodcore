@@ -7,21 +7,35 @@ ARG GOVC_VERSION=0.30.2
 ARG VCC_VERSION=1.1.2
 
 #################################################
-# Prep
-FROM python:3.11.1-slim as prep
-WORKDIR /tmp
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir poetry
-COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
-ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f requirements.txt --output requirements.txt --without-hashes ; else poetry export -f requirements.txt --output requirements.txt --without-hashes ; fi"
+# Base
+FROM python:3.11.1-slim as base
 
-# Define Args needed to add the package
+
+
+#################################################
+# Builder
+FROM base as builder
+
+ARG INSTALL_DEV=false
+ARG POETRY_VERSION
+ARG POETRY_VENV
 ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
 ARG GOVC_VERSION
 ARG VCC_VERSION
+
+WORKDIR /tmp
+
+ENV PATH="${POETRY_VENV}/bin:${PATH}"
+COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
+
+RUN python3 -m venv $POETRY_VENV \
+    && . $POETRY_VENV/bin/activate \
+    && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
+    && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
+    && poetry install --no-interaction --no-cache $(test "$INSTALL_DEV" != "true" && echo "--without dev")
+
 RUN echo "I'm building for $TARGETPLATFORM"
 
 RUN apt-get update \
@@ -61,16 +75,30 @@ RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
     && chmod +x /usr/local/bin/govc \
     && chmod +x /usr/local/bin/vcc
 
+# Install ovftool
+# FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
+# COPY ./VMware-ovftool-4.4.1-16812187-lin.aarch64.zip /tmp/ovftool.zip
+# RUN curl -L https://www.dropbox.com/s/rrvhvewwi3zrr4p/VMware-ovftool-4.4.1-16812187-lin.x86_64.bundle?dl=1 -o /tmp/ovftool.bundle
+# RUN sh /tmp/ovftool.bundle --console --eulas-agreed --required
+# RUN rm -f /tmp/ovftool.bundle
+
+
 
 #################################################
-# BASE
-FROM python:3.11.1-slim as base
+# MAIN
+FROM base as main
 ARG PS_INSTALL_VERSION
 ARG POWERCLI_VERSION
 ARG POWERNSX_VERSION
+ARG POETRY_VENV
 
-# Finish Powershell install
-COPY --from=prep ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
+# Copy python packages
+COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
+
+# Copy other packages
+COPY --from=builder ["/usr/local/bin/govc", "/usr/local/bin/govc"]
+COPY --from=builder ["/usr/local/bin/vcc", "/usr/local/bin/vcc"]
+COPY --from=builder ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
 
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
     # Define ENVs for Localization/Globalization
@@ -140,32 +168,21 @@ RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:$false
 SHELL ["/bin/sh", "-c"]
 RUN sed -i '/Write-Progress/d' /usr/local/share/powershell/Modules/PowerNSX/${POWERNSX_VERSION}/PowerNSX.psm1
 
-# Install govc and vcc
-COPY --from=prep ["/usr/local/bin/govc", "/usr/local/bin/govc"]
-COPY --from=prep ["/usr/local/bin/vcc", "/usr/local/bin/vcc"]
-
-# Install ovftool
-# FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
-# COPY ./VMware-ovftool-4.4.1-16812187-lin.aarch64.zip /tmp/ovftool.zip
-# RUN curl -L https://www.dropbox.com/s/rrvhvewwi3zrr4p/VMware-ovftool-4.4.1-16812187-lin.x86_64.bundle?dl=1 -o /tmp/ovftool.bundle
-# RUN sh /tmp/ovftool.bundle --console --eulas-agreed --required
-# RUN rm -f /tmp/ovftool.bundle
-
-# Install python packages
-RUN pip install --no-cache-dir --upgrade pip
-COPY --from=prep /tmp/requirements.txt /requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 WORKDIR /zpodcore/src/zpodengine
 ENV PYTHONPATH=/zpodcore/src
 
 CMD ["tail", "-f", "/dev/null"]
 
+
+
 #################################################
 # DEV
-FROM base as dev
+FROM main as dev
+
+
 
 #################################################
 # PROD
-FROM base as production
+FROM main as production
 COPY ./zpodengine/src/zpodengine /zpodcore/src/zpodengine
 COPY ./zpodcommon/src/zpodcommon /zpodcore/src/zpodcommon
