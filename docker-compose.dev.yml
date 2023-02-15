@@ -37,6 +37,7 @@ services:
     build:
       context: .
       dockerfile: ./zpodpostgres/dockerfile
+    command: [ "postgres", "--log_checkpoints=0" ]
     ports:
       - ${ZPODAPI_POSTGRES_HOSTPORT:-127.0.0.1:5432}:5432
     restart: always
