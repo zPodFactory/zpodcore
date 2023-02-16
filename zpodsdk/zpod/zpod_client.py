@@ -12,6 +12,48 @@ class ZpodClient:
 
     @property
     @cache
+    def components_get_all(self):
+        from zpod.api.components import components_get_all
+
+        return components_get_all.ComponentsGetAll(self._client)
+
+    @property
+    @cache
+    def components_update(self):
+        from zpod.api.components import components_update
+
+        return components_update.ComponentsUpdate(self._client)
+
+    @property
+    @cache
+    def libraries_create(self):
+        from zpod.api.libraries import libraries_create
+
+        return libraries_create.LibrariesCreate(self._client)
+
+    @property
+    @cache
+    def libraries_delete(self):
+        from zpod.api.libraries import libraries_delete
+
+        return libraries_delete.LibrariesDelete(self._client)
+
+    @property
+    @cache
+    def libraries_get_all(self):
+        from zpod.api.libraries import libraries_get_all
+
+        return libraries_get_all.LibrariesGetAll(self._client)
+
+    @property
+    @cache
+    def libraries_update(self):
+        from zpod.api.libraries import libraries_update
+
+        return libraries_update.LibrariesUpdate(self._client)
+
+    @property
+    @cache
     def root_root(self):
         from zpod.api.root import root_root
 
