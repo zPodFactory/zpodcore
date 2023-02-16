@@ -46,7 +46,8 @@ ARG POETRY_VENV
 
 RUN apt-get update && \
     apt-get install -y \
-    libpq5 && \
+    libpq5 \
+    git && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
