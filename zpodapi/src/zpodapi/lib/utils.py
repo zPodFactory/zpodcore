@@ -1,3 +1,4 @@
+import os
 import random
 import string
 
@@ -17,3 +18,12 @@ def gen_password(length=12):
     # Shuffle the letters
     random.shuffle(pw)
     return "".join(pw)
+
+
+def list_json_files(folder_path):
+    json_files = []
+    for root, dirs, files in os.walk(folder_path):
+        json_files.extend(
+            os.path.join(root, file) for file in files if file.endswith(".json")
+        )
+    return json_files
