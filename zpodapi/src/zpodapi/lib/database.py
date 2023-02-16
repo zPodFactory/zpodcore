@@ -2,7 +2,7 @@ import logging
 from collections.abc import Generator
 from contextlib import contextmanager
 
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, create_engine
 
 from zpodapi import settings
 from zpodcommon import models  # noqa: F401
@@ -14,10 +14,6 @@ engine = create_engine(
     echo=settings.ECHO_SQL,
     echo_pool=settings.ECHO_POOL,
 )
-
-
-def create_tables():
-    SQLModel.metadata.create_all(engine)
 
 
 def get_session() -> Generator[Session, None]:
