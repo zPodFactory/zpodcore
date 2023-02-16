@@ -16,5 +16,5 @@ def deploy_sample2(zpodname: str):
     deploy2.submit("nsxt", wait_for=esxi_futures)
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     print(deploy_sample2("zpod-awesome"))
