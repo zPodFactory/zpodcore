@@ -33,8 +33,15 @@ ARG VCC_VERSION
 
 WORKDIR /tmp
 
-COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
+RUN apt-get update \
+    && apt-get install -y \
+    curl \
+    gcc \
+    libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
 RUN python3 -m venv $POETRY_VENV \
     && . $POETRY_VENV/bin/activate \
     && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
@@ -42,12 +49,6 @@ RUN python3 -m venv $POETRY_VENV \
     && poetry install --no-interaction --no-cache $(test "$INSTALL_DEV" != "true" && echo "--without dev")
 
 RUN echo "I'm building for $TARGETPLATFORM"
-
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-    curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
 
 # Download powershell
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
@@ -116,7 +117,7 @@ ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
 
 # Install dependencies and clean up
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
+    && apt-get install -y \
     curl \
     # less is required for help in powershell
     less \
@@ -134,6 +135,8 @@ RUN apt-get update \
     zlib1g \
     # PowerShell remoting over SSH dependencies
     openssh-client \
+    # Postgres libs
+    libpq5 \
     && apt-get dist-upgrade -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
