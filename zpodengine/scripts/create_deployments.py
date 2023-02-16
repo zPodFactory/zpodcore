@@ -36,10 +36,10 @@ def create_deployment(*, flow: str, **kwargs):
 
 create_deployment(
     name="deploy_sample",
-    flow="sample.deploy_sample.deploy_sample",
+    flow="samples.deploy_sample.deploy_sample",
 )
 create_deployment(
     name="deploy_sample2",
-    flow="sample.deploy_sample2.deploy_sample2",
+    flow="samples.deploy_sample2.deploy_sample2",
     parameters=dict(zpodname="zpod-default"),
 )

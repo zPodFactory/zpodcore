@@ -21,5 +21,5 @@ def deploy_sample():
     )
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     print(deploy_sample())
