@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import typing
@@ -152,16 +151,15 @@ class ZpodEngine(ZpodEngineBase):
         )
 
 
-async def main():
-    async with ZpodEngine() as zpodengine:
+def main():
+    with ZpodEngine() as zpodengine:
         print(
-            await zpodengine.create_flow_run_by_name(
-                flow_name="my-flow1",
-                deployment_name="flow1b",
-                start=9,
+            zpodengine.create_flow_run_by_name(
+                flow_name="deploy_sample",
+                deployment_name="deploy_sample",
             )
         )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
