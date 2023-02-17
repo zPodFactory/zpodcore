@@ -20,7 +20,9 @@ class Settings(BaseSettings):
 
     class Config:
         env_prefix = "ZPODENGINE_"
-        env_file = Path(__file__).parent.parent.joinpath(".env").absolute()
+        env_file = (
+            Path(__file__).parent.parent.parent.parent.joinpath(".env").absolute()
+        )
         frozen = True
 
 
