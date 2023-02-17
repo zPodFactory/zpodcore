@@ -5,7 +5,6 @@ import os
 from prefect.infrastructure import DockerContainer
 
 ZPODCORE_PATH = os.environ["ZPODCORE_PATH"]
-ZPODENGINE_HOSTPORT = os.environ.get("ZPODENGINE_HOSTPORT", "localhost:4200")
 COMPOSE_PROJECT_NAME = os.environ.get("COMPOSE_PROJECT_NAME", "zpodcore")
 
 
@@ -18,8 +17,9 @@ docker_block = DockerContainer(
         f"{ZPODCORE_PATH}/.env:/zpodcore/.env",
     ],
     env={
-        "PREFECT_API_URL": f"http://{ZPODENGINE_HOSTPORT}/api",
+        "PREFECT_API_URL": "http://zpodengineorion:4200/api",
     },
+    networks=[f"{COMPOSE_PROJECT_NAME}_default"],
 )
 uuid = docker_block.save("zpodengine", overwrite=True)
 print(f"Created Block: zpodengine [{uuid}]")
