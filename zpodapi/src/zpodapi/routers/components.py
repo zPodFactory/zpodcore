@@ -45,6 +45,9 @@ def update(
     db_component: M.Component = Depends(get_component_record),
     component: S.ComponentUpdate,
 ):
+
+    becomingEnabled = component.enabled is True and db_component.enabled is False
+
     for key, value in component.dict(exclude_unset=True).items():
         setattr(db_component, key, value)
 
@@ -52,6 +55,8 @@ def update(
     session.commit()
     session.refresh(db_component)
 
-    # call vincent vcc stuff
+    if becomingEnabled:
+        # call zpodengine deployment/flow vcc stuff
+        ...
 
     return db_component
