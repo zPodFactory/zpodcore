@@ -13,6 +13,7 @@ docker_block = DockerContainer(
     volumes=[
         f"{ZPODCORE_PATH}/zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon",
         f"{ZPODCORE_PATH}/zpodengine/src/zpodengine:/zpodcore/src/zpodengine",
+        f"{ZPODCORE_PATH}/.env:/zpodcore/.env"
     ],
     env={
         "PREFECT_API_URL": f"http://{ZPODENGINE_HOSTPORT}/api",
