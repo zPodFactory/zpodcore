@@ -155,7 +155,7 @@ def main():
     with ZpodEngine() as zpodengine:
         print(
             zpodengine.create_flow_run_by_name(
-                flow_name="deploy_sample",
+                flow_name="deploy-sample",
                 deployment_name="deploy_sample",
             )
         )
