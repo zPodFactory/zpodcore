@@ -6,9 +6,13 @@ authors = ["Kelby Valenti <kvalenti@vmware.com>", "Timo Sugliani <tsugliani@vmwa
 readme = "README.md"
 
 [tool.poetry.dependencies]
+email-validator = "1.3.1"
 ipython = "8.9.0"
-python = "^3.11.1"
 prefect = "2.8.0"
+psycopg2 = "2.9.5"
+python = "^3.11.1"
+python-dotenv = "0.21.1"
+sqlmodel = "0.0.8"
 
 [tool.poetry.group.dev.dependencies]
 black = "23.1.0"

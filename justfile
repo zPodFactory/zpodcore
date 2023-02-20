@@ -61,7 +61,7 @@ zpodsdk-update: zpodapi-generate-openapi
 
 # Build zpodengine image
 zpodengine-build-docker-image:
-  docker build --build-arg INSTALL_DEV=true --tag zpodengine:v1 --target dev --file zpodengine/dockerfile .
+  docker build --build-arg INSTALL_DEV=true --tag ${COMPOSE_PROJECT_NAME:-zpodcore}-zpodengine:v1 --target dev --file zpodengine/dockerfile .
 
 # Open zpodengine CLI
 zpodengine-cli:

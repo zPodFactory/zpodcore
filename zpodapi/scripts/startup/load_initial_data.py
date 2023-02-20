@@ -3,8 +3,8 @@
 import secrets
 from datetime import datetime
 
+from zpodapi import settings
 from zpodapi.lib import database
-from zpodapi.settings import settings
 from zpodcommon import models as M
 
 with database.get_session_ctx() as session:

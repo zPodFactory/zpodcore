@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import EmailStr
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlmodel import Session, or_, select
 
@@ -14,11 +15,11 @@ router = APIRouter(
 )
 
 
-async def get_user_record(
+def get_user_record(
     *,
     session: Session = Depends(deps.get_session),
     username: str | None = None,
-    email: str | None = None,
+    email: EmailStr | None = None,
 ):
     try:
         return session.exec(

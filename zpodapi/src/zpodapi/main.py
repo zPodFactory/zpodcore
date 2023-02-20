@@ -6,7 +6,7 @@ from fastapi.routing import APIRoute
 from starlette.requests import Request
 
 from zpodapi.lib.panel import log_obj
-from zpodapi.routers import root, users
+from zpodapi.routers import components, libraries, root, users
 
 
 async def log_request(request: Request):
@@ -35,5 +35,7 @@ include_router_logged = partial(
 )
 include_router_logged(root.router)
 include_router_logged(users.router)
+include_router_logged(libraries.router)
+include_router_logged(components.router)
 
 simplify_operation_ids(api)

@@ -22,18 +22,21 @@ services:
       - ${ZPODAPI_DEBUG_HOSTPORT:-127.0.0.1:5678}:5678
     restart: always
     tty: true
+    # user: "${UID}:${GID}"
     volumes:
       - ./zpodapi/scripts:/zpodcore/scripts:cached
       - ./zpodapi/tests:/zpodcore/tests:cached
       - ./zpodapi/src/zpodapi:/zpodcore/src/zpodapi:cached
       - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
+      - ${ZPODFACTORY_LIBRARY_PATH}:/library
+      - ${ZPODFACTORY_PRODUCT_PATH}:/products
       - ./logs:/zpodcore/logs:cached
       - zpod-history-vol:/commandhistory
 
   zpodpostgres:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodpostgres
     environment:
-      - POSTGRES_PASSWORD=${ZPODAPI_POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${ZPODCORE_POSTGRES_PASSWORD}
     build:
       context: .
       dockerfile: ./zpodpostgres/dockerfile
@@ -55,7 +58,7 @@ services:
       - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
       - PREFECT_ORION_API_HOST=0.0.0.0
       # - PREFECT_ORION_UI_API_URL=http://${ZPODENGINE_HOSTPORT}/api
-      - PREFECT_ORION_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODAPI_POSTGRES_PASSWORD}@zpodpostgres/orion
+      - PREFECT_ORION_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODCORE_POSTGRES_PASSWORD}@zpodpostgres/orion
     ports:
       - ${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}:4200
     restart: always

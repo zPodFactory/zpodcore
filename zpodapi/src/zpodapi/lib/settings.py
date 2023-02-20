@@ -5,8 +5,6 @@ from pydantic import BaseSettings, Field, PostgresDsn
 
 _Debug = Literal["debug"]
 
-ENV_PREFIX = "ZPODAPI_"
-
 
 class Settings(BaseSettings):
     API_USERNAME: str = None
@@ -40,11 +38,14 @@ class Settings(BaseSettings):
     LOGGER_FORMAT: str = "%(asctime)s %(name)s [%(levelname)s]\t%(message)s"
     LOGGER_FORMAT_DATE: str = "%d-%b-%y %H:%M:%S"
 
-    POSTGRES_DSN: PostgresDsn = "postgresql://postgres:password@zpodpostgres/postgres"
-    POSTGRES_PASSWORD: str = "password"
+    POSTGRES_DSN: PostgresDsn = Field(
+        "postgresql://postgres:password@zpodpostgres/postgres",
+        env="ZPODCORE_POSTGRES_DSN",
+    )
+    POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
 
     class Config:
-        env_prefix = ENV_PREFIX
+        env_prefix = "ZPODAPI_"
         env_file = Path(__file__).parent.parent.joinpath(".env").absolute()
         frozen = True
 
