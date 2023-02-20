@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     API_USERNAME: str = None
     API_PASSWORD: str = None
     AUTH_ALGORITHM: str = "HS256"
-    AUTH_SECRET_KEY: str = "Should_Be_Replaced_1!"
+    AUTH_SECRET_KEY: str = "MySt0ng5pas3!"
     AUTH_TOKEN_EXPIRE_MINUTES: int = 480
 
     DEBUGPY: bool = False
