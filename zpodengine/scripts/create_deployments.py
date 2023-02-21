@@ -49,3 +49,8 @@ create_deployment(
     name="db_sample",
     flow="samples.db_sample.db_sample",
 )
+
+create_deployment(
+    name="component_download",
+    flow="component.deployment.component_download",
+)
