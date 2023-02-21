@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from sqlmodel import Session, or_, select
 
 from zpodapi import schemas as S
 from zpodapi.lib import deps
 from zpodcommon import models as M
+from zpodcommon.lib import zpodengine
 
 router = APIRouter(
     tags=["components"],
@@ -44,9 +47,9 @@ def update(
     session: Session = Depends(deps.get_session),
     db_component: M.Component = Depends(get_component_record),
     component: S.ComponentUpdate,
+    filename: str = Query(),
 ):
-
-    becomingEnabled = component.enabled is True and db_component.enabled is False
+    component_enabled = component.enabled is True and db_component.enabled is False
 
     for key, value in component.dict(exclude_unset=True).items():
         setattr(db_component, key, value)
@@ -55,8 +58,17 @@ def update(
     session.commit()
     session.refresh(db_component)
 
-    if becomingEnabled:
-        # call zpodengine deployment/flow vcc stuff
-        ...
-
+    if component_enabled:
+        zpod_engine = zpodengine.ZpodEngine()
+        vcc_username = os.getenv("ZPODENGINE_VCC_USER")
+        vcc_password = os.getenv("ZPODENGINE_VCC_PASS")
+        zpod_engine.create_flow_run_by_name(
+            flow_name="download",
+            deployment_name="component_download",
+            vcc_username=vcc_username,
+            vcc_password=vcc_password,
+            filename=filename.split("/")[-1],
+            filepath="/library",
+            zpod_path="/products",
+        )
     return db_component
