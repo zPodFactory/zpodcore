@@ -62,13 +62,18 @@ def update(
         zpod_engine = zpodengine.ZpodEngine()
         vcc_username = os.getenv("ZPODENGINE_VCC_USER")
         vcc_password = os.getenv("ZPODENGINE_VCC_PASS")
-        zpod_engine.create_flow_run_by_name(
-            flow_name="download",
-            deployment_name="component_download",
-            vcc_username=vcc_username,
-            vcc_password=vcc_password,
+        vcc_request = zpodengine.read_json_file(
             filename=filename.split("/")[-1],
             filepath="/library",
+        )
+        print(vcc_request["component_download_file"])
+        zpod_engine.create_flow_run_by_name(
+            flow_name="download-component",
+            deployment_name="component",
+            vcc_username=vcc_username,
+            vcc_password=vcc_password,
             zpod_path="/products",
+            vcc_request=vcc_request,
+            component_download_file=vcc_request["component_download_file"],
         )
     return db_component

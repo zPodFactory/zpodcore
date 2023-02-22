@@ -1,28 +1,16 @@
 import hashlib
-import json
-import os
 import shlex
 import subprocess
-import sys
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
-from loguru import logger
+# from prefect import get_run_logger
 from pydantic import BaseModel
 from rich.console import Console
 from rich.progress import BarColumn, Progress, TaskID, TimeElapsedColumn
 
-log_file_dir = Path("/logs")
-log_file = "/logs/component_downloads.log"
-log_file_dir.mkdir(parents=True, mode=0o775, exist_ok=True)
-logger.remove()
-logger.add(
-    sys.stderr,
-    format="<red>{time}</red> | <green>{level}</green> | {message}",
-    colorize=True,
-)
-logger.add(log_file, rotation="30 MB", compression="zip")
+# logger = get_run_logger()
 
 progress = Progress(
     "[progress.description]{task.description}",
@@ -30,15 +18,6 @@ progress = Progress(
     "[progress.percentage]{task.percentage:>3.0f}%",
     TimeElapsedColumn(),
 )
-
-
-def read_json_file(filename: str, filepath: str):
-    for subdir, _, files in os.walk(filepath):
-        for file in files:
-            if file == filename:
-                full_file_path = os.path.join(subdir, file)
-                with open(full_file_path) as f:
-                    return json.load(f)
 
 
 class ComponentDownload(BaseModel):
@@ -80,10 +59,16 @@ class DownloadHelper:
             f"{self.zpod_files_path}/{self.component_download.component_download_file}"
         )
         self.file_path_tmp = Path(
-            f"{self.zpod_files_path}/{self.component_download.component_download_file}.tmp"
+            (
+                f"{self.zpod_files_path}/"
+                f"{self.component_download.component_download_file}.tmp"
+            )
         )
         self.dst_file_dir = Path(
-            f"{self.zpod_files_path}/{self.component_download.component_name}/{self.component_download.component_version}"
+            (
+                f"{self.zpod_files_path}/{self.component_download.component_name}"
+                f"/{self.component_download.component_version}"
+            )
         )
         self.dst_file = Path(
             f"{self.dst_file_dir}/{self.component_download.component_download_file}"
@@ -102,20 +87,9 @@ class DownloadHelper:
         unit = unit_str.upper()
         return size, unit
 
-    def verify_checksum(self) -> bool:
-        checksum_engine, expected_checksum = self.get_checksum_details()
-        checksum = self.compute_checksum(checksum_engine)
-        if checksum == expected_checksum:
-            return True
-        return False
-
-    def get_checksum_details(self) -> Tuple[str, str]:
-        checksum_str = self.component_download.component_download_file_checksum
-        checksum_engine, expected_checksum = checksum_str.split(":")
-        return checksum_engine, expected_checksum
-
-    def compute_checksum(self, checksum_engine: str) -> str:
-        with open(self.file_path, "rb") as f:
+    @staticmethod
+    def compute_checksum(checksum_engine: str, filename: Path) -> str:
+        with open(filename, "rb") as f:
             bytes_read = f.read()
             if checksum_engine == "md5":
                 return hashlib.md5(bytes_read).hexdigest()
@@ -124,9 +98,28 @@ class DownloadHelper:
             if checksum_engine == "sha1":
                 return hashlib.sha1(bytes_read).hexdigest()
 
+    def verify_checksum(self, filename: Path) -> bool:
+        print(
+            "Verifying checksum for {self.component_download.component_download_file}"
+        )
+        checksum_engine, expected_checksum = self.get_checksum_details()
+        checksum = self.compute_checksum(checksum_engine, filename)
+        if checksum == expected_checksum:
+            print("Successfully verified the checksume")
+            return True
+
+    def get_checksum_details(self) -> Tuple[str, str]:
+        checksum_str = self.component_download.component_download_file_checksum
+        checksum_engine, expected_checksum = checksum_str.split(":")
+        return checksum_engine, expected_checksum
+
     @staticmethod
     def is_file_exists(filename: Path):
-        return filename.exists()
+        try:
+            return filename.exists()
+        except FileNotFoundError as e:
+            print(f"Cannot locate {e}")
+            return False
 
     def get_download_status(self) -> DownloadStatus:
         expected_size = round(self.convert_to_byte())
@@ -156,16 +149,17 @@ class DownloadHelper:
         return "SCHEDULED"
 
     def rename_file(self):
+        print(
+            f"Moving {self.component_download.component_download_file} to its final destination"
+        )
         self.dst_file_dir.mkdir(parents=True, mode=0o775, exist_ok=True)
         self.file_path.rename(self.dst_file)
         if self.dst_file.exists():
-            logger.info(
-                f"File {self.component_download.component_download_file} renamed successfully"
-            )
+            print(f"{self.component_download.component_download_file} renamed")
 
     def show_progress(self, task_id: TaskID, status: dict):
         if self.dst_file.exists():
-            logger.info(
+            print(
                 f"{self.component_download.component_download_file} is done downloading"
             )
             return
@@ -187,9 +181,6 @@ class DownloadHelper:
         return True
 
     def download_component(self):
-        logs = Path(f"{self.zpod_files_path}/logs")
-        logs.mkdir(parents=True, mode=0o775, exist_ok=True)
-
         cmd = (
             f"vcc download -a --user {shlex.quote(self.download_username)}"
             f" --pass {shlex.quote(self.download_password)}"
@@ -208,40 +199,26 @@ class DownloadHelper:
                 shell=True,
                 check=True,
             )
-            logger.info(f"{vcc.stdout.decode()}")
-            logger.error(f"{vcc.stderr.decode()}")
-
-            # if self.is_file_exists(self.file_path):
-            #     logger.info(f"{self.component_download.component_download_file} downloaded")
-            #     logger.info(f"Verifying checksum for {self.component_download.component_download_file}")
-            #     if self.verify_checksum():
-            #         logger.info(f"Checksum verified")
-            #     self.rename_file()
+            print(f"{vcc.stdout.decode()}")
+            print(f"{vcc.stderr.decode()}")
             return self.file_path
-        
+
         except subprocess.CalledProcessError as e:
-            logger.error(e)
-            logger.error(
-                f"Unable to download {self.component_download.component_download_file}"
+            print(
+                f"Error downloading {self.component_download.component_download_file}"
             )
+            print(e)
 
     def verify_if_component_exists(self):
+        print(f"Checking if we have {self.component_download.component_download_file}")
         file_exists = False
-        if self.is_file_exists(self.dst_file) and self.verify_checksum():
+        if self.is_file_exists(self.dst_file):
+            self.verify_checksum(self.dst_file)
             file_exists = True
-        elif self.is_file_exists(self.file_path) and self.verify_checksum():
+        elif self.is_file_exists(self.file_path):
+            self.verify_checksum(self.file_path)
             self.rename_file()
             file_exists = True
         if file_exists:
-            logger.info(
-                f"{self.component_download.component_download_file} already exists"
-            )
+            print(f"{self.component_download.component_download_file} already exists")
         return file_exists
-
-    def download_file(self) -> None:
-        if self.is_file_exists(self.dst_file):
-            logger.info(
-                f"{self.component_download.component_download_file} already exists"
-            )
-            return
-        self.download_component()
