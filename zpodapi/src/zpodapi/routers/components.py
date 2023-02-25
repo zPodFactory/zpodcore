@@ -45,7 +45,6 @@ def update(
     db_component: M.Component = Depends(get_component_record),
     component: S.ComponentUpdate,
 ):
-
     becomingEnabled = component.enabled is True and db_component.enabled is False
 
     for key, value in component.dict(exclude_unset=True).items():
@@ -60,3 +59,24 @@ def update(
         ...
 
     return db_component
+
+
+@router.get(
+    "/component", response_model=M.ComponentInfo, status_code=status.HTTP_200_OK
+)
+def get_component(component: M.ComponentBase):
+    ...
+
+
+@router.get(
+    "/component/status",
+    response_model=M.ComponentStatus,
+    status_code=status.HTTP_200_OK,
+)
+def get_component_status(component: M.ComponentBase):
+    ...
+
+
+@router.put("/component/{action: bool}", response_model=M.ComponentInfo)
+def set_component_state(component: M.ComponentBase):
+    ...

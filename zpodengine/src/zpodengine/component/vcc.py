@@ -47,13 +47,13 @@ class ComponentDownload(BaseModel):
     component_type: Optional[str]
     component_description: Optional[str]
     component_url: Optional[str]
-    component_download_engine: str
-    component_download_product: str
+    component_download_engine: Optional[str]
+    component_download_product: Optional[str]
     component_download_subproduct: Optional[str]
-    component_download_version: str
-    component_download_file: str
-    component_download_file_checksum: str  # "sha265:checksum"
-    component_download_file_size: str
+    component_download_version: Optional[str]
+    component_download_file: Optional[str]
+    component_download_file_checksum: Optional[str]  #
+    component_download_file_size: Optional[str]
     component_isnested: Optional[bool]
 
 
