@@ -77,6 +77,10 @@ def get_component_status(component: M.ComponentBase):
     ...
 
 
-@router.put("/component/{action: bool}", response_model=M.ComponentInfo)
+@router.put(
+    "/component/{action}",
+    response_model=M.ComponentInfo,
+    status_code=status.HTTP_201_CREATED,
+)
 def set_component_state(component: M.ComponentBase):
     ...

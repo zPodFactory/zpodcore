@@ -16,6 +16,7 @@ class Component(SQLModel, table=True):
 class ComponentBase(BaseModel):
     component_name: str
     component_version: str
+    component_state: Optional[bool]
 
 
 class ComponentInfo(ComponentBase):
