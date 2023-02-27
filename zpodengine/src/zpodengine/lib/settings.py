@@ -7,6 +7,11 @@ _Debug = Literal["debug"]
 
 
 class Settings(BaseSettings):
+    class Config:
+        env_prefix = "ZPODENGINE_"
+        env_file = Path(__file__).parents[3] / ".env"
+        frozen = True
+
     DEV_MODE: bool = False
 
     ECHO_POOL: bool | _Debug = False
@@ -17,11 +22,6 @@ class Settings(BaseSettings):
         env="ZPODCORE_POSTGRES_DSN",
     )
     POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
-
-    class Config:
-        env_prefix = "ZPODENGINE_"
-        env_file = Path(__file__).parents[3] / ".env"
-        frozen = True
 
 
 settings = Settings()
