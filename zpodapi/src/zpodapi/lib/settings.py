@@ -7,6 +7,11 @@ _Debug = Literal["debug"]
 
 
 class Settings(BaseSettings):
+    class Config:
+        env_prefix = "ZPODAPI_"
+        env_file = Path(__file__).parents[1] / ".env"
+        frozen = True
+
     API_USERNAME: str = None
     API_PASSWORD: str = None
     AUTH_ALGORITHM: str = "HS256"
@@ -43,11 +48,6 @@ class Settings(BaseSettings):
         env="ZPODCORE_POSTGRES_DSN",
     )
     POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
-
-    class Config:
-        env_prefix = "ZPODAPI_"
-        env_file = Path(__file__).parent.parent.joinpath(".env").absolute()
-        frozen = True
 
 
 settings = Settings()
