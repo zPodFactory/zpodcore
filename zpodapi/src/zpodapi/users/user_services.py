@@ -5,7 +5,7 @@ from sqlmodel import Session, or_, select
 
 from zpodcommon import models as M
 
-from .schemas import UserCreate, UserUpdate
+from .user_schemas import UserCreate, UserUpdate
 
 
 def get_all(session: Session):

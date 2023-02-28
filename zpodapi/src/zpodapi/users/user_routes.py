@@ -4,8 +4,8 @@ from sqlmodel import Session
 from zpodapi.lib import deps
 from zpodcommon import models as M
 
-from . import dependencies, service
-from .schemas import UserCreate, UserUpdate, UserView
+from . import user_dependencies, user_services
+from .user_schemas import UserCreate, UserUpdate, UserView
 
 router = APIRouter(
     tags=["users"],
@@ -18,7 +18,7 @@ def get_all(
     *,
     session: Session = Depends(deps.get_session),
 ):
-    return service.get_all(session)
+    return user_services.get_all(session)
 
 
 @router.get("/user/me", response_model=UserView)
@@ -32,7 +32,7 @@ def get_me(
 @router.get("/user", response_model=UserView)
 def get(
     *,
-    db_user: M.User = Depends(dependencies.get_user_record),
+    db_user: M.User = Depends(user_dependencies.get_user_record),
 ):
     return db_user
 
@@ -43,9 +43,13 @@ def create(
     session: Session = Depends(deps.get_session),
     user_in: UserCreate,
 ):
-    if service.get(session=session, username=user_in.username, email=user_in.email):
+    if user_services.get(
+        session=session,
+        username=user_in.username,
+        email=user_in.email,
+    ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return service.create(session=session, user_in=user_in)
+    return user_services.create(session=session, user_in=user_in)
 
 
 @router.patch(
@@ -56,10 +60,10 @@ def create(
 def update(
     *,
     session: Session = Depends(deps.get_session),
-    user: M.User = Depends(dependencies.get_user_record),
+    user: M.User = Depends(user_dependencies.get_user_record),
     user_in: UserUpdate,
 ):
-    return service.update(session=session, user=user, user_in=user_in)
+    return user_services.update(session=session, user=user, user_in=user_in)
 
 
 @router.delete(
@@ -69,6 +73,6 @@ def update(
 def delete(
     *,
     session: Session = Depends(deps.get_session),
-    user: M.User = Depends(dependencies.get_user_record),
+    user: M.User = Depends(user_dependencies.get_user_record),
 ):
-    return service.delete(session=session, user=user)
+    return user_services.delete(session=session, user=user)
