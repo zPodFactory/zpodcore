@@ -4,7 +4,7 @@ from sqlmodel import Session
 from zpodapi.lib import deps
 from zpodcommon import models as M
 
-from . import dependencies, service
+from . import dependencies, services
 from .schemas import UserCreate, UserUpdate, UserView
 
 router = APIRouter(
@@ -18,7 +18,7 @@ def get_all(
     *,
     session: Session = Depends(deps.get_session),
 ):
-    return service.get_all(session)
+    return services.get_all(session)
 
 
 @router.get("/user/me", response_model=UserView)
@@ -43,9 +43,9 @@ def create(
     session: Session = Depends(deps.get_session),
     user_in: UserCreate,
 ):
-    if service.get(session=session, username=user_in.username, email=user_in.email):
+    if services.get(session=session, username=user_in.username, email=user_in.email):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return service.create(session=session, user_in=user_in)
+    return services.create(session=session, user_in=user_in)
 
 
 @router.patch(
@@ -59,7 +59,7 @@ def update(
     user: M.User = Depends(dependencies.get_user_record),
     user_in: UserUpdate,
 ):
-    return service.update(session=session, user=user, user_in=user_in)
+    return services.update(session=session, user=user, user_in=user_in)
 
 
 @router.delete(
@@ -71,4 +71,4 @@ def delete(
     session: Session = Depends(deps.get_session),
     user: M.User = Depends(dependencies.get_user_record),
 ):
-    return service.delete(session=session, user=user)
+    return services.delete(session=session, user=user)

@@ -6,9 +6,9 @@ from fastapi.routing import APIRoute
 from starlette.requests import Request
 
 from zpodapi.lib.panel import log_obj
-from zpodapi.root.router import router as root_router
+from zpodapi.root.routes import router as root_router
 from zpodapi.routers import components, libraries
-from zpodapi.users.router import router as user_router
+from zpodapi.users.routes import router as user_router
 
 
 async def log_request(request: Request):

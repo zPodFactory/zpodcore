@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from zpodapi.lib import deps
 
-from . import service
+from . import services
 
 
 def get_user_record(
@@ -13,6 +13,6 @@ def get_user_record(
     username: str | None = None,
     email: EmailStr | None = None,
 ):
-    if user := service.get(session=session, username=username, email=email):
+    if user := services.get(session=session, username=username, email=email):
         return user
     raise HTTPException(status_code=404, detail="User not found")
