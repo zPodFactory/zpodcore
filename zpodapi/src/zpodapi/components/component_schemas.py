@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlmodel import SQLModel
 
 from zpodapi.lib.schema_base import Field
