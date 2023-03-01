@@ -47,7 +47,7 @@ def update(
     session: Session = Depends(deps.get_session),
     db_component: M.Component = Depends(get_component_record),
     component: S.ComponentUpdate,
-    filename: str = Query(),
+    component_uid: str = Query(),
 ):
     component_enabled = component.enabled is True and db_component.enabled is False
 
@@ -60,20 +60,9 @@ def update(
 
     if component_enabled:
         zpod_engine = zpodengine.ZpodEngine()
-        vcc_username = os.getenv("ZPODENGINE_VCC_USER")
-        vcc_password = os.getenv("ZPODENGINE_VCC_PASS")
-        vcc_request = zpodengine.read_json_file(
-            filename=filename.split("/")[-1],
-            filepath="/library",
-        )
-        print(vcc_request["component_download_file"])
         zpod_engine.create_flow_run_by_name(
             flow_name="download-component",
             deployment_name="component",
-            vcc_username=vcc_username,
-            vcc_password=vcc_password,
-            zpod_path="/products",
-            vcc_request=vcc_request,
-            component_download_file=vcc_request["component_download_file"],
+            component_uid=component_uid,
         )
     return db_component
