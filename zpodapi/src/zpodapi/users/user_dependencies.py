@@ -13,6 +13,10 @@ def get_user_record(
     username: str | None = None,
     email: EmailStr | None = None,
 ):
-    if user := user_services.get(session=session, username=username, email=email):
+    if user := user_services.get(
+        session=session,
+        username=username,
+        email=email,
+    ):
         return user
     raise HTTPException(status_code=404, detail="User not found")

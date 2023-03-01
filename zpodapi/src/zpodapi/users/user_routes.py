@@ -13,7 +13,10 @@ router = APIRouter(
 )
 
 
-@router.get("/users", response_model=list[UserView])
+@router.get(
+    "/users",
+    response_model=list[UserView],
+)
 def get_all(
     *,
     session: Session = Depends(deps.get_session),
@@ -21,7 +24,10 @@ def get_all(
     return user_services.get_all(session)
 
 
-@router.get("/user/me", response_model=UserView)
+@router.get(
+    "/user/me",
+    response_model=UserView,
+)
 def get_me(
     *,
     current_user: M.User = Depends(deps.get_current_user_and_update),
@@ -29,7 +35,10 @@ def get_me(
     return current_user
 
 
-@router.get("/user", response_model=UserView)
+@router.get(
+    "/user",
+    response_model=UserView,
+)
 def get(
     *,
     db_user: M.User = Depends(user_dependencies.get_user_record),
@@ -37,7 +46,11 @@ def get(
     return db_user
 
 
-@router.post("/user", response_model=UserView, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/user",
+    response_model=UserView,
+    status_code=status.HTTP_201_CREATED,
+)
 def create(
     *,
     session: Session = Depends(deps.get_session),
@@ -63,7 +76,11 @@ def update(
     user: M.User = Depends(user_dependencies.get_user_record),
     user_in: UserUpdate,
 ):
-    return user_services.update(session=session, user=user, user_in=user_in)
+    return user_services.update(
+        session=session,
+        user=user,
+        user_in=user_in,
+    )
 
 
 @router.delete(
