@@ -1,10 +1,20 @@
 import json
 import logging
+import os
 import typing
 
 import httpx
 
 logger = logging.getLogger(__name__)
+
+
+def read_json_file(filename: str, filepath: str):
+    for subdir, _, files in os.walk(filepath):
+        for file in files:
+            if file == filename:
+                full_file_path = os.path.join(subdir, file)
+                with open(full_file_path) as f:
+                    return json.load(f)
 
 
 class ZpodEngineBase:
