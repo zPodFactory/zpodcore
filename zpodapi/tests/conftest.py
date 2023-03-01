@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-from zpodapi.lib.deps import get_session
+from zpodapi.lib.dependencies import get_session
 from zpodapi.main import api
 from zpodcommon import models as M
 
