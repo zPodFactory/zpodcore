@@ -17,6 +17,8 @@ class Settings(BaseSettings):
         env="ZPODCORE_POSTGRES_DSN",
     )
     POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
+    VCC_USERNAME: str
+    VCC_PASSWORD: str
 
     class Config:
         env_prefix = "ZPODENGINE_"
