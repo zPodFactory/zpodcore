@@ -7,8 +7,8 @@ from starlette.requests import Request
 
 from zpodapi.components import component_routes
 from zpodapi.lib.panel import log_obj
-from zpodapi.root import root_routes
 from zpodapi.libraries import library_routes
+from zpodapi.root import root_routes
 from zpodapi.users import user_routes
 
 

@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
-from zpodapi.lib import deps
 from zpodcommon import models as M
 
+from ..lib import dependencies
 from . import library_dependencies, library_services
 from .library_schemas import LibraryCreate, LibraryUpdate, LibraryView
 
 router = APIRouter(
     tags=["libraries"],
-    dependencies=[Depends(deps.get_current_user_and_update)],
+    dependencies=[Depends(dependencies.get_current_user_and_update)],
 )
 
 
@@ -19,7 +19,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
 ):
     return library_services.get_all(session)
 
@@ -31,7 +31,7 @@ def get_all(
 )
 def create(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     library_in: LibraryCreate,
 ):
     if library_services.get(
@@ -50,7 +50,7 @@ def create(
 )
 def update(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     library: M.Library = Depends(library_dependencies.get_library_record),
     library_in: LibraryUpdate,
 ):
@@ -67,7 +67,7 @@ def update(
 )
 def delete(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     library: M.Library = Depends(library_dependencies.get_library_record),
 ):
     return library_services.delete(session=session, library=library)

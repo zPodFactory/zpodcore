@@ -1,14 +1,14 @@
 from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
-from zpodapi.lib import deps
+from zpodapi.lib import dependencies
 
 from . import library_services
 
 
 async def get_library_record(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     name: str | None = None,
     git_url: str | None = None,
 ):

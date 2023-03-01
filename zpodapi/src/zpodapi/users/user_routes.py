@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
-from zpodapi.lib import deps
 from zpodcommon import models as M
 
+from ..lib import dependencies
 from . import user_dependencies, user_services
 from .user_schemas import UserCreate, UserUpdate, UserView
 
 router = APIRouter(
     tags=["users"],
-    dependencies=[Depends(deps.get_current_user_and_update)],
+    dependencies=[Depends(dependencies.get_current_user_and_update)],
 )
 
 
@@ -19,7 +19,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
 ):
     return user_services.get_all(session)
 
@@ -30,7 +30,7 @@ def get_all(
 )
 def get_me(
     *,
-    current_user: M.User = Depends(deps.get_current_user_and_update),
+    current_user: M.User = Depends(dependencies.get_current_user_and_update),
 ):
     return current_user
 
@@ -53,7 +53,7 @@ def get(
 )
 def create(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     user_in: UserCreate,
 ):
     if user_services.get(
@@ -72,7 +72,7 @@ def create(
 )
 def update(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     user: M.User = Depends(user_dependencies.get_user_record),
     user_in: UserUpdate,
 ):
@@ -89,7 +89,7 @@ def update(
 )
 def delete(
     *,
-    session: Session = Depends(deps.get_session),
+    session: Session = Depends(dependencies.get_session),
     user: M.User = Depends(user_dependencies.get_user_record),
 ):
     return user_services.delete(session=session, user=user)
