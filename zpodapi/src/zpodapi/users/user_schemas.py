@@ -4,7 +4,7 @@ from pydantic import EmailStr
 from pydantic import Field as PField
 from sqlmodel import SQLModel
 
-from zpodapi.schemas.base import Field
+from ..lib.schema_base import Field
 
 example_creation_date = datetime(2023, 1, 1)
 example_last_connection = datetime(2023, 1, 1, 0, 1)

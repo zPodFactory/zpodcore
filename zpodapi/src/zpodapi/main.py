@@ -5,8 +5,11 @@ from fastapi import Depends, FastAPI
 from fastapi.routing import APIRoute
 from starlette.requests import Request
 
+from zpodapi.components import component_routes
 from zpodapi.lib.panel import log_obj
-from zpodapi.routers import components, libraries, root, users
+from zpodapi.libraries import library_routes
+from zpodapi.root import root_routes
+from zpodapi.users import user_routes
 
 
 async def log_request(request: Request):
@@ -33,9 +36,9 @@ include_router_logged = partial(
     api.include_router,
     dependencies=[Depends(log_request)],
 )
-include_router_logged(root.router)
-include_router_logged(users.router)
-include_router_logged(libraries.router)
-include_router_logged(components.router)
+include_router_logged(root_routes.router)
+include_router_logged(user_routes.router)
+include_router_logged(library_routes.router)
+include_router_logged(component_routes.router)
 
 simplify_operation_ids(api)
