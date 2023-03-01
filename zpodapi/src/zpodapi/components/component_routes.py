@@ -34,9 +34,11 @@ def update(
     session: Session = Depends(dependencies.get_session),
     component: M.Component = Depends(component_dependencies.get_component_record),
     component_in: ComponentUpdate,
+    filename: str,
 ):
     return component_services.update(
         session=session,
         component=component,
         component_in=component_in,
+        filename=filename,
     )
