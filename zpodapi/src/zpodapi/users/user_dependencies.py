@@ -1,7 +1,8 @@
 from fastapi import Depends, HTTPException
 from sqlmodel import Session
 
-from ..lib import dependencies
+from zpodapi.lib import dependencies
+
 from . import user_services
 from .user_types import UserIdType
 

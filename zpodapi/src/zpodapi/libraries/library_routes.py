@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
+from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
-from ..lib import dependencies
 from . import library_dependencies, library_services
 from .library_schemas import LibraryCreate, LibraryUpdate, LibraryView
 

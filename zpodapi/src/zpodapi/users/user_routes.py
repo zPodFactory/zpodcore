@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
 from sqlmodel import Session
 
+from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
-from ..lib import dependencies
 from . import user_dependencies, user_services
 from .user_schemas import UserCreate, UserUpdate, UserView
 
