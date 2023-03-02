@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 class UsersDelete:
@@ -15,21 +15,12 @@ class UsersDelete:
 
     def _get_kwargs(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/user".format(self.client.base_url)
+        url = "{}/users/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
-
-        params: Dict[str, Any] = {}
-        params["username"] = username
-
-        params["email"] = email
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
         return {
             "method": "delete",
@@ -37,7 +28,6 @@ class UsersDelete:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
-            "params": params,
         }
 
     def _parse_response(
@@ -69,15 +59,12 @@ class UsersDelete:
 
     def sync_detailed(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -88,8 +75,7 @@ class UsersDelete:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            username=username,
-            email=email,
+            id=id,
         )
 
         response = httpx.request(
@@ -101,15 +87,12 @@ class UsersDelete:
 
     def sync(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -120,21 +103,17 @@ class UsersDelete:
         """  # noqa e501
 
         return self.sync_detailed(
-            username=username,
-            email=email,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -145,8 +124,7 @@ class UsersDelete:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            username=username,
-            email=email,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -156,15 +134,12 @@ class UsersDelete:
 
     async def asyncio(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -176,7 +151,6 @@ class UsersDelete:
 
         return (
             await self.asyncio_detailed(
-                username=username,
-                email=email,
+                id=id,
             )
         ).parsed

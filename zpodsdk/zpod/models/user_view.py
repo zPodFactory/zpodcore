@@ -17,6 +17,7 @@ class UserView:
         creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         description (str):  Example: Sample User.
         email (str):  Example: jdoe@example.com.
+        id (int):  Example: 1.
         ssh_key (str):
         superadmin (bool):
         username (str):  Example: jdoe.
@@ -27,6 +28,7 @@ class UserView:
     creation_date: datetime.datetime
     description: str
     email: str
+    id: int
     ssh_key: str
     superadmin: bool
     username: str
@@ -39,6 +41,7 @@ class UserView:
 
         description = self.description
         email = self.email
+        id = self.id
         ssh_key = self.ssh_key
         superadmin = self.superadmin
         username = self.username
@@ -56,6 +59,7 @@ class UserView:
                 "creation_date": creation_date,
                 "description": description,
                 "email": email,
+                "id": id,
                 "ssh_key": ssh_key,
                 "superadmin": superadmin,
                 "username": username,
@@ -77,6 +81,8 @@ class UserView:
 
         email = d.pop("email")
 
+        id = d.pop("id")
+
         ssh_key = d.pop("ssh_key")
 
         superadmin = d.pop("superadmin")
@@ -97,6 +103,7 @@ class UserView:
             creation_date=creation_date,
             description=description,
             email=email,
+            id=id,
             ssh_key=ssh_key,
             superadmin=superadmin,
             username=username,
