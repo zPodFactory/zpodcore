@@ -20,7 +20,7 @@ class UsersCreate:
         *,
         json_body: UserCreate,
     ) -> Dict[str, Any]:
-        url = "{}/user".format(self.client.base_url)
+        url = "{}/users".format(self.client.base_url)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()

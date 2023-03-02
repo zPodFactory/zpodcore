@@ -7,7 +7,7 @@ from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_view import UserView
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 class UsersGet:
@@ -16,21 +16,12 @@ class UsersGet:
 
     def _get_kwargs(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/user".format(self.client.base_url)
+        url = "{}/users/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
-
-        params: Dict[str, Any] = {}
-        params["username"] = username
-
-        params["email"] = email
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
         return {
             "method": "get",
@@ -38,7 +29,6 @@ class UsersGet:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
-            "params": params,
         }
 
     def _parse_response(
@@ -71,15 +61,12 @@ class UsersGet:
 
     def sync_detailed(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Response[Union[HTTPValidationError, UserView]]:
         """Get
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -90,8 +77,7 @@ class UsersGet:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            username=username,
-            email=email,
+            id=id,
         )
 
         response = httpx.request(
@@ -103,15 +89,12 @@ class UsersGet:
 
     def sync(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, UserView]]:
         """Get
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -122,21 +105,17 @@ class UsersGet:
         """  # noqa e501
 
         return self.sync_detailed(
-            username=username,
-            email=email,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Response[Union[HTTPValidationError, UserView]]:
         """Get
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -147,8 +126,7 @@ class UsersGet:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            username=username,
-            email=email,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -158,15 +136,12 @@ class UsersGet:
 
     async def asyncio(
         self,
-        *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, UserView]]:
         """Get
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -178,7 +153,6 @@ class UsersGet:
 
         return (
             await self.asyncio_detailed(
-                username=username,
-                email=email,
+                id=id,
             )
         ).parsed

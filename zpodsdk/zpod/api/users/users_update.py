@@ -8,7 +8,7 @@ from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_update import UserUpdate
 from ...models.user_view import UserView
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 class UsersUpdate:
@@ -17,22 +17,14 @@ class UsersUpdate:
 
     def _get_kwargs(
         self,
+        id: str,
         *,
         json_body: UserUpdate,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
     ) -> Dict[str, Any]:
-        url = "{}/user".format(self.client.base_url)
+        url = "{}/users/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
-
-        params: Dict[str, Any] = {}
-        params["username"] = username
-
-        params["email"] = email
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
         json_json_body = json_body.to_dict()
 
@@ -43,7 +35,6 @@ class UsersUpdate:
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
             "json": json_json_body,
-            "params": params,
         }
 
     def _parse_response(
@@ -76,16 +67,14 @@ class UsersUpdate:
 
     def sync_detailed(
         self,
+        id: str,
         *,
         json_body: UserUpdate,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[HTTPValidationError, UserView]]:
         """Update
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
             json_body (UserUpdate):
 
         Raises:
@@ -97,9 +86,8 @@ class UsersUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
+            id=id,
             json_body=json_body,
-            username=username,
-            email=email,
         )
 
         response = httpx.request(
@@ -111,16 +99,14 @@ class UsersUpdate:
 
     def sync(
         self,
+        id: str,
         *,
         json_body: UserUpdate,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[HTTPValidationError, UserView]]:
         """Update
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
             json_body (UserUpdate):
 
         Raises:
@@ -132,23 +118,20 @@ class UsersUpdate:
         """  # noqa e501
 
         return self.sync_detailed(
+            id=id,
             json_body=json_body,
-            username=username,
-            email=email,
         ).parsed
 
     async def asyncio_detailed(
         self,
+        id: str,
         *,
         json_body: UserUpdate,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[HTTPValidationError, UserView]]:
         """Update
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
             json_body (UserUpdate):
 
         Raises:
@@ -160,9 +143,8 @@ class UsersUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
+            id=id,
             json_body=json_body,
-            username=username,
-            email=email,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -172,16 +154,14 @@ class UsersUpdate:
 
     async def asyncio(
         self,
+        id: str,
         *,
         json_body: UserUpdate,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[HTTPValidationError, UserView]]:
         """Update
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            id (str):
             json_body (UserUpdate):
 
         Raises:
@@ -194,8 +174,7 @@ class UsersUpdate:
 
         return (
             await self.asyncio_detailed(
+                id=id,
                 json_body=json_body,
-                username=username,
-                email=email,
             )
         ).parsed
