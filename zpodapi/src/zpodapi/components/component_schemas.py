@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel
 
-from ..lib.schema_base import Field
+from zpodapi.lib.schema_base import Field
 
 
 class ComponentUpdate(SQLModel, extra="forbid"):
