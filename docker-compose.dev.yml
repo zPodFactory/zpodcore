@@ -28,8 +28,8 @@ services:
       - ./zpodapi/tests:/zpodcore/tests:cached
       - ./zpodapi/src/zpodapi:/zpodcore/src/zpodapi:cached
       - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
-      - ${ZPODFACTORY_LIBRARY_PATH}:/library
-      - ${ZPODFACTORY_PRODUCT_PATH}:/products
+      - ${ZPODCORE_LIBRARY_PATH}:/library
+      - ${ZPODCORE_PRODUCTS_PATH}:/products
       - ./logs:/zpodcore/logs:cached
       - zpod-history-vol:/commandhistory
 
@@ -102,6 +102,8 @@ services:
       - ./zpodengine/src/zpodengine:/zpodcore/src/zpodengine:cached
       - ./zpodengine/scripts:/zpodcore/scripts:cached
       - zpod-history-vol:/commandhistory
+      - ${ZPODCORE_LIBRARY_PATH}:/library
+      - ${ZPODCORE_PRODUCTS_PATH}:/products
 
 volumes:
   zpod-history-vol: null
