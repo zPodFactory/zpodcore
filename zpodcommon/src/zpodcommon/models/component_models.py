@@ -8,3 +8,5 @@ class Component(SQLModel, table=True):
     library_name: str = Field(default=None, foreign_key="libraries.name")
     filename: str = Field(..., unique=True, index=True, nullable=False)
     enabled: bool = Field(False, nullable=False)
+    # status: str = Field(..., nullable=False)
+    # component_uid: Field(..., unique=True, nullable=False)

@@ -25,16 +25,16 @@ def get_all(
 
 
 @router.patch(
-    "/components",
+    "/components/{action}",
     response_model=ComponentView,
     status_code=status.HTTP_201_CREATED,
 )
-def update(
+def change_component_state(
     *,
     session: Session = Depends(dependencies.get_session),
     component: M.Component = Depends(component_dependencies.get_component_record),
     component_in: ComponentUpdate,
-    filename: str,
+    action: str,
 ):
     return component_services.update(
         session=session,
