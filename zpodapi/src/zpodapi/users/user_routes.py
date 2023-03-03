@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import EmailStr
 from sqlmodel import Session
 
+from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
-from ..lib import dependencies
 from . import user_dependencies, user_services
 from .user_schemas import UserCreate, UserUpdate, UserView
 
@@ -20,12 +21,14 @@ router = APIRouter(
 def get_all(
     *,
     session: Session = Depends(dependencies.get_session),
+    username: str | None = None,
+    email: EmailStr | None = None,
 ):
-    return user_services.get_all(session)
+    return user_services.get_all(session, username=username, email=email)
 
 
 @router.get(
-    "/user/me",
+    "/users/me",
     response_model=UserView,
 )
 def get_me(
@@ -36,18 +39,18 @@ def get_me(
 
 
 @router.get(
-    "/user",
+    "/users/{id}",
     response_model=UserView,
 )
 def get(
     *,
-    db_user: M.User = Depends(user_dependencies.get_user_record),
+    user: M.User = Depends(user_dependencies.get_user_record),
 ):
-    return db_user
+    return user
 
 
 @router.post(
-    "/user",
+    "/users",
     response_model=UserView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -56,7 +59,7 @@ def create(
     session: Session = Depends(dependencies.get_session),
     user_in: UserCreate,
 ):
-    if user_services.get(
+    if user_services.get_all(
         session=session,
         username=user_in.username,
         email=user_in.email,
@@ -66,7 +69,7 @@ def create(
 
 
 @router.patch(
-    "/user",
+    "/users/{id}",
     response_model=UserView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -84,7 +87,7 @@ def update(
 
 
 @router.delete(
-    "/user",
+    "/users/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete(

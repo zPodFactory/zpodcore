@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
+from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
-from ..lib import dependencies
 from . import component_dependencies, component_services
 from .component_schemas import ComponentUpdate, ComponentView
 
