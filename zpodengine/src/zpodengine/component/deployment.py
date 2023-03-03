@@ -77,40 +77,52 @@ def download_component(component: Component):
         raise ValueError("Incomplete download")
 
 
-@task()
-def validate_component(component: Component):
-    ...
+def get_libraries():
+    libraries = []
+    for subdir, _, files in os.walk(LIBRARY_PATH):
+        libraries.extend(
+            os.path.join(subdir, filename)
+            for filename in files
+            if filename.endswith(".json")
+        )
+    library_contents = []
+    for libary in libraries:
+        with open(libary) as f:
+            library_contents.append(json.load(f))
+    return library_contents
 
 
 @task(log_prints=True)
 def get_component(component_uid: str):
+    logger = get_run_logger()
     # TODO: confirm that component_uid will be consitent. Right now spliting on hyphen
-    comp_subdir, comp_version = component_uid.split("-")
-    for subdir, _, files in os.walk(LIBRARY_PATH):
-        for filename in files:
-            if (
-                os.path.basename(subdir) == comp_subdir
-                and filename == f"{comp_version}.json"
-            ):
-                full_file_path = os.path.join(subdir, filename)
-                with open(full_file_path) as f:
-                    raw_component = json.load(f)
-                    component = Component(**raw_component)
-                    dst_dir = (
-                        Path(PRODUCTS_PATH)
-                        / component.component_name
-                        / component.component_version
-                    )
+    libraries = get_libraries()
+    logger.info("Wait while we get component details")
+    compnent_name, component_version = component_uid.split("-")
+    try:
+        raw_component = [
+            library
+            for library in libraries
+            if library["component_name"] == compnent_name
+            and library["component_version"] == component_version
+        ][0]
+        logger.info("Component details found")
+    except ImportError as e:
+        logger.info("Cannot locate library associated with this request")
+        logger.error(e)
+        return None
 
-                    component.component_dst_path = (
-                        Path(dst_dir) / component.component_download_file
-                    )
-
-                    component.component_dl_path = (
-                        Path(PRODUCTS_PATH) / component.component_download_file
-                    )
-                    return component
-    raise ValueError(f"Invalid component: {component_uid} provided")
+    logger.info("Validating component...")
+    component = Component(**raw_component)
+    dst_dir = (
+        Path(PRODUCTS_PATH) / component.component_name / component.component_version
+    )
+    component.component_dst_path = Path(dst_dir) / component.component_download_file
+    component.component_dl_path = (
+        Path(PRODUCTS_PATH) / component.component_download_file
+    )
+    logger.info("Component validated successfully")
+    return component
 
 
 def get_file_size(component: Component) -> Union[int, None]:
@@ -135,6 +147,8 @@ def convert_to_byte(component: Component) -> int:
 
 
 def compute_checksum(component: Component, filename: Path) -> str:
+    logger = get_run_logger()
+    logger.info("In compute function")
     checksum_str = component.component_download_file_checksum
     checksum_engine = checksum_str.split(":")[0]
     with open(filename, "rb") as f:
@@ -219,6 +233,7 @@ def download_component_flow(component_uid: str):
         return
 
     download_component(component)
+    get_download_status
 
     if not verify_checksum(
         component=component,
@@ -231,4 +246,4 @@ def download_component_flow(component_uid: str):
 
 
 if __name__ == "__main__":
-    download_component_flow("vmware_cloud_director_availability-4.4.1")
+    download_component_flow()
