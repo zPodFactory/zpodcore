@@ -24,21 +24,42 @@ def get_all(
     return component_services.get_all(session)
 
 
-@router.patch(
-    "/components/{action}",
+@router.get("/components/{component_uid}", response_model=ComponentView)
+def get(
+    *,
+    component_uid: str,
+    session: Session = Depends(dependencies.get_session),
+):
+    return component_services.get(
+        session=session, component_in=ComponentUpdate(component_uid=component_uid)
+    )
+
+
+@router.put(
+    "/components/{component_uid}/enable",
     response_model=ComponentView,
     status_code=status.HTTP_201_CREATED,
 )
-def change_component_state(
+def enable(
     *,
     session: Session = Depends(dependencies.get_session),
-    component: M.Component = Depends(component_dependencies.get_component_record),
-    component_in: ComponentUpdate,
-    action: str,
+    component_uid: str,
 ):
-    return component_services.update(
-        session=session,
-        component=component,
-        component_in=component_in,
-        filename=filename,
+    return component_services.enable(
+        session=session, component_in=ComponentUpdate(component_uid=component_uid)
+    )
+
+
+@router.put(
+    "/components/{component_uid}/disable",
+    response_model=ComponentView,
+    status_code=status.HTTP_201_CREATED,
+)
+def disable(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    component_uid: str,
+):
+    return component_services.disable(
+        session=session, component_in=ComponentUpdate(component_uid=component_uid)
     )

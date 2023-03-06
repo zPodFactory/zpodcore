@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import string
@@ -22,8 +23,15 @@ def gen_password(length=12):
 
 def list_json_files(folder_path):
     json_files = []
-    for root, dirs, files in os.walk(folder_path):
+    for root, _, files in os.walk(folder_path):
         json_files.extend(
             os.path.join(root, file) for file in files if file.endswith(".json")
         )
     return json_files
+
+
+def get_component_uid(filename: str) -> str:
+    with open(filename, "r") as f:
+        component = json.load(f)
+        print(component)
+        return f"{component['component_name']}-{component['component_version']}"
