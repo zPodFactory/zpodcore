@@ -35,6 +35,7 @@ WORKDIR /tmp
 
 RUN apt-get update \
     && apt-get install -y \
+    wget \
     curl \
     gcc \
     libpq-dev \
@@ -118,6 +119,7 @@ ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
 # Install dependencies and clean up
 RUN apt-get update \
     && apt-get install -y \
+    wget \
     curl \
     # less is required for help in powershell
     less \

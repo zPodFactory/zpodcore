@@ -22,6 +22,8 @@ class Settings(BaseSettings):
         env="ZPODCORE_POSTGRES_DSN",
     )
     POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
+    VCC_PASSWORD: str = Field("password", env="ZPODCORE_VCC_PASSWORD")
+    VCC_USERNAME: str = Field(..., env="ZPODCORE_VCC_USERNAME")
 
 
 settings = Settings()
