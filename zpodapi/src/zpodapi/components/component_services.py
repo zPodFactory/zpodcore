@@ -1,5 +1,4 @@
-import os
-
+from fastapi import HTTPException
 from sqlmodel import Session, select
 
 from zpodcommon import models as M
@@ -12,50 +11,42 @@ def get_all(session: Session):
     return session.exec(select(M.Component)).all()
 
 
-def get(
-    session: Session,
-    *,
-    filename: str | None = None,
-):
+def get(session: Session, *, component_in: ComponentUpdate):
     return session.exec(
         select(M.Component).where(
-            M.Component.filename == filename,
+            M.Component.component_uid == component_in.component_uid,
         )
     ).first()
 
 
-def update(
+def enable(
     session: Session,
     *,
-    component: M.Component,
     component_in: ComponentUpdate,
-    filename: str,
 ):
-    component_enabled = component_in.enabled is True and component.enabled is False
-    for key, value in component_in.dict(exclude_unset=True).items():
-        setattr(component, key, value)
-
+    component = get(session=session, component_in=component_in)
+    component.enabled = True
+    component.status = "SCHEDULED"
     session.add(component)
     session.commit()
     session.refresh(component)
+    zpod_engine = zpodengine.ZpodEngine()
+    zpod_engine.create_flow_run_by_name(
+        flow_name="download-component-flow",
+        deployment_name="component",
+        component_uid=component.component_uid,
+    )
+    return component
 
-    if component_enabled:
-        zpod_engine = zpodengine.ZpodEngine()
-        vcc_username = os.getenv("ZPODENGINE_VCC_USER")
-        vcc_password = os.getenv("ZPODENGINE_VCC_PASS")
-        vcc_request = zpodengine.read_json_file(
-            filename=filename.split("/")[-1],
-            filepath="/library",
-        )
-        print(vcc_request["component_download_file"])
-        zpod_engine.create_flow_run_by_name(
-            flow_name="download-component",
-            deployment_name="component",
-            vcc_username=vcc_username,
-            vcc_password=vcc_password,
-            zpod_path="/products",
-            vcc_request=vcc_request,
-            component_download_file=vcc_request["component_download_file"],
-        )
 
+def disable(
+    session: Session,
+    *,
+    component_in: ComponentUpdate,
+):
+    component = get(session=session, component_in=component_in)
+    component.enabled = False
+    session.add(component)
+    session.commit()
+    session.refresh(component)
     return component
