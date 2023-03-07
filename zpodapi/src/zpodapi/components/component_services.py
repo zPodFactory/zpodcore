@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlmodel import Session, select
 
 from zpodcommon import models as M
