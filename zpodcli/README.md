@@ -301,7 +301,7 @@ Validating an endpoint:
 
 `zcli endpoint validate --endpointname "Homelab"`
 
-This command will ensure the endpoint is valid, and will set it's `isenabled` property (boolean) to `true`
+This command will ensure the endpoint is valid, and will set it's `enabled` property (boolean) to `true`
 
 ## zPod management
 
