@@ -16,7 +16,35 @@ PS: This would provide from a quick glance which user is trying to connect, unle
 `zcli connect -s "manager.zpodfactory.io" -t "[token]"`  
   
 PS: Will accept long & short format for `typer.Option()`  
-  
+
+## zPodFactory instance settings
+
+We will very likely have a new command to setup some instance wide settings for zPodFactory that can only be altered by a `superadmin`:
+
+## Customer Connect Download facility
+
+Setting customer connect credentials for automatic downloads:
+
+`zcli settings customerconnect -u "timo.sugliani@gmail.com" -p "amazingpassword"`
+
+## zPodFactory main DNS domain for zPods
+
+Setting the main domain name for zPodfactory that will be leverage for every deployed zPod:
+
+`zcli settings domain -s "cool.zpod.io"`
+
+This will make that every zpod deployed will inherit the default domain name and add the name as the subdomain of this main domain.
+
+Example: zPod name = tanzu
+Subdomain for the whole zPod will be `tanzu.cool.zpod.io` and sample hostnames will be:
+
+- `zbox.tanzu.cool.zpod.io`
+- `esx11.tanzu.cool.zpod.io`
+- `esx12.tanzu.cool.zpod.io`
+- `vcsa.tanzu.cool.zpod.io`
+- `nsxt.tanzu.cool.zpod.io`
+
+
 ## RBAC
   
 zPodFactory has the ability to manage Users, Groups and Permissions.
@@ -134,14 +162,16 @@ Deleting a permission:
   
 zPodFactory will provide a set of pre-defined profiles that will be available for use when deploying a zPod.  
   
-You can also create your own profiles and use them when deploying a zPod. (TBD - how to create a profile)  
+You can also create your own profiles and use them when deploying a zPod. (TODO: How to create a profile)  
   
-a zPod Profile is a JSON file representing the components that will be orderly deployed in a zPod.  
+a zPod Profile might be a python wrapper/template type file representing the components that will be orderly deployed in a zPod with the dependency chain & component name/versions.
+Hopefully this will provide a very simple way to leverage prefect capabilities, but also having safeguards to verify that the information we setup in those profiles is still valid and can be deployed.
   
 Listing profiles:  
   
 `zcli profile list`  
 `zcli profile update` // (will very likely update from github repo with latest profiles `git pull`)  
+TODO: similar process to libraries, will the library contain the profiles too, that could make sense ?
 
 Getting info on a specific profile:  
   
@@ -176,10 +206,6 @@ Listing components:
   
 `zcli component list`  
   
-Updating components:  
-  
-`zcli component update` // (will very likely update from github repo with latest components `git pull`)  
-  
 Getting info on a specific component:  
   
 `zcli component info --componentname "vcsa-7.0u3i"` // will display the components JSON data.  
@@ -187,41 +213,106 @@ Getting info on a specific component:
 For now I'll not put commands to create/update/delete components, but we can discuss it later when we need it.  
 This shouldn't be a big problem anyway as the structure is pretty detailed now for the zpodlibrary/components etc...  
 
+`zcli component enable -c|--componentname "vcsa-7.0u3i"`
+
+When a component is `enabled` this will automatically trigger the zPodFactory download engine for the specified component.
+
+Actually it can manage 2 different download engines:
+- `customerconnect`: This will leverage the `vcc` with specific customer connect credentials (obviously you will need to be entitled to the components you expect to use/download as those products are licensed by VMware)
+- `https`: This will leverage a tradition https public link, that can be shared without any constraints.
+
+This will greatly improve the UX for the users of this lab platform, as managing / maintaining the lifecycle of all products & versions deployed. 
+
+
 ## Scripts management
 
 `zcli script list`
 
 ## Library management
 
-TBD
+Library is the main object that hosts all components managed by zPodFactory
+
+By default the main library for zPod will be auto-added: https://github.com/zPodFactory/zPodLibrary
+
+Listing libraries:
 
 `zcli library list`
 
+Adding Library:
+
+`zcli library add --name "main" --git_url "https://github.com/zPodFactory/zPodLibrary"`
+
+Updating library:  
+  
+`zcli library update` // (will very likely update from github repo with latest components `git pull`)  
+
+This will update the list of components based on that git repository & update/add all the new components that may have been added since.
+
+TODO: Scheduled task to update automatically this library & it's components to enhance the UX.
+
+
 ## Endpoints management
+
+Endpoints will be use to specify the deployment target for a zPod, and be a combination of vSphere resources, networking etc.
+
+Listing endpoints:
 
 `zcli endpoint list`
 
-`zcli endpoint add --endpointname "RAX-MCA"`
+Adding endpoint:
 
-`zcli endpoint compute add --endpointname "RAX-MCA" --server "vc01.rax.lab" --username "zpod_svc@vmc.lab" --password "XXYYZZ"`
-`zcli endpoint storage add --endpointname "RAX-MCA" --datastore "vSanDatastore"`
+`zcli endpoint add --endpointname "RAX-MCA" --json @endpoint.json`
 
-`zcli endpoint network xyz` // NOW THIS IS THE COMPLEX PART :D
+The `endpoint.json` file would look something like this:
 
-`zcli endpoint network add --endpointname "RAX-MCA" --driver "NSXT+VyOS" --nsxt_manager "nsx01.rax.lab" --nsxt_username "admin" --nsxt_password "XXYYZZ"`
+```json
+{
+  "compute":
+  {
+    "name": "my-vsphere-endpoint",
+    "driver": "vsphere",
+    "hostname": "my-vcenter.com",
+    "username": "my-username",
+    "password": "my-password",
+    "datacenter": "my-datacenter",
+    "resource_pool": "my-cluster",
+    "storage_policy": "my-storage-policy",
+    "storage_datastore": "my-datastore",
+    "contentlibrary": "my-contentlibrary",
+    "vmfolder": "my-vmfolder"
+  },
+  "network":
+  {
+    "name": "my-network-endpoint",
+    "driver": "nsxt",
+    "hostname": "my-nsxt-manager.com",
+    "username": "my-username",
+    "password": "my-password",
+    "transportzone": "my-transportzone",
+    "edgecluster": "my-edgecluster",
+    "t0": "my-t0"
+  }
+}
+```
 
-`zcli endpoint network add --endpointname "HomeLab" --driver "VyOS"`
+Validating an endpoint:
 
 `zcli endpoint validate --endpointname "RAX-MCA"`
+
 `zcli endpoint validate --endpointname "Homelab"`
+
+This command will ensure the endpoint is valid, and will set it's `isenabled` property (boolean) to `true`
 
 ## zPod management
 
 `zcli pod list`
-`zcli pod info --name "tanzeu"`
+
+`zcli pod info --name "tanzu"`
 
 `zcli pod deploy --name "tanzu" --profilename "sddc-basic-7.0u3i" --endpoint "rax-mca"`
+
 `zcli pod deploy -n "tanzu" -p "sddc-basic-7.0u3i" -e "rax-mca"`
 
 `zcli pod permissions add --zpodname "tanzu" --groupname "MCA" --rolename "zpod_admin"`
+
 `zcli pod permissions add --zpodname "tanzu" --groupname "VMware-SE-France" --rolename "zpod_user"`
