@@ -5,7 +5,7 @@ import git
 from rich import print
 from sqlmodel import Session, or_, select
 
-from zpodapi.lib.utils import get_component_uid, list_json_files
+from zpodapi.components.component_utils import get_component_uid, list_json_files
 from zpodcommon import models as M
 
 from .library_schemas import LibraryCreate, LibraryUpdate

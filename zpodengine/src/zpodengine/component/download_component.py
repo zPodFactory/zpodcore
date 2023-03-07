@@ -288,10 +288,10 @@ def download_component_flow(component_uid: str):
             return_state=True,
         ).is_completed()
     ):
-        print(f"{component.component_download_file} already exists. Nothing to do")
+        logger.info(f"{component.component_uid} already exists. Nothing to do")
         return
     logger.info(
-        f"No {component.component_uid} found, will proceed to download the compnent"
+        f"No {component.component_uid} found, will proceed to download the component"
     )
     return_code = download_component(component=component)
     update_download_progress(component=component)
