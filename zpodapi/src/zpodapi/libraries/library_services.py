@@ -5,7 +5,7 @@ import git
 from rich import print
 from sqlmodel import Session, or_, select
 
-from zpodapi.components.component_utils import get_component_uid
+from zpodapi.components.component_utils import get_component
 from zpodapi.lib.utils import list_json_files
 from zpodcommon import models as M
 
@@ -43,16 +43,15 @@ def create(session: Session, *, library_in: LibraryCreate):
     components_list = zpod_fetch_library_components(library)
 
     for component in components_list:
-        component_uid = get_component_uid(component)
-        component_name, component_version = component_uid.split("-")
+        lib_comp = get_component(component)
         c = M.Component(
             library_name=library_in.name,
             filename=component,
             enabled=False,
             status="",
-            component_uid=component_uid,
-            component_name=component_name,
-            component_version=component_version,
+            component_uid=f"{lib_comp['component_name']}-{lib_comp['component_version']}",
+            component_name=lib_comp["component_name"],
+            component_version=lib_comp["component_version"],
         )
         session.add(c)
         session.commit()
