@@ -35,7 +35,6 @@ WORKDIR /tmp
 
 RUN apt-get update \
     && apt-get install -y \
-    wget \
     curl \
     gcc \
     libpq-dev \
