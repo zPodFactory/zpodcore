@@ -12,17 +12,31 @@ class ZpodClient:
 
     @property
     @cache
+    def components_disable(self):
+        from zpod.api.components import components_disable
+
+        return components_disable.ComponentsDisable(self._client)
+
+    @property
+    @cache
+    def components_enable(self):
+        from zpod.api.components import components_enable
+
+        return components_enable.ComponentsEnable(self._client)
+
+    @property
+    @cache
+    def components_get(self):
+        from zpod.api.components import components_get
+
+        return components_get.ComponentsGet(self._client)
+
+    @property
+    @cache
     def components_get_all(self):
         from zpod.api.components import components_get_all
 
         return components_get_all.ComponentsGetAll(self._client)
-
-    @property
-    @cache
-    def components_update(self):
-        from zpod.api.components import components_update
-
-        return components_update.ComponentsUpdate(self._client)
 
     @property
     @cache
