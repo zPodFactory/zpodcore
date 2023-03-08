@@ -29,7 +29,7 @@ Complete the following steps to set up your development environment:
     poetry install
     ```
 
-1. Configure Environment Variables.  (See `/zpodapi/settings.py` file for all available settings)  In the root directory, run:
+1. Configure Environment Variables.  (See `/zpodapi/src/zpodapi/lib/settings.py` file for all available settings)  In the root directory, run:
 
     ```bash
     cp .env.default .env
