@@ -1,6 +1,5 @@
 """ Contains all the data models used in inputs/outputs """
 
-from .component_update import ComponentUpdate
 from .component_view import ComponentView
 from .http_validation_error import HTTPValidationError
 from .library_create import LibraryCreate
@@ -12,7 +11,6 @@ from .user_view import UserView
 from .validation_error import ValidationError
 
 __all__ = (
-    "ComponentUpdate",
     "ComponentView",
     "HTTPValidationError",
     "LibraryCreate",
