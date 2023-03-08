@@ -1,11 +1,13 @@
 import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
+from urllib.parse import urlparse
 
 from prefect import flow, get_run_logger, task
 from pydantic import BaseModel
@@ -38,11 +40,12 @@ class Component(BaseModel):
     component_download_subproduct: Optional[str]
     component_download_version: Optional[str]
     component_download_file: Optional[str]
-    component_download_file_checksum: str  # "sha265:checksum"
+    component_download_file_checksum: Optional[str]  # "sha265:checksum"
     component_download_file_size: str
     component_isnested: Optional[bool]
     component_dst_path: Path | None = None
     component_dl_path: Path | None = None
+    component_dl_url: str | None = None
     component_uid: str | None = None
 
 
@@ -104,9 +107,16 @@ def download_component(component: Component) -> int:
         f" -f {shlex.quote(component.component_download_file)}"
         f" -o {shlex.quote(PRODUCTS_PATH)}"
     )
-    wget_cmd = f"wget {component.component_url}  -P {PRODUCTS_PATH}"
+    wget_cmd = f"wget {component.component_dl_url}  -P {PRODUCTS_PATH}"
 
     cmd = wget_cmd if component.component_download_engine == "https" else cc_cmd
+
+    hidden_pass_cmd = cc_cmd = re.sub(
+        r"(--pass\s+)(\S+)", r"\1" + "*" * len(settings.VCC_PASSWORD), cc_cmd
+    )
+    print_cmd = (
+        wget_cmd if component.component_download_engine == "https" else hidden_pass_cmd
+    )
     prev_download = Path(PRODUCTS_PATH) / component.component_download_file
 
     try:
@@ -119,7 +129,7 @@ def download_component(component: Component) -> int:
         logger.info(
             f"Downloading {component.component_name}-{component.component_version} ..."
         )
-        logger.info(f"Executing command; {cmd}")
+        logger.info(f"Executing download command {print_cmd}")
         vcc = subprocess.run(
             args=cmd,
             stdout=subprocess.PIPE,
@@ -127,11 +137,9 @@ def download_component(component: Component) -> int:
             shell=True,
             check=True,
         )
-
+        if vcc.returncode != 0:
+            logger.error(vcc.stderr.decode())
         logger.info(f"{component.component_uid} downloaded")
-
-        # if vcc.returncode != 0:
-        #     raise ValueError("Incomplete download")
         return vcc.returncode
     except subprocess.CalledProcessError as e:
         logger.error(f"Error downloading {component.component_uid}")
@@ -143,6 +151,12 @@ def get_component(request: dict):
     logger = get_run_logger()
     logger.info("Validating the request. Standby")
     component = Component(**request)
+
+    if component.component_download_engine == "https":
+        component.component_dl_url = component.component_download_file
+        download_file = urlparse(component.component_download_file).path.split("/")[-1]
+        component.component_download_file = download_file
+
     component.component_uid = (
         f"{component.component_name}-{component.component_version}"
     )
@@ -192,17 +206,29 @@ def compute_checksum(component: Component, filename: Path) -> str:
 @task(task_run_name="{component.component_uid}-verify-checksum")
 def verify_checksum(component: Component, filename: Path) -> bool:
     logger = get_run_logger()
-    if not filename.is_file():
-        logger.error(f"The specified {filename} does not exist")
+
+    if not filename.exists():
+        logger.info(f"The specified {filename} does not exist")
         raise ValueError(f"{filename} does not exist")
+
+    if component.component_download_file_checksum is None:
+        f_size = filename.stat().st_size
+        e_size, _ = convert_to_byte(component=component)
+        if round(f_size) != round(e_size):
+            raise ValueError(f"The {component.component_uid} size can't be verified")
+        update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
+        return
+
     logger.info(f"Verifying {component.component_uid} checksum ...")
     checksum_str = component.component_download_file_checksum
     expected_checksum = checksum_str.split(":")[1]
     checksum = compute_checksum(component, filename)
     if checksum != expected_checksum:
+        update_db(component_uid=component.component_uid, status="DOWNLOAD_INCOMPLETE")
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
     update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
+    return True
 
 
 def calculate_percentage(current_size, expected_size):
@@ -281,31 +307,36 @@ def download_component_flow(component_uid: str):
     component = get_component(request=request, wait_for=request)
     logger.info(f"Checking if {component.component_uid} exists or not")
     if (
-        component.component_dst_path.is_file()
+        component.component_dst_path.exists()
         and verify_checksum(
             component,
             component.component_dst_path,
             return_state=True,
         ).is_completed()
     ):
-        logger.info(f"{component.component_uid} already exists. Nothing to do")
+        logger.info(f"{component.component_uid} already exists. Exiting")
         return
     logger.info(
         f"No {component.component_uid} found, will proceed to download the component"
     )
     return_code = download_component(component=component)
-    update_download_progress(component=component)
+
+    # TODO: Need to revisit this again
+    # update_download_progress(component=component)
+    if return_code != 0:
+        raise ValueError(f"Unable to download {component_uid}")
+
     verify = verify_checksum(
         component=component,
         filename=component.component_dl_path,
-        return_state=True,
-    ).is_completed()
+    )
+
     if return_code == 0 and not verify:
         logger.info(
             f"Incomplete download {component.component_uid} can't verify checksum"
         )
 
-    if return_code == 0:
+    if return_code == 0 and verify:
         rename_file(component=component, wait_for=verify)
 
 
