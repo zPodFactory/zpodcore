@@ -211,11 +211,10 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         logger.info(f"The specified {filename} does not exist")
         raise ValueError(f"{filename} does not exist")
 
-    if component.component_download_file_checksum is None:
-        f_size = filename.stat().st_size
-        e_size, _ = convert_to_byte(component=component)
-        if round(f_size) != round(e_size):
-            raise ValueError(f"The {component.component_uid} size can't be verified")
+    if (
+        component.component_download_file_checksum is None
+        and component.component_dl_path.exists()
+    ):
         update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
         return
 
