@@ -40,21 +40,20 @@ def create(session: Session, *, library_in: LibraryCreate):
 
     # TODO: git clone git_url, and create all the components
     zpod_create_library(library)
-    components_list = zpod_fetch_library_components(library)
-
-    for component in components_list:
-        lib_comp = get_component(component)
+    library_components = zpod_fetch_library_components(library)
+    for library_component in library_components:
+        component = get_component(library_component)
         c = M.Component(
             library_name=library_in.name,
             filename=component,
             enabled=False,
             status="",
-            component_uid=f"{lib_comp['component_name']}-{lib_comp['component_version']}",
-            component_name=lib_comp["component_name"],
-            component_version=lib_comp["component_version"],
+            component_uid=f"{component['component_name']}-{component['component_version']}",
+            component_name=component["component_name"],
+            component_version=component["component_version"],
         )
         session.add(c)
-        session.commit()
+    session.commit()
 
     return library
 
