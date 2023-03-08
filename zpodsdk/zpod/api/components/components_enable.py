@@ -5,42 +5,32 @@ import httpx
 
 from ... import errors
 from ...client import Client
-from ...models.component_update import ComponentUpdate
 from ...models.component_view import ComponentView
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
-class ComponentsUpdate:
+class ComponentsEnable:
     def __init__(self, client: Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
-        *,
-        json_body: ComponentUpdate,
-        filename: Union[Unset, None, str] = UNSET,
+        component_uid: str,
     ) -> Dict[str, Any]:
-        url = "{}/components".format(self.client.base_url)
+        url = "{}/components/{component_uid}/enable".format(
+            self.client.base_url, component_uid=component_uid
+        )
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
-        params: Dict[str, Any] = {}
-        params["filename"] = filename
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
-        json_json_body = json_body.to_dict()
-
         return {
-            "method": "patch",
+            "method": "put",
             "url": url,
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
-            "json": json_json_body,
-            "params": params,
         }
 
     def _parse_response(
@@ -73,15 +63,12 @@ class ComponentsUpdate:
 
     def sync_detailed(
         self,
-        *,
-        json_body: ComponentUpdate,
-        filename: Union[Unset, None, str] = UNSET,
+        component_uid: str,
     ) -> Response[Union[ComponentView, HTTPValidationError]]:
-        """Update
+        """Enable
 
         Args:
-            filename (Union[Unset, None, str]):
-            json_body (ComponentUpdate):
+            component_uid (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -92,8 +79,7 @@ class ComponentsUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            json_body=json_body,
-            filename=filename,
+            component_uid=component_uid,
         )
 
         response = httpx.request(
@@ -105,15 +91,12 @@ class ComponentsUpdate:
 
     def sync(
         self,
-        *,
-        json_body: ComponentUpdate,
-        filename: Union[Unset, None, str] = UNSET,
+        component_uid: str,
     ) -> Optional[Union[ComponentView, HTTPValidationError]]:
-        """Update
+        """Enable
 
         Args:
-            filename (Union[Unset, None, str]):
-            json_body (ComponentUpdate):
+            component_uid (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -124,21 +107,17 @@ class ComponentsUpdate:
         """  # noqa e501
 
         return self.sync_detailed(
-            json_body=json_body,
-            filename=filename,
+            component_uid=component_uid,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        *,
-        json_body: ComponentUpdate,
-        filename: Union[Unset, None, str] = UNSET,
+        component_uid: str,
     ) -> Response[Union[ComponentView, HTTPValidationError]]:
-        """Update
+        """Enable
 
         Args:
-            filename (Union[Unset, None, str]):
-            json_body (ComponentUpdate):
+            component_uid (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -149,8 +128,7 @@ class ComponentsUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            json_body=json_body,
-            filename=filename,
+            component_uid=component_uid,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -160,15 +138,12 @@ class ComponentsUpdate:
 
     async def asyncio(
         self,
-        *,
-        json_body: ComponentUpdate,
-        filename: Union[Unset, None, str] = UNSET,
+        component_uid: str,
     ) -> Optional[Union[ComponentView, HTTPValidationError]]:
-        """Update
+        """Enable
 
         Args:
-            filename (Union[Unset, None, str]):
-            json_body (ComponentUpdate):
+            component_uid (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -180,7 +155,6 @@ class ComponentsUpdate:
 
         return (
             await self.asyncio_detailed(
-                json_body=json_body,
-                filename=filename,
+                component_uid=component_uid,
             )
         ).parsed
