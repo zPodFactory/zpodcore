@@ -57,8 +57,8 @@ services:
     environment:
       - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
       - PREFECT_ORION_API_HOST=0.0.0.0
-      # - PREFECT_ORION_UI_API_URL=http://${ZPODENGINE_HOSTPORT}/api
       - PREFECT_ORION_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODCORE_POSTGRES_PASSWORD}@zpodpostgres/orion
+      - TELEMETRY_ENABLED=false
     ports:
       - ${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}:4200
     restart: always
