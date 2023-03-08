@@ -40,12 +40,12 @@ def create(session: Session, *, library_in: LibraryCreate):
 
     # TODO: git clone git_url, and create all the components
     zpod_create_library(library)
-    library_components = zpod_fetch_library_components(library)
-    for library_component in library_components:
-        component = get_component(library_component)
+    components_filename = zpod_fetch_library_components_filename(library)
+    for component_filename in components_filename:
+        component = get_component(component_filename)
         c = M.Component(
             library_name=library_in.name,
-            filename=component,
+            filename=component_filename,
             enabled=False,
             status="",
             component_uid=f"{component['component_name']}-{component['component_version']}",
@@ -107,7 +107,7 @@ def zpod_delete_library(library: M.Library):
     shutil.rmtree(f"/library/{library.name}")
 
 
-def zpod_fetch_library_components(library: M.Library):
+def zpod_fetch_library_components_filename(library: M.Library):
     component_file_list = list_json_files(f"/library/{library.name}")
 
     print(component_file_list)
