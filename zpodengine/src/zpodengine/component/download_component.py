@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import re
@@ -146,10 +145,10 @@ def download_component(component: Component) -> int:
         logger.error(e)
 
 
-@task
-def get_component(request: dict):
+@task(task_run_name="{component_uid}-get")
+def get_component(request: dict, component_uid: str):
     logger = get_run_logger()
-    logger.info("Validating the request. Standby")
+    logger.info(f"Validating the request {component_uid}. Standby")
     component = Component(**request)
 
     if component.component_download_engine == "https":
@@ -196,11 +195,10 @@ def compute_checksum(component: Component, filename: Path) -> str:
     logger = get_run_logger()
     logger.info(f"Computing checksum for {component.component_uid}")
     checksum_str = component.component_download_file_checksum
-    checksum_engine = checksum_str.split(":")[0]
-    with open(filename, "rb") as f:
-        bytes_read = f.read()
-        logger.info("Checksum computed")
-        return getattr(hashlib, checksum_engine)(bytes_read).hexdigest()
+    checksum_type = checksum_str.split(":")[0]
+    cmd = f"openssl {checksum_type} -r {filename}"
+    output = subprocess.check_output(cmd, shell=True, universal_newlines=True)
+    return output.split()[0]
 
 
 @task(task_run_name="{component.component_uid}-verify-checksum")
@@ -212,17 +210,15 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         raise ValueError(f"{filename} does not exist")
 
     if component.component_download_file_checksum is None:
-        f_size = filename.stat().st_size
-        e_size, _ = convert_to_byte(component=component)
-        if round(f_size) != round(e_size):
-            raise ValueError(f"The {component.component_uid} size can't be verified")
-        update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
+        if component.component_dl_path.exists():
+            update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
     checksum_str = component.component_download_file_checksum
     expected_checksum = checksum_str.split(":")[1]
     checksum = compute_checksum(component, filename)
+    logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
         update_db(component_uid=component.component_uid, status="DOWNLOAD_INCOMPLETE")
         raise ValueError("Checksum does not match")
@@ -304,7 +300,9 @@ def download_component_flow(component_uid: str):
     logger = get_run_logger()
 
     request = get_component_request(component_uid=component_uid)
-    component = get_component(request=request, wait_for=request)
+    component = get_component(
+        request=request, component_uid=component_uid, wait_for=request
+    )
     logger.info(f"Checking if {component.component_uid} exists or not")
     if (
         component.component_dst_path.exists()
