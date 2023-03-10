@@ -21,3 +21,4 @@ Field = field(Field)
 
 Req = partial(Field, default=...)
 Opt = partial(Field, default=None)
+Empty = partial(Field, default="")

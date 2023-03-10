@@ -4,19 +4,19 @@ from typing import Any
 
 from sqlmodel import SQLModel
 
-from zpodapi.lib.schema_base import Opt, Req
+from zpodapi.lib.schema_base import Empty, Field, Opt, Req
 from zpodapi.permission_groups.permission_group_schemas import PermissionGroupView
 from zpodapi.users.user_schemas import UserView
 
 example_creation_date = datetime(2023, 1, 1)
 
 
-# class InstanceCreate(SQLModel, extra="forbid"):
-#     username: str = Req(example="jdoe")
-#     email: EmailStr = Req(example="jdoe@example.com")
-#     description: str = Req(example="Sample User")
-#     ssh_key: str = Field("")
-#     superadmin: bool = False
+class InstanceCreate(SQLModel, extra="forbid"):
+    name: str = Req(example="tanzu-lab")
+    description: str = Empty(example="Tanzu Lab zPod")
+    domain: str = Req(example="tanzu-lab.maindomain.com")
+    endpoint_id: int = Req(example=1)
+    profile: str = Req(example="sddc-profile")
 
 
 # class InstanceUpdate(SQLModel, extra="forbid"):
@@ -59,6 +59,7 @@ class InstanceView(SQLModel):
     description: str = Req(example="Tanzu Lab zPod")
     password: str = Req(example="amazingpassword")
     domain: str = Req(example="tanzu-lab.maindomain.com")
+    profile: str = Req(example="sddc-profile")
     creation_date: datetime = Req(example=example_creation_date)
     last_modified_date: datetime = Req(example=example_creation_date)
     endpoint: EndpointView

@@ -1,8 +1,8 @@
 """update
 
-Revision ID: 2d4f541e097a
+Revision ID: 5394f81ed48d
 Revises: 2f6c907fc8c5
-Create Date: 2023-03-10 16:18:24.483521
+Create Date: 2023-03-10 19:56:41.264180
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2d4f541e097a"
+revision = "5394f81ed48d"
 down_revision = "2f6c907fc8c5"
 branch_labels = None
 depends_on = None
@@ -37,6 +37,7 @@ def upgrade():
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("password", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("domain", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+        sa.Column("profile", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("creation_date", sa.DateTime(), nullable=False),
         sa.Column("last_modified_date", sa.DateTime(), nullable=False),
         sa.Column("endpoint_id", sa.Integer(), nullable=False),

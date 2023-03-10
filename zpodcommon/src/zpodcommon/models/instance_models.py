@@ -36,6 +36,10 @@ class Instance(SQLModel, table=True):
         default="",
         nullable=False,
     )
+    profile: str = Field(
+        default="",
+        nullable=False,
+    )
     creation_date: datetime = Field(
         default=None,
         nullable=False,

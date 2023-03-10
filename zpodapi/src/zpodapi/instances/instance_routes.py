@@ -5,9 +5,8 @@ from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
 from . import instance_dependencies, instance_services
-from .instance_schemas import InstanceView
+from .instance_schemas import InstanceCreate, InstanceView
 
-# from .instance_schemas import InstanceCreate, InstanceUpdate
 router = APIRouter(
     tags=["instances"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
@@ -21,8 +20,9 @@ router = APIRouter(
 def get_all(
     *,
     session: Session = Depends(dependencies.get_session),
+    name: str | None = None,
 ):
-    return instance_services.get_all(session)
+    return instance_services.get_all(session, name=name)
 
 
 @router.get(
@@ -36,23 +36,27 @@ def get(
     return instance
 
 
-# @router.post(
-#     "/instances",
-#     response_model=InstanceView,
-#     status_code=status.HTTP_201_CREATED,
-# )
-# def create(
-#     *,
-#     session: Session = Depends(dependencies.get_session),
-#     instance_in: InstanceCreate,
-# ):
-#     if instance_services.get_all(
-#         session=session,
-#         instancename=instance_in.instancename,
-#         email=instance_in.email,
-#     ):
-#         raise HTTPException(status_code=422, detail="Conflicting record found")
-#     return instance_services.create(session=session, instance_in=instance_in)
+@router.post(
+    "/instances",
+    response_model=InstanceView,
+    status_code=status.HTTP_201_CREATED,
+)
+def create(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    current_user: M.User = Depends(dependencies.get_current_user_and_update),
+    instance_in: InstanceCreate,
+):
+    if instance_services.get_all(
+        session=session,
+        name=instance_in.name,
+    ):
+        raise HTTPException(status_code=422, detail="Conflicting record found")
+    return instance_services.create(
+        session=session,
+        current_user=current_user,
+        instance_in=instance_in,
+    )
 
 
 # @router.patch(
