@@ -25,15 +25,15 @@ def get_all(
     return instance_services.get_all(session)
 
 
-# @router.get(
-#     "/instances/{id}",
-#     response_model=InstanceView,
-# )
-# def get(
-#     *,
-#     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
-# ):
-#     return instance
+@router.get(
+    "/instances/{id}",
+    response_model=InstanceView,
+)
+def get(
+    *,
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+):
+    return instance
 
 
 # @router.post(

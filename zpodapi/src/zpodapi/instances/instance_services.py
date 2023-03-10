@@ -1,12 +1,6 @@
-from datetime import datetime
-
-from pydantic import EmailStr
 from sqlmodel import Session, or_, select
 
 from zpodcommon import models as M
-
-# from .user_schemas import UserCreate, UserUpdate
-# from .user_types import UserIdType
 
 
 def get_all(
@@ -16,14 +10,14 @@ def get_all(
     return session.exec(sel).all()
 
 
-# def get(
-#     session: Session,
-#     *,
-#     id: UserIdType,
-# ):
-#     idtype, id_ = (id if "=" in id else f"id={id}").split("=")
-#     criteria = getattr(M.User, idtype) == id_
-#     return session.exec(select(M.User).where(criteria)).first()
+def get(
+    session: Session,
+    *,
+    id: int,
+):
+    instance = session.exec(select(M.Instance).where(M.Instance.id == id)).first()
+    print(instance)
+    return instance
 
 
 # def create(session: Session, *, user_in: UserCreate):

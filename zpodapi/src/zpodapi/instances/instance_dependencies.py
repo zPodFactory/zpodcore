@@ -1,20 +1,20 @@
-# from fastapi import Depends, HTTPException
-# from sqlmodel import Session
+from fastapi import Depends, HTTPException
+from sqlmodel import Session
 
-# from zpodapi.lib import dependencies
+from zpodapi.lib import dependencies
 
-# from . import user_services
-# from .user_types import UserIdType
+from . import instance_services
 
 
-# def get_user_record(
-#     *,
-#     session: Session = Depends(dependencies.get_session),
-#     id: UserIdType,
-# ):
-#     if user := user_services.get(
-#         session=session,
-#         id=id,
-#     ):
-#         return user
-#     raise HTTPException(status_code=404, detail="User not found")
+def get_instance_record(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    id: int,
+):
+    print(id)
+    if instance := instance_services.get(
+        session=session,
+        id=id,
+    ):
+        return instance
+    raise HTTPException(status_code=404, detail="Instance not found")
