@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     AUTH_TOKEN_EXPIRE_MINUTES: int = 480
 
     DEBUGPY: bool = False
+    DEV_AUTOAUTH_USER: int | None = None
     DEV_MODE: bool = False
 
     ECHO_POOL: bool | _Debug = False
