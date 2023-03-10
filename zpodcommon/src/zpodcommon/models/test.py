@@ -5,34 +5,6 @@ from sqlmodel import select
 from zpodapi.lib import database
 from zpodcommon import models as M
 
-# with database.get_session_ctx() as session:
-#     endpoint = M.Endpoint()
-#     session.add(endpoint)
-#     zpod = M.Instance(
-#         name="test3",
-#         creation_date=datetime.now(),
-#         last_modified_date=datetime.now(),
-#         components=[
-#             M.InstanceComponent(component_uid="vcd-10.2"),
-#         ],
-#         endpoint_id=1,
-#         permissions=[
-#             M.InstancePermission(
-#                 name="owner",
-#                 permission="zpodadmin",
-#                 user_links=[
-#                     M.InstancePermissionUser(user_id=1),
-#                 ],
-#             )
-#         ],
-#     )
-#     session.add(zpod)
-#     session.commit()
-#     session.refresh(zpod)
-#     print("ZPOD", zpod)
-#     print("COMPONENTS", zpod.components)
-#     print("COMPONENTS", zpod.components[0].component)
-
 with database.get_session_ctx() as session:
     user1 = session.exec(select(M.User).where(M.User.id == 1)).one()
     user2 = session.exec(select(M.User).where(M.User.id == 2)).one()
@@ -42,8 +14,8 @@ with database.get_session_ctx() as session:
     session.commit()
     session.refresh(pg)
 
-    zpod = M.Instance(
-        name="test1",
+    instance = M.Instance(
+        name="test2",
         creation_date=datetime.now(),
         last_modified_date=datetime.now(),
         components=[
@@ -58,23 +30,25 @@ with database.get_session_ctx() as session:
                 groups=[pg],
             )
         ],
+        networks=[M.InstanceNetwork(cidr="192.168.0.0/24")],
+        features=[M.InstanceFeature(data={"feature": "one"})],
     )
-    session.add(zpod)
+    session.add(instance)
     session.commit()
-    session.refresh(zpod)
-    print("ZPOD", zpod)
-    print("COMPONENTS", zpod.components)
-    print("COMPONENTS", zpod.components[0].component)
+    session.refresh(instance)
+    print("ZPOD", instance)
 
 
 # # with database.get_session_ctx() as session:
-#     result = session.exec(select(M.Zpod).where(M.Zpod.name == "test"))
-#     zpod = result.one()
+#     instance = session.exec(select(M.Instance).where(M.Instance.name == "test1")).one()
 
-#     print(f"\n\n{zpod=}")
-#     print(f"\n\n{zpod.components}")
-#     print(f"\n\n{zpod.endpoint}")
-#     print(f"\n\n{zpod.networks}")
+#     print(f"\n\n{instance=}")
+#     print(f"\n\n{instance.components}")
+#     print(f"\n\n{instance.endpoint}")
+#     print(f"\n\n{instance.networks}")
 
-#     # session.delete(zpod)
-#     # session.commit()
+
+# with database.get_session_ctx() as session:
+#     instance = session.exec(select(M.Instance).where(M.Instance.name == "test1")).one()
+#     session.delete(instance)
+#     session.commit()

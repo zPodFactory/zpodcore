@@ -1,5 +1,6 @@
 from datetime import datetime
 from ipaddress import IPv4Network
+from typing import Any
 
 from sqlmodel import SQLModel
 
@@ -47,6 +48,11 @@ class InstancePermissionView(SQLModel):
     groups: list[PermissionGroupView] = []
 
 
+class InstanceFeatureView(SQLModel):
+    id: int = Req(example=1)
+    data: dict[Any, Any] = Req(example="{'feature':'one'}")
+
+
 class InstanceView(SQLModel):
     id: int = Req(example=1)
     name: str = Req(example="tanzu-lab")
@@ -59,3 +65,4 @@ class InstanceView(SQLModel):
     networks: list[InstanceNetworkView] = []
     components: list[InstanceComponentView] = []
     permissions: list[InstancePermissionView] = []
+    features: list[InstanceFeatureView] = []
