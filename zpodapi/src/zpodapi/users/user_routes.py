@@ -7,7 +7,7 @@ from zpodapi.lib.route_logger import RouteLogger
 from zpodcommon import models as M
 
 from . import user_dependencies, user_services
-from .user_schemas import UserCreate, UserUpdate, UserView
+from .user_schemas import UserCreate, UserUpdate, UserViewFull
 
 router = APIRouter(
     tags=["users"],
@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.get(
     "/users",
-    response_model=list[UserView],
+    response_model=list[UserViewFull],
 )
 def get_all(
     *,
@@ -31,7 +31,7 @@ def get_all(
 
 @router.get(
     "/users/me",
-    response_model=UserView,
+    response_model=UserViewFull,
 )
 def get_me(
     *,
@@ -42,7 +42,7 @@ def get_me(
 
 @router.get(
     "/users/{id}",
-    response_model=UserView,
+    response_model=UserViewFull,
 )
 def get(
     *,
@@ -53,7 +53,7 @@ def get(
 
 @router.post(
     "/users",
-    response_model=UserView,
+    response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
 )
 def create(
@@ -72,7 +72,7 @@ def create(
 
 @router.patch(
     "/users/{id}",
-    response_model=UserView,
+    response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
 )
 def update(

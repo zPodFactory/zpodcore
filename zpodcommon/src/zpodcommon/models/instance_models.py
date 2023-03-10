@@ -148,8 +148,8 @@ class InstanceNetwork(SQLModel, table=True):
     instance: "Instance" = Relationship(back_populates="networks")
 
 
-class InstancePermissionUser(SQLModel, table=True):
-    __tablename__ = "instance_permission_users"
+class InstancePermissionUserLink(SQLModel, table=True):
+    __tablename__ = "instance_permission_user_link"
 
     instance_permission_id: int = Field(
         default=...,
@@ -163,8 +163,32 @@ class InstancePermissionUser(SQLModel, table=True):
         nullable=False,
         foreign_key="users.id",
     )
-    instance_permission: "InstancePermission" = Relationship(back_populates="users")
+    instance_permission: "InstancePermission" = Relationship(
+        back_populates="user_links"
+    )
     user: "User" = Relationship()
+
+
+class InstancePermissionGroupLink(SQLModel, table=True):
+    __tablename__ = "instance_permission_group_link"
+
+    instance_permission_id: int = Field(
+        default=...,
+        primary_key=True,
+        nullable=False,
+        foreign_key="instance_permissions.id",
+    )
+    permission_group_id: int = Field(
+        default=...,
+        primary_key=True,
+        nullable=False,
+        foreign_key="permission_groups.id",
+    )
+
+    instance_permission: "InstancePermission" = Relationship(
+        back_populates="group_links"
+    )
+    permission_group: "PermissionGroup" = Relationship()
 
 
 class InstancePermission(SQLModel, table=True):
@@ -190,31 +214,16 @@ class InstancePermission(SQLModel, table=True):
     )
 
     instance: "Instance" = Relationship(back_populates="permissions")
-    users: List["InstancePermissionUser"] = Relationship(
+    user_links: List["InstancePermissionUserLink"] = Relationship(
         back_populates="instance_permission",
         sa_relationship_kwargs={"cascade": "all,delete,delete-orphan"},
     )
+    users: List["User"] = Relationship(link_model=InstancePermissionUserLink)
 
-    groups: List["InstancePermissionGroup"] = Relationship(
+    group_links: List["InstancePermissionGroupLink"] = Relationship(
         back_populates="instance_permission",
+        sa_relationship_kwargs={"cascade": "all,delete,delete-orphan"},
     )
-
-
-class InstancePermissionGroup(SQLModel, table=True):
-    __tablename__ = "instance_permission_groups"
-
-    instance_permission_id: int = Field(
-        default=...,
-        primary_key=True,
-        nullable=False,
-        foreign_key="instance_permissions.id",
+    groups: List["PermissionGroup"] = Relationship(
+        link_model=InstancePermissionGroupLink
     )
-    permission_group_id: int = Field(
-        default=...,
-        primary_key=True,
-        nullable=False,
-        foreign_key="permission_groups.id",
-    )
-
-    instance_permission: "InstancePermission" = Relationship(back_populates="groups")
-    permission_group: "PermissionGroup" = Relationship()

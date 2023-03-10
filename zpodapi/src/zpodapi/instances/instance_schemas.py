@@ -1,16 +1,14 @@
 from datetime import datetime
-from functools import partial
 from ipaddress import IPv4Network
 
 from sqlmodel import SQLModel
 
-from zpodapi.lib.schema_base import Field
+from zpodapi.lib.schema_base import Opt, Req
+from zpodapi.permission_groups.permission_group_schemas import PermissionGroupView
 from zpodapi.users.user_schemas import UserView
 
 example_creation_date = datetime(2023, 1, 1)
 
-Req = partial(Field, default=...)
-Opt = partial(Field, default=None)
 
 # class InstanceCreate(SQLModel, extra="forbid"):
 #     username: str = Req(example="jdoe")
@@ -41,15 +39,12 @@ class InstanceNetworkView(SQLModel):
     cidr: IPv4Network = Req(example=1)
 
 
-class InstancePermissionUserView(SQLModel):
-    user: UserView
-
-
 class InstancePermissionView(SQLModel):
     id: int = Req(example=1)
     name: str = Req(example="owner")
     permission: str = Req(example="zpodadmin")
-    users: list[InstancePermissionUserView] = []
+    users: list[UserView] = []
+    groups: list[PermissionGroupView] = []
 
 
 class InstanceView(SQLModel):

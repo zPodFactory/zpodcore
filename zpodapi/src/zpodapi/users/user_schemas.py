@@ -29,6 +29,9 @@ class UserView(SQLModel):
     id: int = Field(..., example=1)
     username: str = Field(..., example="jdoe")
     email: EmailStr = Field(..., example="jdoe@example.com")
+
+
+class UserViewFull(UserView):
     description: str = Field(..., example="Sample User")
     api_token: str = Field(..., index=True)
     ssh_key: str = Field(...)
