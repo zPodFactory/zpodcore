@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from zpodapi.components import component_routes
+from zpodapi.instances import instance_routes
 from zpodapi.endpoints import endpoint_routes
 from zpodapi.libraries import library_routes
 from zpodapi.root import root_routes
@@ -25,5 +26,6 @@ api.include_router(user_routes.router)
 api.include_router(library_routes.router)
 api.include_router(component_routes.router)
 api.include_router(endpoint_routes.router)
+api.include_router(instance_routes.router)
 
 simplify_operation_ids(api)
