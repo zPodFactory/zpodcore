@@ -31,7 +31,7 @@ services:
       - ${ZPODCORE_LIBRARY_PATH}:/library
       - ${ZPODCORE_PRODUCTS_PATH}:/products
       - ./logs:/zpodcore/logs:cached
-      - zpod-history-vol:/commandhistory
+      - zpod_vol_history:/commandhistory
 
   zpodpostgres:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodpostgres
@@ -45,35 +45,50 @@ services:
       - ${ZPODAPI_POSTGRES_HOSTPORT:-127.0.0.1:5432}:5432
     restart: always
     volumes:
-      - zpod-postgres-vol:/var/lib/postgresql/data
+      - zpod_vol_postgres:/var/lib/postgresql/data
 
-  # Prefect Orion API
-  zpodengineorion:
-    container_name: ${COMPOSE_PROJECT_NAME}-zpodengineorion
-    image: prefecthq/prefect:2.8.0-python3.11
+  # Prefect Server API
+  zpodengineserver:
+    container_name: ${COMPOSE_PROJECT_NAME}-zpodengineserver
+    image: prefecthq/prefect:2.8.5-python3.11
     depends_on:
       - zpodpostgres
-    entrypoint: [ "prefect", "orion", "start" ]
+    entrypoint: [ "prefect", "server", "start" ]
     environment:
       - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
-      - PREFECT_ORION_API_HOST=0.0.0.0
-      - PREFECT_ORION_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODCORE_POSTGRES_PASSWORD}@zpodpostgres/orion
+      # Keeping those variables for potential future tuning
+      - PREFECT_API_DATABASE_TIMEOUT=30
+      - PREFECT_API_DATABASE_CONNECTION_TIMEOUT=15
+      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODCORE_POSTGRES_PASSWORD}@zpodpostgres/prefect
+      - PREFECT_SERVER_API_HOST=0.0.0.0
       - TELEMETRY_ENABLED=false
     ports:
       - ${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}:4200
     restart: always
     volumes:
-      - prefect:/root/.prefect
+      - zpod_vol_prefect:/root/.prefect
 
   # Prefect Agent
   zpodengineagent:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineagent
-    image: prefecthq/prefect:2.8.0-python3.11
+    image: prefecthq/prefect:2.8.5-python3.11
     depends_on:
       - zpodpostgres
-    entrypoint: [ "prefect", "agent", "start", "-q", "default" ]
+    entrypoint:
+      [
+        "prefect",
+        "agent",
+        "start",
+        "-q",
+        "default",
+        "--limit",
+        "1"
+      ]
     environment:
-      - PREFECT_API_URL=http://zpodengineorion:4200/api
+      - PREFECT_API_URL=http://zpodengineserver:4200/api
+      # Keeping those variables for potential future tuning.
+      - PREFECT_API_DATABASE_TIMEOUT=30
+      - PREFECT_API_DATABASE_CONNECTION_TIMEOUT=15
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -91,7 +106,7 @@ services:
       - zpodpostgres
     entrypoint: [ "/bin/bash" ]
     environment:
-      - PREFECT_API_URL=http://zpodengineorion:4200/api
+      - PREFECT_API_URL=http://zpodengineserver:4200/api
       - ZPODCORE_PATH=${PWD}
       - HISTFILE=/commandhistory/.zpodenginecli_bash_history
     env_file:
@@ -101,11 +116,11 @@ services:
       - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
       - ./zpodengine/src/zpodengine:/zpodcore/src/zpodengine:cached
       - ./zpodengine/scripts:/zpodcore/scripts:cached
-      - zpod-history-vol:/commandhistory
+      - zpod_vol_history:/commandhistory
       - ${ZPODCORE_LIBRARY_PATH}:/library
       - ${ZPODCORE_PRODUCTS_PATH}:/products
 
 volumes:
-  zpod-history-vol: null
-  zpod-postgres-vol: null
-  prefect: null
+  zpod_vol_history: null
+  zpod_vol_postgres: null
+  zpod_vol_prefect: null

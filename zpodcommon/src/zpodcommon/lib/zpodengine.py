@@ -27,7 +27,7 @@ class ZpodEngineBase:
 class ZpodEngineAsync(ZpodEngineBase):
     def __init__(self):
         self.aclient = httpx.AsyncClient(
-            base_url="http://zpodengineorion:4200/api",
+            base_url="http://zpodengineserver:4200/api",
         )
 
     async def __aenter__(self):
@@ -91,7 +91,7 @@ class ZpodEngineAsync(ZpodEngineBase):
 class ZpodEngine(ZpodEngineBase):
     def __init__(self):
         self.client = httpx.Client(
-            base_url="http://zpodengineorion:4200/api",
+            base_url="http://zpodengineserver:4200/api",
         )
 
     def __enter__(self):

@@ -3,7 +3,7 @@ set dotenv-load
 # This calculates the number of columns for rich to aligne with docker-compose logs
 # 16 is the length of the longest container name
 # 3 is the length of the docker-compose padding
-rich_cols := `echo $(tput cols) - $(echo ${COMPOSE_PROJECT_NAME:-zpodcore} | wc -c) - 16 - 3 | bc`
+rich_cols := `echo $(tput cols) - $(echo ${COMPOSE_PROJECT_NAME:-zpodcore} | wc -c) - 17 - 3 | bc`
 
 @_default:
   just --list --list-heading $'Commands:\n'
@@ -78,4 +78,4 @@ zpodengine-create-deployments:
 # zpodengine initial config
 zpodengine-init:
   just zpodengine-build-docker-image
-  docker compose run --rm zpodenginecli -c "/zpodcore/scripts/create_blocks.py && /zpodcore/scripts/create_deployments.py"
+  docker compose run --rm zpodenginecli -c "/zpodcore/scripts/create_default_settings.sh && /zpodcore/scripts/create_blocks.py && /zpodcore/scripts/create_deployments.py"
