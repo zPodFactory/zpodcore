@@ -6,8 +6,11 @@ from zpodcommon import models as M
 
 from . import instance_dependencies, instance_services
 from .instance_schemas import (
+    InstanceComponentCreate,
     InstanceComponentView,
     InstanceCreate,
+    InstanceFeatureView,
+    InstanceNetworkView,
     InstanceUpdate,
     InstanceView,
 )
@@ -104,3 +107,45 @@ def components_get_all(
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
 ):
     return instance_services.components_get_all(session, instance=instance)
+
+
+@router.post(
+    "/instances/{id}/components",
+    response_model=InstanceComponentView,
+    status_code=status.HTTP_201_CREATED,
+)
+def components_create(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+    component_in: InstanceComponentCreate,
+):
+    return instance_services.components_create(
+        session=session,
+        instance=instance,
+        component_in=component_in,
+    )
+
+
+@router.get(
+    "/instances/{id}/features",
+    response_model=list[InstanceFeatureView],
+)
+def features_get_all(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+):
+    return instance_services.features_get_all(session, instance=instance)
+
+
+@router.get(
+    "/instances/{id}/networks",
+    response_model=list[InstanceNetworkView],
+)
+def networks_get_all(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+):
+    return instance_services.networks_get_all(session, instance=instance)

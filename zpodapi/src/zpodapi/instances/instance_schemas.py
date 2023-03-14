@@ -29,9 +29,19 @@ class EndpointView(SQLModel):
     id: int = Req(example=1)
 
 
+class InstanceComponentCreate(SQLModel, extra="forbid"):
+    component_uid: str = Req(example="vcda-4.4.1")
+
+
 class InstanceComponentView(SQLModel):
+    id: int = Req(example=1)
     component: ComponentView
     data: dict[Any, Any]
+
+
+class InstanceFeatureView(SQLModel):
+    id: int = Req(example=1)
+    data: dict[Any, Any] = Req(example="{'feature':'one'}")
 
 
 class InstanceNetworkView(SQLModel):
@@ -45,11 +55,6 @@ class InstancePermissionView(SQLModel):
     permission: str = Req(example="zpodadmin")
     users: list[UserView] = []
     groups: list[PermissionGroupView] = []
-
-
-class InstanceFeatureView(SQLModel):
-    id: int = Req(example=1)
-    data: dict[Any, Any] = Req(example="{'feature':'one'}")
 
 
 class InstanceView(SQLModel):

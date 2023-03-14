@@ -5,7 +5,7 @@ from sqlmodel import Session, or_, select
 from zpodcommon import models as M
 
 from . import instance_utils
-from .instance_schemas import InstanceCreate, InstanceUpdate
+from .instance_schemas import InstanceComponentCreate, InstanceCreate, InstanceUpdate
 
 
 def get_all(
@@ -85,3 +85,33 @@ def components_get_all(
     instance: M.Instance,
 ):
     return instance.components
+
+
+def components_create(
+    session: Session,
+    *,
+    instance: M.Instance,
+    component_in: InstanceComponentCreate,
+):
+    user = M.InstanceComponent(
+        instance_id=instance.id,
+        component_uid=component_in.component_uid,
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def features_get_all(
+    session: Session,
+    instance: M.Instance,
+):
+    return instance.features
+
+
+def networks_get_all(
+    session: Session,
+    instance: M.Instance,
+):
+    return instance.networks
