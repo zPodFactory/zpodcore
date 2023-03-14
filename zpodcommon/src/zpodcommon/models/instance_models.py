@@ -1,13 +1,17 @@
 from datetime import datetime
 from ipaddress import IPv4Network
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
-from .component_models import Component
-from .endpoint_models import Endpoint
-from .permission_group_models import PermissionGroup
-from .user_models import User
+from .link_models import InstancePermissionUserLink
+#from .link_models import InstancePermissionGroupLink
+
+if TYPE_CHECKING:
+    from .component_models import Component
+    from .endpoint_models import Endpoint
+    #from .permission_group_models import PermissionGroup
+    from .user_models import User
 
 
 class Instance(SQLModel, table=True):
@@ -152,49 +156,6 @@ class InstanceNetwork(SQLModel, table=True):
     instance: "Instance" = Relationship(back_populates="networks")
 
 
-class InstancePermissionUserLink(SQLModel, table=True):
-    __tablename__ = "instance_permission_user_link"
-
-    instance_permission_id: int = Field(
-        default=...,
-        primary_key=True,
-        nullable=False,
-        foreign_key="instance_permissions.id",
-    )
-    user_id: int = Field(
-        default=...,
-        primary_key=True,
-        nullable=False,
-        foreign_key="users.id",
-    )
-    instance_permission: "InstancePermission" = Relationship(
-        back_populates="user_links"
-    )
-    user: "User" = Relationship()
-
-
-class InstancePermissionGroupLink(SQLModel, table=True):
-    __tablename__ = "instance_permission_group_link"
-
-    instance_permission_id: int = Field(
-        default=...,
-        primary_key=True,
-        nullable=False,
-        foreign_key="instance_permissions.id",
-    )
-    permission_group_id: int = Field(
-        default=...,
-        primary_key=True,
-        nullable=False,
-        foreign_key="permission_groups.id",
-    )
-
-    instance_permission: "InstancePermission" = Relationship(
-        back_populates="group_links"
-    )
-    permission_group: "PermissionGroup" = Relationship()
-
-
 class InstancePermission(SQLModel, table=True):
     __tablename__ = "instance_permissions"
 
@@ -218,16 +179,20 @@ class InstancePermission(SQLModel, table=True):
     )
 
     instance: "Instance" = Relationship(back_populates="permissions")
+
     user_links: List["InstancePermissionUserLink"] = Relationship(
         back_populates="instance_permission",
         sa_relationship_kwargs={"cascade": "all,delete,delete-orphan"},
     )
-    users: List["User"] = Relationship(link_model=InstancePermissionUserLink)
+    users: List["User"] = Relationship(
+        back_populates="instance_permissions",
+        link_model=InstancePermissionUserLink,
+    )
 
-    group_links: List["InstancePermissionGroupLink"] = Relationship(
-        back_populates="instance_permission",
-        sa_relationship_kwargs={"cascade": "all,delete,delete-orphan"},
-    )
-    groups: List["PermissionGroup"] = Relationship(
-        link_model=InstancePermissionGroupLink
-    )
+    # group_links: List["InstancePermissionGroupLink"] = Relationship(
+    #     back_populates="instance_permission",
+    #     sa_relationship_kwargs={"cascade": "all,delete,delete-orphan"},
+    # )
+    # groups: List["PermissionGroup"] = Relationship(
+    #     link_model=InstancePermissionGroupLink,
+    # )

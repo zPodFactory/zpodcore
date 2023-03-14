@@ -4,18 +4,18 @@ from sqlmodel import select
 
 from zpodapi.lib import database
 from zpodcommon import models as M
-
+from time import time
 with database.get_session_ctx() as session:
     user1 = session.exec(select(M.User).where(M.User.id == 1)).one()
     user2 = session.exec(select(M.User).where(M.User.id == 2)).one()
 
-    pg = M.PermissionGroup(name="Team", users=[user2])
-    session.add(pg)
-    session.commit()
-    session.refresh(pg)
+    # pg = M.PermissionGroup(name="Team", users=[user2])
+    # session.add(pg)
+    # session.commit()
+    # session.refresh(pg)
 
     instance = M.Instance(
-        name="test2",
+        name=f"test-{time()}",
         creation_date=datetime.now(),
         last_modified_date=datetime.now(),
         components=[
@@ -27,7 +27,7 @@ with database.get_session_ctx() as session:
                 name="owner",
                 permission="zpodadmin",
                 users=[user1],
-                groups=[pg],
+                #groups=[pg],
             )
         ],
         networks=[M.InstanceNetwork(cidr="192.168.0.0/24")],
