@@ -1,8 +1,8 @@
 """update
 
-Revision ID: 5394f81ed48d
+Revision ID: 9ab4b74009c3
 Revises: 2f6c907fc8c5
-Create Date: 2023-03-10 19:56:41.264180
+Create Date: 2023-03-14 15:16:51.907123
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "5394f81ed48d"
+revision = "9ab4b74009c3"
 down_revision = "2f6c907fc8c5"
 branch_labels = None
 depends_on = None

@@ -4,10 +4,9 @@ from typing import TYPE_CHECKING, List
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
 
-from .link_models import InstancePermissionUserLink
-
 if TYPE_CHECKING:
     from .instance_models import InstancePermission
+    from .permission_group_models import PermissionGroup
 
 from .mixins import CommonDatesMixin
 
@@ -24,9 +23,15 @@ class User(CommonDatesMixin, SQLModel, table=True):
     last_connection_date: datetime = Field(None)
     superadmin: bool = Field(False, nullable=False)
 
-    instance_permission_links: List["InstancePermissionUserLink"] = Relationship(
-        back_populates="user",
-    )
     instance_permissions: List["InstancePermission"] = Relationship(
-        back_populates="users", link_model=InstancePermissionUserLink
+        back_populates="users",
+        sa_relationship_kwargs=dict(
+            secondary="instance_permission_user_link",
+        ),
+    )
+    permission_groups: List["PermissionGroup"] = Relationship(
+        back_populates="users",
+        sa_relationship_kwargs=dict(
+            secondary="permission_group_user_link",
+        ),
     )
