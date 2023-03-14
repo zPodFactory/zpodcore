@@ -127,6 +127,23 @@ def components_create(
     )
 
 
+@router.delete(
+    "/instances/{id}/components/{component_uid}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def components_delete(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+    component_uid: str,
+):
+    return instance_services.components_delete(
+        session=session,
+        instance=instance,
+        component_uid=component_uid,
+    )
+
+
 @router.get(
     "/instances/{id}/features",
     response_model=list[InstanceFeatureView],

@@ -93,14 +93,27 @@ def components_create(
     instance: M.Instance,
     component_in: InstanceComponentCreate,
 ):
-    user = M.InstanceComponent(
+    instance = M.InstanceComponent(
         instance_id=instance.id,
         component_uid=component_in.component_uid,
     )
-    session.add(user)
+    session.add(instance)
     session.commit()
-    session.refresh(user)
-    return user
+    session.refresh(instance)
+    return instance
+
+
+def components_delete(session: Session, *, instance: M.Instance, component_uid: str):
+    instance_component = session.exec(
+        select(M.InstanceComponent).where(
+            M.InstanceComponent.instance_id == instance.id,
+            M.InstanceComponent.component_uid == component_uid,
+        )
+    ).first()
+
+    session.delete(instance_component)
+    session.commit()
+    return None
 
 
 def features_get_all(
