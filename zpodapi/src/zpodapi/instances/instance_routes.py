@@ -5,7 +5,12 @@ from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
 from . import instance_dependencies, instance_services
-from .instance_schemas import InstanceCreate, InstanceView
+from .instance_schemas import (
+    InstanceComponentView,
+    InstanceCreate,
+    InstanceUpdate,
+    InstanceView,
+)
 
 router = APIRouter(
     tags=["instances"],
@@ -59,31 +64,43 @@ def create(
     )
 
 
-# @router.patch(
-#     "/instances/{id}",
-#     response_model=InstanceView,
-#     status_code=status.HTTP_201_CREATED,
-# )
-# def update(
-#     *,
-#     session: Session = Depends(dependencies.get_session),
-#     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
-#     instance_in: InstanceUpdate,
-# ):
-#     return instance_services.update(
-#         session=session,
-#         instance=instance,
-#         instance_in=instance_in,
-#     )
+@router.patch(
+    "/instances/{id}",
+    response_model=InstanceView,
+    status_code=status.HTTP_201_CREATED,
+)
+def update(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+    instance_in: InstanceUpdate,
+):
+    return instance_services.update(
+        session=session,
+        instance=instance,
+        instance_in=instance_in,
+    )
 
 
-# @router.delete(
-#     "/instances/{id}",
-#     status_code=status.HTTP_204_NO_CONTENT,
-# )
-# def delete(
-#     *,
-#     session: Session = Depends(dependencies.get_session),
-#     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
-# ):
-#     return instance_services.delete(session=session, instance=instance)
+@router.delete(
+    "/instances/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+):
+    return instance_services.delete(session=session, instance=instance)
+
+
+@router.get(
+    "/instances/{id}/components",
+    response_model=list[InstanceComponentView],
+)
+def components_get_all(
+    *,
+    session: Session = Depends(dependencies.get_session),
+    instance: M.Instance = Depends(instance_dependencies.get_instance_record),
+):
+    return instance_services.components_get_all(session, instance=instance)

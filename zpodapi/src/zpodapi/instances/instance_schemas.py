@@ -4,6 +4,7 @@ from typing import Any
 
 from sqlmodel import SQLModel
 
+from zpodapi.components.component_schemas import ComponentView
 from zpodapi.lib.schema_base import Empty, Field, Opt, Req
 from zpodapi.permission_groups.permission_group_schemas import PermissionGroupView
 from zpodapi.users.user_schemas import UserView
@@ -19,11 +20,9 @@ class InstanceCreate(SQLModel, extra="forbid"):
     profile: str = Req(example="sddc-profile")
 
 
-# class InstanceUpdate(SQLModel, extra="forbid"):
-#     id: int = Field(None, example=1)
-#     description: str | None = Field(None, example="Sample User")
-#     ssh_key: str | None = Field(None)
-#     superadmin: bool | None = Field(None, example=False)
+class InstanceUpdate(SQLModel, extra="forbid"):
+    id: int = Field(None, example=1)
+    description: str = Opt(example="Tanzu Lab zPod")
 
 
 class EndpointView(SQLModel):
@@ -31,8 +30,8 @@ class EndpointView(SQLModel):
 
 
 class InstanceComponentView(SQLModel):
-    id: int = Req(example=1)
-    component_uid: str = Req(example="vcd-10.2")
+    component: ComponentView
+    data: dict[Any, Any]
 
 
 class InstanceNetworkView(SQLModel):

@@ -5,7 +5,7 @@ from sqlmodel import Session, or_, select
 from zpodcommon import models as M
 
 from . import instance_utils
-from .instance_schemas import InstanceCreate
+from .instance_schemas import InstanceCreate, InstanceUpdate
 
 
 def get_all(
@@ -57,19 +57,31 @@ def create(
     return user
 
 
-# def update(session: Session, *, user: M.User, user_in: UserUpdate):
-#     data = user_in.dict(exclude_unset=True)
-#     data.pop("id", None)
-#     for key, value in data.items():
-#         setattr(user, key, value)
+def update(
+    session: Session,
+    *,
+    instance: M.Instance,
+    instance_in: InstanceUpdate,
+):
+    data = instance_in.dict(exclude_unset=True)
+    data.pop("id", None)
+    for key, value in data.items():
+        setattr(instance, key, value)
 
-#     session.add(user)
-#     session.commit()
-#     session.refresh(user)
-#     return user
+    session.add(instance)
+    session.commit()
+    session.refresh(instance)
+    return instance
 
 
-# def delete(session: Session, *, user: M.User):
-#     session.delete(user)
-#     session.commit()
-#     return None
+def delete(session: Session, *, instance: M.Instance):
+    session.delete(instance)
+    session.commit()
+    return None
+
+
+def components_get_all(
+    session: Session,
+    instance: M.Instance,
+):
+    return instance.components

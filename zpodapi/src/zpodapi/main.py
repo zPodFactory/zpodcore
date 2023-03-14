@@ -15,7 +15,7 @@ def simplify_operation_ids(api: FastAPI) -> None:
     names.
     """
     for route in api.routes:
-        if isinstance(route, APIRoute):
+        if isinstance(route, APIRoute) and not route.operation_id:
             tag = route.tags[0] if route.tags else "default"
             route.operation_id = f"{tag}_{route.name}"
 
