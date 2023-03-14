@@ -21,7 +21,7 @@ docker_block = DockerContainer(
         f"{ZPODCORE_PRODUCTS_PATH}:/products",
     ],
     env={
-        "PREFECT_API_URL": "http://zpodengineorion:4200/api",
+        "PREFECT_API_URL": "http://zpodengineserver:4200/api",
     },
     networks=[f"{COMPOSE_PROJECT_NAME}_default"],
 )
