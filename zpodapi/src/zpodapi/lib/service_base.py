@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlmodel import Session, SQLModel, select
+from sqlmodel import Session, SQLModel, or_, select
 
 
 class ServiceBase:
@@ -13,20 +13,21 @@ class ServiceBase:
         self,
         *,
         _model: SQLModel | None = None,
+        _use_or: bool = False,
         **kwargs: dict[Any, Any],
     ):
         model = _model or self.base_model
         sel = select(model)
         model_keys = set(model.__fields__.keys())
-        and_criteria = []
+        criteria = []
         for attr, value in kwargs.items():
             if attr not in model_keys:
                 raise AttributeError(f"Invalid attribute name: {attr}")
             if value:
-                and_criteria.append(getattr(model, attr) == value)
+                criteria.append(getattr(model, attr) == value)
 
-        if and_criteria:
-            sel = sel.where(*and_criteria)
+        if criteria:
+            sel = sel.where(or_(*criteria)) if _use_or else sel.where(*criteria)
         return self.session.exec(sel).all()
 
     def get(

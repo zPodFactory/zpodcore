@@ -6,8 +6,9 @@ from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
 from zpodcommon import models as M
 
-from . import user_dependencies, user_services
+from . import user_dependencies
 from .user_schemas import UserCreate, UserUpdate, UserViewFull
+from .user_services import UserService
 
 router = APIRouter(
     tags=["users"],
@@ -26,7 +27,7 @@ def get_all(
     username: str | None = None,
     email: EmailStr | None = None,
 ):
-    return user_services.get_all(session, username=username, email=email)
+    return UserService(session=session).get_all(username=username, email=email)
 
 
 @router.get(
@@ -61,13 +62,14 @@ def create(
     session: Session = Depends(dependencies.get_session),
     user_in: UserCreate,
 ):
-    if user_services.get_all(
-        session=session,
+    service = UserService(session=session)
+    if service.get_all(
         username=user_in.username,
         email=user_in.email,
+        _use_or=True,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return user_services.create(session=session, user_in=user_in)
+    return service.create(item_in=user_in)
 
 
 @router.patch(
@@ -81,11 +83,7 @@ def update(
     user: M.User = Depends(user_dependencies.get_user_record),
     user_in: UserUpdate,
 ):
-    return user_services.update(
-        session=session,
-        user=user,
-        user_in=user_in,
-    )
+    return UserService(session=session).update(item=user, item_in=user_in)
 
 
 @router.delete(
@@ -97,4 +95,4 @@ def delete(
     session: Session = Depends(dependencies.get_session),
     user: M.User = Depends(user_dependencies.get_user_record),
 ):
-    return user_services.delete(session=session, user=user)
+    return UserService(session=session).delete(item=user)
