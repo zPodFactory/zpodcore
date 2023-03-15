@@ -42,11 +42,14 @@ class Instance(SQLModel, table=True):
         nullable=False,
     )
     creation_date: datetime = Field(
-        default=None,
+        sa_column_kwargs=dict(default=datetime.utcnow),
         nullable=False,
     )
     last_modified_date: datetime = Field(
-        default=None,
+        sa_column_kwargs=dict(
+            default=datetime.utcnow,
+            onupdate=datetime.utcnow,
+        ),
         nullable=False,
     )
     endpoint_id: int = Field(
