@@ -1,7 +1,9 @@
 from sqlmodel import Field, SQLModel
 
+from .mixins import CommonDatesMixin
 
-class Component(SQLModel, table=True):
+
+class Component(CommonDatesMixin, SQLModel, table=True):
     __tablename__ = "components"
 
     id: int | None = Field(default=None, primary_key=True, nullable=False)

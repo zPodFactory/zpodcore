@@ -18,7 +18,7 @@ class LibraryView:
         enabled (bool):
         git_url (str):  Example: https://github.com/zpodfactory/zpodlibrary.
         name (str):  Example: vmware.
-        lastupdate_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
+        last_modified_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
     """
 
     creation_date: datetime.datetime
@@ -26,7 +26,7 @@ class LibraryView:
     enabled: bool
     git_url: str
     name: str
-    lastupdate_date: Union[Unset, None, datetime.datetime] = UNSET
+    last_modified_date: Union[Unset, None, datetime.datetime] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -36,10 +36,10 @@ class LibraryView:
         enabled = self.enabled
         git_url = self.git_url
         name = self.name
-        lastupdate_date: Union[Unset, None, str] = UNSET
-        if not isinstance(self.lastupdate_date, Unset):
-            lastupdate_date = (
-                self.lastupdate_date.isoformat() if self.lastupdate_date else None
+        last_modified_date: Union[Unset, None, str] = UNSET
+        if not isinstance(self.last_modified_date, Unset):
+            last_modified_date = (
+                self.last_modified_date.isoformat() if self.last_modified_date else None
             )
 
         field_dict: Dict[str, Any] = {}
@@ -53,8 +53,8 @@ class LibraryView:
                 "name": name,
             }
         )
-        if lastupdate_date is not UNSET:
-            field_dict["lastupdate_date"] = lastupdate_date
+        if last_modified_date is not UNSET:
+            field_dict["last_modified_date"] = last_modified_date
 
         return field_dict
 
@@ -71,14 +71,14 @@ class LibraryView:
 
         name = d.pop("name")
 
-        _lastupdate_date = d.pop("lastupdate_date", UNSET)
-        lastupdate_date: Union[Unset, None, datetime.datetime]
-        if _lastupdate_date is None:
-            lastupdate_date = None
-        elif isinstance(_lastupdate_date, Unset):
-            lastupdate_date = UNSET
+        _last_modified_date = d.pop("last_modified_date", UNSET)
+        last_modified_date: Union[Unset, None, datetime.datetime]
+        if _last_modified_date is None:
+            last_modified_date = None
+        elif isinstance(_last_modified_date, Unset):
+            last_modified_date = UNSET
         else:
-            lastupdate_date = isoparse(_lastupdate_date)
+            last_modified_date = isoparse(_last_modified_date)
 
         library_view = cls(
             creation_date=creation_date,
@@ -86,7 +86,7 @@ class LibraryView:
             enabled=enabled,
             git_url=git_url,
             name=name,
-            lastupdate_date=lastupdate_date,
+            last_modified_date=last_modified_date,
         )
 
         library_view.additional_properties = d
