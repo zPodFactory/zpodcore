@@ -1,8 +1,9 @@
-from datetime import datetime
 from ipaddress import IPv4Network
 from typing import TYPE_CHECKING, Any, Dict, List
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+
+from .mixins import CommonDatesMixin
 
 if TYPE_CHECKING:
     from .component_models import Component
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from .user_models import User
 
 
-class Instance(SQLModel, table=True):
+class Instance(CommonDatesMixin, SQLModel, table=True):
     __tablename__ = "instances"
 
     id: int | None = Field(
@@ -39,17 +40,6 @@ class Instance(SQLModel, table=True):
     )
     profile: str = Field(
         default="",
-        nullable=False,
-    )
-    creation_date: datetime = Field(
-        sa_column_kwargs=dict(default=datetime.utcnow),
-        nullable=False,
-    )
-    last_modified_date: datetime = Field(
-        sa_column_kwargs=dict(
-            default=datetime.utcnow,
-            onupdate=datetime.utcnow,
-        ),
         nullable=False,
     )
     endpoint_id: int = Field(
