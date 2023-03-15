@@ -8,9 +8,9 @@ from zpodcommon import models as M
 
 with database.get_session_ctx() as session:
     user1 = session.exec(select(M.User).where(M.User.id == 1)).one()
-    user2 = session.exec(select(M.User).where(M.User.id == 2)).one()
+    user2 = session.exec(select(M.User).where(M.User.id == 1)).one()
 
-    if 1:
+    if 0:
         pg = session.exec(
             select(M.PermissionGroup).where(M.PermissionGroup.name == "Team")
         ).one()
@@ -20,7 +20,7 @@ with database.get_session_ctx() as session:
         session.commit()
         session.refresh(pg)
 
-    if 0:
+    if 1:
         instance = M.Instance(
             name=f"test-{time()}",
             creation_date=datetime.now(),
@@ -55,7 +55,7 @@ with database.get_session_ctx() as session:
 #     print(f"\n\n{instance.networks}")
 
 
-if 1:
+if 0:
     with database.get_session_ctx() as session:
         instance = session.exec(
             select(M.Instance).where(M.Instance.name == "test-1678807449.145618")

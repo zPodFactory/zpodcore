@@ -85,17 +85,14 @@ class Instance(SQLModel, table=True):
 class InstanceComponent(SQLModel, table=True):
     __tablename__ = "instance_components"
 
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        nullable=False,
-    )
     instance_id: int = Field(
+        primary_key=True,
         default=...,
         nullable=False,
         foreign_key="instances.id",
     )
     component_uid: str = Field(
+        primary_key=True,
         default=...,
         nullable=False,
         foreign_key="components.component_uid",

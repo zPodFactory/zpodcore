@@ -4,7 +4,7 @@ from sqlmodel import Session
 from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
-from . import instance_dependencies, instance_services
+from . import instance_dependencies
 from .instance_schemas import (
     InstanceComponentCreate,
     InstanceComponentView,
@@ -14,6 +14,7 @@ from .instance_schemas import (
     InstanceUpdate,
     InstanceView,
 )
+from .instance_services import InstanceComponentService, InstanceService
 
 router = APIRouter(
     tags=["instances"],
@@ -30,7 +31,7 @@ def get_all(
     session: Session = Depends(dependencies.get_session),
     name: str | None = None,
 ):
-    return instance_services.get_all(session, name=name)
+    return InstanceService(session=session).get_all(name=name)
 
 
 @router.get(
@@ -55,15 +56,14 @@ def create(
     current_user: M.User = Depends(dependencies.get_current_user_and_update),
     instance_in: InstanceCreate,
 ):
-    if instance_services.get_all(
-        session=session,
+    service = InstanceService(session=session)
+    if service.get_all(
         name=instance_in.name,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return instance_services.create(
-        session=session,
+    return service.create(
         current_user=current_user,
-        instance_in=instance_in,
+        item_in=instance_in,
     )
 
 
@@ -78,10 +78,9 @@ def update(
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
     instance_in: InstanceUpdate,
 ):
-    return instance_services.update(
-        session=session,
-        instance=instance,
-        instance_in=instance_in,
+    return InstanceService(session=session).update(
+        item=instance,
+        item_in=instance_in,
     )
 
 
@@ -94,7 +93,7 @@ def delete(
     session: Session = Depends(dependencies.get_session),
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
 ):
-    return instance_services.delete(session=session, instance=instance)
+    return InstanceService(session=session).update(item=instance)
 
 
 @router.get(
@@ -103,10 +102,9 @@ def delete(
 )
 def components_get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
 ):
-    return instance_services.components_get_all(session, instance=instance)
+    return instance.components
 
 
 @router.post(
@@ -120,10 +118,11 @@ def components_create(
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
     component_in: InstanceComponentCreate,
 ):
-    return instance_services.components_create(
-        session=session,
-        instance=instance,
-        component_in=component_in,
+    return InstanceComponentService(session=session).create(
+        item_in=M.InstanceComponent(
+            instance_id=instance.id,
+            component_uid=component_in.component_uid,
+        )
     )
 
 
@@ -137,11 +136,11 @@ def components_delete(
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
     component_uid: str,
 ):
-    return instance_services.components_delete(
-        session=session,
-        instance=instance,
-        component_uid=component_uid,
+    service = InstanceComponentService(session=session)
+    instance_component = service.get(
+        instance_id=instance.id, component_uid=component_uid
     )
+    service.delete(item=instance_component)
 
 
 @router.get(
@@ -150,10 +149,9 @@ def components_delete(
 )
 def features_get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
 ):
-    return instance_services.features_get_all(session, instance=instance)
+    return instance.features
 
 
 @router.get(
@@ -162,7 +160,6 @@ def features_get_all(
 )
 def networks_get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
 ):
-    return instance_services.networks_get_all(session, instance=instance)
+    return instance.networks

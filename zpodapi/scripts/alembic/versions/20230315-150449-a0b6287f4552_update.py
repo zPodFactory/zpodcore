@@ -1,8 +1,8 @@
 """update
 
-Revision ID: 9ab4b74009c3
+Revision ID: a0b6287f4552
 Revises: 2f6c907fc8c5
-Create Date: 2023-03-14 15:16:51.907123
+Create Date: 2023-03-15 15:04:49.342437
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ import sqlmodel
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "9ab4b74009c3"
+revision = "a0b6287f4552"
 down_revision = "2f6c907fc8c5"
 branch_labels = None
 depends_on = None
@@ -64,7 +64,6 @@ def upgrade():
     )
     op.create_table(
         "instance_components",
-        sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("instance_id", sa.Integer(), nullable=False),
         sa.Column("component_uid", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("data", sa.JSON(), nullable=True),
@@ -76,7 +75,7 @@ def upgrade():
             ["instance_id"],
             ["instances.id"],
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("instance_id", "component_uid"),
     )
     op.create_table(
         "instance_features",
