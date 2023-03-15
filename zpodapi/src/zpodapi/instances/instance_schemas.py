@@ -61,7 +61,6 @@ class InstanceView(SQLModel):
     id: int = Req(example=1)
     name: str = Req(example="tanzu-lab")
     description: str = Req(example="Tanzu Lab zPod")
-    password: str = Req(example="amazingpassword")
     domain: str = Req(example="tanzu-lab.maindomain.com")
     profile: str = Req(example="sddc-profile")
     creation_date: datetime = Req(example=example_creation_date)
