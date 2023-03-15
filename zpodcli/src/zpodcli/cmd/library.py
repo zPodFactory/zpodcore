@@ -39,7 +39,7 @@ def list():
             library.description,
             library.git_url,
             library.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
-            library.lastupdate_date.strftime("%Y-%m-%d %H:%M:%S"),
+            library.last_modified_date.strftime("%Y-%m-%d %H:%M:%S"),
             library.enabled.__str__(),
         )
 

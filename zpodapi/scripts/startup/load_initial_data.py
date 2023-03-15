@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import secrets
-from datetime import datetime
 
 from zpodapi import settings
 from zpodapi.lib import database
@@ -18,8 +17,6 @@ with database.get_session_ctx() as session:
             api_token=(
                 "supertoken" if settings.DEV_MODE else secrets.token_urlsafe(32)
             ),
-            creation_date=datetime.now(),
-            last_connection=datetime.now(),
             superadmin=True,
         )
 
