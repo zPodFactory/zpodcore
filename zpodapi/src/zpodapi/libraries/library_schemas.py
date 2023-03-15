@@ -6,7 +6,7 @@ from sqlmodel import SQLModel
 from zpodapi.lib.schema_base import Field
 
 example_creation_date = datetime(2023, 1, 1)
-example_lastupdate_date = datetime(2023, 1, 1, 0, 1)
+example_last_modified_date = datetime(2023, 1, 1, 0, 1)
 
 
 class LibraryCreate(SQLModel, extra="forbid"):
@@ -25,9 +25,9 @@ class LibraryView(SQLModel):
     description: str = Field(..., example="Default zPodFactory library")
     git_url: str = Field(..., example="https://github.com/zpodfactory/zpodlibrary")
     creation_date: datetime = Field(..., example=example_creation_date)
-    lastupdate_date: datetime | None = PField(
+    last_modified_date: datetime | None = PField(
         None,
-        example=example_lastupdate_date,
+        example=example_last_modified_date,
         nullable=True,
     )
     enabled: bool = Field(...)
