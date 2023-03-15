@@ -1,7 +1,8 @@
 from ipaddress import IPv4Network
 from typing import TYPE_CHECKING, Any, Dict, List
 
-from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import Column, Field, Relationship, SQLModel
 
 from .mixins import CommonDatesMixin
 
@@ -93,7 +94,7 @@ class InstanceComponent(SQLModel, table=True):
     data: Dict[Any, Any] | None = Field(
         default={},
         index=False,
-        sa_column=Column(JSON),
+        sa_column=Column(JSONB),
     )
 
     instance: "Instance" = Relationship(back_populates="components")
@@ -116,7 +117,7 @@ class InstanceFeature(SQLModel, table=True):
     data: Dict[Any, Any] | None = Field(
         default={},
         index=False,
-        sa_column=Column(JSON),
+        sa_column=Column(JSONB),
     )
 
     instance: "Instance" = Relationship(back_populates="features")

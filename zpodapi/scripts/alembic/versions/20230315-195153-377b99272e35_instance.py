@@ -67,7 +67,7 @@ def upgrade():
         "instance_components",
         sa.Column("instance_id", sa.Integer(), nullable=False),
         sa.Column("component_uid", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("data", sa.JSON(), nullable=True),
+        sa.Column("data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.ForeignKeyConstraint(
             ["component_uid"],
             ["components.component_uid"],
@@ -82,7 +82,7 @@ def upgrade():
         "instance_features",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("instance_id", sa.Integer(), nullable=False),
-        sa.Column("data", sa.JSON(), nullable=True),
+        sa.Column("data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.ForeignKeyConstraint(
             ["instance_id"],
             ["instances.id"],
