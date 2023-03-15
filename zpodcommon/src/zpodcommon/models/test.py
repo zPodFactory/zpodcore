@@ -11,14 +11,33 @@ with database.get_session_ctx() as session:
     user2 = session.exec(select(M.User).where(M.User.id == 1)).one()
 
     if 0:
+        pg = M.PermissionGroup(name="Team", users=[user2])
+        session.add(pg)
+
+        library = M.Library(name="test", enabled=True, git_url="url")
+        session.add(library)
+        session.commit()
+
+        component = M.Component(
+            component_uid="vcd-10.2",
+            component_name="vcd",
+            component_version="10.2",
+            enabled=True,
+            library_name="test",
+            filename="test.ova",
+            status="active",
+        )
+        session.add(component)
+
+        endpoint = M.Endpoint()
+        session.add(endpoint)
+
+        session.commit()
+        session.refresh(pg)
+    else:
         pg = session.exec(
             select(M.PermissionGroup).where(M.PermissionGroup.name == "Team")
         ).one()
-    else:
-        pg = M.PermissionGroup(name="Team", users=[user2])
-        session.add(pg)
-        session.commit()
-        session.refresh(pg)
 
     if 1:
         instance = M.Instance(
