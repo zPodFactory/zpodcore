@@ -1,38 +1,21 @@
 from datetime import datetime
-from ipaddress import IPv4Network
-from typing import Any
 
 from sqlmodel import SQLModel
 
-from zpodapi.components.component_schemas import ComponentView
 from zpodapi.lib.schema_base import Empty, Field, Opt, Req
 from zpodapi.permission_groups.permission_group_schemas import PermissionGroupView
 from zpodapi.users.user_schemas import UserView
 
+from .instance_component__schemas import InstanceComponentView
+from .instance_feature__schemas import InstanceFeatureView
+from .instance_network__schemas import InstanceNetworkView
+
 example_creation_date = datetime(2023, 1, 1)
 
 
+# TODO: Remove when real version is ready
 class EndpointView(SQLModel):
     id: int = Req(example=1)
-
-
-class InstanceComponentView(SQLModel):
-    component: ComponentView
-    data: dict[Any, Any]
-
-
-class InstanceComponentCreate(SQLModel, extra="forbid"):
-    component_uid: str = Req(example="vcda-4.4.1")
-
-
-class InstanceFeatureView(SQLModel):
-    id: int = Req(example=1)
-    data: dict[Any, Any] = Req(example="{'feature':'one'}")
-
-
-class InstanceNetworkView(SQLModel):
-    id: int = Req(example=1)
-    cidr: IPv4Network = Req(example=1)
 
 
 class InstancePermissionView(SQLModel):
@@ -40,7 +23,7 @@ class InstancePermissionView(SQLModel):
     name: str = Req(example="owner")
     permission: str = Req(example="zpodadmin")
     users: list[UserView] = []
-    groups: list[PermissionGroupView] = []
+    groups: list["PermissionGroupView"] = []
 
 
 class InstanceCreate(SQLModel, extra="forbid"):

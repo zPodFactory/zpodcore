@@ -3,7 +3,7 @@ from sqlmodel import SQLModel
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 
-from . import instance_utils
+from . import instance__utils
 
 
 class InstanceService(ServiceBase):
@@ -20,7 +20,7 @@ class InstanceService(ServiceBase):
             _model=_model,
             item_in=item_in,
             extra=dict(
-                password=instance_utils.gen_password(),
+                password=instance__utils.gen_password(),
                 permissions=[
                     M.InstancePermission(
                         name="Owner",
