@@ -18,11 +18,21 @@ class UserCreate(SQLModel, extra="forbid"):
     superadmin: bool = False
 
 
-class UserUpdate(SQLModel, extra="forbid"):
-    id: int = Field(None, example=1)
-    description: str | None = Field(None, example="Sample User")
+class UserUpdate(SQLModel):
+    class Config:
+        extra = "forbid"
+        schema_extra2 = dict(
+            example=dict(
+                description="Sample User",
+                ssh_key="xxx",
+                superadmin=False,
+            )
+        )
+
+    id: int = Field(None)
+    description: str | None = Field(None)
     ssh_key: str | None = Field(None)
-    superadmin: bool | None = Field(None, example=False)
+    superadmin: bool | None = Field(None)
 
 
 class UserView(SQLModel):

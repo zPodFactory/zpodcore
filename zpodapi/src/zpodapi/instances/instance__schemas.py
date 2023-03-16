@@ -2,10 +2,10 @@ from datetime import datetime
 
 from sqlmodel import SQLModel
 
-from zpodapi.lib.schema_base import Empty, Field, Opt, Req
-from zpodapi.permission_groups.permission_group_schemas import PermissionGroupView
-from zpodapi.users.user_schemas import UserView
+from zpodapi.lib.schema_base import Empty, Opt, Req
 
+from ..permission_groups.permission_group_schemas import PermissionGroupView
+from ..users.user_schemas import UserView
 from .instance_component__schemas import InstanceComponentView
 from .instance_feature__schemas import InstanceFeatureView
 from .instance_network__schemas import InstanceNetworkView
@@ -34,9 +34,13 @@ class InstanceCreate(SQLModel, extra="forbid"):
     profile: str = Req(example="sddc-profile")
 
 
-class InstanceUpdate(SQLModel, extra="forbid"):
-    id: int = Field(None, example=1)
-    description: str = Opt(example="Tanzu Lab zPod")
+class InstanceUpdate(SQLModel):
+    id: int = Opt()
+    description: str = Opt()
+
+    class Config:
+        extra = "forbid"
+        schema_extra = {"example": {"description": "Tanzu Lab zPod"}}
 
 
 class InstanceView(SQLModel):
