@@ -112,7 +112,7 @@ def components_get_all(
     response_model=InstanceComponentView,
     status_code=status.HTTP_201_CREATED,
 )
-def components_create(
+def components_add(
     *,
     session: Session = Depends(dependencies.get_session),
     instance: M.Instance = Depends(instance_dependencies.get_instance_record),
