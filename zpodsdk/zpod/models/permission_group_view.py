@@ -1,36 +1,44 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 import attr
 
-T = TypeVar("T", bound="UserView")
+if TYPE_CHECKING:
+    from ..models.user_view import UserView
+
+
+T = TypeVar("T", bound="PermissionGroupView")
 
 
 @attr.s(auto_attribs=True)
-class UserView:
+class PermissionGroupView:
     """
     Attributes:
-        email (str):  Example: jdoe@example.com.
         id (int):  Example: 1.
-        username (str):  Example: jdoe.
+        name (str):  Example: Team.
+        users (List['UserView']):
     """
 
-    email: str
     id: int
-    username: str
+    name: str
+    users: List["UserView"]
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        email = self.email
         id = self.id
-        username = self.username
+        name = self.name
+        users = []
+        for users_item_data in self.users:
+            users_item = users_item_data.to_dict()
+
+            users.append(users_item)
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "email": email,
                 "id": id,
-                "username": username,
+                "name": name,
+                "users": users,
             }
         )
 
@@ -38,21 +46,28 @@ class UserView:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
-        email = d.pop("email")
+        from ..models.user_view import UserView
 
+        d = src_dict.copy()
         id = d.pop("id")
 
-        username = d.pop("username")
+        name = d.pop("name")
 
-        user_view = cls(
-            email=email,
+        users = []
+        _users = d.pop("users")
+        for users_item_data in _users:
+            users_item = UserView.from_dict(users_item_data)
+
+            users.append(users_item)
+
+        permission_group_view = cls(
             id=id,
-            username=username,
+            name=name,
+            users=users,
         )
 
-        user_view.additional_properties = d
-        return user_view
+        permission_group_view.additional_properties = d
+        return permission_group_view
 
     @property
     def additional_keys(self) -> List[str]:

@@ -6,29 +6,26 @@ import httpx
 from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.user_view_full import UserViewFull
+from ...models.instance_view import InstanceView
 from ...types import UNSET, Response, Unset
 
 
-class UsersGetAll:
+class InstancesGetAll:
     def __init__(self, client: Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
+        name: Union[Unset, None, str] = UNSET,
     ) -> Dict[str, Any]:
-        url = "{}/users".format(self.client.base_url)
+        url = "{}/instances".format(self.client.base_url)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
         params: Dict[str, Any] = {}
-        params["username"] = username
-
-        params["email"] = email
+        params["name"] = name
 
         params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -43,12 +40,12 @@ class UsersGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Optional[Union[HTTPValidationError, List["InstanceView"]]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
-                response_200_item = UserViewFull.from_dict(response_200_item_data)
+                response_200_item = InstanceView.from_dict(response_200_item_data)
 
                 response_200.append(response_200_item)
 
@@ -66,7 +63,7 @@ class UsersGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Response[Union[HTTPValidationError, List["InstanceView"]]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -77,26 +74,23 @@ class UsersGetAll:
     def sync_detailed(
         self,
         *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+        name: Union[Unset, None, str] = UNSET,
+    ) -> Response[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            name (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, List['InstanceView']]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            username=username,
-            email=email,
+            name=name,
         )
 
         response = httpx.request(
@@ -109,51 +103,45 @@ class UsersGetAll:
     def sync(
         self,
         *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
+        name: Union[Unset, None, str] = UNSET,
+    ) -> Optional[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            name (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, List['InstanceView']]]
         """  # noqa e501
 
         return self.sync_detailed(
-            username=username,
-            email=email,
+            name=name,
         ).parsed
 
     async def asyncio_detailed(
         self,
         *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+        name: Union[Unset, None, str] = UNSET,
+    ) -> Response[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            name (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, List['InstanceView']]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            username=username,
-            email=email,
+            name=name,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -164,26 +152,23 @@ class UsersGetAll:
     async def asyncio(
         self,
         *,
-        username: Union[Unset, None, str] = UNSET,
-        email: Union[Unset, None, str] = UNSET,
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
+        name: Union[Unset, None, str] = UNSET,
+    ) -> Optional[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Args:
-            username (Union[Unset, None, str]):
-            email (Union[Unset, None, str]):
+            name (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, List['InstanceView']]]
         """  # noqa e501
 
         return (
             await self.asyncio_detailed(
-                username=username,
-                email=email,
+                name=name,
             )
         ).parsed

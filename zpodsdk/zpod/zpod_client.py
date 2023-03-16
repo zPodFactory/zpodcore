@@ -40,6 +40,76 @@ class ZpodClient:
 
     @property
     @cache
+    def instances_components_create(self):
+        from zpod.api.instances import instances_components_create
+
+        return instances_components_create.InstancesComponentsCreate(self._client)
+
+    @property
+    @cache
+    def instances_components_delete(self):
+        from zpod.api.instances import instances_components_delete
+
+        return instances_components_delete.InstancesComponentsDelete(self._client)
+
+    @property
+    @cache
+    def instances_components_get_all(self):
+        from zpod.api.instances import instances_components_get_all
+
+        return instances_components_get_all.InstancesComponentsGetAll(self._client)
+
+    @property
+    @cache
+    def instances_create(self):
+        from zpod.api.instances import instances_create
+
+        return instances_create.InstancesCreate(self._client)
+
+    @property
+    @cache
+    def instances_delete(self):
+        from zpod.api.instances import instances_delete
+
+        return instances_delete.InstancesDelete(self._client)
+
+    @property
+    @cache
+    def instances_features_get_all(self):
+        from zpod.api.instances import instances_features_get_all
+
+        return instances_features_get_all.InstancesFeaturesGetAll(self._client)
+
+    @property
+    @cache
+    def instances_get(self):
+        from zpod.api.instances import instances_get
+
+        return instances_get.InstancesGet(self._client)
+
+    @property
+    @cache
+    def instances_get_all(self):
+        from zpod.api.instances import instances_get_all
+
+        return instances_get_all.InstancesGetAll(self._client)
+
+    @property
+    @cache
+    def instances_networks_get_all(self):
+        from zpod.api.instances import instances_networks_get_all
+
+        return instances_networks_get_all.InstancesNetworksGetAll(self._client)
+
+    @property
+    @cache
+    def instances_update(self):
+        from zpod.api.instances import instances_update
+
+        return instances_update.InstancesUpdate(self._client)
+
+    @property
+    @cache
     def libraries_create(self):
         from zpod.api.libraries import libraries_create
 
