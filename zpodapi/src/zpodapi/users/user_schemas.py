@@ -21,7 +21,7 @@ class UserCreate(SQLModel, extra="forbid"):
 class UserUpdate(SQLModel):
     class Config:
         extra = "forbid"
-        schema_extra2 = dict(
+        schema_extra = dict(
             example=dict(
                 description="Sample User",
                 ssh_key="xxx",
