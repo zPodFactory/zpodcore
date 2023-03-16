@@ -7,7 +7,7 @@ from sqlmodel import SQLModel
 from zpodapi.lib.schema_base import Field
 
 example_creation_date = datetime(2023, 1, 1)
-example_last_connection = datetime(2023, 1, 1, 0, 1)
+example_last_connection_date = datetime(2023, 1, 1, 0, 1)
 
 
 class UserCreate(SQLModel, extra="forbid"):
@@ -33,9 +33,9 @@ class UserView(SQLModel):
     api_token: str = Field(..., index=True)
     ssh_key: str = Field(...)
     creation_date: datetime = Field(..., example=example_creation_date)
-    last_connection: datetime | None = PField(
+    last_connection_date: datetime | None = PField(
         None,
-        example=example_last_connection,
+        example=example_last_connection_date,
         nullable=True,
     )
     superadmin: bool = Field(...)
