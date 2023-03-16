@@ -34,7 +34,6 @@ class InstanceComponentCreate(SQLModel, extra="forbid"):
 
 
 class InstanceComponentView(SQLModel):
-    id: int = Req(example=1)
     component: ComponentView
     data: dict[Any, Any]
 
