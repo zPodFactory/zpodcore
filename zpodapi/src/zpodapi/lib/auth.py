@@ -33,7 +33,7 @@ def get_current_user_and_update(
     user: M.User = Depends(get_current_user),
 ):
     # Update last connection
-    user.last_connection = func.now()
+    user.last_connection_date = func.now()
     session.add(user)
     session.commit()
     return user
