@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import re
@@ -92,7 +93,7 @@ def get_component_request(component_uid: str):
     retry_delay_seconds=30,
     task_run_name="{component.component_uid}-download",
 )
-def download_component(component: Component) -> int:
+async def download_component(component: Component) -> int:
     logger = get_run_logger()
 
     cc_cmd = (
@@ -134,11 +135,14 @@ def download_component(component: Component) -> int:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,
+            start_new_session=True,
             check=True,
         )
+
         if vcc.returncode != 0:
             logger.error(vcc.stderr.decode())
         logger.info(f"{component.component_uid} downloaded")
+
         return vcc.returncode
     except subprocess.CalledProcessError as e:
         logger.error(f"Error downloading {component.component_uid}")
@@ -257,8 +261,8 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=60):
     return f"{progress}% COMPLETE" if progress < 100 else "DOWNLOAD_COMPLETE"
 
 
-@task(task_run_name="{component.component_uid}-update-db")
-def update_download_progress(component: Component):
+# @task(task_run_name="{component.component_uid}-update-db")
+async def update_download_progress(component: Component):
     logger = get_run_logger()
     dl_path, tmp_dl_path = get_download_paths(component)
     expected_size = round(convert_to_byte(component=component))
@@ -277,7 +281,8 @@ def update_download_progress(component: Component):
         logger.info(f"{component.component_uid} progress: {progress}")
         if progress == "DOWNLOAD_COMPLETE":
             break
-        time.sleep(0.5)
+        asyncio.sleep(0.5)
+    return True
 
 
 @task(task_run_name="{component.component_uid}-rename")
@@ -296,9 +301,8 @@ def rename_file(component: Component):
 
 
 @flow(log_prints=True, flow_run_name="{component_uid}-download")
-def download_component_flow(component_uid: str):
+async def download_component_flow(component_uid: str):
     logger = get_run_logger()
-
     request = get_component_request(component_uid=component_uid)
     component = get_component(
         request=request, component_uid=component_uid, wait_for=request
@@ -317,11 +321,11 @@ def download_component_flow(component_uid: str):
     logger.info(
         f"No {component.component_uid} found, will proceed to download the component"
     )
-    return_code = download_component(component=component)
-
-    # TODO: Need to revisit this again
+    # return_code = download_component(component=component)
+    download_component(component=component)
     # update_download_progress(component=component)
-    if return_code != 0:
+    status = update_download_progress(component=component)
+    if not status:
         raise ValueError(f"Unable to download {component_uid}")
 
     verify = verify_checksum(
@@ -329,12 +333,12 @@ def download_component_flow(component_uid: str):
         filename=component.component_dl_path,
     )
 
-    if return_code == 0 and not verify:
+    if status and not verify:
         logger.info(
             f"Incomplete download {component.component_uid} can't verify checksum"
         )
 
-    if return_code == 0 and verify:
+    if status and verify:
         rename_file(component=component, wait_for=verify)
 
 
