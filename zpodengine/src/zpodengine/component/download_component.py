@@ -93,7 +93,7 @@ def get_component_request(component_uid: str):
     retry_delay_seconds=30,
     task_run_name="{component.component_uid}-download",
 )
-async def download_component(component: Component) -> int:
+def download_component(component: Component) -> int:
     logger = get_run_logger()
 
     cc_cmd = (
@@ -262,7 +262,7 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=60):
 
 
 # @task(task_run_name="{component.component_uid}-update-db")
-async def update_download_progress(component: Component):
+def update_download_progress(component: Component):
     logger = get_run_logger()
     dl_path, tmp_dl_path = get_download_paths(component)
     expected_size = round(convert_to_byte(component=component))
