@@ -41,7 +41,7 @@ def create(
 
 @router.patch(
     "/endpoints",
-    # response_model=EndpointView,
+    response_model=EndpointView,
     status_code=status.HTTP_201_CREATED,
 )
 def update(

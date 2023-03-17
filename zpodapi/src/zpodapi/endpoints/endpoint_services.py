@@ -9,9 +9,7 @@ from .endpoint_utils import update_dictionary, zpod_endpoint_check
 
 
 def get_all(session: Session):
-    endpoints = session.exec(select(M.Endpoint)).all()
-    print(endpoints)
-    return endpoints
+    return session.exec(select(M.Endpoint)).all()
 
 
 def get(
@@ -53,8 +51,6 @@ def update(session: Session, *, endpoint: M.Endpoint, endpoint_in: EndpointUpdat
     session.commit()
     session.refresh(endpoint)
 
-    print(endpoint)
-
     return endpoint
 
 
@@ -70,6 +66,5 @@ def delete(session: Session, *, endpoint: M.Endpoint):
 def verify(session: Session, *, endpoint: M.Endpoint):
     # Verify endpoint status
     print(f"Verifying Endpoint {endpoint.name}")
-    print(endpoint)
 
     return zpod_endpoint_check(endpoint)

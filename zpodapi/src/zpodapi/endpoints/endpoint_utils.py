@@ -1,12 +1,9 @@
-from rich import print
-
 from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
 
 
 def zpod_endpoint_check(endpoint: M.Endpoint):
     print(f"Checking Endpoint: {endpoint.name}...")
-    print(endpoint)
     compute = endpoint.endpoints["compute"]
 
     try:
@@ -17,7 +14,6 @@ def zpod_endpoint_check(endpoint: M.Endpoint):
         return f"Connection Error to endpoint: {compute['hostname']} - ({e})"
 
     portgroups = vc.get_portgroups()
-    print(portgroups)
     for pg in portgroups:
         print(pg.name)
 
