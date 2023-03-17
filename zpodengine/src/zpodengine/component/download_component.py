@@ -92,6 +92,7 @@ def get_component_request(component_uid: str):
     retries=3,
     retry_delay_seconds=30,
     task_run_name="{component.component_uid}-download",
+    tags=["download"],
 )
 def download_component(component: Component) -> int:
     logger = get_run_logger()
@@ -309,8 +310,8 @@ async def download_component_flow(component_uid: str):
     )
     logger.info(f"Checking if {component.component_uid} exists or not")
     if (
-        component.component_dst_path.exists()
-        and verify_checksum(
+        component.component_dst_path.exists() and
+        verify_checksum(
             component,
             component.component_dst_path,
             return_state=True,
