@@ -10,7 +10,7 @@ def instance_component_prep(label):
     time.sleep(sleep)
 
 
-@task(task_run_name="{label}: pre_scripts")
+@task(task_run_name="{label}: execute pre_scripts")
 def instance_component_pre_scripts(label):
     time.sleep(sleep)
 
@@ -20,7 +20,7 @@ def instance_component_deploy(label):
     time.sleep(sleep)
 
 
-@task(task_run_name="{label}: post_scripts")
+@task(task_run_name="{label}: execute post_scripts")
 def instance_component_post_scripts(label):
     time.sleep(sleep)
 

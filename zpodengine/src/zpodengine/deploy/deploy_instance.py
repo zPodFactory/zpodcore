@@ -6,17 +6,17 @@ from prefect import flow, task
 sleep = 1
 
 
-@task(task_run_name="{instance_name}: vapp")
+@task(task_run_name="{instance_name}: create vapp")
 def create_instance_vapp(instance_name: str):
     time.sleep(sleep)
 
 
-@task(task_run_name="{instance_name}: dnsmasq")
+@task(task_run_name="{instance_name}: configure dnsmasq")
 def configure_instance_dnsmasq(instance_name: str):
     time.sleep(sleep)
 
 
-@task(task_run_name="{instance_name}: top level networking")
+@task(task_run_name="{instance_name}: configure top level networking")
 def configure_instance_networking(instance_name: str):
     time.sleep(sleep)
 
