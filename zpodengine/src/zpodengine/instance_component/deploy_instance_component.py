@@ -30,7 +30,7 @@ def instance_component_finalize(label):
     time.sleep(sleep)
 
 
-def deploy_component(instance_id: int, component_uid: str, wait_for=None):
+def deploy_instance_component(instance_id: int, component_uid: str, wait_for=None):
     prep = instance_component_prep.submit(component_uid, wait_for=wait_for)
     label = component_uid
     pre_scripts = instance_component_pre_scripts.submit(label, wait_for=prep)
@@ -46,7 +46,7 @@ def deploy_component_flow(
     instance_id: int,
     component_uid: str,
 ):
-    deploy_component(instance_id=instance_id, component_uid=component_uid)
+    deploy_instance_component(instance_id=instance_id, component_uid=component_uid)
 
 
 if __name__ == "__main__":

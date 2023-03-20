@@ -48,8 +48,8 @@ def deploy_instance(
     )
 
     # Deploy profile components
-    mod = importlib.import_module(f"zpodengine.deploy.profiles.{profile}")
-    mod.flow(instance_id=instance_id, wait_for=instance_networking)
+    mod = importlib.import_module(f"zpodengine.instance_profiles.{profile}")
+    mod.instance_profile_flow(instance_id=instance_id, wait_for=instance_networking)
 
 
 if __name__ == "__main__":
