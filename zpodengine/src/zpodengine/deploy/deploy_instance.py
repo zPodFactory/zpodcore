@@ -10,10 +10,11 @@ from prefect import flow
 def deploy_zpod(
     profile: str,
     zpodname: str,
+    instance_id: int,
 ):
     mod = importlib.import_module(f"zpodengine.deploy.profiles.{profile}")
-    mod.flow()
+    mod.flow(instance_id=instance_id)
 
 
 if __name__ == "__main__":
-    print(deploy_zpod("zpod-awesome", "special"))
+    deploy_zpod(profile="sddc", zpodname="abc", instance_id=1)

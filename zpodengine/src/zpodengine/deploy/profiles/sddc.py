@@ -1,15 +1,10 @@
-from zpodengine.deploy.components import (
-    deploy_esxi,
-    deploy_nsxt,
-    deploy_vcenter,
-    deploy_zbox,
-)
+from zpodengine.deploy.deploy_component import deploy_component
 
 
-def flow():
-    zbox_future = deploy_zbox.submit()
-    vcenter_future = deploy_vcenter.submit(wait_for=zbox_future)
-    esxi_futures = [
-        deploy_esxi.submit(f"esxi{i}", wait_for=vcenter_future) for i in range(11, 14)
-    ]
-    deploy_nsxt.submit(wait_for=esxi_futures)
+def flow(
+    instance_id,
+):
+    esxis = [deploy_component(instance_id, f"esxi-8.0.0 [{x}]") for x in range(11, 14)]
+    vcsa = deploy_component(instance_id, "vcsa-8.0.0", wait_for=esxis)
+    nsxt = deploy_component(instance_id, "nsxt-4.3.1", wait_for=vcsa)
+    deploy_component(instance_id, "hcx-2.6.3", wait_for=nsxt)

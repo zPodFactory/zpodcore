@@ -31,11 +31,9 @@ def instance_component_finalize(label):
 
 
 def deploy_component(instance_id: int, component_uid: str, wait_for=None):
-    config = instance_component_prep.submit(component_uid, wait_for=wait_for)
-
+    prep = instance_component_prep.submit(component_uid, wait_for=wait_for)
     label = component_uid
-
-    pre_scripts = instance_component_pre_scripts.submit(label, wait_for=config)
+    pre_scripts = instance_component_pre_scripts.submit(label, wait_for=prep)
     package = instance_component_deploy.submit(label, wait_for=pre_scripts)
     post_scripts = instance_component_post_scripts.submit(label, wait_for=package)
     return instance_component_finalize.submit(label, wait_for=post_scripts)
@@ -48,13 +46,7 @@ def deploy_component_flow(
     instance_id: int,
     component_uid: str,
 ):
-    vcsa = deploy_component(instance_id, "vcsa-8.0.0")
-    nsxt = deploy_component(instance_id, "nsxt-4.3.1", wait_for=vcsa)
-    esxis = [
-        deploy_component(instance_id, f"esxi-8.0.0 [{x}]", wait_for=nsxt)
-        for x in range(11, 14)
-    ]
-    hcx = deploy_component(instance_id, "hcx-2.6.3", wait_for=esxis)
+    deploy_component(instance_id=instance_id, component_uid=component_uid)
 
 
 if __name__ == "__main__":
