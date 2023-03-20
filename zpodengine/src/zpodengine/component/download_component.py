@@ -93,28 +93,25 @@ def get_component_request(uid: str):
     return get_json_from_file(component.filename)
 
 
-def run_process(cmd, cmd_engine):
-    return (
-        subprocess.Popen(
+def run_command(cmd: str, cmd_engine: str):
+    if cmd_engine == "cc":
+        return subprocess.Popen(
             args=cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,
         )
-        if cmd_engine == "cc"
-        else subprocess.run(
+    else:
+        return subprocess.run(
             args=cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,
             check=True,
         )
-    )
 
 
 @task(
-    retries=3,
-    retry_delay_seconds=30,
     task_run_name="{component.component_uid}-download",
     tags=["download"],
 )
@@ -157,15 +154,12 @@ def download_component(component: Component) -> int:
             f"Downloading {component.component_name}-{component.component_version} ..."
         )
         logger.info(f"Executing download command {print_cmd}")
-        # process = subprocess.Popen(
-        #     args=cmd,
-        #     stdout=subprocess.PIPE,
-        #     stderr=subprocess.PIPE,
-        #     shell=True,
-        # )
-        process = run_process(cmd=cmd, cmd_engine=cmd_engine)
+
+        process = run_command(cmd=cmd, cmd_engine=cmd_engine)
+
         while cmd_engine == "cc" and process.poll() is None:
-            pass
+            process.stdout.readline()
+
         return_code = process.wait() if cmd_engine == "cc" else process.returncode
         if return_code != 0:
             msg = (
@@ -318,7 +312,7 @@ def update_download_progress(component):
     logger = get_run_logger()
     dl_path, tmp_dl_path = get_download_paths(component)
     expected_size = round(convert_to_byte(component=component))
-    timeout = 15
+    timeout = 30
     success = False
 
     logger.info(f"Tracking download progress for component {component.component_uid}")
@@ -382,8 +376,8 @@ def download_component_flow(uid: str):
     logger.info(f"Checking if {component.component_uid} exists or not")
 
     if (
-        component.component_dst_path.exists() and
-        verify_checksum(
+        component.component_dst_path.exists()
+        and verify_checksum(
             component,
             component.component_dst_path,
             return_state=True,
