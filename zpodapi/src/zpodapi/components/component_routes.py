@@ -2,14 +2,15 @@ from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
 from zpodapi.lib import dependencies
-from zpodcommon import models as M
+from zpodapi.lib.route_logger import RouteLogger
 
-from . import  component_services
+from . import component_services
 from .component_schemas import ComponentUpdate, ComponentView
 
 router = APIRouter(
     tags=["components"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
+    route_class=RouteLogger,
 )
 
 
