@@ -1,3 +1,5 @@
+import contextlib
+import json
 import logging
 from functools import partial
 
@@ -21,5 +23,17 @@ def print_panel_obj(obj, title=None):
 
 def log_obj(obj, title):
     if settings.DEV_MODE:
-        print_panel_obj(obj, title)
-    logger.debug(f"{title or ''} {obj}")
+        print_panel_obj(format_obj(obj), title)
+
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("%s %s", title or "", format_obj(obj))
+
+
+def format_obj(obj):
+    if type(obj) == bytes:
+        obj = obj.decode("utf-8")
+
+    if type(obj) == str:
+        with contextlib.suppress(json.JSONDecodeError):
+            obj = json.loads(obj)
+    return obj

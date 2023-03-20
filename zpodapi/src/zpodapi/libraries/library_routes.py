@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
 from zpodapi.lib import dependencies
+from zpodapi.lib.route_logger import RouteLogger
 from zpodcommon import models as M
 
 from . import library_dependencies, library_services
@@ -10,6 +11,7 @@ from .library_schemas import LibraryCreate, LibraryUpdate, LibraryView
 router = APIRouter(
     tags=["libraries"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
+    route_class=RouteLogger,
 )
 
 
