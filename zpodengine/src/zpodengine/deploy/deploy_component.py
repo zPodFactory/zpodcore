@@ -2,7 +2,7 @@ import time
 
 from prefect import flow, task
 
-sleep = 2
+sleep = 1
 
 
 @task(task_run_name="{label}: prep")
