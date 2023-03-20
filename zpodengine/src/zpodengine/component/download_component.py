@@ -382,8 +382,8 @@ def download_component_flow(uid: str):
     logger.info(f"Checking if {component.component_uid} exists or not")
 
     if (
-        component.component_dst_path.exists()
-        and verify_checksum(
+        component.component_dst_path.exists() and
+        verify_checksum(
             component,
             component.component_dst_path,
             return_state=True,

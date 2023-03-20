@@ -26,7 +26,7 @@ def test_create_user(authed_client: TestClient):
     response = authed_client.post("/user", json=user)
     data = response.json()
     assert response.status_code == 201
-    assert ignore(data, "api_token", "creation_date", "last_connection") == user
+    assert ignore(data, "api_token", "creation_date", "last_connection_date") == user
 
     for key in user:
         assert user[key] == data[key]
@@ -49,7 +49,7 @@ def test_get_users(authed_client: TestClient):
     response = authed_client.get("/users")
     data = response.json()
     assert response.status_code == 200
-    assert ignore(data, "creation_date", "last_connection") == [
+    assert ignore(data, "creation_date", "last_connection_date") == [
         dict(
             username="superuser",
             email="superuser@zpodfactory.io",
@@ -65,7 +65,7 @@ def test_get_user_me(authed_client: TestClient):
     response = authed_client.get("/user/me")
     data = response.json()
     assert response.status_code == 200
-    assert ignore(data, "creation_date", "last_connection") == {
+    assert ignore(data, "creation_date", "last_connection_date") == {
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
@@ -79,7 +79,7 @@ def test_get_user_by_username(authed_client: TestClient):
     response = authed_client.get("/user?username=superuser")
     data = response.json()
     assert response.status_code == 200
-    assert ignore(data, "creation_date", "last_connection") == {
+    assert ignore(data, "creation_date", "last_connection_date") == {
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
@@ -93,7 +93,7 @@ def test_get_user_by_email(authed_client: TestClient):
     response = authed_client.get("/user?email=superuser@zpodfactory.io")
     data = response.json()
     assert response.status_code == 200
-    assert ignore(data, "creation_date", "last_connection") == {
+    assert ignore(data, "creation_date", "last_connection_date") == {
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
@@ -120,7 +120,7 @@ def test_patch_user(authed_client: TestClient):
     )
     data = response.json()
     assert response.status_code == 201
-    assert ignore(data, "creation_date", "last_connection") == {
+    assert ignore(data, "creation_date", "last_connection_date") == {
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "AdminPatched",
