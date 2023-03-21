@@ -33,7 +33,7 @@ def enable(
     zpod_engine.create_flow_run_by_name(
         flow_name="download-component-flow",
         deployment_name="download_component",
-        component_uid=component.component_uid,
+        uid=component.component_uid,
     )
     return component
 
