@@ -8,6 +8,30 @@ from zpodcli.lib.callback import isauthenticated
 
 app = typer.Typer(help="Manage components", callback=isauthenticated)
 
+console = Console()
+
+
+def generate_table(components: list, component_uid: str = None, action: str = None):
+    title = f"{action} {component_uid}" if len(components) == 1 else "Component List"
+
+    table = Table(title=title, show_header=True, header_style="bold cyan")
+    table.add_column("UID")
+    table.add_column("Name", style="dim")
+    table.add_column("Version")
+    table.add_column("Library", style="dim")
+    table.add_column("Enabled", style="dim")
+    table.add_column("Status")
+    for component in components:
+        table.add_row(
+            f"[green]{component.component_uid}[/green]",
+            f"[magenta]{component.component_name}[/magenta]",
+            component.component_version,
+            f"[yellow]{component.library_name}[/yellow]",
+            f"[magenta]{component.enabled.__str__()}[/magenta]",
+            component.status,
+        )
+    console.print(table)
+
 
 @app.command()
 def list():
@@ -25,15 +49,27 @@ def list():
     print("")
     print("[yellow][blink]Rich Table nice view ;-)[/blink][/yellow]")
 
-    table = Table(title="Component List", show_header=True, header_style="bold cyan")
-    table.add_column("Library")
-    table.add_column("Filename")
-    table.add_column("Enabled")
+    generate_table(components)
 
-    for component in components:
-        table.add_row(
-            component.library_name, component.filename, component.enabled.__str__()
-        )
 
-    console = Console()
-    console.print(table)
+@app.command()
+def enable(component_uid: str):
+    z = zpod_client.ZpodClient()
+    component = z.components_enable.sync(component_uid=component_uid)
+    generate_table(components=[component], component_uid=component_uid, action="Enable")
+
+
+@app.command()
+def get(component_uid: str):
+    z = zpod_client.ZpodClient()
+    component = z.components_get.sync(component_uid=component_uid)
+    generate_table(components=[component], component_uid=component_uid, action="Get")
+
+
+@app.command()
+def disable(component_uid: str):
+    z = zpod_client.ZpodClient()
+    component = z.components_enable.sync(component_uid=component_uid)
+    generate_table(
+        components=[component], component_uid=component_uid, action="Disable"
+    )

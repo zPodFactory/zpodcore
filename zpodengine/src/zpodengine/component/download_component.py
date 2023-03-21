@@ -4,6 +4,7 @@ import re
 import shlex
 import subprocess
 import time
+from enum import Enum
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
@@ -22,10 +23,13 @@ BYTE_SIZE = 1024
 POWERS = {"KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5}
 
 
-class ComponentStatus(BaseModel):
-    component_name: str
-    component_version: str
-    component_status: str
+class DownloadState(Enum):
+    FAILED_DOWNLOAD = 0
+    NOT_ENTITLED = 1
+    DOWNLOAD_COMPLETE = 2
+    FAILED_AUTHENTICATION = 3
+    DOWNLOAD_INCOMPLETE = 4
+    SCHEDULED = 5
 
 
 class Component(BaseModel):
@@ -48,26 +52,28 @@ class Component(BaseModel):
     component_uid: str | None = None
 
 
-def get_component_record(component_uid: str):
+def get_component_record(uid: str):
     logger = get_run_logger()
-    with database.get_session_ctx() as session:
-        component = session.exec(
-            select(M.Component).where(M.Component.component_uid == component_uid)
-        ).first()
-        if component is None:
-            logger.warning(f"No component found with UID {component_uid}")
-            return None
-        else:
-            logger.info(f"Found component with UID {component_uid}")
-            return component
+    component = get_component_by_uid(uid=uid)
+    if component is None:
+        logger.warning(f"No component found with UID {uid}")
+        return None
+    else:
+        logger.info(f"Found component with UID {uid}")
+        return component
 
 
-def update_db(component_uid: str, status: str):
+def get_component_by_uid(uid: str) -> M.Component:
     with database.get_session_ctx() as session:
-        component = session.exec(
-            select(M.Component).where(M.Component.component_uid == component_uid)
+        return session.exec(
+            select(M.Component).where(M.Component.component_uid == uid)
         ).first()
-        component.status = status
+
+
+def update_db(uid: str, status: str):
+    component = get_component_by_uid(uid)
+    component.status = status
+    with database.get_session_ctx() as session:
         session.add(component)
         session.commit()
 
@@ -79,23 +85,39 @@ def get_json_from_file(filename: str):
         return json.load(f)
 
 
-@task(task_run_name="{component_uid}-request")
-def get_component_request(component_uid: str):
+@task(task_run_name="{uid}-request")
+def get_component_request(uid: str):
     logger = get_run_logger()
-    component = get_component_record(component_uid=component_uid)
+    component = get_component_record(uid)
     logger.info("Extracting raw component details")
     return get_json_from_file(component.filename)
 
 
+def run_command(cmd: str, cmd_engine: str):
+    if cmd_engine == "cc":
+        return subprocess.Popen(
+            args=cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+    else:
+        return subprocess.run(
+            args=cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+            check=True,
+        )
+
+
 @task(
-    retries=3,
-    retry_delay_seconds=30,
     task_run_name="{component.component_uid}-download",
     tags=["download"],
 )
 def download_component(component: Component) -> int:
     logger = get_run_logger()
-
+    failed_message = "FAILED_DOWNLOAD"
     cc_cmd = (
         "vcc download"
         " -a"
@@ -110,6 +132,8 @@ def download_component(component: Component) -> int:
     wget_cmd = f"wget {component.component_dl_url}  -P {PRODUCTS_PATH}"
 
     cmd = wget_cmd if component.component_download_engine == "https" else cc_cmd
+
+    cmd_engine = "wget" if component.component_download_engine == "https" else "cc"
 
     hidden_pass_cmd = cc_cmd = re.sub(
         r"(--pass\s+)(\S+)", r"\1" + "*" * len(settings.VCC_PASSWORD), cc_cmd
@@ -130,26 +154,48 @@ def download_component(component: Component) -> int:
             f"Downloading {component.component_name}-{component.component_version} ..."
         )
         logger.info(f"Executing download command {print_cmd}")
-        vcc = subprocess.run(
-            args=cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-            check=True,
-        )
-        if vcc.returncode != 0:
-            logger.error(vcc.stderr.decode())
-        logger.info(f"{component.component_uid} downloaded")
-        return vcc.returncode
-    except subprocess.CalledProcessError as e:
+
+        process = run_command(cmd=cmd, cmd_engine=cmd_engine)
+
+        while cmd_engine == "cc" and process.poll() is None:
+            process.stdout.readline()
+
+        return_code = process.wait() if cmd_engine == "cc" else process.returncode
+        if return_code != 0:
+            msg = (
+                process.stderr.read().decode().strip()
+                if cmd_engine == "cc"
+                else process.stdout.decode()
+            )
+            logger.info(f"stderr: {msg}")
+            if "Authentication failure" in msg:
+                logger.error(msg)
+                raise RuntimeError("AuthenticationError")
+            if "You are not entitled" in msg:
+                raise RuntimeError("EntitlementError")
+        else:
+            logger.info(f"{component.component_uid} downloaded")
+            return 0
+    except RuntimeError as e:
+        if e.args[0] == "AuthenticationError":
+            update_db(component.component_uid, DownloadState.FAILED_AUTHENTICATION.name)
+            logger.error("The provided credentials are not correct.")
+            raise e
+        if e.args[0] == "EntitlementError":
+            update_db(component.component_uid, DownloadState.NOT_ENTITLED.name)
+            logger.error("You are not entitled to download this sub-product")
+            raise e
+    except Exception as e:
         logger.error(f"Error downloading {component.component_uid}")
+        update_db(component.component_uid, failed_message)
         logger.error(e)
+        raise e
 
 
-@task(task_run_name="{component_uid}-get")
-def get_component(request: dict, component_uid: str):
+@task(task_run_name="{uid}-get")
+def get_component(request: dict, uid: str):
     logger = get_run_logger()
-    logger.info(f"Validating the request {component_uid}. Standby")
+    logger.info(f"Validating the request {uid}. Standby")
     component = Component(**request)
 
     if component.component_download_engine == "https":
@@ -205,14 +251,15 @@ def compute_checksum(component: Component, filename: Path) -> str:
 @task(task_run_name="{component.component_uid}-verify-checksum")
 def verify_checksum(component: Component, filename: Path) -> bool:
     logger = get_run_logger()
-
     if not filename.exists():
         logger.info(f"The specified {filename} does not exist")
         raise ValueError(f"{filename} does not exist")
 
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
-            update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
+            update_db(
+                uid=component.component_uid, status=DownloadState.DOWNLOAD_COMPLETE.name
+            )
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
@@ -221,10 +268,12 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum = compute_checksum(component, filename)
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
-        update_db(component_uid=component.component_uid, status="DOWNLOAD_INCOMPLETE")
+        update_db(
+            uid=component.component_uid, status=DownloadState.DOWNLOAD_INCOMPLETE.name
+        )
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component_uid=component.component_uid, status="DOWNLOAD_COMPLETE")
+    update_db(uid=component.component_uid, status=DownloadState.DOWNLOAD_COMPLETE.name)
     return True
 
 
@@ -238,7 +287,7 @@ def get_download_paths(component: Component) -> Tuple[str, str]:
     return dl_path, tmp_dl_path
 
 
-def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=60):
+def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=30):
     logger = get_run_logger()
     start_time = time.time()
     logger.info("Tracking dowloading process")
@@ -247,7 +296,7 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=60):
         if elapsed_time > timeout:
             logger.info("Timeout, waiting for file to track")
             return "Timeout"
-        time.sleep(0.5)
+        time.sleep(1)
 
     file_path = dl_path if Path(dl_path).exists() else tmp_dl_path
 
@@ -255,30 +304,52 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=60):
 
     progress = calculate_percentage(downloaded_size, file_size)
 
-    return f"{progress}% COMPLETE" if progress < 100 else "DOWNLOAD_COMPLETE"
+    return f"{progress}" if progress < 100 else "DOWNLOAD_COMPLETE"
 
 
 @task(task_run_name="{component.component_uid}-update-db")
-def update_download_progress(component: Component):
+def update_download_progress(component):
     logger = get_run_logger()
     dl_path, tmp_dl_path = get_download_paths(component)
     expected_size = round(convert_to_byte(component=component))
-    timeout = 90
-    logger.info(f"Tracking {component.component_uid} progress")
+    timeout = 30
+    success = False
+
+    logger.info(f"Tracking download progress for component {component.component_uid}")
+
     while True:
         progress = track_download_progress(dl_path, tmp_dl_path, expected_size, timeout)
         if progress == "Timeout":
-            logger.info("There is no file to track, exiting")
+            logger.info("Timeout: no file to track, exiting")
             break
 
-        update_db(
-            component_uid=component.component_uid,
-            status=progress,
+        current_state = get_component_by_uid(component.component_uid).status
+        if current_state in (
+            DownloadState.FAILED_AUTHENTICATION.name,
+            DownloadState.FAILED_DOWNLOAD.name,
+            DownloadState.NOT_ENTITLED.name,
+            DownloadState.DOWNLOAD_COMPLETE.name,
+        ):
+            logger.error(
+                f"Cannot track {component.component_uid} - state {current_state}"
+            )
+            raise RuntimeError("Failed Download")
+
+        update_db(uid=component.component_uid, status=progress)
+        logger.info(
+            f"Download progress for component {component.component_uid}: {progress}%"
         )
-        logger.info(f"{component.component_uid} progress: {progress}")
+
         if progress == "DOWNLOAD_COMPLETE":
+            success = True
             break
-        time.sleep(0.5)
+
+        time.sleep(10)
+
+    logger.info(
+        f"Finished tracking download progress for component {component.component_uid}"
+    )
+    return success
 
 
 @task(task_run_name="{component.component_uid}-rename")
@@ -296,46 +367,47 @@ def rename_file(component: Component):
         logger.info(f"{component.component_uid} renamed")
 
 
-@flow(log_prints=True, flow_run_name="{component_uid}-download")
-def download_component_flow(component_uid: str):
+@flow(log_prints=True, flow_run_name="{uid}-download")
+def download_component_flow(uid: str):
     logger = get_run_logger()
-
-    request = get_component_request(component_uid=component_uid)
-    component = get_component(
-        request=request, component_uid=component_uid, wait_for=request
-    )
+    request = get_component_request(uid=uid)
+    logger.info(f"Request: {request}")
+    component = get_component(request=request, uid=uid, wait_for=request)
     logger.info(f"Checking if {component.component_uid} exists or not")
+
     if (
-        component.component_dst_path.exists() and
-        verify_checksum(
+        component.component_dst_path.exists()
+        and verify_checksum(
             component,
             component.component_dst_path,
             return_state=True,
         ).is_completed()
     ):
-        logger.info(f"{component.component_uid} already exists. Exiting")
+        logger.info(f"{uid} already exists. Exiting")
         return
-    logger.info(
-        f"No {component.component_uid} found, will proceed to download the component"
-    )
-    return_code = download_component(component=component)
+    logger.info(f"No {uid} found, will proceed to download the component")
+    download_component.submit(component=component)
 
-    # TODO: Need to revisit this again
-    # update_download_progress(component=component)
-    if return_code != 0:
-        raise ValueError(f"Unable to download {component_uid}")
+    status_task = update_download_progress.submit(component=component)
+    result = status_task.result()
+
+    logger.info(f"Status: {result}")
+
+    if not result:
+        raise ValueError(f"Unable to download {uid}")
 
     verify = verify_checksum(
         component=component,
         filename=component.component_dl_path,
+        wait_for=result,
     )
 
-    if return_code == 0 and not verify:
+    if result and not verify:
         logger.info(
             f"Incomplete download {component.component_uid} can't verify checksum"
         )
 
-    if return_code == 0 and verify:
+    if result and verify:
         rename_file(component=component, wait_for=verify)
 
 
