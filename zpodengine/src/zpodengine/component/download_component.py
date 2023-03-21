@@ -129,7 +129,7 @@ def download_component(component: Component) -> int:
         f" -f {shlex.quote(component.component_download_file)}"
         f" -o {shlex.quote(PRODUCTS_PATH)}"
     )
-    wget_cmd = f"wget  {component.component_dl_url}  -P {PRODUCTS_PATH}"
+    wget_cmd = f"wget {component.component_dl_url}  -P {PRODUCTS_PATH}"
 
     cmd = wget_cmd if component.component_download_engine == "https" else cc_cmd
 
