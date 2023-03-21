@@ -54,7 +54,7 @@ def instance_component_pre_scripts(
             dict(
                 instance_id=instance_id,
                 component_uid=component_uid,
-                extra_key=str(extra_key or ''),
+                extra_key=str(extra_key or ""),
             ),
         )
 
@@ -84,7 +84,7 @@ def instance_component_post_scripts(
             dict(
                 instance_id=instance_id,
                 component_uid=component_uid,
-                extra_key=str(extra_key or ''),
+                extra_key=str(extra_key or ""),
             ),
         )
 

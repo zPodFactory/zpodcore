@@ -25,7 +25,9 @@ def test_create_user(authed_client: TestClient):
     response = authed_client.post("/users", json=user)
     data = response.json()
     assert response.status_code == 201
-    assert ignore(data, "id", "api_token", "creation_date", "last_connection_date") == user
+    assert (
+        ignore(data, "id", "api_token", "creation_date", "last_connection_date") == user
+    )
 
     for key in user:
         assert user[key] == data[key]
