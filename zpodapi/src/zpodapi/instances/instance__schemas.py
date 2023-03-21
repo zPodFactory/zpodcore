@@ -4,6 +4,7 @@ from sqlmodel import SQLModel
 
 from zpodapi.lib.schema_base import Empty, Opt, Req
 
+from ..endpoints.endpoint_schemas import EndpointView
 from ..permission_groups.permission_group_schemas import PermissionGroupView
 from ..users.user_schemas import UserView
 from .instance_component__schemas import InstanceComponentView
@@ -11,11 +12,6 @@ from .instance_feature__schemas import InstanceFeatureView
 from .instance_network__schemas import InstanceNetworkView
 
 example_creation_date = datetime(2023, 1, 1)
-
-
-# TODO: Remove when real version is ready
-class EndpointView(SQLModel):
-    id: int = Req(example=1)
 
 
 class InstancePermissionView(SQLModel):
