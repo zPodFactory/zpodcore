@@ -27,6 +27,10 @@ def get_session() -> Generator[Session, None]:
         yield session
 
 
+def get_session_raw():
+    return Session(engine)
+
+
 get_session_ctx = contextmanager(get_session)
 register_adapter(IPv4Address, adapt_pydantic_ip_address)
 register_adapter(IPv6Address, adapt_pydantic_ip_address)
