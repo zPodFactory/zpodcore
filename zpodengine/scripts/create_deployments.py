@@ -54,3 +54,13 @@ create_deployment(
     name="download_component",
     flow="component.download_component.download_component_flow",
 )
+
+create_deployment(
+    name="deploy_instance",
+    flow="instance.flow_deploy_instance.flow_deploy_instance",
+)
+
+create_deployment(
+    name="add_instance_component",
+    flow="instance_component.flow_add_instance_component.flow_add_instance_component",
+)
