@@ -136,7 +136,7 @@ class ZpodEngine(ZpodEngineBase):
     def create_flow_run_by_name(
         self,
         flow_name,
-        deployment_name,
+        deployment_name="default",
         *,
         run_name=None,
         **parameters,
