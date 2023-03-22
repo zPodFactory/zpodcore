@@ -48,7 +48,7 @@ class User(CommonDatesMixin, SQLModel, table=True):
         sa_column_kwargs=dict(default=datetime.utcnow),
         nullable=False,
     )
-    last_connection: datetime = Field(
+    last_connection_date: datetime = Field(
         default=None,
     )
     superadmin: bool = Field(
