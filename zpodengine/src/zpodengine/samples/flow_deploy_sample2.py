@@ -10,11 +10,11 @@ def deploy2(component_type):
 
 
 @flow(flow_run_name="deploy_{zpodname}")
-def deploy_sample2(zpodname: str):
+def flow_deploy_sample2(zpodname: str):
     vcenter = deploy2.submit("vcenter")
     esxi_futures = [deploy2.submit(f"esxi{i}", wait_for=vcenter) for i in range(11, 16)]
     deploy2.submit("nsxt", wait_for=esxi_futures)
 
 
 if __name__ == "__main__":
-    print(deploy_sample2("zpod-awesome"))
+    print(flow_deploy_sample2("zpod-awesome"))

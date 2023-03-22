@@ -2,16 +2,16 @@
 from zpodengine.lib.deployments import create_deployment
 
 create_deployment(
-    flow="samples.deploy_sample.deploy_sample",
+    flow="samples.flow_deploy_sample.flow_deploy_sample",
 )
 
 create_deployment(
-    flow="samples.deploy_sample2.deploy_sample2",
+    flow="samples.flow_deploy_sample2.flow_deploy_sample2",
     parameters=dict(zpodname="zpod-default"),
 )
 
 create_deployment(
-    flow="samples.db_sample.db_sample",
+    flow="samples.flow_db_sample.flow_db_sample",
 )
 
 create_deployment(

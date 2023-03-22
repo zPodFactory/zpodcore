@@ -10,7 +10,7 @@ def deploy():
 
 
 @flow(log_prints=True)
-def deploy_sample():
+def flow_deploy_sample():
     vcenter = deploy.with_options(name="deploy_vcenter").submit()
     esxi_futures = [
         deploy.with_options(name=f"deploy_esxi{i}").submit(wait_for=vcenter)
@@ -22,4 +22,4 @@ def deploy_sample():
 
 
 if __name__ == "__main__":
-    print(deploy_sample())
+    print(flow_deploy_sample())
