@@ -1,11 +1,29 @@
 from typing import Any
 
 from prefect import flow, task
+from sqlmodel import SQLModel
 
 from zpodcommon import models as M
 from zpodengine.lib import database
 
 sleep = 1
+
+
+class ComponentView(SQLModel):
+    component_uid: str
+    component_name: str
+    component_version: str
+    library_name: str
+    filename: str
+    enabled: bool
+    status: str
+
+
+class InstanceComponentView(SQLModel):
+    instance_id: int
+    component: ComponentView
+    data: dict[Any, Any]
+    extra_key: str
 
 
 @task(task_run_name="{label}: prep")
@@ -27,9 +45,7 @@ def instance_component_prep(
         session.add(instance_component)
         session.commit()
         session.refresh(instance_component)
-        data = instance_component.dict()
-        data["component"] = instance_component.component.dict()
-        return data
+        return InstanceComponentView.from_orm(instance_component)
 
 
 @task(task_run_name="{label}: execute pre_scripts")
