@@ -23,14 +23,14 @@ class InstanceComponentView(SQLModel):
     instance_id: int
     component: ComponentView
     data: dict[Any, Any]
-    extra_key: str
+    extra_id: str
 
 
 @task(task_run_name="{label}: prep")
 def instance_component_prep(
     instance_id: int,
     component_uid: str,
-    extra_key: str,
+    extra_id: str,
     data: dict[str, Any],
     label: str,
 ):
@@ -38,7 +38,7 @@ def instance_component_prep(
         instance_component = M.InstanceComponent(
             instance_id=instance_id,
             component_uid=component_uid,
-            extra_key=extra_key,
+            extra_id=extra_id,
             data=data,
         )
 
@@ -85,7 +85,7 @@ def instance_component_finalize(
 def deploy_instance_component(
     instance_id: int,
     component_uid: str,
-    extra_key: str = "",
+    extra_id: str = "",
     data=None,
     wait_for=None,
 ):
@@ -93,7 +93,7 @@ def deploy_instance_component(
     instance_component = instance_component_prep.submit(
         instance_id=instance_id,
         component_uid=component_uid,
-        extra_key=extra_key,
+        extra_id=extra_id,
         data=data or {},
         label=label,
         wait_for=wait_for,

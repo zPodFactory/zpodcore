@@ -11,7 +11,7 @@ def instance_profile_flow(
         deploy_instance_component(
             instance_id=instance_id,
             component_uid="esxi-8.0.0",
-            extra_key=x,
+            extra_id=x,
             data=dict(last_octet=x),
             wait_for=wait_for,
         )

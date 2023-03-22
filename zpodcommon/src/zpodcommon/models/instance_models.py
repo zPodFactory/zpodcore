@@ -91,7 +91,7 @@ class InstanceComponent(SQLModel, table=True):
         nullable=False,
         foreign_key="components.component_uid",
     )
-    extra_key: str = Field(
+    extra_id: str = Field(
         primary_key=True,
         default="",
     )
