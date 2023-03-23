@@ -11,6 +11,7 @@ from .user_schemas import UserCreate, UserUpdate, UserViewFull
 from .user_services import UserService
 
 router = APIRouter(
+    prefix="/users",
     tags=["users"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
     route_class=RouteLogger,
@@ -18,7 +19,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/users",
+    "",
     response_model=list[UserViewFull],
 )
 def get_all(
@@ -36,7 +37,7 @@ def get_all(
 
 
 @router.get(
-    "/users/me",
+    "/me",
     response_model=UserViewFull,
 )
 def get_me(
@@ -47,7 +48,7 @@ def get_me(
 
 
 @router.get(
-    "/users/{id}",
+    "/{id}",
     response_model=UserViewFull,
 )
 def get(
@@ -58,7 +59,7 @@ def get(
 
 
 @router.post(
-    "/users",
+    "",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
 )
@@ -81,7 +82,7 @@ def create(
 
 
 @router.patch(
-    "/users/{id}",
+    "/{id}",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
 )
@@ -95,7 +96,7 @@ def update(
 
 
 @router.delete(
-    "/users/{id}",
+    "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete(

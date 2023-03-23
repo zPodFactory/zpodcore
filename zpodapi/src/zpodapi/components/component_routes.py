@@ -8,6 +8,8 @@ from . import component_services
 from .component_schemas import ComponentUpdate, ComponentViewFull
 
 router = APIRouter(
+    prefix="/components",
+
     tags=["components"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
     route_class=RouteLogger,
@@ -15,7 +17,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/components",
+    "",
     response_model=list[ComponentViewFull],
 )
 def get_all(
@@ -25,7 +27,7 @@ def get_all(
     return component_services.get_all(session)
 
 
-@router.get("/components/{component_uid}", response_model=ComponentViewFull)
+@router.get("/{component_uid}", response_model=ComponentViewFull)
 def get(
     *,
     component_uid: str,
@@ -37,7 +39,7 @@ def get(
 
 
 @router.put(
-    "/components/{component_uid}/enable",
+    "/{component_uid}/enable",
     response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
 )
@@ -52,7 +54,7 @@ def enable(
 
 
 @router.put(
-    "/components/{component_uid}/disable",
+    "/{component_uid}/disable",
     response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
 )
