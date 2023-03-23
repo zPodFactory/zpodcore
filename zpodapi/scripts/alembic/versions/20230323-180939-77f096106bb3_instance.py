@@ -100,7 +100,6 @@ def upgrade():
         "instance_permissions",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("instance_id", sa.Integer(), nullable=False),
-        sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("permission", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.ForeignKeyConstraint(
             ["instance_id"],

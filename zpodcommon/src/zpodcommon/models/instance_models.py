@@ -163,10 +163,6 @@ class InstancePermission(SQLModel, table=True):
         nullable=False,
         foreign_key="instances.id",
     )
-    name: str = Field(
-        default=...,
-        nullable=False,
-    )
     permission: str = Field(
         default=...,
         nullable=False,

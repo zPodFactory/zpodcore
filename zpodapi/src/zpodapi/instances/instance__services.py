@@ -27,8 +27,7 @@ class InstanceService(ServiceBase):
                 password=instance__utils.gen_password(),
                 permissions=[
                     M.InstancePermission(
-                        name="Owner",
-                        permission="zpodadmin",
+                        permission="zpodowner",
                         users=[current_user],
                     )
                 ],
