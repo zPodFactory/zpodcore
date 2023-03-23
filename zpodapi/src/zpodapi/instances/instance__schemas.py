@@ -17,8 +17,7 @@ example_creation_date = datetime(2023, 1, 1)
 
 class InstancePermissionView(SQLModel):
     id: int = Req(example=1)
-    name: str = Req(example="owner")
-    permission: str = Req(example="zpodadmin")
+    permission: str = Req(example="zpodowner")
     users: list[UserView] = []
     groups: list["PermissionGroupView"] = []
 
