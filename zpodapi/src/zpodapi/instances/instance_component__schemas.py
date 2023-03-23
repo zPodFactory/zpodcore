@@ -2,7 +2,7 @@ from typing import Any
 
 from sqlmodel import SQLModel
 
-from zpodapi.components.component_schemas import ComponentView
+from zpodapi.components.component__schemas import ComponentView
 from zpodapi.lib.schema_base import Req
 
 

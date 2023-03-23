@@ -3,7 +3,7 @@ from sqlmodel import SQLModel
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 
-from .user_types import UserIdType
+from .user__types import UserIdType
 
 
 class UserService(ServiceBase):

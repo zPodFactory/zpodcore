@@ -4,8 +4,8 @@ from sqlmodel import SQLModel
 
 from zpodapi.lib.schema_base import Empty, Opt, Req
 
-from ..permission_groups.permission_group_schemas import PermissionGroupView
-from ..users.user_schemas import UserView
+from ..permission_groups.permission_group__schemas import PermissionGroupView
+from ..users.user__schemas import UserView
 from .instance__enums import InstanceStatusEnum
 from .instance_component__schemas import InstanceComponentView
 from .instance_feature__schemas import InstanceFeatureView

@@ -5,8 +5,8 @@ from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
 from zpodcommon import models as M
 
-from . import library_dependencies, library_services
-from .library_schemas import LibraryCreate, LibraryUpdate, LibraryView
+from . import library__dependencies, library__services
+from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
 
 router = APIRouter(
     prefix="/libraries",
@@ -25,7 +25,7 @@ def get_all(
     *,
     session: Session = Depends(dependencies.get_session),
 ):
-    return library_services.get_all(session)
+    return library__services.get_all(session)
 
 
 @router.post(
@@ -38,13 +38,13 @@ def create(
     session: Session = Depends(dependencies.get_session),
     library_in: LibraryCreate,
 ):
-    if library_services.get(
+    if library__services.get(
         session=session,
         name=library_in.name,
         git_url=library_in.git_url,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return library_services.create(session=session, library_in=library_in)
+    return library__services.create(session=session, library_in=library_in)
 
 
 @router.patch(
@@ -55,10 +55,10 @@ def create(
 def update(
     *,
     session: Session = Depends(dependencies.get_session),
-    library: M.Library = Depends(library_dependencies.get_library_record),
+    library: M.Library = Depends(library__dependencies.get_library_record),
     library_in: LibraryUpdate,
 ):
-    return library_services.update(
+    return library__services.update(
         session=session,
         library=library,
         library_in=library_in,
@@ -72,6 +72,6 @@ def update(
 def delete(
     *,
     session: Session = Depends(dependencies.get_session),
-    library: M.Library = Depends(library_dependencies.get_library_record),
+    library: M.Library = Depends(library__dependencies.get_library_record),
 ):
-    return library_services.delete(session=session, library=library)
+    return library__services.delete(session=session, library=library)
