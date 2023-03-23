@@ -4,7 +4,6 @@ from sqlmodel import SQLModel
 
 from zpodapi.lib.schema_base import Empty, Opt, Req
 
-from ..endpoints.endpoint_schemas import EndpointView
 from ..permission_groups.permission_group_schemas import PermissionGroupView
 from ..users.user_schemas import UserView
 from .instance__enums import InstanceStatusEnum
@@ -27,7 +26,7 @@ class InstanceCreate(SQLModel, extra="forbid"):
     description: str = Empty(example="Tanzu Lab zPod")
     domain: str = Req(example="tanzu-lab.maindomain.com")
     endpoint_id: int = Req(example=1)
-    profile: str = Req(example="sddc-profile")
+    profile: str = Req(example="sddc")
 
 
 class InstanceUpdate(SQLModel):
@@ -53,11 +52,11 @@ class InstanceView(SQLModel):
     description: str = Req(example="Tanzu Lab zPod")
     domain: str = Req(example="tanzu-lab.maindomain.com")
     profile: str = Req(example="sddc-profile")
+    status: InstanceStatusEnum = Req(example=InstanceStatusEnum.ACTIVE)
     creation_date: datetime = Req(example=example_creation_date)
     last_modified_date: datetime = Req(example=example_creation_date)
-    endpoint: "EndpointView"
+    endpoint_id: int = Req(example=1)
     networks: list["InstanceNetworkView"] = []
     components: list["InstanceComponentView"] = []
     permissions: list["InstancePermissionView"] = []
     features: list["InstanceFeatureView"] = []
-    status: InstanceStatusEnum = Req(example=InstanceStatusEnum.ACTIVE)
