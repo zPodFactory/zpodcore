@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import Client
-from ...models.component_view import ComponentView
+from ...models.component_view_full import ComponentViewFull
 from ...types import Response
 
 
@@ -31,12 +31,12 @@ class ComponentsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[List["ComponentView"]]:
+    ) -> Optional[List["ComponentViewFull"]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
-                response_200_item = ComponentView.from_dict(response_200_item_data)
+                response_200_item = ComponentViewFull.from_dict(response_200_item_data)
 
                 response_200.append(response_200_item)
 
@@ -50,7 +50,7 @@ class ComponentsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[List["ComponentView"]]:
+    ) -> Response[List["ComponentViewFull"]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -60,7 +60,7 @@ class ComponentsGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[List["ComponentView"]]:
+    ) -> Response[List["ComponentViewFull"]]:
         """Get All
 
         Raises:
@@ -68,7 +68,7 @@ class ComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['ComponentView']]
+            Response[List['ComponentViewFull']]
         """  # noqa e501
 
         kwargs = self._get_kwargs()
@@ -82,7 +82,7 @@ class ComponentsGetAll:
 
     def sync(
         self,
-    ) -> Optional[List["ComponentView"]]:
+    ) -> Optional[List["ComponentViewFull"]]:
         """Get All
 
         Raises:
@@ -90,14 +90,14 @@ class ComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['ComponentView']]
+            Response[List['ComponentViewFull']]
         """  # noqa e501
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[List["ComponentView"]]:
+    ) -> Response[List["ComponentViewFull"]]:
         """Get All
 
         Raises:
@@ -105,7 +105,7 @@ class ComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['ComponentView']]
+            Response[List['ComponentViewFull']]
         """  # noqa e501
 
         kwargs = self._get_kwargs()
@@ -117,7 +117,7 @@ class ComponentsGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[List["ComponentView"]]:
+    ) -> Optional[List["ComponentViewFull"]]:
         """Get All
 
         Raises:
@@ -125,7 +125,7 @@ class ComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['ComponentView']]
+            Response[List['ComponentViewFull']]
         """  # noqa e501
 
         return (await self.asyncio_detailed()).parsed

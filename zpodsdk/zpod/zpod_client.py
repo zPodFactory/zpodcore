@@ -40,6 +40,104 @@ class ZpodClient:
 
     @property
     @cache
+    def endpoints_create(self):
+        from zpod.api.endpoints import endpoints_create
+
+        return endpoints_create.EndpointsCreate(self._client)
+
+    @property
+    @cache
+    def endpoints_delete(self):
+        from zpod.api.endpoints import endpoints_delete
+
+        return endpoints_delete.EndpointsDelete(self._client)
+
+    @property
+    @cache
+    def endpoints_get_all(self):
+        from zpod.api.endpoints import endpoints_get_all
+
+        return endpoints_get_all.EndpointsGetAll(self._client)
+
+    @property
+    @cache
+    def endpoints_update(self):
+        from zpod.api.endpoints import endpoints_update
+
+        return endpoints_update.EndpointsUpdate(self._client)
+
+    @property
+    @cache
+    def endpoints_verify(self):
+        from zpod.api.endpoints import endpoints_verify
+
+        return endpoints_verify.EndpointsVerify(self._client)
+
+    @property
+    @cache
+    def instances_components_add(self):
+        from zpod.api.instances import instances_components_add
+
+        return instances_components_add.InstancesComponentsAdd(self._client)
+
+    @property
+    @cache
+    def instances_components_get_all(self):
+        from zpod.api.instances import instances_components_get_all
+
+        return instances_components_get_all.InstancesComponentsGetAll(self._client)
+
+    @property
+    @cache
+    def instances_create(self):
+        from zpod.api.instances import instances_create
+
+        return instances_create.InstancesCreate(self._client)
+
+    @property
+    @cache
+    def instances_delete(self):
+        from zpod.api.instances import instances_delete
+
+        return instances_delete.InstancesDelete(self._client)
+
+    @property
+    @cache
+    def instances_features_get_all(self):
+        from zpod.api.instances import instances_features_get_all
+
+        return instances_features_get_all.InstancesFeaturesGetAll(self._client)
+
+    @property
+    @cache
+    def instances_get(self):
+        from zpod.api.instances import instances_get
+
+        return instances_get.InstancesGet(self._client)
+
+    @property
+    @cache
+    def instances_get_all(self):
+        from zpod.api.instances import instances_get_all
+
+        return instances_get_all.InstancesGetAll(self._client)
+
+    @property
+    @cache
+    def instances_networks_get_all(self):
+        from zpod.api.instances import instances_networks_get_all
+
+        return instances_networks_get_all.InstancesNetworksGetAll(self._client)
+
+    @property
+    @cache
+    def instances_update(self):
+        from zpod.api.instances import instances_update
+
+        return instances_update.InstancesUpdate(self._client)
+
+    @property
+    @cache
     def libraries_create(self):
         from zpod.api.libraries import libraries_create
 

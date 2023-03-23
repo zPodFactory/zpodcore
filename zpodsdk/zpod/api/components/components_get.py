@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import Client
-from ...models.component_view import ComponentView
+from ...models.component_view_full import ComponentViewFull
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -35,9 +35,9 @@ class ComponentsGet:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[ComponentView, HTTPValidationError]]:
+    ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
         if response.status_code == HTTPStatus.OK:
-            response_200 = ComponentView.from_dict(response.json())
+            response_200 = ComponentViewFull.from_dict(response.json())
 
             return response_200
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
@@ -53,7 +53,7 @@ class ComponentsGet:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[ComponentView, HTTPValidationError]]:
+    ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -64,7 +64,7 @@ class ComponentsGet:
     def sync_detailed(
         self,
         component_uid: str,
-    ) -> Response[Union[ComponentView, HTTPValidationError]]:
+    ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
         """Get
 
         Args:
@@ -75,7 +75,7 @@ class ComponentsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[ComponentView, HTTPValidationError]]
+            Response[Union[ComponentViewFull, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -92,7 +92,7 @@ class ComponentsGet:
     def sync(
         self,
         component_uid: str,
-    ) -> Optional[Union[ComponentView, HTTPValidationError]]:
+    ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
         """Get
 
         Args:
@@ -103,7 +103,7 @@ class ComponentsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[ComponentView, HTTPValidationError]]
+            Response[Union[ComponentViewFull, HTTPValidationError]]
         """  # noqa e501
 
         return self.sync_detailed(
@@ -113,7 +113,7 @@ class ComponentsGet:
     async def asyncio_detailed(
         self,
         component_uid: str,
-    ) -> Response[Union[ComponentView, HTTPValidationError]]:
+    ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
         """Get
 
         Args:
@@ -124,7 +124,7 @@ class ComponentsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[ComponentView, HTTPValidationError]]
+            Response[Union[ComponentViewFull, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -139,7 +139,7 @@ class ComponentsGet:
     async def asyncio(
         self,
         component_uid: str,
-    ) -> Optional[Union[ComponentView, HTTPValidationError]]:
+    ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
         """Get
 
         Args:
@@ -150,7 +150,7 @@ class ComponentsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[ComponentView, HTTPValidationError]]
+            Response[Union[ComponentViewFull, HTTPValidationError]]
         """  # noqa e501
 
         return (

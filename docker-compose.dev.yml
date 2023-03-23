@@ -81,8 +81,8 @@ services:
         "start",
         "-q",
         "default",
-        "--limit",
-        "1"
+        #"--limit",
+        #"1"
       ]
     environment:
       - PREFECT_API_URL=http://zpodengineserver:4200/api
