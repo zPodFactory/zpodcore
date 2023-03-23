@@ -1,10 +1,6 @@
-import datetime
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, List, Type, TypeVar
 
 import attr
-from dateutil.parser import isoparse
-
-from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="UserView")
 
@@ -13,101 +9,46 @@ T = TypeVar("T", bound="UserView")
 class UserView:
     """
     Attributes:
-        api_token (str):
-        creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        description (str):  Example: Sample User.
         email (str):  Example: jdoe@example.com.
         id (int):  Example: 1.
-        ssh_key (str):
-        superadmin (bool):
         username (str):  Example: jdoe.
-        last_connection (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
     """
 
-    api_token: str
-    creation_date: datetime.datetime
-    description: str
     email: str
     id: int
-    ssh_key: str
-    superadmin: bool
     username: str
-    last_connection: Union[Unset, None, datetime.datetime] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        api_token = self.api_token
-        creation_date = self.creation_date.isoformat()
-
-        description = self.description
         email = self.email
         id = self.id
-        ssh_key = self.ssh_key
-        superadmin = self.superadmin
         username = self.username
-        last_connection: Union[Unset, None, str] = UNSET
-        if not isinstance(self.last_connection, Unset):
-            last_connection = (
-                self.last_connection.isoformat() if self.last_connection else None
-            )
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "api_token": api_token,
-                "creation_date": creation_date,
-                "description": description,
                 "email": email,
                 "id": id,
-                "ssh_key": ssh_key,
-                "superadmin": superadmin,
                 "username": username,
             }
         )
-        if last_connection is not UNSET:
-            field_dict["last_connection"] = last_connection
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        api_token = d.pop("api_token")
-
-        creation_date = isoparse(d.pop("creation_date"))
-
-        description = d.pop("description")
-
         email = d.pop("email")
 
         id = d.pop("id")
 
-        ssh_key = d.pop("ssh_key")
-
-        superadmin = d.pop("superadmin")
-
         username = d.pop("username")
 
-        _last_connection = d.pop("last_connection", UNSET)
-        last_connection: Union[Unset, None, datetime.datetime]
-        if _last_connection is None:
-            last_connection = None
-        elif isinstance(_last_connection, Unset):
-            last_connection = UNSET
-        else:
-            last_connection = isoparse(_last_connection)
-
         user_view = cls(
-            api_token=api_token,
-            creation_date=creation_date,
-            description=description,
             email=email,
             id=id,
-            ssh_key=ssh_key,
-            superadmin=superadmin,
             username=username,
-            last_connection=last_connection,
         )
 
         user_view.additional_properties = d

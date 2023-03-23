@@ -10,9 +10,12 @@ T = TypeVar("T", bound="UserUpdate")
 @attr.s(auto_attribs=True)
 class UserUpdate:
     """
+    Example:
+        {'description': 'Sample User', 'ssh_key': 'xxx', 'superadmin': False}
+
     Attributes:
-        description (Union[Unset, str]):  Example: Sample User.
-        id (Union[Unset, int]):  Example: 1.
+        description (Union[Unset, str]):
+        id (Union[Unset, int]):
         ssh_key (Union[Unset, str]):
         superadmin (Union[Unset, bool]):
     """

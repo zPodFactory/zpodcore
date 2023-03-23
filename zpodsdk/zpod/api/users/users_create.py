@@ -7,7 +7,7 @@ from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_create import UserCreate
-from ...models.user_view import UserView
+from ...models.user_view_full import UserViewFull
 from ...types import Response
 
 
@@ -38,9 +38,9 @@ class UsersCreate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, UserView]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         if response.status_code == HTTPStatus.CREATED:
-            response_201 = UserView.from_dict(response.json())
+            response_201 = UserViewFull.from_dict(response.json())
 
             return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
@@ -56,7 +56,7 @@ class UsersCreate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, UserView]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -68,7 +68,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Response[Union[HTTPValidationError, UserView]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Create
 
         Args:
@@ -79,7 +79,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -97,7 +97,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Optional[Union[HTTPValidationError, UserView]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Create
 
         Args:
@@ -108,7 +108,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         return self.sync_detailed(
@@ -119,7 +119,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Response[Union[HTTPValidationError, UserView]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Create
 
         Args:
@@ -130,7 +130,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -146,7 +146,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Optional[Union[HTTPValidationError, UserView]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Create
 
         Args:
@@ -157,7 +157,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         return (

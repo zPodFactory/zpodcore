@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import Client
-from ...models.user_view import UserView
+from ...models.user_view_full import UserViewFull
 from ...types import Response
 
 
@@ -29,9 +29,9 @@ class UsersGetMe:
             "timeout": self.client.get_timeout(),
         }
 
-    def _parse_response(self, *, response: httpx.Response) -> Optional[UserView]:
+    def _parse_response(self, *, response: httpx.Response) -> Optional[UserViewFull]:
         if response.status_code == HTTPStatus.OK:
-            response_200 = UserView.from_dict(response.json())
+            response_200 = UserViewFull.from_dict(response.json())
 
             return response_200
         if self.client.raise_on_unexpected_status:
@@ -41,7 +41,7 @@ class UsersGetMe:
         else:
             return None
 
-    def _build_response(self, *, response: httpx.Response) -> Response[UserView]:
+    def _build_response(self, *, response: httpx.Response) -> Response[UserViewFull]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -51,7 +51,7 @@ class UsersGetMe:
 
     def sync_detailed(
         self,
-    ) -> Response[UserView]:
+    ) -> Response[UserViewFull]:
         """Get Me
 
         Raises:
@@ -59,7 +59,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserView]
+            Response[UserViewFull]
         """  # noqa e501
 
         kwargs = self._get_kwargs()
@@ -73,7 +73,7 @@ class UsersGetMe:
 
     def sync(
         self,
-    ) -> Optional[UserView]:
+    ) -> Optional[UserViewFull]:
         """Get Me
 
         Raises:
@@ -81,14 +81,14 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserView]
+            Response[UserViewFull]
         """  # noqa e501
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[UserView]:
+    ) -> Response[UserViewFull]:
         """Get Me
 
         Raises:
@@ -96,7 +96,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserView]
+            Response[UserViewFull]
         """  # noqa e501
 
         kwargs = self._get_kwargs()
@@ -108,7 +108,7 @@ class UsersGetMe:
 
     async def asyncio(
         self,
-    ) -> Optional[UserView]:
+    ) -> Optional[UserViewFull]:
         """Get Me
 
         Raises:
@@ -116,7 +116,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserView]
+            Response[UserViewFull]
         """  # noqa e501
 
         return (await self.asyncio_detailed()).parsed
