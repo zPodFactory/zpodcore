@@ -28,13 +28,13 @@ def upgrade():
     op.create_table(
         "instances",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("status", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("password", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("domain", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("profile", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("endpoint_id", sa.Integer(), nullable=False),
+        sa.Column("status", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("creation_date", sa.DateTime(), nullable=False),
         sa.Column("last_modified_date", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(
