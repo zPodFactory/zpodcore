@@ -5,6 +5,7 @@ from zpodapi.lib import dependencies
 from zpodcommon import models as M
 
 from . import instance__dependencies
+from .instance__enums import InstanceStatusEnum
 from .instance__schemas import InstanceCreate, InstanceUpdate, InstanceView
 from .instance__services import InstanceService
 
@@ -24,7 +25,12 @@ def get_all(
     session: Session = Depends(dependencies.get_session),
     name: str | None = None,
 ):
-    return InstanceService(session=session).get_all(name=name)
+    return InstanceService(session=session).get_all(
+        criteria=(
+            M.Instance.status == InstanceStatusEnum.ACTIVE,
+            M.Instance.name == name,
+        )
+    )
 
 
 @router.get(
@@ -51,7 +57,10 @@ def create(
 ):
     service = InstanceService(session=session)
     if service.get_all(
-        name=instance_in.name,
+        criteria=(
+            M.Instance.status == InstanceStatusEnum.ACTIVE,
+            M.Instance.name == instance_in.name,
+        ),
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
     return service.create(
@@ -86,4 +95,4 @@ def delete(
     session: Session = Depends(dependencies.get_session),
     instance: M.Instance = Depends(instance__dependencies.get_instance_record),
 ):
-    return InstanceService(session=session).update(item=instance)
+    return InstanceService(session=session).delete(item=instance)

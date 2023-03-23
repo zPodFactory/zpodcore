@@ -7,6 +7,7 @@ from zpodapi.lib.schema_base import Empty, Opt, Req
 from ..endpoints.endpoint_schemas import EndpointView
 from ..permission_groups.permission_group_schemas import PermissionGroupView
 from ..users.user_schemas import UserView
+from .instance__enums import InstanceStatusEnum
 from .instance_component__schemas import InstanceComponentView
 from .instance_feature__schemas import InstanceFeatureView
 from .instance_network__schemas import InstanceNetworkView
@@ -36,7 +37,15 @@ class InstanceUpdate(SQLModel):
 
     class Config:
         extra = "forbid"
-        schema_extra = {"example": {"description": "Tanzu Lab zPod"}}
+        schema_extra = dict(
+            example=dict(
+                description="Tanzu Lab zPod",
+            )
+        )
+
+
+class InstanceDelete(SQLModel):
+    status: InstanceStatusEnum = Req()
 
 
 class InstanceView(SQLModel):
@@ -52,3 +61,4 @@ class InstanceView(SQLModel):
     components: list["InstanceComponentView"] = []
     permissions: list["InstancePermissionView"] = []
     features: list["InstanceFeatureView"] = []
+    status: InstanceStatusEnum = Req(example=InstanceStatusEnum.ACTIVE)

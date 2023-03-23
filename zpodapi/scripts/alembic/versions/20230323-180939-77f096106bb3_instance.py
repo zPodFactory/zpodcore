@@ -1,17 +1,17 @@
 """instance
 
-Revision ID: fb2fd328f41a
+Revision ID: 77f096106bb3
 Revises: ed3586602581
-Create Date: 2023-03-21 18:37:46.646239
+Create Date: 2023-03-23 18:09:39.982238
 
 """
 import sqlalchemy as sa
 import sqlmodel
+
 from alembic import op
-from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "fb2fd328f41a"
+revision = "77f096106bb3"
 down_revision = "ed3586602581"
 branch_labels = None
 depends_on = None
@@ -28,6 +28,7 @@ def upgrade():
     op.create_table(
         "instances",
         sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("status", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("name", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("password", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -42,7 +43,7 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_instances_name"), "instances", ["name"], unique=True)
+    op.create_index(op.f("ix_instances_name"), "instances", ["name"], unique=False)
     op.create_table(
         "permission_group_user_link",
         sa.Column("permission_group_id", sa.Integer(), nullable=False),
@@ -62,7 +63,7 @@ def upgrade():
         sa.Column("instance_id", sa.Integer(), nullable=False),
         sa.Column("component_uid", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("extra_id", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column("data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("data", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
             ["component_uid"],
             ["components.component_uid"],
@@ -77,7 +78,7 @@ def upgrade():
         "instance_features",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("instance_id", sa.Integer(), nullable=False),
-        sa.Column("data", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("data", sa.JSON(), nullable=True),
         sa.ForeignKeyConstraint(
             ["instance_id"],
             ["instances.id"],

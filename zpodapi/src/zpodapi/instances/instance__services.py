@@ -5,6 +5,8 @@ from zpodcommon import models as M
 from zpodcommon.lib import zpodengine
 
 from . import instance__utils
+from .instance__enums import InstanceStatusEnum
+from .instance__schemas import InstanceDelete
 
 
 class InstanceService(ServiceBase):
@@ -21,6 +23,7 @@ class InstanceService(ServiceBase):
             _model=_model,
             item_in=item_in,
             extra=dict(
+                status=InstanceStatusEnum.PENDING,
                 password=instance__utils.gen_password(),
                 permissions=[
                     M.InstancePermission(
@@ -40,3 +43,10 @@ class InstanceService(ServiceBase):
             instance_name=instance.name,
         )
         return instance
+
+    def delete(self, *, item: SQLModel):
+        self.update(
+            item=item,
+            item_in=InstanceDelete(status=InstanceStatusEnum.DELETED),
+        )
+        return None

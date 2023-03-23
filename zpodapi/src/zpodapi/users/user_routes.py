@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
-from sqlmodel import Session
+from sqlmodel import Session, or_
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
@@ -27,7 +27,12 @@ def get_all(
     username: str | None = None,
     email: EmailStr | None = None,
 ):
-    return UserService(session=session).get_all(username=username, email=email)
+    return UserService(session=session).get_all(
+        criteria=(
+            M.User.username == username,
+            M.User.email == email,
+        )
+    )
 
 
 @router.get(
@@ -64,9 +69,12 @@ def create(
 ):
     service = UserService(session=session)
     if service.get_all(
-        username=user_in.username,
-        email=user_in.email,
-        _use_or=True,
+        criteria=(
+            or_(
+                M.User.username == user_in.username,
+                M.User.email == user_in.email,
+            )
+        )
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
     return service.create(item_in=user_in)

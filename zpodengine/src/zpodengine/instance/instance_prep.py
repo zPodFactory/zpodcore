@@ -13,6 +13,7 @@ def instance_prep(instance_id: int, instance_name: str):
     # Add default network
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
+        instance.status = "ACTIVE"
         instance.networks.append(M.InstanceNetwork(cidr=get_available_network()))
         session.add(instance)
         session.commit()
