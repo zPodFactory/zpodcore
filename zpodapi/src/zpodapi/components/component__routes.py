@@ -4,8 +4,8 @@ from sqlmodel import Session
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
 
-from . import component_services
-from .component_schemas import ComponentUpdate, ComponentViewFull
+from . import component__services
+from .component__schemas import ComponentUpdate, ComponentViewFull
 
 router = APIRouter(
     prefix="/components",
@@ -24,7 +24,7 @@ def get_all(
     *,
     session: Session = Depends(dependencies.get_session),
 ):
-    return component_services.get_all(session)
+    return component__services.get_all(session)
 
 
 @router.get("/{component_uid}", response_model=ComponentViewFull)
@@ -33,7 +33,7 @@ def get(
     component_uid: str,
     session: Session = Depends(dependencies.get_session),
 ):
-    return component_services.get(
+    return component__services.get(
         session=session, component_in=ComponentUpdate(component_uid=component_uid)
     )
 
@@ -48,7 +48,7 @@ def enable(
     session: Session = Depends(dependencies.get_session),
     component_uid: str,
 ):
-    return component_services.enable(
+    return component__services.enable(
         session=session, component_in=ComponentUpdate(component_uid=component_uid)
     )
 
@@ -63,6 +63,6 @@ def disable(
     session: Session = Depends(dependencies.get_session),
     component_uid: str,
 ):
-    return component_services.disable(
+    return component__services.disable(
         session=session, component_in=ComponentUpdate(component_uid=component_uid)
     )

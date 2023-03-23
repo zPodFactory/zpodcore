@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from zpodapi.lib import dependencies
 
-from . import library_services
+from . import library__services
 
 
 async def get_library_record(
@@ -12,7 +12,7 @@ async def get_library_record(
     name: str | None = None,
     git_url: str | None = None,
 ):
-    if library := library_services.get(
+    if library := library__services.get(
         session=session,
         name=name,
         git_url=git_url,

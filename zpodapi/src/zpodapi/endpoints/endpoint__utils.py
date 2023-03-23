@@ -24,7 +24,8 @@ def zpod_endpoint_check(endpoint: M.Endpoint):
 def update_dictionary(target_dict, update_dict):
     for key, value in update_dict.items():
         if isinstance(value, dict):
-            # If value is a dictionary, recursively call update_dict with the nested dictionaries
+            # If value is a dictionary, recursively call update_dict with the nested
+            # dictionaries
             if key in target_dict and isinstance(target_dict[key], dict):
                 update_dictionary(target_dict[key], value)
             else:

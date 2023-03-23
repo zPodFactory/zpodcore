@@ -3,8 +3,8 @@ from sqlmodel import Session
 
 from zpodapi.lib import dependencies
 
-from .user_services import UserService
-from .user_types import UserIdType
+from .user__services import UserService
+from .user__types import UserIdType
 
 
 def get_user_record(

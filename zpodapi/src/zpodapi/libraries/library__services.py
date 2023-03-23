@@ -5,11 +5,11 @@ import git
 from rich import print
 from sqlmodel import Session, or_, select
 
-from zpodapi.components.component_utils import get_component
+from zpodapi.components.component__utils import get_component
 from zpodapi.lib.utils import list_json_files
 from zpodcommon import models as M
 
-from .library_schemas import LibraryCreate, LibraryUpdate
+from .library__schemas import LibraryCreate, LibraryUpdate
 
 
 def get_all(session: Session):
