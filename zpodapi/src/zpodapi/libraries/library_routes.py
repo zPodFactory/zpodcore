@@ -9,6 +9,8 @@ from . import library_dependencies, library_services
 from .library_schemas import LibraryCreate, LibraryUpdate, LibraryView
 
 router = APIRouter(
+    prefix="/libraries",
+
     tags=["libraries"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
     route_class=RouteLogger,
@@ -16,7 +18,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/libraries",
+    "",
     response_model=list[LibraryView],
 )
 def get_all(
@@ -27,7 +29,7 @@ def get_all(
 
 
 @router.post(
-    "/libraries",
+    "",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -46,7 +48,7 @@ def create(
 
 
 @router.patch(
-    "/libraries",
+    "",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -64,7 +66,7 @@ def update(
 
 
 @router.delete(
-    "/libraries",
+    "",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete(

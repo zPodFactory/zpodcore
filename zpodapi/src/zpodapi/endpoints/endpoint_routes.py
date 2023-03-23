@@ -9,6 +9,7 @@ from . import endpoint_dependencies, endpoint_services
 from .endpoint_schemas import EndpointCreate, EndpointUpdate, EndpointView
 
 router = APIRouter(
+    prefix="/endpoints",
     tags=["endpoints"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
     route_class=RouteLogger,
@@ -16,7 +17,7 @@ router = APIRouter(
 
 
 @router.get(
-    "/endpoints",
+    "",
     response_model=list[EndpointView],
 )
 def get_all(
@@ -27,7 +28,7 @@ def get_all(
 
 
 @router.post(
-    "/endpoints",
+    "",
     response_model=EndpointCreate,
     status_code=status.HTTP_201_CREATED,
 )
@@ -42,7 +43,7 @@ def create(
 
 
 @router.patch(
-    "/endpoints",
+    "",
     response_model=EndpointView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -58,7 +59,7 @@ def update(
 
 
 @router.delete(
-    "/endpoints",
+    "",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete(
@@ -70,7 +71,7 @@ def delete(
 
 
 @router.put(
-    "/endpoints/{endpoint_name}/verify",
+    "/{endpoint_name}/verify",
     status_code=status.HTTP_201_CREATED,
 )
 async def verify(
