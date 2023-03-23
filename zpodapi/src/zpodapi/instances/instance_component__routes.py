@@ -45,18 +45,18 @@ def components_add(
     )
 
 
-@router.delete(
-    "/{component_uid}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-def components_delete(
-    *,
-    session: Session = Depends(dependencies.get_session),
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
-    component_uid: str,
-):
-    service = InstanceComponentService(session=session)
-    instance_component = service.get(
-        instance_id=instance.id, component_uid=component_uid
-    )
-    service.delete(item=instance_component)
+# @router.delete(
+#     "/{component_uid}",
+#     status_code=status.HTTP_204_NO_CONTENT,
+# )
+# def components_delete(
+#     *,
+#     session: Session = Depends(dependencies.get_session),
+#     instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+#     component_uid: str,
+# ):
+#     service = InstanceComponentService(session=session)
+#     instance_component = service.get(
+#         instance_id=instance.id, component_uid=component_uid
+#     )
+#     service.delete(item=instance_component)
