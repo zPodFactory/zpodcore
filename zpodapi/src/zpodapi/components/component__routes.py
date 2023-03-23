@@ -9,7 +9,6 @@ from .component__schemas import ComponentUpdate, ComponentViewFull
 
 router = APIRouter(
     prefix="/components",
-
     tags=["components"],
     dependencies=[Depends(dependencies.get_current_user_and_update)],
     route_class=RouteLogger,
