@@ -15,8 +15,7 @@ create_deployment(
 )
 
 create_deployment(
-    name="download_component",
-    flow="component.download_component.download_component_flow",
+    flow="component.flow_download_component.flow_download_component",
 )
 
 create_deployment(
