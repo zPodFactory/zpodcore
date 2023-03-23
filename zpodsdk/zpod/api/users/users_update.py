@@ -7,7 +7,7 @@ from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_update import UserUpdate
-from ...models.user_view import UserView
+from ...models.user_view_full import UserViewFull
 from ...types import Response
 
 
@@ -39,9 +39,9 @@ class UsersUpdate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, UserView]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         if response.status_code == HTTPStatus.CREATED:
-            response_201 = UserView.from_dict(response.json())
+            response_201 = UserViewFull.from_dict(response.json())
 
             return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
@@ -57,7 +57,7 @@ class UsersUpdate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, UserView]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -70,19 +70,20 @@ class UsersUpdate:
         id: str,
         *,
         json_body: UserUpdate,
-    ) -> Response[Union[HTTPValidationError, UserView]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
+                'superadmin': False}.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -102,19 +103,20 @@ class UsersUpdate:
         id: str,
         *,
         json_body: UserUpdate,
-    ) -> Optional[Union[HTTPValidationError, UserView]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
+                'superadmin': False}.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         return self.sync_detailed(
@@ -127,19 +129,20 @@ class UsersUpdate:
         id: str,
         *,
         json_body: UserUpdate,
-    ) -> Response[Union[HTTPValidationError, UserView]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
+                'superadmin': False}.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -157,19 +160,20 @@ class UsersUpdate:
         id: str,
         *,
         json_body: UserUpdate,
-    ) -> Optional[Union[HTTPValidationError, UserView]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
+                'superadmin': False}.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserView]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """  # noqa e501
 
         return (

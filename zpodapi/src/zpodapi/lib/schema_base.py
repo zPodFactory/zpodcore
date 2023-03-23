@@ -1,4 +1,4 @@
-from functools import wraps
+from functools import partial, wraps
 
 from sqlmodel import Field
 
@@ -18,3 +18,7 @@ def field(func: Field) -> Field:
 
 
 Field = field(Field)
+
+Req = partial(Field, default=...)
+Opt = partial(Field, default=None)
+Empty = partial(Field, default="")

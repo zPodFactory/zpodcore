@@ -12,9 +12,9 @@ def get_users():
 
 
 @flow(log_prints=True)
-def db_sample():
+def flow_db_sample():
     get_users()
 
 
 if __name__ == "__main__":
-    print(db_sample())
+    print(flow_db_sample())

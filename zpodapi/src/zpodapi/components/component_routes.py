@@ -5,7 +5,7 @@ from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
 
 from . import component_services
-from .component_schemas import ComponentUpdate, ComponentView
+from .component_schemas import ComponentUpdate, ComponentViewFull
 
 router = APIRouter(
     tags=["components"],
@@ -16,7 +16,7 @@ router = APIRouter(
 
 @router.get(
     "/components",
-    response_model=list[ComponentView],
+    response_model=list[ComponentViewFull],
 )
 def get_all(
     *,
@@ -25,7 +25,7 @@ def get_all(
     return component_services.get_all(session)
 
 
-@router.get("/components/{component_uid}", response_model=ComponentView)
+@router.get("/components/{component_uid}", response_model=ComponentViewFull)
 def get(
     *,
     component_uid: str,
@@ -38,7 +38,7 @@ def get(
 
 @router.put(
     "/components/{component_uid}/enable",
-    response_model=ComponentView,
+    response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
 )
 def enable(
@@ -53,7 +53,7 @@ def enable(
 
 @router.put(
     "/components/{component_uid}/disable",
-    response_model=ComponentView,
+    response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
 )
 def disable(
