@@ -25,12 +25,10 @@ def get_all(
     session: Session = Depends(dependencies.get_session),
     name: str | None = None,
 ):
-    return InstanceService(session=session).get_all(
-        criteria=(
-            M.Instance.status == InstanceStatusEnum.ACTIVE,
-            M.Instance.name == name,
-        )
-    )
+    criteria = [M.Instance.status == InstanceStatusEnum.ACTIVE.value]
+    if name:
+        criteria.append(M.Instance.name == name)
+    return InstanceService(session=session).get_all(criteria=criteria)
 
 
 @router.get(
@@ -58,7 +56,7 @@ def create(
     service = InstanceService(session=session)
     if service.get_all(
         criteria=(
-            M.Instance.status == InstanceStatusEnum.ACTIVE,
+            M.Instance.status == InstanceStatusEnum.ACTIVE.value,
             M.Instance.name == instance_in.name,
         ),
     ):
