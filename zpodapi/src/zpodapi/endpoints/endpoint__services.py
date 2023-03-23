@@ -4,8 +4,8 @@ from sqlmodel import Session, or_, select
 
 from zpodcommon import models as M
 
-from .endpoint_schemas import EndpointCreate, EndpointUpdate
-from .endpoint_utils import update_dictionary, zpod_endpoint_check
+from .endpoint__schemas import EndpointCreate, EndpointUpdate
+from .endpoint__utils import update_dictionary, zpod_endpoint_check
 
 
 def get_all(session: Session):

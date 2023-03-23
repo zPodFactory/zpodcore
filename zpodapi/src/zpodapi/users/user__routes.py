@@ -6,9 +6,9 @@ from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
 from zpodcommon import models as M
 
-from . import user_dependencies
-from .user_schemas import UserCreate, UserUpdate, UserViewFull
-from .user_services import UserService
+from . import user__dependencies
+from .user__schemas import UserCreate, UserUpdate, UserViewFull
+from .user__services import UserService
 
 router = APIRouter(
     prefix="/users",
@@ -53,7 +53,7 @@ def get_me(
 )
 def get(
     *,
-    user: M.User = Depends(user_dependencies.get_user_record),
+    user: M.User = Depends(user__dependencies.get_user_record),
 ):
     return user
 
@@ -89,7 +89,7 @@ def create(
 def update(
     *,
     session: Session = Depends(dependencies.get_session),
-    user: M.User = Depends(user_dependencies.get_user_record),
+    user: M.User = Depends(user__dependencies.get_user_record),
     user_in: UserUpdate,
 ):
     return UserService(session=session).update(item=user, item_in=user_in)
@@ -102,6 +102,6 @@ def update(
 def delete(
     *,
     session: Session = Depends(dependencies.get_session),
-    user: M.User = Depends(user_dependencies.get_user_record),
+    user: M.User = Depends(user__dependencies.get_user_record),
 ):
     return UserService(session=session).delete(item=user)

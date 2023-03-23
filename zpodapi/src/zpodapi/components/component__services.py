@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from zpodcommon import models as M
 from zpodcommon.lib import zpodengine
 
-from .component_schemas import ComponentUpdate
+from .component__schemas import ComponentUpdate
 
 
 def get_all(session: Session):
