@@ -55,7 +55,7 @@ Complete the following steps to set up your development environment:
 1. Start the environment.  In the root directory, run:
 
     ```bash
-    docker compose up
+    just zpodcore-start
     ```
 
 1. Verify that zpodapi is working by opening a browser and going to `http://localhost:[8000 or ZPODAPI_HOSTPORT]` and `http://localhost:[8000 or ZPODAPI_HOSTPORT]/docs`
