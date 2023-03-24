@@ -70,12 +70,12 @@ def create(
 ):
     service = UserService(session=session)
     if service.get_all(
-        criteria=(
+        criteria=[
             or_(
                 M.User.username == user_in.username,
                 M.User.email == user_in.email,
             )
-        )
+        ]
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
     return service.create(item_in=user_in)
