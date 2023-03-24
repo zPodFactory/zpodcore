@@ -6,7 +6,7 @@ def instance_profile_flow(
     wait_for=None,
 ):
     zbox = add_instance_component(
-        instance_id=instance_id, component_uid="zbox-11.6", wait_for=None
+        instance_id=instance_id, component_uid="zbox-11.6", wait_for=wait_for
     )
     esxis = [
         add_instance_component(
@@ -14,7 +14,7 @@ def instance_profile_flow(
             component_uid="esxi-8.0.0b",
             extra_id=x,
             data=dict(last_octet=x),
-            wait_for=zbox,
+            wait_for=[zbox],
         )
         for x in range(11, 14)
     ]
