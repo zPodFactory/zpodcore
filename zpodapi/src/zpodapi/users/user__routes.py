@@ -28,12 +28,12 @@ def get_all(
     username: str | None = None,
     email: EmailStr | None = None,
 ):
-    return UserService(session=session).get_all(
-        criteria=(
-            M.User.username == username,
-            M.User.email == email,
-        )
-    )
+    criteria = []
+    if username:
+        criteria.append(M.User.username == username)
+    if email:
+        criteria.append(M.User.email == email)
+    return UserService(session=session).get_all(criteria=criteria)
 
 
 @router.get(
