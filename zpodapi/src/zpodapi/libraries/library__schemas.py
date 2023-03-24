@@ -10,7 +10,7 @@ example_last_modified_date = datetime(2023, 1, 1, 0, 1)
 
 
 class LibraryCreate(SQLModel, extra="forbid"):
-    name: str = Field(..., example="vmware")
+    name: str = Field(..., example="default")
     description: str = Field(..., example="Default zPodFactory library")
     git_url: str = Field(..., example="https://github.com/zpodfactory/zpodlibrary")
 
@@ -21,7 +21,7 @@ class LibraryUpdate(SQLModel, extra="forbid"):
 
 
 class LibraryView(SQLModel):
-    name: str = Field(..., example="vmware")
+    name: str = Field(..., example="default")
     description: str = Field(..., example="Default zPodFactory library")
     git_url: str = Field(..., example="https://github.com/zpodfactory/zpodlibrary")
     creation_date: datetime = Field(..., example=example_creation_date)
