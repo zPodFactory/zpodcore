@@ -6,21 +6,29 @@ from zpodcommon.lib import zpodengine
 
 from . import instance__utils
 from .instance__enums import InstanceStatusEnum
-from .instance__schemas import InstanceDelete
+from .instance__schemas import InstanceCreate, InstanceDelete
 
 
 class InstanceService(ServiceBase):
     base_model: SQLModel = M.Instance
 
+    def get_all(
+        self,
+        *,
+        name: str | None = None,
+    ):
+        return self.get_all_filtered(
+            base_criteria=[M.Instance.status == InstanceStatusEnum.ACTIVE.value],
+            name=name,
+        )
+
     def create(
         self,
         *,
-        item_in: SQLModel,
+        item_in: InstanceCreate,
         current_user: M.User,
-        _model: SQLModel | None = None,
     ):
-        instance = super()._create(
-            _model=_model,
+        instance = self.crud.create(
             item_in=item_in,
             extra=dict(
                 status=InstanceStatusEnum.PENDING,
@@ -43,9 +51,9 @@ class InstanceService(ServiceBase):
         )
         return instance
 
-    def delete(self, *, item: SQLModel):
-        self.update(
-            item=item,
+    def delete(self, *, instance: SQLModel):
+        self.crud.update(
+            item=instance,
             item_in=InstanceDelete(status=InstanceStatusEnum.DELETED),
         )
         return None

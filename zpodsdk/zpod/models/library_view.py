@@ -17,7 +17,7 @@ class LibraryView:
         description (str):  Example: Default zPodFactory library.
         enabled (bool):
         git_url (str):  Example: https://github.com/zpodfactory/zpodlibrary.
-        name (str):  Example: vmware.
+        name (str):  Example: default.
         last_modified_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
     """
 

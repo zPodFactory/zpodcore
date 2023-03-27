@@ -3,15 +3,14 @@ from sqlmodel import Session
 
 from zpodapi.lib import dependencies
 
-from . import component__services
-from .component__schemas import ComponentUpdate
+from .component__services import ComponentService
 
 
 def get_component_record(
     *,
     session: Session = Depends(dependencies.get_session),
-    component_in: ComponentUpdate,
+    component_uid: str,
 ):
-    if component := component__services.get(session=session, component_in=component_in):
+    if component := ComponentService(session=session).get(value=component_uid):
         return component
     raise HTTPException(status_code=404, detail="Component not found")
