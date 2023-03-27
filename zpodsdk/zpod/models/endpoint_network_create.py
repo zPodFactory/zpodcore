@@ -13,6 +13,7 @@ class EndpointNetworkCreate:
         edgecluster (str):  Example: my-edgecluster.
         hostname (str):  Example: my-nsxt-manager.com.
         name (str):
+        networks (str):  Example: 10.196.64.0/18.
         password (str):  Example: my-password.
         t0 (str):  Example: my-t0.
         transportzone (str):  Example: my-transportzone.
@@ -23,6 +24,7 @@ class EndpointNetworkCreate:
     edgecluster: str
     hostname: str
     name: str
+    networks: str
     password: str
     t0: str
     transportzone: str
@@ -34,6 +36,7 @@ class EndpointNetworkCreate:
         edgecluster = self.edgecluster
         hostname = self.hostname
         name = self.name
+        networks = self.networks
         password = self.password
         t0 = self.t0
         transportzone = self.transportzone
@@ -47,6 +50,7 @@ class EndpointNetworkCreate:
                 "edgecluster": edgecluster,
                 "hostname": hostname,
                 "name": name,
+                "networks": networks,
                 "password": password,
                 "t0": t0,
                 "transportzone": transportzone,
@@ -67,6 +71,8 @@ class EndpointNetworkCreate:
 
         name = d.pop("name")
 
+        networks = d.pop("networks")
+
         password = d.pop("password")
 
         t0 = d.pop("t0")
@@ -80,6 +86,7 @@ class EndpointNetworkCreate:
             edgecluster=edgecluster,
             hostname=hostname,
             name=name,
+            networks=networks,
             password=password,
             t0=t0,
             transportzone=transportzone,

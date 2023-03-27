@@ -13,6 +13,7 @@ class EndpointNetworkView:
         edgecluster (str):  Example: my-edgecluster.
         hostname (str):  Example: my-nsxt-manager.com.
         name (str):
+        networks (str):  Example: 10.196.64.0/18.
         t0 (str):  Example: my-t0.
         transportzone (str):  Example: my-transportzone.
         username (str):  Example: my-username.
@@ -22,6 +23,7 @@ class EndpointNetworkView:
     edgecluster: str
     hostname: str
     name: str
+    networks: str
     t0: str
     transportzone: str
     username: str
@@ -32,6 +34,7 @@ class EndpointNetworkView:
         edgecluster = self.edgecluster
         hostname = self.hostname
         name = self.name
+        networks = self.networks
         t0 = self.t0
         transportzone = self.transportzone
         username = self.username
@@ -44,6 +47,7 @@ class EndpointNetworkView:
                 "edgecluster": edgecluster,
                 "hostname": hostname,
                 "name": name,
+                "networks": networks,
                 "t0": t0,
                 "transportzone": transportzone,
                 "username": username,
@@ -63,6 +67,8 @@ class EndpointNetworkView:
 
         name = d.pop("name")
 
+        networks = d.pop("networks")
+
         t0 = d.pop("t0")
 
         transportzone = d.pop("transportzone")
@@ -74,6 +80,7 @@ class EndpointNetworkView:
             edgecluster=edgecluster,
             hostname=hostname,
             name=name,
+            networks=networks,
             t0=t0,
             transportzone=transportzone,
             username=username,

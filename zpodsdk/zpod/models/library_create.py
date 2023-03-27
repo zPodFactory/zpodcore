@@ -11,7 +11,7 @@ class LibraryCreate:
     Attributes:
         description (str):  Example: Default zPodFactory library.
         git_url (str):  Example: https://github.com/zpodfactory/zpodlibrary.
-        name (str):  Example: vmware.
+        name (str):  Example: default.
     """
 
     description: str

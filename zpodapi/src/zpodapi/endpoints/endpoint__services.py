@@ -1,70 +1,35 @@
 from rich import print
 from sqlalchemy.orm.attributes import flag_modified
-from sqlmodel import Session, or_, select
+from sqlmodel import SQLModel
 
+from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 
-from .endpoint__schemas import EndpointCreate, EndpointUpdate
+from .endpoint__schemas import EndpointUpdate
 from .endpoint__utils import update_dictionary, zpod_endpoint_check
 
 
-def get_all(session: Session):
-    return session.exec(select(M.Endpoint)).all()
+class EndpointService(ServiceBase):
+    base_model: SQLModel = M.Endpoint
 
+    def get(self, *, value, column="name"):
+        return super().get(value=value, column=column)
 
-def get(
-    session: Session,
-    *,
-    name: str | None = None,
-):
-    return session.exec(
-        select(M.Endpoint).where(
-            or_(
-                M.Endpoint.name == name,
-            )
-        )
-    ).first()
+    def update(self, *, item: M.Endpoint, item_in: EndpointUpdate):
+        for key, value in item_in.dict(exclude_unset=True).items():
+            # specific code to handle nested dictionaries & JSON fields
+            if key == "endpoints":
+                update_dictionary(item.endpoints, value)
+                value = item.endpoints
 
+            setattr(item, key, value)
 
-def create(session: Session, *, endpoint_in: EndpointCreate):
-    endpoint = M.Endpoint(**endpoint_in.dict())
-    session.add(endpoint)
-    session.commit()
-    session.refresh(endpoint)
+        # https://stackoverflow.com/questions/42559434/updates-to-json-field-dont-persist-to-db
+        flag_modified(item, "endpoints")
+        self.crud.save(item)
+        return item
 
-    return endpoint
-
-
-def update(session: Session, *, endpoint: M.Endpoint, endpoint_in: EndpointUpdate):
-    print(endpoint)
-    for key, value in endpoint_in.dict(exclude_unset=True).items():
-        # specific code to handle nested dictionaries & JSON fields
-        if key == "endpoints":
-            update_dictionary(endpoint.endpoints, value)
-            value = endpoint.endpoints
-
-        setattr(endpoint, key, value)
-
-    # https://stackoverflow.com/questions/42559434/updates-to-json-field-dont-persist-to-db
-    flag_modified(endpoint, "endpoints")
-    session.add(endpoint)
-    session.commit()
-    session.refresh(endpoint)
-
-    return endpoint
-
-
-def delete(session: Session, *, endpoint: M.Endpoint):
-    # Delete Endpoint from DB
-    print(f"Deleting {endpoint}")
-    session.delete(endpoint)
-    session.commit()
-
-    return None
-
-
-def verify(session: Session, *, endpoint: M.Endpoint):
-    # Verify endpoint status
-    print(f"Verifying Endpoint {endpoint.name}")
-
-    return zpod_endpoint_check(endpoint)
+    def verify(self, *, item: M.Endpoint):
+        # Verify endpoint status
+        print(f"Verifying Endpoint {item.name}")
+        return zpod_endpoint_check(item)

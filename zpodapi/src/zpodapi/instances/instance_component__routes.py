@@ -37,11 +37,9 @@ def components_add(
     instance: M.Instance = Depends(instance__dependencies.get_instance_record),
     component_in: InstanceComponentCreate,
 ):
-    return InstanceComponentService(session=session).create(
-        item_in=M.InstanceComponent(
-            instance_id=instance.id,
-            component_uid=component_in.component_uid,
-        )
+    return InstanceComponentService(session=session).add(
+        instance_id=instance.id,
+        component_uid=component_in.component_uid,
     )
 
 

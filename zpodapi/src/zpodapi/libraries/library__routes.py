@@ -3,9 +3,10 @@ from sqlmodel import Session
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
+from zpodapi.libraries.library__services import LibraryService
 from zpodcommon import models as M
 
-from . import library__dependencies, library__services
+from . import library__dependencies
 from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
 
 router = APIRouter(
@@ -24,7 +25,7 @@ def get_all(
     *,
     session: Session = Depends(dependencies.get_session),
 ):
-    return library__services.get_all(session)
+    return LibraryService(session=session).get_all()
 
 
 @router.post(
@@ -37,13 +38,14 @@ def create(
     session: Session = Depends(dependencies.get_session),
     library_in: LibraryCreate,
 ):
-    if library__services.get(
-        session=session,
+    service = LibraryService(session=session)
+    if service.get_all_filtered(
         name=library_in.name,
         git_url=library_in.git_url,
+        use_or=True,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return library__services.create(session=session, library_in=library_in)
+    return service.create(session=session, item_in=library_in)
 
 
 @router.patch(
@@ -57,10 +59,9 @@ def update(
     library: M.Library = Depends(library__dependencies.get_library_record),
     library_in: LibraryUpdate,
 ):
-    return library__services.update(
-        session=session,
-        library=library,
-        library_in=library_in,
+    return LibraryService(session=session).update(
+        item=library,
+        item_in=library_in,
     )
 
 
@@ -73,4 +74,4 @@ def delete(
     session: Session = Depends(dependencies.get_session),
     library: M.Library = Depends(library__dependencies.get_library_record),
 ):
-    return library__services.delete(session=session, library=library)
+    return LibraryService(session=session).delete(item=library)
