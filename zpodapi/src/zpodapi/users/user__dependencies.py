@@ -12,6 +12,6 @@ def get_user_record(
     session: Session = Depends(dependencies.get_session),
     id: UserIdType,
 ):
-    if user := UserService(session=session).get(id=id):
+    if user := UserService(session=session).get(value=id):
         return user
     raise HTTPException(status_code=404, detail="User not found")

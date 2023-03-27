@@ -17,7 +17,6 @@ class LibrariesDelete:
         self,
         *,
         name: Union[Unset, None, str] = UNSET,
-        git_url: Union[Unset, None, str] = UNSET,
     ) -> Dict[str, Any]:
         url = "{}/libraries".format(self.client.base_url)
 
@@ -26,8 +25,6 @@ class LibrariesDelete:
 
         params: Dict[str, Any] = {}
         params["name"] = name
-
-        params["git_url"] = git_url
 
         params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -71,13 +68,11 @@ class LibrariesDelete:
         self,
         *,
         name: Union[Unset, None, str] = UNSET,
-        git_url: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
             name (Union[Unset, None, str]):
-            git_url (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -89,7 +84,6 @@ class LibrariesDelete:
 
         kwargs = self._get_kwargs(
             name=name,
-            git_url=git_url,
         )
 
         response = httpx.request(
@@ -103,13 +97,11 @@ class LibrariesDelete:
         self,
         *,
         name: Union[Unset, None, str] = UNSET,
-        git_url: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
             name (Union[Unset, None, str]):
-            git_url (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -121,20 +113,17 @@ class LibrariesDelete:
 
         return self.sync_detailed(
             name=name,
-            git_url=git_url,
         ).parsed
 
     async def asyncio_detailed(
         self,
         *,
         name: Union[Unset, None, str] = UNSET,
-        git_url: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
             name (Union[Unset, None, str]):
-            git_url (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -146,7 +135,6 @@ class LibrariesDelete:
 
         kwargs = self._get_kwargs(
             name=name,
-            git_url=git_url,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -158,13 +146,11 @@ class LibrariesDelete:
         self,
         *,
         name: Union[Unset, None, str] = UNSET,
-        git_url: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
             name (Union[Unset, None, str]):
-            git_url (Union[Unset, None, str]):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -177,6 +163,5 @@ class LibrariesDelete:
         return (
             await self.asyncio_detailed(
                 name=name,
-                git_url=git_url,
             )
         ).parsed
