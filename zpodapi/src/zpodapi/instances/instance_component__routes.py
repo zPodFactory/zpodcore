@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, status
-from sqlmodel import Session
+from fastapi import APIRouter, status
 
 from zpodapi.lib import dependencies
 from zpodcommon import models as M
@@ -11,7 +10,7 @@ from .instance_component__services import InstanceComponentService
 router = APIRouter(
     prefix="/instances/{id}/components",
     tags=["instances"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
 )
 
 
@@ -21,7 +20,7 @@ router = APIRouter(
 )
 def components_get_all(
     *,
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+    instance: M.Instance = instance__dependencies.GetInstanceRecord,
 ):
     return instance.components
 
@@ -33,8 +32,8 @@ def components_get_all(
 )
 def components_add(
     *,
-    session: Session = Depends(dependencies.get_session),
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+    session: dependencies.GetSession,
+    instance: M.Instance = instance__dependencies.GetInstanceRecord,
     component_in: InstanceComponentCreate,
 ):
     return InstanceComponentService(session=session).add(
@@ -49,8 +48,8 @@ def components_add(
 # )
 # def components_delete(
 #     *,
-#     session: Session = Depends(dependencies.get_session),
-#     instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+#     session: dependencies.GetSession,
+#     instance: M.Instance = instance__dependencies.GetInstanceRecord,
 #     component_uid: str,
 # ):
 #     service = InstanceComponentService(session=session)

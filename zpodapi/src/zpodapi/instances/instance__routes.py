@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
+from fastapi import APIRouter, HTTPException, status
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
@@ -12,7 +11,7 @@ from .instance__services import InstanceService
 router = APIRouter(
     prefix="/instances",
     tags=["instances"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
     route_class=RouteLogger,
 )
 
@@ -23,7 +22,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
     name: str | None = None,
 ):
     return InstanceService(session=session).get_all(name=name)
@@ -35,7 +34,7 @@ def get_all(
 )
 def get(
     *,
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+    instance: M.Instance = instance__dependencies.GetInstanceRecord,
 ):
     return instance
 
@@ -47,8 +46,8 @@ def get(
 )
 def create(
     *,
-    session: Session = Depends(dependencies.get_session),
-    current_user: M.User = Depends(dependencies.get_current_user_and_update),
+    session: dependencies.GetSession,
+    current_user: dependencies.GetCurrentUser,
     instance_in: InstanceCreate,
 ):
     service = InstanceService(session=session)
@@ -64,8 +63,8 @@ def create(
 )
 def update(
     *,
-    session: Session = Depends(dependencies.get_session),
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+    session: dependencies.GetSession,
+    instance: M.Instance = instance__dependencies.GetInstanceRecord,
     instance_in: InstanceUpdate,
 ):
     return InstanceService(session=session).update(
@@ -80,7 +79,7 @@ def update(
 )
 def delete(
     *,
-    session: Session = Depends(dependencies.get_session),
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+    session: dependencies.GetSession,
+    instance: M.Instance = instance__dependencies.GetInstanceRecord,
 ):
     return InstanceService(session=session).delete(item=instance)

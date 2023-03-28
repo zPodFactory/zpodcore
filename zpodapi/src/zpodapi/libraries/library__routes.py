@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
+from fastapi import APIRouter, HTTPException, status
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
 from zpodapi.libraries.library__services import LibraryService
-from zpodcommon import models as M
 
 from . import library__dependencies
 from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
@@ -12,7 +10,7 @@ from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
 router = APIRouter(
     prefix="/libraries",
     tags=["libraries"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
     route_class=RouteLogger,
 )
 
@@ -23,7 +21,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
 ):
     return LibraryService(session=session).get_all()
 
@@ -35,7 +33,7 @@ def get_all(
 )
 def create(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
     library_in: LibraryCreate,
 ):
     service = LibraryService(session=session)
@@ -55,8 +53,8 @@ def create(
 )
 def update(
     *,
-    session: Session = Depends(dependencies.get_session),
-    library: M.Library = Depends(library__dependencies.get_library_record),
+    session: dependencies.GetSession,
+    library: library__dependencies.GetLibraryRecord,
     library_in: LibraryUpdate,
 ):
     return LibraryService(session=session).update(
@@ -71,7 +69,7 @@ def update(
 )
 def delete(
     *,
-    session: Session = Depends(dependencies.get_session),
-    library: M.Library = Depends(library__dependencies.get_library_record),
+    session: dependencies.GetSession,
+    library: library__dependencies.GetLibraryRecord,
 ):
     return LibraryService(session=session).delete(item=library)
