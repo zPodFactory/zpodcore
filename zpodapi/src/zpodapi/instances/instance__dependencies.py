@@ -12,13 +12,16 @@ from .instance__types import InstanceIdType
 def get_instance_record(
     *,
     session: dependencies.GetSession,
-    id: InstanceIdType = Path(
-        examples={
-            "id": {"value": "1"},
-            "id alternative": {"value": "id=1"},
-            "name": {"value": "name=tanzu-lab"},
-        },
-    ),
+    id: Annotated[
+        InstanceIdType,
+        Path(
+            examples={
+                "id": {"value": "1"},
+                "id alternative": {"value": "id=1"},
+                "name": {"value": "name=tanzu-lab"},
+            },
+        ),
+    ],
 ):
     if instance := InstanceService(session=session).get(value=id):
         return instance

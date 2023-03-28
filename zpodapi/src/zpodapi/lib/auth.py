@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security.api_key import APIKey, APIKeyHeader
 from sqlalchemy import func
@@ -11,8 +13,8 @@ api_key_header = APIKeyHeader(name="access_token", auto_error=False)
 
 
 def get_current_user(
-    session: Session = Depends(get_session),
-    api_key: APIKey = Security(api_key_header),
+    session: Annotated[Session, Depends(get_session)],
+    api_key: Annotated[APIKey, Security(api_key_header)],
 ):
     if settings.DEV_AUTOAUTH_USER:
         criteria = M.User.id == settings.DEV_AUTOAUTH_USER
@@ -29,8 +31,8 @@ def get_current_user(
 
 
 def get_current_user_and_update(
-    session: Session = Depends(get_session),
-    user: M.User = Depends(get_current_user),
+    session: Annotated[Session, Depends(get_session)],
+    user: Annotated[M.User, Depends(get_current_user)],
 ):
     # Update last connection
     user.last_connection_date = func.now()
