@@ -17,7 +17,6 @@ def get_instance_record(
         Path(
             examples={
                 "id": {"value": "1"},
-                "id alternative": {"value": "id=1"},
                 "name": {"value": "name=tanzu-lab"},
             },
         ),
