@@ -45,7 +45,7 @@ def create(
         use_or=True,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return service.create(session=session, item_in=library_in)
+    return service.create(item_in=library_in)
 
 
 @router.patch(
