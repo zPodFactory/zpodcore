@@ -10,5 +10,5 @@ class UserService(ServiceBase):
     base_model: SQLModel = M.User
 
     def get(self, *, value: UserIdType):
-        id_key, id_value = (value if "=" in value else f"id={value}").split("=")
-        return super().get(value=id_value, column=id_key)
+        column, value = UserIdType.parse(value)
+        return super().get(value=value, column=column)
