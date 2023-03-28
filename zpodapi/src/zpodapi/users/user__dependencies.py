@@ -17,7 +17,6 @@ def get_user_record(
         Path(
             examples={
                 "id": {"value": "1"},
-                "id alternative": {"value": "id=1"},
                 "username": {"value": "username=jdoe"},
                 "email": {"value": "email=jdoe@example.com"},
             },
