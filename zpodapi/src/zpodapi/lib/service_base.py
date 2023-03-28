@@ -13,8 +13,8 @@ class ServiceBase:
     def get_all(self):
         return self.crud.select().all()
 
-    def get_all_filtered(self, *, base_criteria=None, use_or=False, **filters: dict):
-        criteria = base_criteria or []
+    def get_all_filtered(self, *, extra_criteria=None, use_or=False, **filters: dict):
+        criteria = extra_criteria or []
 
         arg_criteria = self.crud.build_criteria_when_available(**filters)
 
@@ -25,20 +25,13 @@ class ServiceBase:
 
         return self.crud.select(criteria=criteria).all()
 
-    def get(self, *, value, column="id"):
+    def get(self, *, value, column="id", extra_criteria=None):
         model_keys = set(self.base_model.__fields__.keys())
-
         if column not in model_keys:
             raise AttributeError(f"Invalid attribute name: {column}")
-        field_info = self.base_model.__fields__[column].field_info
-        if not field_info.primary_key and not field_info.unique:
-            raise AttributeError(
-                f"Invalid attribute: {column}.  "
-                "Must be either a primary_key or a unique field."
-            )
-        return self.crud.select(
-            criteria=[getattr(self.base_model, column) == value]
-        ).first()
+
+        criteria = (extra_criteria or []) + [getattr(self.base_model, column) == value]
+        return self.crud.select(criteria=criteria).one_or_none()
 
     def create(self, *, item_in: SQLModel):
         return self.crud.create(item_in=item_in)

@@ -1,12 +1,22 @@
 from sqlmodel import SQLModel
 
+from zpodapi.instances.instance__types import InstanceIdType
 from zpodapi.lib.service_base import ServiceBase
-from zpodcommon import models as M
 from zpodcommon import enums
+from zpodcommon import models as M
 from zpodcommon.lib.zpodengine import ZpodEngine
 
 from . import instance__utils
 from .instance__schemas import InstanceCreate, InstanceDelete
+
+EXTRA_CRITERIA = [
+    M.Instance.status.in_(
+        [
+            enums.InstanceStatus.ACTIVE.value,
+            enums.InstanceStatus.PENDING.value,
+        ]
+    )
+]
 
 
 class InstanceService(ServiceBase):
@@ -18,8 +28,16 @@ class InstanceService(ServiceBase):
         name: str | None = None,
     ):
         return self.get_all_filtered(
-            base_criteria=[M.Instance.status == enums.InstanceStatus.ACTIVE.value],
+            extra_criteria=EXTRA_CRITERIA,
             name=name,
+        )
+
+    def get(self, *, value: InstanceIdType):
+        column, value = InstanceIdType.parse(value)
+        return super().get(
+            value=value,
+            column=column,
+            extra_criteria=EXTRA_CRITERIA if column != "id" else [],
         )
 
     def create(
