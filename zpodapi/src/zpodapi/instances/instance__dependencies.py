@@ -1,7 +1,9 @@
+from typing import Annotated
+
 from fastapi import Depends, HTTPException, Path
-from sqlmodel import Session
 
 from zpodapi.lib import dependencies
+from zpodcommon import models as M
 
 from .instance__services import InstanceService
 from .instance__types import InstanceIdType
@@ -9,7 +11,7 @@ from .instance__types import InstanceIdType
 
 def get_instance_record(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
     id: InstanceIdType = Path(
         examples={
             "id": {"value": "1"},
@@ -21,3 +23,7 @@ def get_instance_record(
     if instance := InstanceService(session=session).get(value=id):
         return instance
     raise HTTPException(status_code=404, detail="Instance not found")
+
+
+GetInstanceRecordDepends = Depends(get_instance_record)
+GetInstanceRecord = Annotated[M.Instance, GetInstanceRecordDepends]

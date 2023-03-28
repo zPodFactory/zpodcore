@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
+from fastapi import APIRouter, HTTPException, status
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
-from zpodcommon import models as M
 
 from . import endpoint__dependencies
 from .endpoint__schemas import EndpointCreate, EndpointUpdate, EndpointView
@@ -12,7 +10,7 @@ from .endpoint__services import EndpointService
 router = APIRouter(
     prefix="/endpoints",
     tags=["endpoints"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
     route_class=RouteLogger,
 )
 
@@ -23,7 +21,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
 ):
     return EndpointService(session=session).get_all()
 
@@ -35,7 +33,7 @@ def get_all(
 )
 def create(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
     endpoint: EndpointCreate,
 ):
     service = EndpointService(session=session)
@@ -51,8 +49,8 @@ def create(
 )
 def update(
     *,
-    session: Session = Depends(dependencies.get_session),
-    endpoint: M.Endpoint = Depends(endpoint__dependencies.get_endpoint_record),
+    session: dependencies.GetSession,
+    endpoint: endpoint__dependencies.GetEndpointRecord,
     endpoint_in: EndpointUpdate,
 ):
     return EndpointService(session=session).update(item=endpoint, item_in=endpoint_in)
@@ -64,8 +62,8 @@ def update(
 )
 def delete(
     *,
-    session: Session = Depends(dependencies.get_session),
-    endpoint: M.Endpoint = Depends(endpoint__dependencies.get_endpoint_record),
+    session: dependencies.GetSession,
+    endpoint: endpoint__dependencies.GetEndpointRecord,
 ):
     EndpointService(session=session).delete(item=endpoint)
 
@@ -75,7 +73,9 @@ def delete(
     status_code=status.HTTP_201_CREATED,
 )
 async def verify(
-    *, session: Session = Depends(dependencies.get_session), endpoint_name: str
+    *,
+    session: dependencies.GetSession,
+    endpoint_name: str,
 ):
     # TODO: Add initial verification of JSON endpoint data
     service = EndpointService(session=session)

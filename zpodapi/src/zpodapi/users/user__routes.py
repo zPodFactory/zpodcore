@@ -1,12 +1,10 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import EmailStr
-from sqlmodel import Session
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
-from zpodcommon import models as M
 
 from . import user__dependencies
 from .user__schemas import UserCreate, UserUpdate, UserViewFull
@@ -17,7 +15,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
     route_class=RouteLogger,
 )
 
@@ -28,7 +26,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
     username: str | None = None,
     email: EmailStr | None = None,
 ):
@@ -41,7 +39,7 @@ def get_all(
 )
 def get_me(
     *,
-    current_user: M.User = Depends(dependencies.get_current_user_and_update),
+    current_user: dependencies.GetCurrentUser,
 ):
     return current_user
 
@@ -52,7 +50,7 @@ def get_me(
 )
 def get(
     *,
-    user: M.User = Depends(user__dependencies.get_user_record),
+    user: user__dependencies.GetUserRecord,
 ):
     return user
 
@@ -64,7 +62,7 @@ def get(
 )
 def create(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
     user_in: UserCreate,
 ):
     service = UserService(session=session)
@@ -84,8 +82,8 @@ def create(
 )
 def update(
     *,
-    session: Session = Depends(dependencies.get_session),
-    user: M.User = Depends(user__dependencies.get_user_record),
+    session: dependencies.GetSession,
+    user: user__dependencies.GetUserRecord,
     user_in: UserUpdate,
 ):
     return UserService(session=session).update(item=user, item_in=user_in)
@@ -97,7 +95,7 @@ def update(
 )
 def delete(
     *,
-    session: Session = Depends(dependencies.get_session),
-    user: M.User = Depends(user__dependencies.get_user_record),
+    session: dependencies.GetSession,
+    user: user__dependencies.GetUserRecord,
 ):
     return UserService(session=session).delete(item=user)

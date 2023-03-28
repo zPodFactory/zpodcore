@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from zpodapi.lib import dependencies
 from zpodcommon import models as M
@@ -9,7 +9,7 @@ from .instance_network__schemas import InstanceNetworkView
 router = APIRouter(
     prefix="/instances/{id}/networks",
     tags=["instances"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
 )
 
 
@@ -19,6 +19,6 @@ router = APIRouter(
 )
 def networks_get_all(
     *,
-    instance: M.Instance = Depends(instance__dependencies.get_instance_record),
+    instance: M.Instance = instance__dependencies.GetInstanceRecord,
 ):
     return instance.networks

@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, status
-from sqlmodel import Session
+from fastapi import APIRouter, status
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
-from zpodcommon import models as M
 
 from . import component__dependencies
 from .component__schemas import ComponentViewFull
@@ -12,7 +10,7 @@ from .component__services import ComponentService
 router = APIRouter(
     prefix="/components",
     tags=["components"],
-    dependencies=[Depends(dependencies.get_current_user_and_update)],
+    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
     route_class=RouteLogger,
 )
 
@@ -23,7 +21,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: dependencies.GetSession,
 ):
     return ComponentService(session=session).get_all()
 
@@ -31,7 +29,7 @@ def get_all(
 @router.get("/{component_uid}", response_model=ComponentViewFull)
 def get(
     *,
-    component: M.Component = Depends(component__dependencies.get_component_record),
+    component: component__dependencies.GetComponentRecord,
 ):
     return component
 
@@ -43,8 +41,8 @@ def get(
 )
 def enable(
     *,
-    session: Session = Depends(dependencies.get_session),
-    component: M.Component = Depends(component__dependencies.get_component_record),
+    session: dependencies.GetSession,
+    component: component__dependencies.GetComponentRecord,
 ):
     return ComponentService(session=session).enable(component=component)
 
@@ -56,7 +54,7 @@ def enable(
 )
 def disable(
     *,
-    session: Session = Depends(dependencies.get_session),
-    component: M.Component = Depends(component__dependencies.get_component_record),
+    session: dependencies.GetSession,
+    component: component__dependencies.GetComponentRecord,
 ):
     return ComponentService(session=session).disable(component=component)
