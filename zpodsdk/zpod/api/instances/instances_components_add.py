@@ -17,7 +17,7 @@ class InstancesComponentsAdd:
 
     def _get_kwargs(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceComponentCreate,
     ) -> Dict[str, Any]:
@@ -67,14 +67,14 @@ class InstancesComponentsAdd:
 
     def sync_detailed(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceComponentCreate,
     ) -> Response[Union[HTTPValidationError, InstanceComponentView]]:
         """Components Add
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceComponentCreate):
 
         Raises:
@@ -99,14 +99,14 @@ class InstancesComponentsAdd:
 
     def sync(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceComponentCreate,
     ) -> Optional[Union[HTTPValidationError, InstanceComponentView]]:
         """Components Add
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceComponentCreate):
 
         Raises:
@@ -124,14 +124,14 @@ class InstancesComponentsAdd:
 
     async def asyncio_detailed(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceComponentCreate,
     ) -> Response[Union[HTTPValidationError, InstanceComponentView]]:
         """Components Add
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceComponentCreate):
 
         Raises:
@@ -154,14 +154,14 @@ class InstancesComponentsAdd:
 
     async def asyncio(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceComponentCreate,
     ) -> Optional[Union[HTTPValidationError, InstanceComponentView]]:
         """Components Add
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceComponentCreate):
 
         Raises:

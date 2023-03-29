@@ -152,6 +152,13 @@ class ZpodClient:
 
     @property
     @cache
+    def libraries_get(self):
+        from zpod.api.libraries import libraries_get
+
+        return libraries_get.LibrariesGet(self._client)
+
+    @property
+    @cache
     def libraries_get_all(self):
         from zpod.api.libraries import libraries_get_all
 

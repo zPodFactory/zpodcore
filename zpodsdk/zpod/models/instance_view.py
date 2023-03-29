@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 import attr
 from dateutil.parser import isoparse
 
-from ..models.instance_status_enum import InstanceStatusEnum
+from ..models.instance_status import InstanceStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class InstanceView:
         last_modified_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         name (str):  Example: tanzu-lab.
         profile (str):  Example: sddc-profile.
-        status (InstanceStatusEnum): An enumeration.
+        status (InstanceStatus): An enumeration.
         components (Union[Unset, List['InstanceComponentView']]):
         features (Union[Unset, List['InstanceFeatureView']]):
         networks (Union[Unset, List['InstanceNetworkView']]):
@@ -44,7 +44,7 @@ class InstanceView:
     last_modified_date: datetime.datetime
     name: str
     profile: str
-    status: InstanceStatusEnum
+    status: InstanceStatus
     components: Union[Unset, List["InstanceComponentView"]] = UNSET
     features: Union[Unset, List["InstanceFeatureView"]] = UNSET
     networks: Union[Unset, List["InstanceNetworkView"]] = UNSET
@@ -146,7 +146,7 @@ class InstanceView:
 
         profile = d.pop("profile")
 
-        status = InstanceStatusEnum(d.pop("status"))
+        status = InstanceStatus(d.pop("status"))
 
         components = []
         _components = d.pop("components", UNSET)

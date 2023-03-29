@@ -26,6 +26,14 @@ def get_all(
     return LibraryService(session=session).get_all()
 
 
+@router.get("/{name}", response_model=LibraryView)
+def get(
+    *,
+    library: LibraryAnnotations.GetLibrary,
+):
+    return library
+
+
 @router.post(
     "",
     response_model=LibraryView,
