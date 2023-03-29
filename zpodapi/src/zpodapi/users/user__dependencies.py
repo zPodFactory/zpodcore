@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Path
+from fastapi import Depends, HTTPException, Path, status
 
 from zpodapi.lib.global_dependencies import GlobalAnnotations
 from zpodcommon import models as M
@@ -28,9 +28,26 @@ def get_user(
     raise HTTPException(status_code=404, detail="User not found")
 
 
+def is_super_admin_or_active_user(
+    *,
+    current_user: GlobalAnnotations.GetCurrentUser,
+    user: "UserAnnotations.GetUser",
+):
+    if not current_user.superadmin and current_user.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient privileges",
+        )
+
+
 class UserDepends:
     GetUser = Depends(get_user)
+    IsSuperAdminOrActiveUser = Depends(is_super_admin_or_active_user)
 
 
 class UserAnnotations:
     GetUser = Annotated[M.User, UserDepends.GetUser]
+    IsSuperAdminOrActiveUser = Annotated[
+        M.User,
+        UserDepends.IsSuperAdminOrActiveUser,
+    ]
