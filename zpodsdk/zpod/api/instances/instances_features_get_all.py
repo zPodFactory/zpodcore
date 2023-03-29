@@ -16,7 +16,7 @@ class InstancesFeaturesGetAll:
 
     def _get_kwargs(
         self,
-        id: int,
+        id: str,
     ) -> Dict[str, Any]:
         url = "{}/instances/{id}/features".format(self.client.base_url, id=id)
 
@@ -68,12 +68,12 @@ class InstancesFeaturesGetAll:
 
     def sync_detailed(
         self,
-        id: int,
+        id: str,
     ) -> Response[Union[HTTPValidationError, List["InstanceFeatureView"]]]:
         """Features Get All
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -96,12 +96,12 @@ class InstancesFeaturesGetAll:
 
     def sync(
         self,
-        id: int,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, List["InstanceFeatureView"]]]:
         """Features Get All
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -117,12 +117,12 @@ class InstancesFeaturesGetAll:
 
     async def asyncio_detailed(
         self,
-        id: int,
+        id: str,
     ) -> Response[Union[HTTPValidationError, List["InstanceFeatureView"]]]:
         """Features Get All
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -143,12 +143,12 @@ class InstancesFeaturesGetAll:
 
     async def asyncio(
         self,
-        id: int,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, List["InstanceFeatureView"]]]:
         """Features Get All
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

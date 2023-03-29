@@ -15,7 +15,7 @@ class InstancesDelete:
 
     def _get_kwargs(
         self,
-        id: int,
+        id: str,
     ) -> Dict[str, Any]:
         url = "{}/instances/{id}".format(self.client.base_url, id=id)
 
@@ -59,12 +59,12 @@ class InstancesDelete:
 
     def sync_detailed(
         self,
-        id: int,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -87,12 +87,12 @@ class InstancesDelete:
 
     def sync(
         self,
-        id: int,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -108,12 +108,12 @@ class InstancesDelete:
 
     async def asyncio_detailed(
         self,
-        id: int,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,12 +134,12 @@ class InstancesDelete:
 
     async def asyncio(
         self,
-        id: int,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

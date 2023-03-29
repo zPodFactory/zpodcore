@@ -1,7 +1,10 @@
+from typing import Optional
+
 import typer
-from rich import print
 from rich.console import Console
 from rich.table import Table
+from zpod.models.library_create import LibraryCreate
+from zpod.models.library_update import LibraryUpdate
 
 from zpodcli.lib import zpod_client
 from zpodcli.lib.callback import isauthenticated
@@ -85,8 +88,7 @@ def update(
     is_enabled = None
     z = zpod_client.ZpodClient()
     if enabled is None:
-        libraries = z.libraries_get_all.sync()
-        library = [library for library in libraries if library.name == name][0]
+        library = z.libraries_get.sync(name=name)
         is_enabled = library.enabled
     elif enabled:
         is_enabled = True
