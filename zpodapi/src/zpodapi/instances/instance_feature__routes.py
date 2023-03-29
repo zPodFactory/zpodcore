@@ -8,7 +8,7 @@ from .instance_feature__schemas import InstanceFeatureView
 router = APIRouter(
     prefix="/instances/{id}/features",
     tags=["instances"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
 )
 
 
