@@ -32,7 +32,7 @@ def get_all(
 )
 def get(
     *,
-    component: component__dependencies.GetComponentRecord,
+    component: component__dependencies.GetComponent,
 ):
     return component
 
@@ -45,7 +45,7 @@ def get(
 def enable(
     *,
     session: dependencies.GetSession,
-    component: component__dependencies.GetComponentRecord,
+    component: component__dependencies.GetComponent,
 ):
     return ComponentService(session=session).enable(component=component)
 
@@ -58,6 +58,6 @@ def enable(
 def disable(
     *,
     session: dependencies.GetSession,
-    component: component__dependencies.GetComponentRecord,
+    component: component__dependencies.GetComponent,
 ):
     return ComponentService(session=session).disable(component=component)

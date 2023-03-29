@@ -18,6 +18,6 @@ router = APIRouter(
 )
 def features_get_all(
     *,
-    instance: instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstance,
 ):
     return instance.features

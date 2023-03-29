@@ -50,7 +50,7 @@ def create(
 def update(
     *,
     session: dependencies.GetSession,
-    endpoint: endpoint__dependencies.GetEndpointRecord,
+    endpoint: endpoint__dependencies.GetEndpoint,
     endpoint_in: EndpointUpdate,
 ):
     return EndpointService(session=session).update(item=endpoint, item_in=endpoint_in)
@@ -63,7 +63,7 @@ def update(
 def delete(
     *,
     session: dependencies.GetSession,
-    endpoint: endpoint__dependencies.GetEndpointRecord,
+    endpoint: endpoint__dependencies.GetEndpoint,
 ):
     EndpointService(session=session).delete(item=endpoint)
 
