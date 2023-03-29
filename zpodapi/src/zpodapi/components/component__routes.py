@@ -10,7 +10,7 @@ from .component__services import ComponentService
 router = APIRouter(
     prefix="/components",
     tags=["components"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
     route_class=RouteLogger,
 )
 
@@ -26,7 +26,10 @@ def get_all(
     return ComponentService(session=session).get_all()
 
 
-@router.get("/{component_uid}", response_model=ComponentViewFull)
+@router.get(
+    "/{component_uid}",
+    response_model=ComponentViewFull,
+)
 def get(
     *,
     component: component__dependencies.GetComponentRecord,

@@ -8,7 +8,7 @@ from .instance_network__schemas import InstanceNetworkView
 router = APIRouter(
     prefix="/instances/{id}/networks",
     tags=["instances"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
 )
 
 

@@ -10,7 +10,7 @@ from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
 router = APIRouter(
     prefix="/libraries",
     tags=["libraries"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
     route_class=RouteLogger,
 )
 
