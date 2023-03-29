@@ -16,7 +16,7 @@ class InstancesGet:
 
     def _get_kwargs(
         self,
-        id: int,
+        id: str,
     ) -> Dict[str, Any]:
         url = "{}/instances/{id}".format(self.client.base_url, id=id)
 
@@ -61,12 +61,12 @@ class InstancesGet:
 
     def sync_detailed(
         self,
-        id: int,
+        id: str,
     ) -> Response[Union[HTTPValidationError, InstanceView]]:
         """Get
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -89,12 +89,12 @@ class InstancesGet:
 
     def sync(
         self,
-        id: int,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, InstanceView]]:
         """Get
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -110,12 +110,12 @@ class InstancesGet:
 
     async def asyncio_detailed(
         self,
-        id: int,
+        id: str,
     ) -> Response[Union[HTTPValidationError, InstanceView]]:
         """Get
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -136,12 +136,12 @@ class InstancesGet:
 
     async def asyncio(
         self,
-        id: int,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, InstanceView]]:
         """Get
 
         Args:
-            id (int):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

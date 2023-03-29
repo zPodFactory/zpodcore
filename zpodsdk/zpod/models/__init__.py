@@ -23,7 +23,7 @@ from .instance_feature_view import InstanceFeatureView
 from .instance_feature_view_data import InstanceFeatureViewData
 from .instance_network_view import InstanceNetworkView
 from .instance_permission_view import InstancePermissionView
-from .instance_status_enum import InstanceStatusEnum
+from .instance_status import InstanceStatus
 from .instance_update import InstanceUpdate
 from .instance_view import InstanceView
 from .library_create import LibraryCreate
@@ -60,7 +60,7 @@ __all__ = (
     "InstanceFeatureViewData",
     "InstanceNetworkView",
     "InstancePermissionView",
-    "InstanceStatusEnum",
+    "InstanceStatus",
     "InstanceUpdate",
     "InstanceView",
     "LibraryCreate",
