@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, status
 
 from zpodapi.lib import dependencies
 from zpodapi.lib.route_logger import RouteLogger
-from zpodcommon import models as M
 
 from . import instance__dependencies
 from .instance__schemas import InstanceCreate, InstanceUpdate, InstanceView

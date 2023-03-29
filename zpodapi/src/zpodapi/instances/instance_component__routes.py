@@ -1,7 +1,6 @@
 from fastapi import APIRouter, status
 
 from zpodapi.lib import dependencies
-from zpodcommon import models as M
 
 from . import instance__dependencies
 from .instance_component__schemas import InstanceComponentCreate, InstanceComponentView
