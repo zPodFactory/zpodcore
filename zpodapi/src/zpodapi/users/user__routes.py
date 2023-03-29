@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
-from .user__dependencies import UserAnnotations
+from .user__dependencies import UserAnnotations, UserDepends
 from .user__schemas import UserCreate, UserUpdate, UserViewFull
 from .user__services import UserService
 
@@ -23,6 +23,7 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[UserViewFull],
+    dependencies=[GlobalDepends.IsSuperAdmin],
 )
 def get_all(
     *,
@@ -47,6 +48,7 @@ def get_me(
 @router.get(
     "/{id}",
     response_model=UserViewFull,
+    dependencies=[UserDepends.IsSuperAdminOrActiveUser],
 )
 def get(
     *,
@@ -59,6 +61,7 @@ def get(
     "",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.IsSuperAdmin],
 )
 def create(
     *,
@@ -79,6 +82,7 @@ def create(
     "/{id}",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[UserDepends.IsSuperAdminOrActiveUser],
 )
 def update(
     *,
@@ -92,6 +96,7 @@ def update(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.IsSuperAdmin],
 )
 def delete(
     *,

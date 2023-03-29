@@ -41,10 +41,21 @@ def update_last_connection_date(
     return current_user
 
 
+def is_superadmin(
+    current_user: "GlobalAnnotations.GetCurrentUser",
+) -> bool:
+    if not current_user.superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient privileges",
+        )
+
+
 class GlobalDepends:
     GetSession = Depends(get_session)
     GetCurrentUser = Depends(get_current_user)
     UpdateLastConnectionDate = Depends(update_last_connection_date)
+    IsSuperAdmin = Depends(is_superadmin)
 
 
 class GlobalAnnotations:
@@ -59,4 +70,8 @@ class GlobalAnnotations:
     UpdateLastConnectionDate = Annotated[
         M.User,
         GlobalDepends.UpdateLastConnectionDate,
+    ]
+    IsSuperAdmin = Annotated[
+        bool,
+        GlobalDepends.IsSuperAdmin,
     ]
