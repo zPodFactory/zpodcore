@@ -1,9 +1,8 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from sqlmodel import Session
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations
 from zpodcommon import models as M
 
 from .library__services import LibraryService
@@ -11,7 +10,7 @@ from .library__services import LibraryService
 
 async def get_library(
     *,
-    session: Session = Depends(dependencies.get_session),
+    session: GlobalAnnotations.GetSession,
     name: str | None = None,
 ):
     if library := LibraryService(session=session).get(value=name):
@@ -19,5 +18,9 @@ async def get_library(
     raise HTTPException(status_code=404, detail="Library not found")
 
 
-GetLibraryDepends = Depends(get_library)
-GetLibrary = Annotated[M.Library, GetLibraryDepends]
+class LibraryDepends:
+    GetLibrary = Depends(get_library)
+
+
+class LibraryAnnotations:
+    GetLibrary = Annotated[M.Library, LibraryDepends.GetLibrary]
