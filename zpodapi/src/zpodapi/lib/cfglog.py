@@ -6,6 +6,11 @@ import sys
 from functools import lru_cache
 from logging.handlers import TimedRotatingFileHandler
 
+import anyio
+import fastapi
+import starlette
+import uvicorn
+
 from zpodapi import settings
 
 logger = logging.getLogger(__name__)
@@ -35,6 +40,7 @@ def configure_logger():
         rich_handler = RichHandler(
             rich_tracebacks=True,
             tracebacks_show_locals=True,
+            tracebacks_suppress=[anyio, fastapi, starlette, uvicorn],
         )
         rich_handler.setLevel(logging.INFO)
         handlers.append(rich_handler)
