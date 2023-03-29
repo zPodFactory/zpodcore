@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalDepends
 
-from . import instance__dependencies
+from .instance__dependencies import InstanceAnnotations
 from .instance_feature__schemas import InstanceFeatureView
 
 router = APIRouter(
     prefix="/instances/{id}/features",
     tags=["instances"],
-    dependencies=[dependencies.UpdateLastConnectionDateDepends],
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
 )
 
 
@@ -18,6 +18,6 @@ router = APIRouter(
 )
 def features_get_all(
     *,
-    instance: instance__dependencies.GetInstance,
+    instance: InstanceAnnotations.GetInstance,
 ):
     return instance.features

@@ -11,12 +11,9 @@ from zpodcommon import models as M
 
 api_key_header = APIKeyHeader(name="access_token", auto_error=False)
 
-GetSessionDepends = Depends(get_session)
-GetSession = Annotated[Session, Depends(get_session)]
-
 
 def get_current_user(
-    session: GetSession,
+    session: "GlobalAnnotations.GetSession",
     api_key: Annotated[APIKey, Security(api_key_header)],
 ):
     if api_key:
@@ -24,8 +21,8 @@ def get_current_user(
     elif settings.DEV_AUTOAUTH_USER:
         criteria = M.User.id == settings.DEV_AUTOAUTH_USER
 
-    if user := session.exec(select(M.User).where(criteria)).first():
-        return user
+    if current_user := session.exec(select(M.User).where(criteria)).first():
+        return current_user
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -33,20 +30,33 @@ def get_current_user(
         )
 
 
-GetCurrentUserDepends = Depends(get_current_user)
-GetCurrentUser = Annotated[M.User, GetCurrentUserDepends]
-
-
 def update_last_connection_date(
-    session: GetSession,
-    user: GetCurrentUser,
+    session: "GlobalAnnotations.GetSession",
+    current_user: "GlobalAnnotations.GetCurrentUser",
 ):
     # Update last connection
-    user.last_connection_date = func.now()
-    session.add(user)
+    current_user.last_connection_date = func.now()
+    session.add(current_user)
     session.commit()
-    return user
+    return current_user
 
 
-UpdateLastConnectionDateDepends = Depends(update_last_connection_date)
-UpdateLastConnectionDate = Annotated[M.User, UpdateLastConnectionDateDepends]
+class GlobalDepends:
+    GetSession = Depends(get_session)
+    GetCurrentUser = Depends(get_current_user)
+    UpdateLastConnectionDate = Depends(update_last_connection_date)
+
+
+class GlobalAnnotations:
+    GetSession = Annotated[
+        Session,
+        GlobalDepends.GetSession,
+    ]
+    GetCurrentUser = Annotated[
+        M.User,
+        GlobalDepends.GetCurrentUser,
+    ]
+    UpdateLastConnectionDate = Annotated[
+        M.User,
+        GlobalDepends.UpdateLastConnectionDate,
+    ]

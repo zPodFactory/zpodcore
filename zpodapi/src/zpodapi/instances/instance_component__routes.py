@@ -1,15 +1,15 @@
 from fastapi import APIRouter, status
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 
-from . import instance__dependencies
+from .instance__dependencies import InstanceAnnotations
 from .instance_component__schemas import InstanceComponentCreate, InstanceComponentView
 from .instance_component__services import InstanceComponentService
 
 router = APIRouter(
     prefix="/instances/{id}/components",
     tags=["instances"],
-    dependencies=[dependencies.UpdateLastConnectionDateDepends],
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
 )
 
 
@@ -19,7 +19,7 @@ router = APIRouter(
 )
 def components_get_all(
     *,
-    instance: instance__dependencies.GetInstance,
+    instance: InstanceAnnotations.GetInstance,
 ):
     return instance.components
 
@@ -31,8 +31,8 @@ def components_get_all(
 )
 def components_add(
     *,
-    session: dependencies.GetSession,
-    instance: instance__dependencies.GetInstance,
+    session: GlobalAnnotations.GetSession,
+    instance: InstanceAnnotations.GetInstance,
     component_in: InstanceComponentCreate,
 ):
     return InstanceComponentService(session=session).add(
@@ -47,8 +47,8 @@ def components_add(
 # )
 # def components_delete(
 #     *,
-#     session: dependencies.GetSession,
-#     instance: M.Instance = instance__dependencies.GetInstanceRecord,
+#     session: GlobalAnnotations.GetSession,
+#     instance: M.Instance = InstanceAnnotations.GetInstance,
 #     component_uid: str,
 # ):
 #     service = InstanceComponentService(session=session)

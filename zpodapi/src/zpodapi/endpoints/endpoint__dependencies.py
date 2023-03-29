@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations
 from zpodcommon import models as M
 
 from .endpoint__services import EndpointService
@@ -10,7 +10,7 @@ from .endpoint__services import EndpointService
 
 async def get_endpoint(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     name: str | None = None,
 ):
     if endpoint := EndpointService(session=session).get(value=name):
@@ -18,5 +18,9 @@ async def get_endpoint(
     raise HTTPException(status_code=404, detail="Endpoint not found")
 
 
-GetEndpointDepends = Depends(get_endpoint)
-GetEndpoint = Annotated[M.Endpoint, GetEndpointDepends]
+class EndpointDepends:
+    GetEndpoint = Depends(get_endpoint)
+
+
+class EndpointAnnotations:
+    GetEndpoint = Annotated[M.Endpoint, EndpointDepends.GetEndpoint]

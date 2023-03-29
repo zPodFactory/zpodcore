@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 from zpodapi.libraries.library__services import LibraryService
 
-from . import library__dependencies
+from .library__dependencies import LibraryAnnotations
 from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
 
 router = APIRouter(
     prefix="/libraries",
     tags=["libraries"],
-    dependencies=[dependencies.UpdateLastConnectionDateDepends],
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
 ):
     return LibraryService(session=session).get_all()
 
@@ -33,7 +33,7 @@ def get_all(
 )
 def create(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     library_in: LibraryCreate,
 ):
     service = LibraryService(session=session)
@@ -53,8 +53,8 @@ def create(
 )
 def update(
     *,
-    session: dependencies.GetSession,
-    library: library__dependencies.GetLibrary,
+    session: GlobalAnnotations.GetSession,
+    library: LibraryAnnotations.GetLibrary,
     library_in: LibraryUpdate,
 ):
     return LibraryService(session=session).update(
@@ -69,7 +69,7 @@ def update(
 )
 def delete(
     *,
-    session: dependencies.GetSession,
-    library: library__dependencies.GetLibrary,
+    session: GlobalAnnotations.GetSession,
+    library: LibraryAnnotations.GetLibrary,
 ):
     return LibraryService(session=session).delete(item=library)
