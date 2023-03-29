@@ -54,7 +54,7 @@ def create(
 def update(
     *,
     session: dependencies.GetSession,
-    library: library__dependencies.GetLibraryRecord,
+    library: library__dependencies.GetLibrary,
     library_in: LibraryUpdate,
 ):
     return LibraryService(session=session).update(
@@ -70,6 +70,6 @@ def update(
 def delete(
     *,
     session: dependencies.GetSession,
-    library: library__dependencies.GetLibraryRecord,
+    library: library__dependencies.GetLibrary,
 ):
     return LibraryService(session=session).delete(item=library)

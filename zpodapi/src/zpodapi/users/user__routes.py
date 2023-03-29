@@ -50,7 +50,7 @@ def get_me(
 )
 def get(
     *,
-    user: user__dependencies.GetUserRecord,
+    user: user__dependencies.GetUser,
 ):
     return user
 
@@ -83,7 +83,7 @@ def create(
 def update(
     *,
     session: dependencies.GetSession,
-    user: user__dependencies.GetUserRecord,
+    user: user__dependencies.GetUser,
     user_in: UserUpdate,
 ):
     return UserService(session=session).update(item=user, item_in=user_in)
@@ -96,6 +96,6 @@ def update(
 def delete(
     *,
     session: dependencies.GetSession,
-    user: user__dependencies.GetUserRecord,
+    user: user__dependencies.GetUser,
 ):
     return UserService(session=session).delete(item=user)
