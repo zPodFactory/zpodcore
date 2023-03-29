@@ -29,7 +29,7 @@ def get_all(
 @router.get("/{name}", response_model=LibraryView)
 def get(
     *,
-    library: library__dependencies.GetLibrary,
+    library: LibraryAnnotations.GetLibrary,
 ):
     return library
 
