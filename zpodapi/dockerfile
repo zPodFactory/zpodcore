@@ -5,7 +5,7 @@ ARG POETRY_VENV=/opt/venv
 
 ######################################
 # BASE
-FROM python:3.11.1-slim as base
+FROM python:3.11.2-slim as base
 
 ARG POETRY_VENV
 
