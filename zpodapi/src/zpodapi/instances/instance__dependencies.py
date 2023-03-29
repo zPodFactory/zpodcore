@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Path
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations
 from zpodcommon import models as M
 
 from .instance__services import InstanceService
@@ -11,7 +11,7 @@ from .instance__types import InstanceIdType
 
 def get_instance(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     id: Annotated[
         InstanceIdType,
         Path(
@@ -27,5 +27,9 @@ def get_instance(
     raise HTTPException(status_code=404, detail="Instance not found")
 
 
-GetInstanceDepends = Depends(get_instance)
-GetInstance = Annotated[M.Instance, GetInstanceDepends]
+class InstanceDepends:
+    GetInstance = Depends(get_instance)
+
+
+class InstanceAnnotations:
+    GetInstance = Annotated[M.Instance, InstanceDepends.GetInstance]
