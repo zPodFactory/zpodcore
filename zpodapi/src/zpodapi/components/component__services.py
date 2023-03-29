@@ -16,7 +16,7 @@ class ComponentService(ServiceBase):
         if component.status == CS.DOWNLOAD_COMPLETE and component.enabled is True:
             return component
         component.enabled = True
-        component.status = "SCHEDULED"
+        component.status = CS.SCHEDULED
         self.crud.save(component)
 
         zpod_engine = zpodengine.ZpodEngine()
