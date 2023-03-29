@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
-from . import endpoint__dependencies
+from .endpoint__dependencies import EndpointAnnotations
 from .endpoint__schemas import EndpointCreate, EndpointUpdate, EndpointView
 from .endpoint__services import EndpointService
 
 router = APIRouter(
     prefix="/endpoints",
     tags=["endpoints"],
-    dependencies=[dependencies.UpdateLastConnectionDateDepends],
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
 ):
     return EndpointService(session=session).get_all()
 
@@ -33,7 +33,7 @@ def get_all(
 )
 def create(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     endpoint: EndpointCreate,
 ):
     service = EndpointService(session=session)
@@ -49,8 +49,8 @@ def create(
 )
 def update(
     *,
-    session: dependencies.GetSession,
-    endpoint: endpoint__dependencies.GetEndpoint,
+    session: GlobalAnnotations.GetSession,
+    endpoint: EndpointAnnotations.GetEndpoint,
     endpoint_in: EndpointUpdate,
 ):
     return EndpointService(session=session).update(item=endpoint, item_in=endpoint_in)
@@ -62,8 +62,8 @@ def update(
 )
 def delete(
     *,
-    session: dependencies.GetSession,
-    endpoint: endpoint__dependencies.GetEndpoint,
+    session: GlobalAnnotations.GetSession,
+    endpoint: EndpointAnnotations.GetEndpoint,
 ):
     EndpointService(session=session).delete(item=endpoint)
 
@@ -74,7 +74,7 @@ def delete(
 )
 async def verify(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     endpoint_name: str,
 ):
     # TODO: Add initial verification of JSON endpoint data

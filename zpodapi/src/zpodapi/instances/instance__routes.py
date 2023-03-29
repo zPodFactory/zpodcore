@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
-from . import instance__dependencies
+from .instance__dependencies import InstanceAnnotations
 from .instance__schemas import InstanceCreate, InstanceUpdate, InstanceView
 from .instance__services import InstanceService
 
 router = APIRouter(
     prefix="/instances",
     tags=["instances"],
-    dependencies=[dependencies.UpdateLastConnectionDateDepends],
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     name: str | None = None,
 ):
     return InstanceService(session=session).get_all(name=name)
@@ -33,7 +33,7 @@ def get_all(
 )
 def get(
     *,
-    instance: instance__dependencies.GetInstance,
+    instance: InstanceAnnotations.GetInstance,
 ):
     return instance
 
@@ -45,8 +45,8 @@ def get(
 )
 def create(
     *,
-    session: dependencies.GetSession,
-    current_user: dependencies.GetCurrentUser,
+    session: GlobalAnnotations.GetSession,
+    current_user: GlobalAnnotations.GetCurrentUser,
     instance_in: InstanceCreate,
 ):
     service = InstanceService(session=session)
@@ -62,8 +62,8 @@ def create(
 )
 def update(
     *,
-    session: dependencies.GetSession,
-    instance: instance__dependencies.GetInstance,
+    session: GlobalAnnotations.GetSession,
+    instance: InstanceAnnotations.GetInstance,
     instance_in: InstanceUpdate,
 ):
     return InstanceService(session=session).update(
@@ -78,7 +78,7 @@ def update(
 )
 def delete(
     *,
-    session: dependencies.GetSession,
-    instance: instance__dependencies.GetInstance,
+    session: GlobalAnnotations.GetSession,
+    instance: InstanceAnnotations.GetInstance,
 ):
     return InstanceService(session=session).delete(item=instance)

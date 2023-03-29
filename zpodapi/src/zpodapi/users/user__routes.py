@@ -3,10 +3,10 @@ import logging
 from fastapi import APIRouter, HTTPException, status
 from pydantic import EmailStr
 
-from zpodapi.lib import dependencies
+from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
-from . import user__dependencies
+from .user__dependencies import UserAnnotations, UserDepends
 from .user__schemas import UserCreate, UserUpdate, UserViewFull
 from .user__services import UserService
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    dependencies=[dependencies.UpdateLastConnectionDateDepends],
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 
@@ -23,10 +23,11 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[UserViewFull],
+    dependencies=[GlobalDepends.IsSuperAdmin],
 )
 def get_all(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     username: str | None = None,
     email: EmailStr | None = None,
 ):
@@ -39,7 +40,7 @@ def get_all(
 )
 def get_me(
     *,
-    current_user: dependencies.GetCurrentUser,
+    current_user: GlobalAnnotations.GetCurrentUser,
 ):
     return current_user
 
@@ -47,10 +48,11 @@ def get_me(
 @router.get(
     "/{id}",
     response_model=UserViewFull,
+    dependencies=[UserDepends.IsSuperAdminOrActiveUser],
 )
 def get(
     *,
-    user: user__dependencies.GetUser,
+    user: UserAnnotations.GetUser,
 ):
     return user
 
@@ -59,10 +61,11 @@ def get(
     "",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.IsSuperAdmin],
 )
 def create(
     *,
-    session: dependencies.GetSession,
+    session: GlobalAnnotations.GetSession,
     user_in: UserCreate,
 ):
     service = UserService(session=session)
@@ -79,11 +82,12 @@ def create(
     "/{id}",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[UserDepends.IsSuperAdminOrActiveUser],
 )
 def update(
     *,
-    session: dependencies.GetSession,
-    user: user__dependencies.GetUser,
+    session: GlobalAnnotations.GetSession,
+    user: UserAnnotations.GetUser,
     user_in: UserUpdate,
 ):
     return UserService(session=session).update(item=user, item_in=user_in)
@@ -92,10 +96,11 @@ def update(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.IsSuperAdmin],
 )
 def delete(
     *,
-    session: dependencies.GetSession,
-    user: user__dependencies.GetUser,
+    session: GlobalAnnotations.GetSession,
+    user: UserAnnotations.GetUser,
 ):
     return UserService(session=session).delete(item=user)
