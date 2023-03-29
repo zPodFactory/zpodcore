@@ -34,7 +34,7 @@ def get_all(
 )
 def get(
     *,
-    instance: M.Instance = instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstanceRecord,
 ):
     return instance
 
@@ -64,7 +64,7 @@ def create(
 def update(
     *,
     session: dependencies.GetSession,
-    instance: M.Instance = instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstanceRecord,
     instance_in: InstanceUpdate,
 ):
     return InstanceService(session=session).update(
@@ -80,6 +80,6 @@ def update(
 def delete(
     *,
     session: dependencies.GetSession,
-    instance: M.Instance = instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstanceRecord,
 ):
     return InstanceService(session=session).delete(item=instance)

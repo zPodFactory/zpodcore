@@ -19,6 +19,6 @@ router = APIRouter(
 )
 def networks_get_all(
     *,
-    instance: M.Instance = instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstanceRecord,
 ):
     return instance.networks
