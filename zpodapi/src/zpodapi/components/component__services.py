@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel
-
+from zpodcommon.enums import ComponentStatus as CS
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 from zpodcommon.lib import zpodengine
@@ -12,6 +12,9 @@ class ComponentService(ServiceBase):
         return super().get(value=value, column=column)
 
     def enable(self, *, component: M.Component):
+        
+        if component.status == CS.DOWNLOAD_COMPLETE and component.enabled is True:
+            return component
         component.enabled = True
         component.status = "SCHEDULED"
         self.crud.save(component)

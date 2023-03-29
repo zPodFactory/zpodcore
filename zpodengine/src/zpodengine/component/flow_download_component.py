@@ -4,7 +4,6 @@ import re
 import shlex
 import subprocess
 import time
-from enum import Enum
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
@@ -14,6 +13,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 
 from zpodcommon import models as M
+from zpodcommon.enums import ComponentStatus as CS
 from zpodengine import settings
 from zpodengine.lib import database
 
@@ -22,14 +22,6 @@ PRODUCTS_PATH = "/products"
 BYTE_SIZE = 1024
 POWERS = {"KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5}
 
-
-class DownloadState(Enum):
-    FAILED_DOWNLOAD = 0
-    NOT_ENTITLED = 1
-    DOWNLOAD_COMPLETE = 2
-    FAILED_AUTHENTICATION = 3
-    DOWNLOAD_INCOMPLETE = 4
-    SCHEDULED = 5
 
 
 class Component(BaseModel):
@@ -178,11 +170,11 @@ def download_component(component: Component) -> int:
             return 0
     except RuntimeError as e:
         if e.args[0] == "AuthenticationError":
-            update_db(component.component_uid, DownloadState.FAILED_AUTHENTICATION.name)
+            update_db(component.component_uid, CS.FAILED_AUTHENTICATION)
             logger.error("The provided credentials are not correct.")
             raise e
         if e.args[0] == "EntitlementError":
-            update_db(component.component_uid, DownloadState.NOT_ENTITLED.name)
+            update_db(component.component_uid, CS.NOT_ENTITLED.name)
             logger.error("You are not entitled to download this sub-product")
             raise e
     except Exception as e:
@@ -258,7 +250,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
             update_db(
-                uid=component.component_uid, status=DownloadState.DOWNLOAD_COMPLETE.name
+                uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE
             )
         return
 
@@ -269,11 +261,11 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
         update_db(
-            uid=component.component_uid, status=DownloadState.DOWNLOAD_INCOMPLETE.name
+            uid=component.component_uid, status=CS.DOWNLOAD_INCOMPLETE
         )
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(uid=component.component_uid, status=DownloadState.DOWNLOAD_COMPLETE.name)
+    update_db(uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE)
     return True
 
 
@@ -325,10 +317,10 @@ def update_download_progress(component):
 
         current_state = get_component_by_uid(component.component_uid).status
         if current_state in (
-            DownloadState.FAILED_AUTHENTICATION.name,
-            DownloadState.FAILED_DOWNLOAD.name,
-            DownloadState.NOT_ENTITLED.name,
-            DownloadState.DOWNLOAD_COMPLETE.name,
+            CS.FAILED_AUTHENTICATION,
+            CS.FAILED_DOWNLOAD,
+            CS.NOT_ENTITLED,
+            CS.DOWNLOAD_COMPLETE,
         ):
             logger.error(
                 f"Cannot track {component.component_uid} - state {current_state}"
