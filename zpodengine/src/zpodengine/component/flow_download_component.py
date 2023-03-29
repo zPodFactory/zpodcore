@@ -23,7 +23,6 @@ BYTE_SIZE = 1024
 POWERS = {"KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5}
 
 
-
 class Component(BaseModel):
     component_name: str
     component_version: str
@@ -174,7 +173,7 @@ def download_component(component: Component) -> int:
             logger.error("The provided credentials are not correct.")
             raise e
         if e.args[0] == "EntitlementError":
-            update_db(component.component_uid, CS.NOT_ENTITLED.name)
+            update_db(component.component_uid, CS.NOT_ENTITLED)
             logger.error("You are not entitled to download this sub-product")
             raise e
     except Exception as e:
@@ -249,9 +248,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
 
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
-            update_db(
-                uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE
-            )
+            update_db(uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE)
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
@@ -260,9 +257,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum = compute_checksum(component, filename)
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
-        update_db(
-            uid=component.component_uid, status=CS.DOWNLOAD_INCOMPLETE
-        )
+        update_db(uid=component.component_uid, status=CS.DOWNLOAD_INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
     update_db(uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE)
