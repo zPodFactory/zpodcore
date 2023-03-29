@@ -15,7 +15,7 @@ httpx = "0.23.3"
 ipython = "^8.11.0"
 passlib = "1.7.4"
 psycopg2 = "2.9.5"
-python = "^3.11.1"
+python = "3.11.2"
 python-dotenv = "1.0.0"
 python-jose = {extras = ["cryptography"], version = "3.3.0"}
 python-multipart = "0.0.6"
