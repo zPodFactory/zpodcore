@@ -248,7 +248,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
 
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
-            update_db(uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE)
+            update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
@@ -257,7 +257,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum = compute_checksum(component, filename)
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
-        update_db(uid=component.component_uid, status=CS.DOWNLOAD_INCOMPLETE)
+        update_db(component.component_uid, CS.DOWNLOAD_INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
     update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
