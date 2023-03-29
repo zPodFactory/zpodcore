@@ -10,7 +10,7 @@ from .endpoint__services import EndpointService
 router = APIRouter(
     prefix="/endpoints",
     tags=["endpoints"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
     route_class=RouteLogger,
 )
 

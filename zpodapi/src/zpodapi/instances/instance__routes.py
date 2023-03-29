@@ -10,7 +10,7 @@ from .instance__services import InstanceService
 router = APIRouter(
     prefix="/instances",
     tags=["instances"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
     route_class=RouteLogger,
 )
 

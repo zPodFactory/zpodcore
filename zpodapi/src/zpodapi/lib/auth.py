@@ -30,7 +30,7 @@ def get_current_user(
         )
 
 
-def get_current_user_and_update(
+def update_last_connection_date(
     session: Annotated[Session, Depends(get_session)],
     user: Annotated[M.User, Depends(get_current_user)],
 ):

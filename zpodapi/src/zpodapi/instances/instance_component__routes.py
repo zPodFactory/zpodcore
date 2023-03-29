@@ -9,7 +9,7 @@ from .instance_component__services import InstanceComponentService
 router = APIRouter(
     prefix="/instances/{id}/components",
     tags=["instances"],
-    dependencies=[dependencies.GetCurrentUserAndUpdateDepends],
+    dependencies=[dependencies.UpdateLastConnectionDateDepends],
 )
 
 
