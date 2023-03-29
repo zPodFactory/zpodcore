@@ -19,10 +19,10 @@ def get_current_user(
     session: GetSession,
     api_key: Annotated[APIKey, Security(api_key_header)],
 ):
-    if settings.DEV_AUTOAUTH_USER:
-        criteria = M.User.id == settings.DEV_AUTOAUTH_USER
-    else:
+    if api_key:
         criteria = M.User.api_token == api_key
+    elif settings.DEV_AUTOAUTH_USER:
+        criteria = M.User.id == settings.DEV_AUTOAUTH_USER
 
     if user := session.exec(select(M.User).where(criteria)).first():
         return user
