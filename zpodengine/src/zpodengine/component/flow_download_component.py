@@ -260,7 +260,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         update_db(uid=component.component_uid, status=CS.DOWNLOAD_INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(uid=component.component_uid, status=CS.DOWNLOAD_COMPLETE)
+    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
     return True
 
 
@@ -322,7 +322,7 @@ def update_download_progress(component):
             )
             raise RuntimeError("Failed Download")
 
-        update_db(uid=component.component_uid, status=progress)
+        update_db(component.component_uid, progress)
         logger.info(
             f"Download progress for component {component.component_uid}: {progress}%"
         )
