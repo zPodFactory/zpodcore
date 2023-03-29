@@ -17,7 +17,7 @@ class InstancesUpdate:
 
     def _get_kwargs(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceUpdate,
     ) -> Dict[str, Any]:
@@ -67,14 +67,14 @@ class InstancesUpdate:
 
     def sync_detailed(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceUpdate,
     ) -> Response[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
 
         Raises:
@@ -99,14 +99,14 @@ class InstancesUpdate:
 
     def sync(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceUpdate,
     ) -> Optional[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
 
         Raises:
@@ -124,14 +124,14 @@ class InstancesUpdate:
 
     async def asyncio_detailed(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceUpdate,
     ) -> Response[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
 
         Raises:
@@ -154,14 +154,14 @@ class InstancesUpdate:
 
     async def asyncio(
         self,
-        id: int,
+        id: str,
         *,
         json_body: InstanceUpdate,
     ) -> Optional[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
-            id (int):
+            id (str):
             json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
 
         Raises:
