@@ -8,7 +8,7 @@ from zpodcommon import models as M
 from .endpoint__services import EndpointService
 
 
-async def get_endpoint_record(
+async def get_endpoint(
     *,
     session: dependencies.GetSession,
     name: str | None = None,
@@ -18,5 +18,5 @@ async def get_endpoint_record(
     raise HTTPException(status_code=404, detail="Endpoint not found")
 
 
-GetEndpointRecordDepends = Depends(get_endpoint_record)
-GetEndpointRecord = Annotated[M.Endpoint, GetEndpointRecordDepends]
+GetEndpointDepends = Depends(get_endpoint)
+GetEndpoint = Annotated[M.Endpoint, GetEndpointDepends]

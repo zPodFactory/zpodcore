@@ -9,7 +9,7 @@ from .instance__services import InstanceService
 from .instance__types import InstanceIdType
 
 
-def get_instance_record(
+def get_instance(
     *,
     session: dependencies.GetSession,
     id: Annotated[
@@ -27,5 +27,5 @@ def get_instance_record(
     raise HTTPException(status_code=404, detail="Instance not found")
 
 
-GetInstanceRecordDepends = Depends(get_instance_record)
-GetInstanceRecord = Annotated[M.Instance, GetInstanceRecordDepends]
+GetInstanceDepends = Depends(get_instance)
+GetInstance = Annotated[M.Instance, GetInstanceDepends]

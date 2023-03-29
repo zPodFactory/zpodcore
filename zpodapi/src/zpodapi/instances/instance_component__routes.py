@@ -19,7 +19,7 @@ router = APIRouter(
 )
 def components_get_all(
     *,
-    instance: instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstance,
 ):
     return instance.components
 
@@ -32,7 +32,7 @@ def components_get_all(
 def components_add(
     *,
     session: dependencies.GetSession,
-    instance: instance__dependencies.GetInstanceRecord,
+    instance: instance__dependencies.GetInstance,
     component_in: InstanceComponentCreate,
 ):
     return InstanceComponentService(session=session).add(

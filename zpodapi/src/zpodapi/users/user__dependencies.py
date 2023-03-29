@@ -9,7 +9,7 @@ from .user__services import UserService
 from .user__types import UserIdType
 
 
-def get_user_record(
+def get_user(
     *,
     session: dependencies.GetSession,
     id: Annotated[
@@ -28,5 +28,5 @@ def get_user_record(
     raise HTTPException(status_code=404, detail="User not found")
 
 
-GetUserRecordDepends = Depends(get_user_record)
-GetUserRecord = Annotated[M.User, GetUserRecordDepends]
+GetUserDepends = Depends(get_user)
+GetUser = Annotated[M.User, GetUserDepends]

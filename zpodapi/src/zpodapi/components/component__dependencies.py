@@ -8,7 +8,7 @@ from zpodcommon import models as M
 from .component__services import ComponentService
 
 
-def get_component_record(
+def get_component(
     *,
     session: dependencies.GetSession,
     component_uid: str,
@@ -18,5 +18,5 @@ def get_component_record(
     raise HTTPException(status_code=404, detail="Component not found")
 
 
-GetComponentRecordDepends = Depends(get_component_record)
-GetComponentRecord = Annotated[M.Component, GetComponentRecordDepends]
+GetComponentDepends = Depends(get_component)
+GetComponent = Annotated[M.Component, GetComponentDepends]

@@ -9,7 +9,7 @@ from zpodcommon import models as M
 from .library__services import LibraryService
 
 
-async def get_library_record(
+async def get_library(
     *,
     session: Session = Depends(dependencies.get_session),
     name: str | None = None,
@@ -19,5 +19,5 @@ async def get_library_record(
     raise HTTPException(status_code=404, detail="Library not found")
 
 
-GetLibraryRecordDepends = Depends(get_library_record)
-GetLibraryRecord = Annotated[M.Library, GetLibraryRecordDepends]
+GetLibraryDepends = Depends(get_library)
+GetLibrary = Annotated[M.Library, GetLibraryDepends]
