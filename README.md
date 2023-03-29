@@ -23,8 +23,8 @@ Complete the following steps to set up your development environment:
 1. Configure Virtual Environment.  In the `/zpodapi` directory, run:
 
     ```bash
-    pyenv install 3.10.7
-    pyenv local 3.10.7
+    pyenv install 3.11.2
+    pyenv local 3.11.2
     poetry config virtualenvs.in-project true
     poetry install
     ```
