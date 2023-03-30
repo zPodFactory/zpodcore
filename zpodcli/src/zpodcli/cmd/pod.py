@@ -1,8 +1,6 @@
 import typer
 
-from zpodcli.lib.callback import isauthenticated
-
-app = typer.Typer(help="Manage pods", callback=isauthenticated)
+app = typer.Typer(help="Manage pods")
 
 
 @app.command()

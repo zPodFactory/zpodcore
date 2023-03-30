@@ -4,9 +4,8 @@ from rich.console import Console
 from rich.table import Table
 
 from zpodcli.lib import zpod_client
-from zpodcli.lib.callback import isauthenticated
 
-app = typer.Typer(help="Manage components", callback=isauthenticated)
+app = typer.Typer(help="Manage components")
 
 console = Console()
 
