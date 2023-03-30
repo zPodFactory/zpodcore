@@ -1,8 +1,6 @@
 import typer
 
-from zpodcli.lib.callback import isauthenticated
-
-app = typer.Typer(help="Manage permissions", callback=isauthenticated)
+app = typer.Typer(help="Manage permissions")
 
 
 @app.command()

@@ -1,3 +1,5 @@
+from functools import partial
+
 import typer
 from rich import print
 
@@ -12,23 +14,30 @@ from zpodcli.cmd import (
     profile,
     user,
 )
+from zpodcli.lib.callback import isauthenticated
 
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
 
 
 def launch():
     # top level commands
     app.command()(connect.connect)
-    # own level commands
 
-    app.add_typer(group.app, name="group")
-    app.add_typer(pod.app, name="pod")
-    app.add_typer(profile.app, name="profile")
-    app.add_typer(library.app, name="library")
-    app.add_typer(permission.app, name="permission")
-    app.add_typer(endpoint.app, name="endpoint")
-    app.add_typer(component.app, name="component")
-    app.add_typer(user.app, name="user")
+    # own level commands
+    authed_typer = partial(
+        app.add_typer,
+        callback=isauthenticated,
+        no_args_is_help=True,
+    )
+
+    authed_typer(group.app, name="group")
+    authed_typer(pod.app, name="pod")
+    authed_typer(profile.app, name="profile")
+    authed_typer(library.app, name="library")
+    authed_typer(permission.app, name="permission")
+    authed_typer(endpoint.app, name="endpoint")
+    authed_typer(component.app, name="component")
+    authed_typer(user.app, name="user")
 
     app()
 

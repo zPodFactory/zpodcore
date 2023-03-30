@@ -4,10 +4,9 @@ import typer
 from rich import print
 from rich.table import Table
 
-from zpodcli.lib import zpod_client, utils
-from zpodcli.lib.callback import isauthenticated
+from zpodcli.lib import utils, zpod_client
 
-app = typer.Typer(help="Manage users", callback=isauthenticated)
+app = typer.Typer(help="Manage users")
 
 
 @app.command()
