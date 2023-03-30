@@ -7,9 +7,8 @@ from zpod.models.library_create import LibraryCreate
 from zpod.models.library_update import LibraryUpdate
 
 from zpodcli.lib import zpod_client
-from zpodcli.lib.callback import isauthenticated
 
-app = typer.Typer(help="Manage libraries", callback=isauthenticated)
+app = typer.Typer(help="Manage libraries")
 
 console = Console()
 
@@ -38,7 +37,7 @@ def generate_table(libraries: list, action: str = None):
             f"[magenta]{library.description}[/magenta]",
             library.git_url,
             f"[yellow]{library.creation_date.strftime('%Y-%m-%d %H:%M:%S')}[/yellow]",
-            f"[magenta]{library.last_modified_date.strftime('%Y-%m-%d %H:%M:%S')}[/magenta]",
+            f"[magenta]{library.last_modified_date.strftime('%Y-%m-%d %H:%M:%S')}[/magenta]",  # noqa e501
             library.enabled.__str__(),
         )
     console.print(table)

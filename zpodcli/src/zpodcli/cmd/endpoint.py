@@ -1,8 +1,6 @@
 import typer
 
-from zpodcli.lib.callback import isauthenticated
-
-app = typer.Typer(help="Manage endpoints", callback=isauthenticated)
+app = typer.Typer(help="Manage endpoints")
 
 
 @app.command()
