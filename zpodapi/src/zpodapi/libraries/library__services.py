@@ -37,13 +37,14 @@ class LibraryService(ServiceBase):
                 ),
                 component_name=component["component_name"],
                 component_version=component["component_version"],
+                component_description=component["component_description"],
             )
             self.session.add(c)
         self.session.commit()
         return library
 
-    def delete(self, *, library: M.Library):
-        statement = select(M.Component).where(M.Component.library_name == library.name)
+    def delete(self, *, item: M.Library):
+        statement = select(M.Component).where(M.Component.library_name == item.name)
         result = self.session.exec(statement)
 
         components = result.all()
@@ -55,11 +56,11 @@ class LibraryService(ServiceBase):
         self.session.commit()
 
         # Delete Library from DB
-        print(f"Deleting {library}")
-        self.crud.delete(library)
+        print(f"Deleting {item.name}")
+        self.crud.delete(item=item)
 
         # Delete Library from filesystem (not potential products download yet)
-        zpod_delete_library(library)
+        zpod_delete_library(library=item)
         return None
 
 
@@ -81,6 +82,5 @@ def zpod_delete_library(library: M.Library):
 
 def zpod_fetch_library_components_filename(library: M.Library):
     component_file_list = list_json_files(f"/library/{library.name}")
-
     print(component_file_list)
     return component_file_list
