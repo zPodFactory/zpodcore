@@ -1,5 +1,4 @@
 import typer
-from rich import print
 from rich.console import Console
 from rich.table import Table
 
@@ -18,6 +17,7 @@ def generate_table(components: list, component_uid: str = None, action: str = No
     table.add_column("Name", style="dim")
     table.add_column("Version")
     table.add_column("Library", style="dim")
+    table.add_column("Description")
     table.add_column("Enabled", style="dim")
     table.add_column("Status")
     for component in components:
@@ -26,6 +26,7 @@ def generate_table(components: list, component_uid: str = None, action: str = No
             f"[magenta]{component.component_name}[/magenta]",
             component.component_version,
             f"[yellow]{component.library_name}[/yellow]",
+            f"[green]{component.component_description}[/green]",
             f"[magenta]{component.enabled.__str__()}[/magenta]",
             component.status,
         )
@@ -34,41 +35,29 @@ def generate_table(components: list, component_uid: str = None, action: str = No
 
 @app.command()
 def list():
-    """
-    List components
-    """
-    print("Listing components")
-
     z = zpod_client.ZpodClient()
     components = z.components_get_all.sync()
-
-    print("Server Component list")
-    print(components)
-
-    print("")
-    print("[yellow][blink]Rich Table nice view ;-)[/blink][/yellow]")
-
     generate_table(components)
 
 
 @app.command()
-def enable(component_uid: str):
+def enable(component_uid: str = typer.Option(..., "--uid")):
     z = zpod_client.ZpodClient()
     component = z.components_enable.sync(component_uid=component_uid)
     generate_table(components=[component], component_uid=component_uid, action="Enable")
 
 
 @app.command()
-def get(component_uid: str):
+def get(component_uid: str = typer.Option(..., "--uid")):
     z = zpod_client.ZpodClient()
     component = z.components_get.sync(component_uid=component_uid)
     generate_table(components=[component], component_uid=component_uid, action="Get")
 
 
 @app.command()
-def disable(component_uid: str):
+def disable(component_uid: str = typer.Option(..., "--uid")):
     z = zpod_client.ZpodClient()
-    component = z.components_enable.sync(component_uid=component_uid)
+    component = z.components_disable.sync(component_uid=component_uid)
     generate_table(
         components=[component], component_uid=component_uid, action="Disable"
     )

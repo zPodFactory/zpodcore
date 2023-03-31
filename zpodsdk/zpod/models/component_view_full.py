@@ -11,6 +11,7 @@ T = TypeVar("T", bound="ComponentViewFull")
 class ComponentViewFull:
     """
     Attributes:
+        component_description (str):  Example: VMWare NSX.
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
         component_version (str):  Example: 4.4.1.
@@ -20,6 +21,7 @@ class ComponentViewFull:
         status (Union[Unset, str]):  Example: SCHEDULED.
     """
 
+    component_description: str
     component_name: str
     component_uid: str
     component_version: str
@@ -30,6 +32,7 @@ class ComponentViewFull:
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
+        component_description = self.component_description
         component_name = self.component_name
         component_uid = self.component_uid
         component_version = self.component_version
@@ -42,6 +45,7 @@ class ComponentViewFull:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "component_description": component_description,
                 "component_name": component_name,
                 "component_uid": component_uid,
                 "component_version": component_version,
@@ -61,6 +65,8 @@ class ComponentViewFull:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
+        component_description = d.pop("component_description")
+
         component_name = d.pop("component_name")
 
         component_uid = d.pop("component_uid")
@@ -76,6 +82,7 @@ class ComponentViewFull:
         status = d.pop("status", UNSET)
 
         component_view_full = cls(
+            component_description=component_description,
             component_name=component_name,
             component_uid=component_uid,
             component_version=component_version,
