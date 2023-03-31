@@ -10,6 +10,7 @@ class Component(CommonDatesMixin, SQLModel, table=True):
     component_uid: str = Field(..., unique=True, nullable=False)
     component_name: str = Field(..., unique=False, nullable=False)
     component_version: str = Field(..., unique=False, nullable=False)
+    component_description: str = Field(..., unique=False, nullable=True)
     library_name: str = Field(default=None, foreign_key="libraries.name")
     filename: str = Field(..., unique=True, index=True, nullable=False)
     enabled: bool = Field(False, nullable=False)

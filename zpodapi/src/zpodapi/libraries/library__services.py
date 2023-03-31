@@ -37,6 +37,7 @@ class LibraryService(ServiceBase):
                 ),
                 component_name=component["component_name"],
                 component_version=component["component_version"],
+                component_description=component["component_description"],
             )
             self.session.add(c)
         self.session.commit()
@@ -56,7 +57,7 @@ class LibraryService(ServiceBase):
 
         # Delete Library from DB
         print(f"Deleting {library}")
-        self.crud.delete(library)
+        self.crud.delete(item=library)
 
         # Delete Library from filesystem (not potential products download yet)
         zpod_delete_library(library)
@@ -81,6 +82,5 @@ def zpod_delete_library(library: M.Library):
 
 def zpod_fetch_library_components_filename(library: M.Library):
     component_file_list = list_json_files(f"/library/{library.name}")
-
     print(component_file_list)
     return component_file_list

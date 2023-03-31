@@ -65,10 +65,9 @@ def create(
 @app.command()
 def delete(
     name: str = typer.Option(..., "--name", "-n"),
-    git_url: str = typer.Option(ZPOD_LIBRARY_GIT_URL, "--git_url", "-u"),
 ):
     z = zpod_client.ZpodClient()
-    library = z.libraries_delete.sync(name=name, git_url=git_url)
+    library = z.libraries_delete.sync(name=name)
     if library is None:
         console.print(
             f"Library [magenta]{name}[/magenta] has been deleted successfully",

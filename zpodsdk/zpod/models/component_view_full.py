@@ -14,6 +14,7 @@ class ComponentViewFull:
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
         component_version (str):  Example: 4.4.1.
+        component_description (Union[Unset, str]):  Example: VMWare NSX.
         enabled (Union[Unset, bool]):
         filename (Union[Unset, str]):  Example: vmware_nsx/vmware-nsxt-4.0.1.1.json.
         library_name (Union[Unset, str]):
@@ -23,6 +24,7 @@ class ComponentViewFull:
     component_name: str
     component_uid: str
     component_version: str
+    component_description: Union[Unset, str] = UNSET
     enabled: Union[Unset, bool] = False
     filename: Union[Unset, str] = UNSET
     library_name: Union[Unset, str] = UNSET
@@ -33,6 +35,7 @@ class ComponentViewFull:
         component_name = self.component_name
         component_uid = self.component_uid
         component_version = self.component_version
+        component_description = self.component_description
         enabled = self.enabled
         filename = self.filename
         library_name = self.library_name
@@ -47,6 +50,8 @@ class ComponentViewFull:
                 "component_version": component_version,
             }
         )
+        if component_description is not UNSET:
+            field_dict["component_description"] = component_description
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
         if filename is not UNSET:
@@ -67,6 +72,8 @@ class ComponentViewFull:
 
         component_version = d.pop("component_version")
 
+        component_description = d.pop("component_description", UNSET)
+
         enabled = d.pop("enabled", UNSET)
 
         filename = d.pop("filename", UNSET)
@@ -79,6 +86,7 @@ class ComponentViewFull:
             component_name=component_name,
             component_uid=component_uid,
             component_version=component_version,
+            component_description=component_description,
             enabled=enabled,
             filename=filename,
             library_name=library_name,

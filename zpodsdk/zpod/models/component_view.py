@@ -1,6 +1,8 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import attr
+
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ComponentView")
 
@@ -12,17 +14,20 @@ class ComponentView:
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
         component_version (str):  Example: 4.4.1.
+        component_description (Union[Unset, str]):  Example: VMWare NSX.
     """
 
     component_name: str
     component_uid: str
     component_version: str
+    component_description: Union[Unset, str] = UNSET
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         component_name = self.component_name
         component_uid = self.component_uid
         component_version = self.component_version
+        component_description = self.component_description
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -33,6 +38,8 @@ class ComponentView:
                 "component_version": component_version,
             }
         )
+        if component_description is not UNSET:
+            field_dict["component_description"] = component_description
 
         return field_dict
 
@@ -45,10 +52,13 @@ class ComponentView:
 
         component_version = d.pop("component_version")
 
+        component_description = d.pop("component_description", UNSET)
+
         component_view = cls(
             component_name=component_name,
             component_uid=component_uid,
             component_version=component_version,
+            component_description=component_description,
         )
 
         component_view.additional_properties = d

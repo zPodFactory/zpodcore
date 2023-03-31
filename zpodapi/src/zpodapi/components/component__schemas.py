@@ -11,6 +11,7 @@ class ComponentView(SQLModel):
     component_uid: str = Field(nullable=False, example="vcda-4.4.1")
     component_name: str = Field(nullable=False, example="vcda")
     component_version: str = Field(nullable=False, example="4.4.1")
+    component_description: str | None = Field(example="VMWare NSX")
 
 
 class ComponentViewFull(ComponentView):
