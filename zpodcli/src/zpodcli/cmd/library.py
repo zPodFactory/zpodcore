@@ -104,4 +104,7 @@ def update(
 def get(name: str = typer.Option(..., "--name", "-n")):
     z = zpod_client.ZpodClient()
     library = z.libraries_get.sync(name=name)
+    if library is None:
+        console.print(f"Library [magenta]{name}[/magenta] not found", style="red")
+        return
     generate_table(libraries=[library], action="Get")
