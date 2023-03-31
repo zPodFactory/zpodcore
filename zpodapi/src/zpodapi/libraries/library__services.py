@@ -43,8 +43,8 @@ class LibraryService(ServiceBase):
         self.session.commit()
         return library
 
-    def delete(self, *, library: M.Library):
-        statement = select(M.Component).where(M.Component.library_name == library.name)
+    def delete(self, *, item: M.Library):
+        statement = select(M.Component).where(M.Component.library_name == item.name)
         result = self.session.exec(statement)
 
         components = result.all()
@@ -56,11 +56,11 @@ class LibraryService(ServiceBase):
         self.session.commit()
 
         # Delete Library from DB
-        print(f"Deleting {library}")
-        self.crud.delete(item=library)
+        print(f"Deleting {item.name}")
+        self.crud.delete(item=item)
 
         # Delete Library from filesystem (not potential products download yet)
-        zpod_delete_library(library)
+        zpod_delete_library(library=item)
         return None
 
 
