@@ -80,4 +80,4 @@ def delete(
     session: GlobalAnnotations.GetSession,
     library: LibraryAnnotations.GetLibrary,
 ):
-    return LibraryService(session=session).delete(library=library)
+    return LibraryService(session=session).delete(item=library)
