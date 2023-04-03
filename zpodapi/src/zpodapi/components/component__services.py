@@ -5,11 +5,16 @@ from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus as CS
 from zpodcommon.lib import zpodengine
 
+from .component__types import ComponentIdType
+
 
 class ComponentService(ServiceBase):
     base_model: SQLModel = M.Component
 
-    def get(self, *, value, column="component_uid"):
+    def get(self, *, value, column="id"):
+        column, value = ComponentIdType.parse(value)
+        if column == "uid":
+            column = "component_uid"
         return super().get(value=value, column=column)
 
     def enable(self, *, component: M.Component):

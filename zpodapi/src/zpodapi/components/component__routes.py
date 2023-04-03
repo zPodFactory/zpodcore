@@ -27,7 +27,7 @@ def get_all(
 
 
 @router.get(
-    "/{component_uid}",
+    "/{id}",
     response_model=ComponentViewFull,
 )
 def get(
@@ -38,7 +38,7 @@ def get(
 
 
 @router.put(
-    "/{component_uid}/enable",
+    "/{id}/enable",
     response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
 )
@@ -51,7 +51,7 @@ def enable(
 
 
 @router.put(
-    "/{component_uid}/disable",
+    "/{id}/disable",
     response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
 )
