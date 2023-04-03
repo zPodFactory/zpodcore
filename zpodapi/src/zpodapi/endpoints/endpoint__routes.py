@@ -43,7 +43,7 @@ def create(
 
 
 @router.patch(
-    "",
+    "/{id}",
     response_model=EndpointView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -57,7 +57,7 @@ def update(
 
 
 @router.delete(
-    "",
+    "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete(
@@ -69,16 +69,14 @@ def delete(
 
 
 @router.put(
-    "/{endpoint_name}/verify",
+    "/{id}/verify",
     status_code=status.HTTP_201_CREATED,
 )
 async def verify(
     *,
+
     session: GlobalAnnotations.GetSession,
-    endpoint_name: str,
+    endpoint: EndpointAnnotations.GetEndpoint,
 ):
     # TODO: Add initial verification of JSON endpoint data
-    service = EndpointService(session=session)
-    if endpoint := service.get(value=endpoint_name):
-        return service.verify(item=endpoint)
-    raise HTTPException(status_code=404, detail="Endpoint not found")
+    return EndpointService(session=session).verify(item=endpoint)
