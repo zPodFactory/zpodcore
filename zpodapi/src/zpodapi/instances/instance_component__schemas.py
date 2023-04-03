@@ -1,15 +1,19 @@
 from typing import Any
 
-from sqlmodel import SQLModel
-
 from zpodapi.components.component__schemas import ComponentView
-from zpodapi.lib.schema_base import Req
+from zpodapi.lib.schema_base import Field, SchemaBase
 
 
-class InstanceComponentView(SQLModel):
+class D:
+    id = {"example": 1}
+    data = {"example": "{}"}
+    component_uid = {"example": "vcda-4.4.1"}
+
+
+class InstanceComponentView(SchemaBase):
     component: ComponentView
-    data: dict[Any, Any]
+    data: dict[Any, Any] = Field(..., D.data)
 
 
-class InstanceComponentCreate(SQLModel, extra="forbid"):
-    component_uid: str = Req(example="vcda-4.4.1")
+class InstanceComponentCreate(SchemaBase):
+    component_uid: str = Field(..., D.component_uid)
