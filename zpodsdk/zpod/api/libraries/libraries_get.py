@@ -16,9 +16,9 @@ class LibrariesGet:
 
     def _get_kwargs(
         self,
-        name: str,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/libraries/{name}".format(self.client.base_url, name=name)
+        url = "{}/libraries/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
@@ -61,12 +61,12 @@ class LibrariesGet:
 
     def sync_detailed(
         self,
-        name: str,
+        id: str,
     ) -> Response[Union[HTTPValidationError, LibraryView]]:
         """Get
 
         Args:
-            name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -77,7 +77,7 @@ class LibrariesGet:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            name=name,
+            id=id,
         )
 
         response = httpx.request(
@@ -89,12 +89,12 @@ class LibrariesGet:
 
     def sync(
         self,
-        name: str,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, LibraryView]]:
         """Get
 
         Args:
-            name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -105,17 +105,17 @@ class LibrariesGet:
         """  # noqa e501
 
         return self.sync_detailed(
-            name=name,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        name: str,
+        id: str,
     ) -> Response[Union[HTTPValidationError, LibraryView]]:
         """Get
 
         Args:
-            name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -126,7 +126,7 @@ class LibrariesGet:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            name=name,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -136,12 +136,12 @@ class LibrariesGet:
 
     async def asyncio(
         self,
-        name: str,
+        id: str,
     ) -> Optional[Union[HTTPValidationError, LibraryView]]:
         """Get
 
         Args:
-            name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -153,6 +153,6 @@ class LibrariesGet:
 
         return (
             await self.asyncio_detailed(
-                name=name,
+                id=id,
             )
         ).parsed

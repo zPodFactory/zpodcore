@@ -43,21 +43,22 @@ def list():
 @app.command()
 def enable(component_uid: str = typer.Option(..., "--uid")):
     z = zpod_client.ZpodClient()
-    component = z.components_enable.sync(component_uid=component_uid)
+    component = z.components_enable.sync(id=f"uid={component_uid}")
     generate_table(components=[component], component_uid=component_uid, action="Enable")
 
 
 @app.command()
 def get(component_uid: str = typer.Option(..., "--uid")):
     z = zpod_client.ZpodClient()
-    component = z.components_get.sync(component_uid=component_uid)
+    component = z.components_get.sync(id=f"uid={component_uid}")
+
     generate_table(components=[component], component_uid=component_uid, action="Get")
 
 
 @app.command()
 def disable(component_uid: str = typer.Option(..., "--uid")):
     z = zpod_client.ZpodClient()
-    component = z.components_disable.sync(component_uid=component_uid)
+    component = z.components_disable.sync(id=f"uid={component_uid}")
     generate_table(
         components=[component], component_uid=component_uid, action="Disable"
     )

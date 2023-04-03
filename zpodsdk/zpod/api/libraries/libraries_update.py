@@ -8,7 +8,7 @@ from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.library_update import LibraryUpdate
 from ...models.library_view import LibraryView
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 class LibrariesUpdate:
@@ -17,19 +17,14 @@ class LibrariesUpdate:
 
     def _get_kwargs(
         self,
+        id: str,
         *,
         json_body: LibraryUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Dict[str, Any]:
-        url = "{}/libraries".format(self.client.base_url)
+        url = "{}/libraries/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
-
-        params: Dict[str, Any] = {}
-        params["name"] = name
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
         json_json_body = json_body.to_dict()
 
@@ -40,7 +35,6 @@ class LibrariesUpdate:
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
             "json": json_json_body,
-            "params": params,
         }
 
     def _parse_response(
@@ -73,14 +67,14 @@ class LibrariesUpdate:
 
     def sync_detailed(
         self,
+        id: str,
         *,
         json_body: LibraryUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[HTTPValidationError, LibraryView]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (LibraryUpdate):
 
         Raises:
@@ -92,8 +86,8 @@ class LibrariesUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
+            id=id,
             json_body=json_body,
-            name=name,
         )
 
         response = httpx.request(
@@ -105,14 +99,14 @@ class LibrariesUpdate:
 
     def sync(
         self,
+        id: str,
         *,
         json_body: LibraryUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[HTTPValidationError, LibraryView]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (LibraryUpdate):
 
         Raises:
@@ -124,20 +118,20 @@ class LibrariesUpdate:
         """  # noqa e501
 
         return self.sync_detailed(
+            id=id,
             json_body=json_body,
-            name=name,
         ).parsed
 
     async def asyncio_detailed(
         self,
+        id: str,
         *,
         json_body: LibraryUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[HTTPValidationError, LibraryView]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (LibraryUpdate):
 
         Raises:
@@ -149,8 +143,8 @@ class LibrariesUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
+            id=id,
             json_body=json_body,
-            name=name,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -160,14 +154,14 @@ class LibrariesUpdate:
 
     async def asyncio(
         self,
+        id: str,
         *,
         json_body: LibraryUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[HTTPValidationError, LibraryView]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (LibraryUpdate):
 
         Raises:
@@ -180,7 +174,7 @@ class LibrariesUpdate:
 
         return (
             await self.asyncio_detailed(
+                id=id,
                 json_body=json_body,
-                name=name,
             )
         ).parsed
