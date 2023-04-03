@@ -29,6 +29,9 @@ docker-fullclean:
   docker system prune -af
   docker volume prune -f
 
+zcli *args:
+  @cd zpodcli && poetry run zcli {{args}}
+
 # Generate coverage docs
 zpodapi-coverage:
   docker compose exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon"
