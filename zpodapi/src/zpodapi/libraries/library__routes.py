@@ -26,7 +26,7 @@ def get_all(
     return LibraryService(session=session).get_all()
 
 
-@router.get("/{name}", response_model=LibraryView)
+@router.get("/{id}", response_model=LibraryView)
 def get(
     *,
     library: LibraryAnnotations.GetLibrary,
@@ -55,7 +55,7 @@ def create(
 
 
 @router.patch(
-    "",
+    "/{id}",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
 )
@@ -72,7 +72,7 @@ def update(
 
 
 @router.delete(
-    "",
+    "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete(

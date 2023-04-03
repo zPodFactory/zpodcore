@@ -126,5 +126,5 @@ class EndpointsUpdate(SchemaBase):
 
 class EndpointUpdate(SchemaBase):
     description: str | None = Field(None, D.endpoint.description)
-    endpoints: EndpointsUpdate
+    endpoints: EndpointsUpdate = {}
     enabled: bool | None = Field(None, D.endpoint.enabled)
