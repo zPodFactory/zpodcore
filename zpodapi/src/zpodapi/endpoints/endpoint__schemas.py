@@ -1,98 +1,130 @@
-from sqlmodel import SQLModel
-
-from zpodapi.lib.schema_base import Field
+from zpodapi.lib.schema_base import Field, SchemaBase
 
 
-class EndpointComputeView(SQLModel):
-    name: str = Field(...)
-    driver: str = Field(..., example="current testing env")
-    hostname: str = Field(..., example="my-vcenter.com")
-    username: str = Field(..., example="my-username")
-    datacenter: str = Field(..., example="my-datacenter")
-    resource_pool: str = Field(..., example="my-cluster")
-    storage_policy: str = Field(..., example="my-storage-policy")
-    storage_datastore: str = Field(..., example="my-datastore")
-    contentlibrary: str = Field(..., example="my-contentlibrary")
-    vmfolder: str = Field(..., example="my-vmfolder")
+class D:
+    class endpoint:
+        id = {"example": 1}
+        name = {"example": "mylab"}
+        description = {"example": "current testing env"}
+        endpoints = {"example": "vcda-4.4.1"}
+        enabled = {"example": True}
+
+    class endpoint_compute:
+        name = {"example": "main"}
+        driver = {"example": "current testing env"}
+        hostname = {"example": "my-vcenter.com"}
+        username = {"example": "my-username"}
+        password = {"example": "my-password"}
+        datacenter = {"example": "my-datacenter"}
+        resource_pool = {"example": "my-cluster"}
+        storage_policy = {"example": "my-storage-policy"}
+        storage_datastore = {"example": "my-datastore"}
+        contentlibrary = {"example": "my-contentlibrary"}
+        vmfolder = {"example": "my-vmfolder"}
+
+    class endpoint_network:
+        name = {"example": "main"}
+        driver = {"example": "nsxt"}
+        hostname = {"example": "my-nsxt-manager.com"}
+        username = {"example": "my-username"}
+        password = {"example": "my-password"}
+        networks = {"example": "10.196.64.0/18"}
+        transportzone = {"example": "my-transportzone"}
+        edgecluster = {"example": "my-edgecluster"}
+        t0 = {"example": "my-t0"}
 
 
-class EndpointNetworkView(SQLModel):
-    name: str = Field(...)
-    driver: str = Field(..., example="nsxt")
-    hostname: str = Field(..., example="my-nsxt-manager.com")
-    username: str = Field(..., example="my-username")
-    networks: str = Field(..., example="10.196.64.0/18")
-    transportzone: str = Field(..., example="my-transportzone")
-    edgecluster: str = Field(..., example="my-edgecluster")
-    t0: str = Field(..., example="my-t0")
+class EndpointComputeView(SchemaBase):
+    name: str = Field(..., D.endpoint_compute.name)
+    driver: str = Field(..., D.endpoint_compute.driver)
+    hostname: str = Field(..., D.endpoint_compute.hostname)
+    username: str = Field(..., D.endpoint_compute.username)
+    datacenter: str = Field(..., D.endpoint_compute.datacenter)
+    resource_pool: str = Field(..., D.endpoint_compute.resource_pool)
+    storage_policy: str = Field(..., D.endpoint_compute.storage_policy)
+    storage_datastore: str = Field(..., D.endpoint_compute.storage_datastore)
+    contentlibrary: str = Field(..., D.endpoint_compute.contentlibrary)
+    vmfolder: str = Field(..., D.endpoint_compute.vmfolder)
 
 
-class EndpointsView(SQLModel):
+class EndpointNetworkView(SchemaBase):
+    name: str = Field(..., D.endpoint_network.name)
+    driver: str = Field(..., D.endpoint_network.driver)
+    hostname: str = Field(..., D.endpoint_network.hostname)
+    username: str = Field(..., D.endpoint_network.username)
+    networks: str = Field(..., D.endpoint_network.networks)
+    transportzone: str = Field(..., D.endpoint_network.transportzone)
+    edgecluster: str = Field(..., D.endpoint_network.edgecluster)
+    t0: str = Field(..., D.endpoint_network.t0)
+
+
+class EndpointsView(SchemaBase):
     compute: EndpointComputeView
     network: EndpointNetworkView
 
 
-class EndpointView(SQLModel):
-    name: str = Field(..., example="mylab")
-    description: str = Field(..., example="current testing env")
+class EndpointView(SchemaBase):
+    id: str = Field(..., D.endpoint.id)
+    name: str = Field(..., D.endpoint.name)
+    description: str = Field(..., D.endpoint.description)
     endpoints: EndpointsView
-    enabled: bool = Field(...)
+    enabled: bool = Field(..., D.endpoint.enabled)
 
 
-class EndpointComputeCreate(SQLModel):
-    name: str = Field(...)
-    driver: str = Field(..., example="current testing env")
-    hostname: str = Field(..., example="my-vcenter.com")
-    username: str = Field(..., example="my-username")
-    password: str = Field(..., example="my-password")
-    datacenter: str = Field(..., example="my-datacenter")
-    resource_pool: str = Field(..., example="my-cluster")
-    storage_policy: str = Field(..., example="my-storage-policy")
-    storage_datastore: str = Field(..., example="my-datastore")
-    contentlibrary: str = Field(..., example="my-contentlibrary")
-    vmfolder: str = Field(..., example="my-vmfolder")
+class EndpointComputeCreate(SchemaBase):
+    name: str = Field(..., D.endpoint_compute.name)
+    driver: str = Field(..., D.endpoint_compute.driver)
+    hostname: str = Field(..., D.endpoint_compute.hostname)
+    username: str = Field(..., D.endpoint_compute.username)
+    password: str = Field(..., D.endpoint_compute.password)
+    datacenter: str = Field(..., D.endpoint_compute.datacenter)
+    resource_pool: str = Field(..., D.endpoint_compute.resource_pool)
+    storage_policy: str = Field(..., D.endpoint_compute.storage_policy)
+    storage_datastore: str = Field(..., D.endpoint_compute.storage_datastore)
+    contentlibrary: str = Field(..., D.endpoint_compute.contentlibrary)
+    vmfolder: str = Field(..., D.endpoint_compute.vmfolder)
 
 
-class EndpointNetworkCreate(SQLModel):
-    name: str = Field(...)
-    driver: str = Field(..., example="nsxt")
-    hostname: str = Field(..., example="my-nsxt-manager.com")
-    username: str = Field(..., example="my-username")
-    password: str = Field(..., example="my-password")
-    networks: str = Field(..., example="10.196.64.0/18")
-    transportzone: str = Field(..., example="my-transportzone")
-    edgecluster: str = Field(..., example="my-edgecluster")
-    t0: str = Field(..., example="my-t0")
+class EndpointNetworkCreate(SchemaBase):
+    name: str = Field(..., D.endpoint_network.name)
+    driver: str = Field(..., D.endpoint_network.driver)
+    hostname: str = Field(..., D.endpoint_network.hostname)
+    username: str = Field(..., D.endpoint_network.username)
+    password: str = Field(..., D.endpoint_network.password)
+    networks: str = Field(..., D.endpoint_network.networks)
+    transportzone: str = Field(..., D.endpoint_network.transportzone)
+    edgecluster: str = Field(..., D.endpoint_network.edgecluster)
+    t0: str = Field(..., D.endpoint_network.t0)
 
 
-class EndpointsCreate(SQLModel):
+class EndpointsCreate(SchemaBase):
     compute: EndpointComputeCreate
     network: EndpointNetworkCreate
 
 
-class EndpointCreate(SQLModel):
-    name: str = Field(..., example="mylab")
-    description: str = Field(..., example="current testing env")
+class EndpointCreate(SchemaBase):
+    name: str = Field(..., D.endpoint.name)
+    description: str = Field(..., D.endpoint.description)
     endpoints: EndpointsCreate
-    enabled: bool = Field(...)
+    enabled: bool = Field(..., D.endpoint.enabled)
 
 
-class EndpointComputeUpdate(SQLModel):
-    username: str | None = Field(None, example="my-username")
-    password: str | None = Field(None, example="my-password")
+class EndpointComputeUpdate(SchemaBase):
+    username: str | None = Field(None, D.endpoint_compute.username)
+    password: str | None = Field(None, D.endpoint_compute.password)
 
 
-class EndpointNetworkUpdate(SQLModel):
-    username: str | None = Field(None, example="my-username")
-    password: str | None = Field(None, example="my-password")
+class EndpointNetworkUpdate(SchemaBase):
+    username: str | None = Field(None, D.endpoint_network.username)
+    password: str | None = Field(None, D.endpoint_network.password)
 
 
-class EndpointsUpdate(SQLModel):
+class EndpointsUpdate(SchemaBase):
     compute: None | EndpointComputeUpdate
     network: None | EndpointNetworkUpdate
 
 
-class EndpointUpdate(SQLModel):
-    description: str | None = Field(None, example="current testing env")
+class EndpointUpdate(SchemaBase):
+    description: str | None = Field(None, D.endpoint.description)
     endpoints: EndpointsUpdate
-    enabled: bool | None = Field(None, example=True)
+    enabled: bool | None = Field(None, D.endpoint.enabled)

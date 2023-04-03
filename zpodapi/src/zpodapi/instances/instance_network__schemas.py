@@ -1,10 +1,13 @@
 from ipaddress import IPv4Network
 
-from sqlmodel import SQLModel
-
-from zpodapi.lib.schema_base import Req
+from zpodapi.lib.schema_base import Field, SchemaBase
 
 
-class InstanceNetworkView(SQLModel):
-    id: int = Req(example=1)
-    cidr: IPv4Network = Req(example=1)
+class D:
+    id = {"example": 1}
+    cidr = {"example": "192.168.0.0/24"}
+
+
+class InstanceNetworkView(SchemaBase):
+    id: int = Field(..., D.id)
+    cidr: IPv4Network = Field(..., D.cidr)

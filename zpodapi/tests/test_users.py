@@ -18,7 +18,6 @@ def test_create_user(authed_client: TestClient):
         username="testuser",
         email="testuser@zpodfactory.io",
         description="Description",
-        ssh_key="ssh_key",
         superadmin=False,
     )
 
@@ -26,7 +25,7 @@ def test_create_user(authed_client: TestClient):
     data = response.json()
     assert response.status_code == 201
     assert (
-        ignore(data, "id", "api_token", "creation_date", "last_connection_date") == user
+        ignore(data, "id", "creation_date", "last_connection_date") == user
     )
 
     for key in user:
@@ -38,7 +37,6 @@ def test_create_user_with_duplicated_username(authed_client: TestClient):
         username="superuser",
         email="testuser@zpodfactory.io",
         description="Description",
-        ssh_key="ssh_key",
         superadmin=False,
     )
 
@@ -55,8 +53,6 @@ def test_get_users(authed_client: TestClient):
             username="superuser",
             email="superuser@zpodfactory.io",
             description="",
-            api_token="APITOKEN",
-            ssh_key="",
             superadmin=True,
         )
     ]
@@ -70,8 +66,6 @@ def test_get_user_me(authed_client: TestClient):
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
-        "api_token": "APITOKEN",
-        "ssh_key": "",
         "superadmin": True,
     }
 
@@ -84,8 +78,6 @@ def test_get_user_by_username(authed_client: TestClient):
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
-        "api_token": "APITOKEN",
-        "ssh_key": "",
         "superadmin": True,
     }
 
@@ -98,8 +90,6 @@ def test_get_user_by_email(authed_client: TestClient):
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "",
-        "api_token": "APITOKEN",
-        "ssh_key": "",
         "superadmin": True,
     }
 
@@ -125,8 +115,6 @@ def test_patch_user(authed_client: TestClient):
         "username": "superuser",
         "email": "superuser@zpodfactory.io",
         "description": "AdminPatched",
-        "api_token": "APITOKEN",
-        "ssh_key": "",
         "superadmin": True,
     }
 
