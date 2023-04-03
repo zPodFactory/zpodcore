@@ -7,7 +7,11 @@ T = TypeVar("T", bound="InstanceComponentViewData")
 
 @attr.s(auto_attribs=True)
 class InstanceComponentViewData:
-    """ """
+    """
+    Example:
+        {}
+
+    """
 
     additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 

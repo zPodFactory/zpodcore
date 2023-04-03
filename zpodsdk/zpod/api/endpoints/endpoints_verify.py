@@ -15,11 +15,9 @@ class EndpointsVerify:
 
     def _get_kwargs(
         self,
-        endpoint_name: str,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/endpoints/{endpoint_name}/verify".format(
-            self.client.base_url, endpoint_name=endpoint_name
-        )
+        url = "{}/endpoints/{id}/verify".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
@@ -61,12 +59,12 @@ class EndpointsVerify:
 
     def sync_detailed(
         self,
-        endpoint_name: str,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Verify
 
         Args:
-            endpoint_name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -77,7 +75,7 @@ class EndpointsVerify:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            endpoint_name=endpoint_name,
+            id=id,
         )
 
         response = httpx.request(
@@ -89,12 +87,12 @@ class EndpointsVerify:
 
     def sync(
         self,
-        endpoint_name: str,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Verify
 
         Args:
-            endpoint_name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -105,17 +103,17 @@ class EndpointsVerify:
         """  # noqa e501
 
         return self.sync_detailed(
-            endpoint_name=endpoint_name,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        endpoint_name: str,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Verify
 
         Args:
-            endpoint_name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -126,7 +124,7 @@ class EndpointsVerify:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            endpoint_name=endpoint_name,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -136,12 +134,12 @@ class EndpointsVerify:
 
     async def asyncio(
         self,
-        endpoint_name: str,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Verify
 
         Args:
-            endpoint_name (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -153,6 +151,6 @@ class EndpointsVerify:
 
         return (
             await self.asyncio_detailed(
-                endpoint_name=endpoint_name,
+                id=id,
             )
         ).parsed

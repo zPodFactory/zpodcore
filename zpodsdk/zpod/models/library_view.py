@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Type, TypeVar, Union
+from typing import Any, Dict, Type, TypeVar, Union
 
 import attr
 from dateutil.parser import isoparse
@@ -15,19 +15,20 @@ class LibraryView:
     Attributes:
         creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         description (str):  Example: Default zPodFactory library.
-        enabled (bool):
+        enabled (bool):  Example: True.
         git_url (str):  Example: https://github.com/zpodfactory/zpodlibrary.
+        id (str):  Example: 1.
         name (str):  Example: default.
-        last_modified_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
+        last_modified_date (Union[Unset, datetime.datetime]):  Example: 2023-01-01T00:01:00.
     """
 
     creation_date: datetime.datetime
     description: str
     enabled: bool
     git_url: str
+    id: str
     name: str
-    last_modified_date: Union[Unset, None, datetime.datetime] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    last_modified_date: Union[Unset, datetime.datetime] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         creation_date = self.creation_date.isoformat()
@@ -35,21 +36,20 @@ class LibraryView:
         description = self.description
         enabled = self.enabled
         git_url = self.git_url
+        id = self.id
         name = self.name
-        last_modified_date: Union[Unset, None, str] = UNSET
+        last_modified_date: Union[Unset, str] = UNSET
         if not isinstance(self.last_modified_date, Unset):
-            last_modified_date = (
-                self.last_modified_date.isoformat() if self.last_modified_date else None
-            )
+            last_modified_date = self.last_modified_date.isoformat()
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "creation_date": creation_date,
                 "description": description,
                 "enabled": enabled,
                 "git_url": git_url,
+                "id": id,
                 "name": name,
             }
         )
@@ -69,13 +69,13 @@ class LibraryView:
 
         git_url = d.pop("git_url")
 
+        id = d.pop("id")
+
         name = d.pop("name")
 
         _last_modified_date = d.pop("last_modified_date", UNSET)
-        last_modified_date: Union[Unset, None, datetime.datetime]
-        if _last_modified_date is None:
-            last_modified_date = None
-        elif isinstance(_last_modified_date, Unset):
+        last_modified_date: Union[Unset, datetime.datetime]
+        if isinstance(_last_modified_date, Unset):
             last_modified_date = UNSET
         else:
             last_modified_date = isoparse(_last_modified_date)
@@ -85,25 +85,9 @@ class LibraryView:
             description=description,
             enabled=enabled,
             git_url=git_url,
+            id=id,
             name=name,
             last_modified_date=last_modified_date,
         )
 
-        library_view.additional_properties = d
         return library_view
-
-    @property
-    def additional_keys(self) -> List[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties

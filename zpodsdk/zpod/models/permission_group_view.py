@@ -21,7 +21,6 @@ class PermissionGroupView:
     id: int
     name: str
     users: List["UserView"]
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
@@ -33,7 +32,6 @@ class PermissionGroupView:
             users.append(users_item)
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "id": id,
@@ -66,21 +64,4 @@ class PermissionGroupView:
             users=users,
         )
 
-        permission_group_view.additional_properties = d
         return permission_group_view
-
-    @property
-    def additional_keys(self) -> List[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties
