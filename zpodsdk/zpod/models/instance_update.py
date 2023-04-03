@@ -10,27 +10,19 @@ T = TypeVar("T", bound="InstanceUpdate")
 @attr.s(auto_attribs=True)
 class InstanceUpdate:
     """
-    Example:
-        {'description': 'Tanzu Lab zPod'}
-
     Attributes:
-        description (Union[Unset, str]):
-        id (Union[Unset, int]):
+        description (Union[Unset, str]):  Example: Tanzu Lab zPod.
     """
 
     description: Union[Unset, str] = UNSET
-    id: Union[Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
-        id = self.id
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
         if description is not UNSET:
             field_dict["description"] = description
-        if id is not UNSET:
-            field_dict["id"] = id
 
         return field_dict
 
@@ -39,11 +31,8 @@ class InstanceUpdate:
         d = src_dict.copy()
         description = d.pop("description", UNSET)
 
-        id = d.pop("id", UNSET)
-
         instance_update = cls(
             description=description,
-            id=id,
         )
 
         return instance_update

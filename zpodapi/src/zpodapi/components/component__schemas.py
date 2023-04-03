@@ -21,7 +21,7 @@ class ComponentView(SchemaBase):
     component_description: str = Field(..., D.component_description)
 
 
-class ComponentViewFull(SchemaBase):
+class ComponentViewFull(ComponentView):
     library_name: str = Field(..., D.library_name)
     filename: str = Field(..., D.filename)
     enabled: bool = Field(..., D.enabled)

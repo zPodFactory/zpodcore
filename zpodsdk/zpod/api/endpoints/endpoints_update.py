@@ -8,7 +8,7 @@ from ...client import Client
 from ...models.endpoint_update import EndpointUpdate
 from ...models.endpoint_view import EndpointView
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 class EndpointsUpdate:
@@ -17,19 +17,14 @@ class EndpointsUpdate:
 
     def _get_kwargs(
         self,
+        id: str,
         *,
         json_body: EndpointUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Dict[str, Any]:
-        url = "{}/endpoints".format(self.client.base_url)
+        url = "{}/endpoints/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
-
-        params: Dict[str, Any] = {}
-        params["name"] = name
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
         json_json_body = json_body.to_dict()
 
@@ -40,7 +35,6 @@ class EndpointsUpdate:
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
             "json": json_json_body,
-            "params": params,
         }
 
     def _parse_response(
@@ -73,14 +67,14 @@ class EndpointsUpdate:
 
     def sync_detailed(
         self,
+        id: str,
         *,
         json_body: EndpointUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[EndpointView, HTTPValidationError]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (EndpointUpdate):
 
         Raises:
@@ -92,8 +86,8 @@ class EndpointsUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
+            id=id,
             json_body=json_body,
-            name=name,
         )
 
         response = httpx.request(
@@ -105,14 +99,14 @@ class EndpointsUpdate:
 
     def sync(
         self,
+        id: str,
         *,
         json_body: EndpointUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[EndpointView, HTTPValidationError]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (EndpointUpdate):
 
         Raises:
@@ -124,20 +118,20 @@ class EndpointsUpdate:
         """  # noqa e501
 
         return self.sync_detailed(
+            id=id,
             json_body=json_body,
-            name=name,
         ).parsed
 
     async def asyncio_detailed(
         self,
+        id: str,
         *,
         json_body: EndpointUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Response[Union[EndpointView, HTTPValidationError]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (EndpointUpdate):
 
         Raises:
@@ -149,8 +143,8 @@ class EndpointsUpdate:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
+            id=id,
             json_body=json_body,
-            name=name,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -160,14 +154,14 @@ class EndpointsUpdate:
 
     async def asyncio(
         self,
+        id: str,
         *,
         json_body: EndpointUpdate,
-        name: Union[Unset, None, str] = UNSET,
     ) -> Optional[Union[EndpointView, HTTPValidationError]]:
         """Update
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
             json_body (EndpointUpdate):
 
         Raises:
@@ -180,7 +174,7 @@ class EndpointsUpdate:
 
         return (
             await self.asyncio_detailed(
+                id=id,
                 json_body=json_body,
-                name=name,
             )
         ).parsed

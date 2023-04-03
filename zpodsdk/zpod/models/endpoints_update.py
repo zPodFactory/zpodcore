@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
 
 import attr
 
@@ -22,7 +22,6 @@ class EndpointsUpdate:
 
     compute: Union[Unset, "EndpointComputeUpdate"] = UNSET
     network: Union[Unset, "EndpointNetworkUpdate"] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         compute: Union[Unset, Dict[str, Any]] = UNSET
@@ -34,7 +33,6 @@ class EndpointsUpdate:
             network = self.network.to_dict()
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
         field_dict.update({})
         if compute is not UNSET:
             field_dict["compute"] = compute
@@ -68,21 +66,4 @@ class EndpointsUpdate:
             network=network,
         )
 
-        endpoints_update.additional_properties = d
         return endpoints_update
-
-    @property
-    def additional_keys(self) -> List[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties

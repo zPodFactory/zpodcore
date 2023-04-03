@@ -75,8 +75,7 @@ class UsersUpdate:
 
         Args:
             id (str):
-            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
-                'superadmin': False}.
+            json_body (UserUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -108,8 +107,7 @@ class UsersUpdate:
 
         Args:
             id (str):
-            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
-                'superadmin': False}.
+            json_body (UserUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,8 +132,7 @@ class UsersUpdate:
 
         Args:
             id (str):
-            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
-                'superadmin': False}.
+            json_body (UserUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -165,8 +162,7 @@ class UsersUpdate:
 
         Args:
             id (str):
-            json_body (UserUpdate):  Example: {'description': 'Sample User', 'ssh_key': 'xxx',
-                'superadmin': False}.
+            json_body (UserUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

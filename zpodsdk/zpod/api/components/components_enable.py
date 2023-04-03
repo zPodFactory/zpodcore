@@ -16,11 +16,9 @@ class ComponentsEnable:
 
     def _get_kwargs(
         self,
-        component_uid: str,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/components/{component_uid}/enable".format(
-            self.client.base_url, component_uid=component_uid
-        )
+        url = "{}/components/{id}/enable".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
@@ -63,12 +61,12 @@ class ComponentsEnable:
 
     def sync_detailed(
         self,
-        component_uid: str,
+        id: str,
     ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
         """Enable
 
         Args:
-            component_uid (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -79,7 +77,7 @@ class ComponentsEnable:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            component_uid=component_uid,
+            id=id,
         )
 
         response = httpx.request(
@@ -91,12 +89,12 @@ class ComponentsEnable:
 
     def sync(
         self,
-        component_uid: str,
+        id: str,
     ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
         """Enable
 
         Args:
-            component_uid (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -107,17 +105,17 @@ class ComponentsEnable:
         """  # noqa e501
 
         return self.sync_detailed(
-            component_uid=component_uid,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        component_uid: str,
+        id: str,
     ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
         """Enable
 
         Args:
-            component_uid (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,7 +126,7 @@ class ComponentsEnable:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            component_uid=component_uid,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -138,12 +136,12 @@ class ComponentsEnable:
 
     async def asyncio(
         self,
-        component_uid: str,
+        id: str,
     ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
         """Enable
 
         Args:
-            component_uid (str):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -155,6 +153,6 @@ class ComponentsEnable:
 
         return (
             await self.asyncio_detailed(
-                component_uid=component_uid,
+                id=id,
             )
         ).parsed

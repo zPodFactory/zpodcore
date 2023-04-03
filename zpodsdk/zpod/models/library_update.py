@@ -12,7 +12,7 @@ class LibraryUpdate:
     """
     Attributes:
         description (Union[Unset, str]):  Example: Default zPodFactory library.
-        enabled (Union[Unset, bool]):
+        enabled (Union[Unset, bool]):  Example: True.
     """
 
     description: Union[Unset, str] = UNSET

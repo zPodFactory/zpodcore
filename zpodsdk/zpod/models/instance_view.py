@@ -28,7 +28,7 @@ class InstanceView:
         id (int):  Example: 1.
         last_modified_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         name (str):  Example: tanzu-lab.
-        profile (str):  Example: sddc-profile.
+        profile (str):  Example: sddc.
         status (InstanceStatus): An enumeration.
         components (Union[Unset, List['InstanceComponentView']]):
         features (Union[Unset, List['InstanceFeatureView']]):
@@ -49,7 +49,6 @@ class InstanceView:
     features: Union[Unset, List["InstanceFeatureView"]] = UNSET
     networks: Union[Unset, List["InstanceNetworkView"]] = UNSET
     permissions: Union[Unset, List["InstancePermissionView"]] = UNSET
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         creation_date = self.creation_date.isoformat()
@@ -97,7 +96,6 @@ class InstanceView:
                 permissions.append(permissions_item)
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "creation_date": creation_date,
@@ -192,21 +190,4 @@ class InstanceView:
             permissions=permissions,
         )
 
-        instance_view.additional_properties = d
         return instance_view
-
-    @property
-    def additional_keys(self) -> List[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties

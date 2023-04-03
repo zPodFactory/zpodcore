@@ -67,7 +67,7 @@ def delete(
     name: str = typer.Option(..., "--name", "-n"),
 ):
     z = zpod_client.ZpodClient()
-    library = z.libraries_delete.sync(name=name)
+    library = z.libraries_delete.sync(id=f"name={name}")
     if library is None:
         console.print(
             f"Library [magenta]{name}[/magenta] has been deleted successfully",
@@ -86,7 +86,7 @@ def update(
     is_enabled = None
     z = zpod_client.ZpodClient()
     if enabled is None:
-        library = z.libraries_get.sync(name=name)
+        library = z.libraries_get.sync(id=f"name={name}")
         is_enabled = library.enabled
     elif enabled:
         is_enabled = True
@@ -94,7 +94,7 @@ def update(
         is_enabled = False
 
     library_in = LibraryUpdate(enabled=is_enabled, description=description)
-    if library := z.libraries_update.sync(json_body=library_in, name=name):
+    if library := z.libraries_update.sync(json_body=library_in, id=f"name={name}"):
         generate_table(libraries=[library], action="Enable")
     else:
         console.print(f"Error {library}", style="red")
@@ -103,7 +103,7 @@ def update(
 @app.command()
 def get(name: str = typer.Option(..., "--name", "-n")):
     z = zpod_client.ZpodClient()
-    library = z.libraries_get.sync(name=name)
+    library = z.libraries_get.sync(id=f"name={name}")
     if library is None:
         console.print(f"Library [magenta]{name}[/magenta] not found", style="red")
         return

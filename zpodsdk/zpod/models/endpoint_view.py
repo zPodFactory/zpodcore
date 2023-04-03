@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
 import attr
 
@@ -14,31 +14,33 @@ class EndpointView:
     """
     Attributes:
         description (str):  Example: current testing env.
-        enabled (bool):
+        enabled (bool):  Example: True.
         endpoints (EndpointsView):
+        id (str):  Example: 1.
         name (str):  Example: mylab.
     """
 
     description: str
     enabled: bool
     endpoints: "EndpointsView"
+    id: str
     name: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
         enabled = self.enabled
         endpoints = self.endpoints.to_dict()
 
+        id = self.id
         name = self.name
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "description": description,
                 "enabled": enabled,
                 "endpoints": endpoints,
+                "id": id,
                 "name": name,
             }
         )
@@ -56,30 +58,16 @@ class EndpointView:
 
         endpoints = EndpointsView.from_dict(d.pop("endpoints"))
 
+        id = d.pop("id")
+
         name = d.pop("name")
 
         endpoint_view = cls(
             description=description,
             enabled=enabled,
             endpoints=endpoints,
+            id=id,
             name=name,
         )
 
-        endpoint_view.additional_properties = d
         return endpoint_view
-
-    @property
-    def additional_keys(self) -> List[str]:
-        return list(self.additional_properties.keys())
-
-    def __getitem__(self, key: str) -> Any:
-        return self.additional_properties[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self.additional_properties[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self.additional_properties[key]
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.additional_properties

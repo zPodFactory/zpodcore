@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
-from ...types import UNSET, Response, Unset
+from ...types import Response
 
 
 class LibrariesDelete:
@@ -15,18 +15,12 @@ class LibrariesDelete:
 
     def _get_kwargs(
         self,
-        *,
-        name: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/libraries".format(self.client.base_url)
+        url = "{}/libraries/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
-
-        params: Dict[str, Any] = {}
-        params["name"] = name
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
         return {
             "method": "delete",
@@ -34,7 +28,6 @@ class LibrariesDelete:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
-            "params": params,
         }
 
     def _parse_response(
@@ -66,13 +59,12 @@ class LibrariesDelete:
 
     def sync_detailed(
         self,
-        *,
-        name: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -83,7 +75,7 @@ class LibrariesDelete:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            name=name,
+            id=id,
         )
 
         response = httpx.request(
@@ -95,13 +87,12 @@ class LibrariesDelete:
 
     def sync(
         self,
-        *,
-        name: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -112,18 +103,17 @@ class LibrariesDelete:
         """  # noqa e501
 
         return self.sync_detailed(
-            name=name,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        *,
-        name: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -134,7 +124,7 @@ class LibrariesDelete:
         """  # noqa e501
 
         kwargs = self._get_kwargs(
-            name=name,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -144,13 +134,12 @@ class LibrariesDelete:
 
     async def asyncio(
         self,
-        *,
-        name: Union[Unset, None, str] = UNSET,
+        id: str,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Delete
 
         Args:
-            name (Union[Unset, None, str]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -162,6 +151,6 @@ class LibrariesDelete:
 
         return (
             await self.asyncio_detailed(
-                name=name,
+                id=id,
             )
         ).parsed

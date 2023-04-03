@@ -75,7 +75,7 @@ class InstancesUpdate:
 
         Args:
             id (str):
-            json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
+            json_body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -107,7 +107,7 @@ class InstancesUpdate:
 
         Args:
             id (str):
-            json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
+            json_body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -132,7 +132,7 @@ class InstancesUpdate:
 
         Args:
             id (str):
-            json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
+            json_body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -162,7 +162,7 @@ class InstancesUpdate:
 
         Args:
             id (str):
-            json_body (InstanceUpdate):  Example: {'description': 'Tanzu Lab zPod'}.
+            json_body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
