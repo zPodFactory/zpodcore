@@ -1,10 +1,13 @@
 from typing import Any
 
-from sqlmodel import SQLModel
-
-from zpodapi.lib.schema_base import Req
+from zpodapi.lib.schema_base import Field, SchemaBase
 
 
-class InstanceFeatureView(SQLModel):
-    id: int = Req(example=1)
-    data: dict[Any, Any] = Req(example="{'feature':'one'}")
+class D:
+    id = {"example": 1}
+    data = {"example": "{'feature':'one'}"}
+
+
+class InstanceFeatureView(SchemaBase):
+    id: int = Field(..., D.id)
+    data: dict[str, Any] = Field(..., D.data)

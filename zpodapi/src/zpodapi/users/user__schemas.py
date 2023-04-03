@@ -1,54 +1,43 @@
 from datetime import datetime
 
 from pydantic import EmailStr
-from pydantic import Field as PField
-from sqlmodel import SQLModel
 
-from zpodapi.lib.schema_base import Field
-
-example_creation_date = datetime(2023, 1, 1)
-example_last_connection_date = datetime(2023, 1, 1, 0, 1)
+from zpodapi.lib.schema_base import Field, SchemaBase
 
 
-class UserCreate(SQLModel, extra="forbid"):
-    username: str = Field(..., example="jdoe")
-    email: EmailStr = Field(..., example="jdoe@example.com")
-    description: str = Field(..., example="Sample User")
-    ssh_key: str = Field("")
-    superadmin: bool = False
+class D:
+    id = {"example": 1}
+    username = {"example": "jdoe"}
+    email = {"example": "jdoe@example.com"}
+    description = {"example": "Sample User"}
+    ssh_key = {"example": "<key>"}
+    superadmin = {"example": False}
+    creation_date = {"example": datetime(2023, 1, 1)}
+    last_connection_date = {"example": datetime(2023, 1, 1, 0, 1)}
 
 
-class UserUpdate(SQLModel):
-    class Config:
-        extra = "forbid"
-        schema_extra = dict(
-            example=dict(
-                description="Sample User",
-                ssh_key="xxx",
-                superadmin=False,
-            )
-        )
-
-    id: int = Field(None)
-    description: str | None = Field(None)
-    ssh_key: str | None = Field(None)
-    superadmin: bool | None = Field(None)
+class UserCreate(SchemaBase):
+    username: str = Field(..., D.username)
+    email: EmailStr = Field(..., D.email)
+    description: str = Field("", D.description)
+    ssh_key: str = Field("", D.ssh_key)
+    superadmin: bool = Field(False, D.superadmin)
 
 
-class UserView(SQLModel):
-    id: int = Field(..., example=1)
-    username: str = Field(..., example="jdoe")
-    email: EmailStr = Field(..., example="jdoe@example.com")
+class UserUpdate(SchemaBase):
+    description: str | None = Field(None, D.description)
+    ssh_key: str | None = Field(None, D.ssh_key)
+    superadmin: bool | None = Field(None, D.superadmin)
+
+
+class UserView(SchemaBase):
+    id: int = Field(..., D.id)
+    username: str = Field(..., D.username)
+    email: EmailStr = Field(..., D.email)
 
 
 class UserViewFull(UserView):
-    description: str = Field(..., example="Sample User")
-    api_token: str = Field(..., index=True)
-    ssh_key: str = Field(...)
-    creation_date: datetime = Field(..., example=example_creation_date)
-    last_connection_date: datetime | None = PField(
-        None,
-        example=example_last_connection_date,
-        nullable=True,
-    )
-    superadmin: bool = Field(...)
+    description: str = Field(..., D.description)
+    creation_date: datetime = Field(..., D.creation_date)
+    last_connection_date: datetime | None = Field(None, D.last_connection_date)
+    superadmin: bool = Field(..., D.superadmin)

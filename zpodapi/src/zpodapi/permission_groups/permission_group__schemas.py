@@ -1,14 +1,13 @@
-from datetime import datetime
-
-from sqlmodel import SQLModel
-
-from zpodapi.lib.schema_base import Req
+from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodapi.users.user__schemas import UserView
 
-example_creation_date = datetime(2023, 1, 1)
+
+class D:
+    id = {"example": 1}
+    name = {"example": "Team"}
 
 
-class PermissionGroupView(SQLModel):
-    id: int = Req(example=1)
-    name: str = Req(example="Team")
+class PermissionGroupView(SchemaBase):
+    id: int = Field(..., D.id)
+    name: str = Field(..., D.name)
     users: list[UserView]
