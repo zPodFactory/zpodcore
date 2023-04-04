@@ -28,7 +28,7 @@ def get_user(
     raise HTTPException(status_code=404, detail="User not found")
 
 
-def is_super_admin_or_active_user(
+def super_admin_or_active_user_only(
     *,
     current_user: GlobalAnnotations.GetCurrentUser,
     user: "UserAnnotations.GetUser",
@@ -42,12 +42,12 @@ def is_super_admin_or_active_user(
 
 class UserDepends:
     GetUser = Depends(get_user)
-    IsSuperAdminOrActiveUser = Depends(is_super_admin_or_active_user)
+    SuperAdminOrActiveUserOnly = Depends(super_admin_or_active_user_only)
 
 
 class UserAnnotations:
     GetUser = Annotated[M.User, UserDepends.GetUser]
-    IsSuperAdminOrActiveUser = Annotated[
+    SuperAdminOrActiveUserOnly = Annotated[
         M.User,
-        UserDepends.IsSuperAdminOrActiveUser,
+        UserDepends.SuperAdminOrActiveUserOnly,
     ]
