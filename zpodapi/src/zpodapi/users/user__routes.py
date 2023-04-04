@@ -23,7 +23,7 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[UserViewFull],
-    dependencies=[GlobalDepends.IsSuperAdmin],
+    dependencies=[GlobalDepends.SuperAdminOnly],
 )
 def get_all(
     *,
@@ -48,7 +48,7 @@ def get_me(
 @router.get(
     "/{id}",
     response_model=UserViewFull,
-    dependencies=[UserDepends.IsSuperAdminOrActiveUser],
+    dependencies=[UserDepends.SuperAdminOrActiveUserOnly],
 )
 def get(
     *,
@@ -61,7 +61,7 @@ def get(
     "",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[GlobalDepends.IsSuperAdmin],
+    dependencies=[GlobalDepends.SuperAdminOnly],
 )
 def create(
     *,
@@ -82,7 +82,7 @@ def create(
     "/{id}",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[UserDepends.IsSuperAdminOrActiveUser],
+    dependencies=[UserDepends.SuperAdminOrActiveUserOnly],
 )
 def update(
     *,
@@ -96,7 +96,7 @@ def update(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[GlobalDepends.IsSuperAdmin],
+    dependencies=[GlobalDepends.SuperAdminOnly],
 )
 def delete(
     *,

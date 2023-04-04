@@ -41,7 +41,7 @@ def update_last_connection_date(
     return current_user
 
 
-def is_superadmin(
+def superadmin_only(
     current_user: "GlobalAnnotations.GetCurrentUser",
 ) -> bool:
     if not current_user.superadmin:
@@ -55,7 +55,7 @@ class GlobalDepends:
     GetSession = Depends(get_session)
     GetCurrentUser = Depends(get_current_user)
     UpdateLastConnectionDate = Depends(update_last_connection_date)
-    IsSuperAdmin = Depends(is_superadmin)
+    SuperAdminOnly = Depends(superadmin_only)
 
 
 class GlobalAnnotations:
@@ -71,7 +71,7 @@ class GlobalAnnotations:
         M.User,
         GlobalDepends.UpdateLastConnectionDate,
     ]
-    IsSuperAdmin = Annotated[
+    SuperAdminOnly = Annotated[
         bool,
-        GlobalDepends.IsSuperAdmin,
+        GlobalDepends.SuperAdminOnly,
     ]
