@@ -28,8 +28,8 @@ async def get_library(
 
 
 class LibraryDepends:
-    GetLibrary = Depends(get_library)
+    pass
 
 
 class LibraryAnnotations:
-    GetLibrary = Annotated[M.Library, LibraryDepends.GetLibrary]
+    GetLibrary = Annotated[M.Library, Depends(get_library)]

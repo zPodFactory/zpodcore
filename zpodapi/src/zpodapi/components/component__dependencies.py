@@ -28,8 +28,8 @@ def get_component(
 
 
 class ComponentDepends:
-    GetComponent = Depends(get_component)
+    pass
 
 
 class ComponentAnnotations:
-    GetComponent = Annotated[M.Component, ComponentDepends.GetComponent]
+    GetComponent = Annotated[M.Component, Depends(get_component)]

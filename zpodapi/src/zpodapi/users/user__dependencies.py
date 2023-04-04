@@ -41,13 +41,8 @@ def super_admin_or_active_user_only(
 
 
 class UserDepends:
-    GetUser = Depends(get_user)
     SuperAdminOrActiveUserOnly = Depends(super_admin_or_active_user_only)
 
 
 class UserAnnotations:
-    GetUser = Annotated[M.User, UserDepends.GetUser]
-    SuperAdminOrActiveUserOnly = Annotated[
-        M.User,
-        UserDepends.SuperAdminOrActiveUserOnly,
-    ]
+    GetUser = Annotated[M.User, Depends(get_user)]

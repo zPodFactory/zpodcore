@@ -28,8 +28,8 @@ async def get_endpoint(
 
 
 class EndpointDepends:
-    GetEndpoint = Depends(get_endpoint)
+    pass
 
 
 class EndpointAnnotations:
-    GetEndpoint = Annotated[M.Endpoint, EndpointDepends.GetEndpoint]
+    GetEndpoint = Annotated[M.Endpoint, Depends(get_endpoint)]

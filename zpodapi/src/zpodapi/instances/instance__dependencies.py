@@ -28,8 +28,8 @@ def get_instance(
 
 
 class InstanceDepends:
-    GetInstance = Depends(get_instance)
+    pass
 
 
 class InstanceAnnotations:
-    GetInstance = Annotated[M.Instance, InstanceDepends.GetInstance]
+    GetInstance = Annotated[M.Instance, Depends(get_instance)]
