@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Path
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations
+from zpodapi.lib.global_dependencies import service_init_annotation
 from zpodcommon import models as M
 
 from .instance__services import InstanceService
@@ -11,7 +11,7 @@ from .instance__types import InstanceIdType
 
 def get_instance(
     *,
-    session: GlobalAnnotations.GetSession,
+    instance_service: "InstanceAnnotations.InstanceService",
     id: Annotated[
         InstanceIdType,
         Path(
@@ -22,7 +22,7 @@ def get_instance(
         ),
     ],
 ):
-    if instance := InstanceService(session=session).get(value=id):
+    if instance := instance_service.get(value=id):
         return instance
     raise HTTPException(status_code=404, detail="Instance not found")
 
@@ -33,3 +33,4 @@ class InstanceDepends:
 
 class InstanceAnnotations:
     GetInstance = Annotated[M.Instance, Depends(get_instance)]
+    InstanceService = service_init_annotation(InstanceService)

@@ -1,11 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .endpoint__dependencies import EndpointAnnotations
 from .endpoint__schemas import EndpointCreate, EndpointUpdate, EndpointView
-from .endpoint__services import EndpointService
 
 router = APIRouter(
     prefix="/endpoints",
@@ -21,9 +20,9 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: GlobalAnnotations.GetSession,
+    endpoint_service: EndpointAnnotations.EndpointService,
 ):
-    return EndpointService(session=session).get_all()
+    return endpoint_service.get_all()
 
 
 @router.post(
@@ -33,13 +32,12 @@ def get_all(
 )
 def create(
     *,
-    session: GlobalAnnotations.GetSession,
+    endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointCreate,
 ):
-    service = EndpointService(session=session)
-    if service.get(value=endpoint.name):
+    if endpoint_service.get(value=endpoint.name):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return service.create(item_in=endpoint)
+    return endpoint_service.create(item_in=endpoint)
 
 
 @router.patch(
@@ -49,11 +47,11 @@ def create(
 )
 def update(
     *,
-    session: GlobalAnnotations.GetSession,
+    endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointAnnotations.GetEndpoint,
     endpoint_in: EndpointUpdate,
 ):
-    return EndpointService(session=session).update(item=endpoint, item_in=endpoint_in)
+    return endpoint_service.update(item=endpoint, item_in=endpoint_in)
 
 
 @router.delete(
@@ -62,10 +60,10 @@ def update(
 )
 def delete(
     *,
-    session: GlobalAnnotations.GetSession,
+    endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointAnnotations.GetEndpoint,
 ):
-    EndpointService(session=session).delete(item=endpoint)
+    endpoint_service.delete(item=endpoint)
 
 
 @router.put(
@@ -75,8 +73,8 @@ def delete(
 async def verify(
     *,
 
-    session: GlobalAnnotations.GetSession,
+    endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointAnnotations.GetEndpoint,
 ):
     # TODO: Add initial verification of JSON endpoint data
-    return EndpointService(session=session).verify(item=endpoint)
+    return endpoint_service.verify(item=endpoint)

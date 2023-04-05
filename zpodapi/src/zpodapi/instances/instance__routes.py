@@ -5,7 +5,6 @@ from zpodapi.lib.route_logger import RouteLogger
 
 from .instance__dependencies import InstanceAnnotations
 from .instance__schemas import InstanceCreate, InstanceUpdate, InstanceView
-from .instance__services import InstanceService
 
 router = APIRouter(
     prefix="/instances",
@@ -21,10 +20,10 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: GlobalAnnotations.GetSession,
+    instance_service: InstanceAnnotations.InstanceService,
     name: str | None = None,
 ):
-    return InstanceService(session=session).get_all(name=name)
+    return instance_service.get_all(name=name)
 
 
 @router.get(
@@ -45,14 +44,13 @@ def get(
 )
 def create(
     *,
-    session: GlobalAnnotations.GetSession,
+    instance_service: InstanceAnnotations.InstanceService,
     current_user: GlobalAnnotations.GetCurrentUser,
     instance_in: InstanceCreate,
 ):
-    service = InstanceService(session=session)
-    if service.get_all(name=instance_in.name):
+    if instance_service.get_all(name=instance_in.name):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return service.create(current_user=current_user, item_in=instance_in)
+    return instance_service.create(current_user=current_user, item_in=instance_in)
 
 
 @router.patch(
@@ -62,11 +60,11 @@ def create(
 )
 def update(
     *,
-    session: GlobalAnnotations.GetSession,
+    instance_service: InstanceAnnotations.InstanceService,
     instance: InstanceAnnotations.GetInstance,
     instance_in: InstanceUpdate,
 ):
-    return InstanceService(session=session).update(
+    return instance_service.update(
         item=instance,
         item_in=instance_in,
     )
@@ -78,7 +76,7 @@ def update(
 )
 def delete(
     *,
-    session: GlobalAnnotations.GetSession,
+    instance_service: InstanceAnnotations.InstanceService,
     instance: InstanceAnnotations.GetInstance,
 ):
-    return InstanceService(session=session).delete(item=instance)
+    return instance_service.delete(item=instance)

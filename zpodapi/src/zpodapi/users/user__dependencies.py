@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Path, status
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations
+from zpodapi.lib.global_dependencies import GlobalAnnotations, service_init_annotation
 from zpodcommon import models as M
 
 from .user__services import UserService
@@ -11,7 +11,7 @@ from .user__types import UserIdType
 
 def get_user(
     *,
-    session: GlobalAnnotations.GetSession,
+    user_service: "UserAnnotations.UserService",
     id: Annotated[
         UserIdType,
         Path(
@@ -23,7 +23,7 @@ def get_user(
         ),
     ],
 ):
-    if user := UserService(session=session).get(value=id):
+    if user := user_service.get(value=id):
         return user
     raise HTTPException(status_code=404, detail="User not found")
 
@@ -46,3 +46,4 @@ class UserDepends:
 
 class UserAnnotations:
     GetUser = Annotated[M.User, Depends(get_user)]
+    UserService = service_init_annotation(UserService)
