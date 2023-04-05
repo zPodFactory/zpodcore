@@ -6,16 +6,11 @@ from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 
 from .endpoint__schemas import EndpointUpdate
-from .endpoint__types import EndpointIdType
 from .endpoint__utils import update_dictionary, zpod_endpoint_check
 
 
 class EndpointService(ServiceBase):
     base_model: SQLModel = M.Endpoint
-
-    def get(self, *, value, column="id"):
-        column, value = EndpointIdType.parse(value)
-        return super().get(value=value, column=column)
 
     def update(self, *, item: M.Endpoint, item_in: EndpointUpdate):
         for key, value in item_in.dict(exclude_unset=True).items():

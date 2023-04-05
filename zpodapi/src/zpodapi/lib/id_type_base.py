@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class IdType(str):
     fields = dict(id=int)
 
@@ -27,6 +30,11 @@ class IdType(str):
     @staticmethod
     def parse(value) -> tuple[str, str]:
         return (value if "=" in value else f"id={value}").split("=")
+
+    @staticmethod
+    def args(value) -> dict[str, Any]:
+        col, val = IdType.parse(value)
+        return {col: val}
 
     def __repr__(self):
         return f"{self.__class__.__name__}()"
