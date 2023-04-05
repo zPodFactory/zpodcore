@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
-from zpodapi.libraries.library__services import LibraryService
 
 from .library__dependencies import LibraryAnnotations
 from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
@@ -21,9 +20,9 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: GlobalAnnotations.GetSession,
+    library_service: LibraryAnnotations.LibraryService,
 ):
-    return LibraryService(session=session).get_all()
+    return library_service.get_all()
 
 
 @router.get("/{id}", response_model=LibraryView)
@@ -41,17 +40,16 @@ def get(
 )
 def create(
     *,
-    session: GlobalAnnotations.GetSession,
+    library_service: LibraryAnnotations.LibraryService,
     library_in: LibraryCreate,
 ):
-    service = LibraryService(session=session)
-    if service.get_all_filtered(
+    if library_service.get_all_filtered(
         name=library_in.name,
         git_url=library_in.git_url,
         use_or=True,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return service.create(item_in=library_in)
+    return library_service.create(item_in=library_in)
 
 
 @router.patch(
@@ -61,11 +59,11 @@ def create(
 )
 def update(
     *,
-    session: GlobalAnnotations.GetSession,
+    library_service: LibraryAnnotations.LibraryService,
     library: LibraryAnnotations.GetLibrary,
     library_in: LibraryUpdate,
 ):
-    return LibraryService(session=session).update(
+    return library_service.update(
         item=library,
         item_in=library_in,
     )
@@ -77,7 +75,7 @@ def update(
 )
 def delete(
     *,
-    session: GlobalAnnotations.GetSession,
+    library_service: LibraryAnnotations.LibraryService,
     library: LibraryAnnotations.GetLibrary,
 ):
-    return LibraryService(session=session).delete(item=library)
+    return library_service.delete(item=library)

@@ -1,11 +1,10 @@
 from fastapi import APIRouter, status
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .component__dependencies import ComponentAnnotations
 from .component__schemas import ComponentViewFull
-from .component__services import ComponentService
 
 router = APIRouter(
     prefix="/components",
@@ -21,9 +20,9 @@ router = APIRouter(
 )
 def get_all(
     *,
-    session: GlobalAnnotations.GetSession,
+    component_service: ComponentAnnotations.ComponentService,
 ):
-    return ComponentService(session=session).get_all()
+    return component_service.get_all()
 
 
 @router.get(
@@ -44,10 +43,10 @@ def get(
 )
 def enable(
     *,
-    session: GlobalAnnotations.GetSession,
+    component_service: ComponentAnnotations.ComponentService,
     component: ComponentAnnotations.GetComponent,
 ):
-    return ComponentService(session=session).enable(component=component)
+    return component_service.enable(component=component)
 
 
 @router.put(
@@ -57,7 +56,7 @@ def enable(
 )
 def disable(
     *,
-    session: GlobalAnnotations.GetSession,
+    component_service: ComponentAnnotations.ComponentService,
     component: ComponentAnnotations.GetComponent,
 ):
-    return ComponentService(session=session).disable(component=component)
+    return component_service.disable(component=component)

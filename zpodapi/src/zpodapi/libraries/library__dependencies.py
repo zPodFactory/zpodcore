@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Path
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations
+from zpodapi.lib.global_dependencies import service_init_annotation
 from zpodapi.libraries.library__types import LibraryIdType
 from zpodcommon import models as M
 
@@ -11,7 +11,7 @@ from .library__services import LibraryService
 
 async def get_library(
     *,
-    session: GlobalAnnotations.GetSession,
+    library_service: "LibraryAnnotations.LibraryService",
     id: Annotated[
         LibraryIdType,
         Path(
@@ -22,7 +22,7 @@ async def get_library(
         ),
     ],
 ):
-    if library := LibraryService(session=session).get(value=id):
+    if library := library_service.get(value=id):
         return library
     raise HTTPException(status_code=404, detail="Library not found")
 
@@ -33,3 +33,4 @@ class LibraryDepends:
 
 class LibraryAnnotations:
     GetLibrary = Annotated[M.Library, Depends(get_library)]
+    LibraryService = service_init_annotation(LibraryService)

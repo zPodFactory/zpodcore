@@ -53,6 +53,17 @@ def superadmin_only(superadmin: "GlobalAnnotations.SuperAdmin"):
         )
 
 
+def service_init_annotation(service):
+    def inner(
+        *,
+        session: "GlobalAnnotations.GetSession",
+        current_user: "GlobalAnnotations.GetCurrentUser",
+    ):
+        return service(session=session, current_user=current_user)
+
+    return Annotated[service, Depends(inner)]
+
+
 class GlobalDepends:
     UpdateLastConnectionDate = Depends(update_last_connection_date)
     SuperAdminOnly = Depends(superadmin_only)
