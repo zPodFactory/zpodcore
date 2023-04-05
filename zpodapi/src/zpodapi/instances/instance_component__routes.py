@@ -1,10 +1,10 @@
 from fastapi import APIRouter, status
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
+from zpodapi.lib.global_dependencies import GlobalDepends
 
 from .instance__dependencies import InstanceAnnotations
+from .instance_component__dependencies import InstanceComponentAnnotations
 from .instance_component__schemas import InstanceComponentCreate, InstanceComponentView
-from .instance_component__services import InstanceComponentService
 
 router = APIRouter(
     prefix="/instances/{id}/components",
@@ -31,11 +31,11 @@ def components_get_all(
 )
 def components_add(
     *,
-    session: GlobalAnnotations.GetSession,
+    instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
     instance: InstanceAnnotations.GetInstance,
     component_in: InstanceComponentCreate,
 ):
-    return InstanceComponentService(session=session).add(
+    return instance_component_service.add(
         instance_id=instance.id,
         component_uid=component_in.component_uid,
     )
@@ -47,12 +47,11 @@ def components_add(
 # )
 # def components_delete(
 #     *,
-#     session: GlobalAnnotations.GetSession,
-#     instance: M.Instance = InstanceAnnotations.GetInstance,
+#     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
+#     instance: InstanceComponentAnnotations.GetInstance,
 #     component_uid: str,
 # ):
-#     service = InstanceComponentService(session=session)
-#     instance_component = service.get(
+#     instance_component = instance_component_service.get(
 #         instance_id=instance.id, component_uid=component_uid
 #     )
-#     service.delete(item=instance_component)
+#     instance_component_service.delete(item=instance_component)
