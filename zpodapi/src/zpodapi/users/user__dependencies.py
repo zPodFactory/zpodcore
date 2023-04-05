@@ -23,7 +23,7 @@ def get_user(
         ),
     ],
 ):
-    if user := user_service.get(value=id):
+    if user := user_service.get(**UserIdType.args(id)):
         return user
     raise HTTPException(status_code=404, detail="User not found")
 

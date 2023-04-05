@@ -22,7 +22,7 @@ async def get_library(
         ),
     ],
 ):
-    if library := library_service.get(value=id):
+    if library := library_service.get(**LibraryIdType.args(id)):
         return library
     raise HTTPException(status_code=404, detail="Library not found")
 

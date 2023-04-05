@@ -1,6 +1,5 @@
 from sqlmodel import SQLModel
 
-from zpodapi.instances.instance__types import InstanceIdType
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import enums
 from zpodcommon import models as M
@@ -32,12 +31,12 @@ class InstanceService(ServiceBase):
             name=name,
         )
 
-    def get(self, *, value: InstanceIdType):
-        column, value = InstanceIdType.parse(value)
+    def get(self, *, extra_criteria=None, **filters: dict):
         return super().get(
-            value=value,
-            column=column,
-            extra_criteria=EXTRA_CRITERIA if column != "id" else [],
+            extra_criteria=[]
+            if filters.get("id")
+            else (extra_criteria or []) + EXTRA_CRITERIA,
+            **filters,
         )
 
     def create(
