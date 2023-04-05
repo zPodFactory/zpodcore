@@ -22,7 +22,10 @@ def get_component(
         ),
     ],
 ):
-    if component := component_service.get(value=id):
+    args = ComponentIdType.args(id)
+    if "uid" in args:
+        args["component-uid"] = args.pop('uid')
+    if component := component_service.get(**args):
         return component
     raise HTTPException(status_code=404, detail="Component not found")
 

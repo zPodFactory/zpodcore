@@ -10,15 +10,10 @@ from zpodapi.lib.utils import list_json_files
 from zpodcommon import models as M
 
 from .library__schemas import LibraryCreate
-from .library__types import LibraryIdType
 
 
 class LibraryService(ServiceBase):
     base_model: SQLModel = M.Library
-
-    def get(self, *, value, column="id"):
-        column, value = LibraryIdType.parse(value)
-        return super().get(value=value, column=column)
 
     def create(self, *, item_in: LibraryCreate):
         library = self.crud.create(item_in=item_in)

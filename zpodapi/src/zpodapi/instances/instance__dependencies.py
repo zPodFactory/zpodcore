@@ -22,7 +22,7 @@ def get_instance(
         ),
     ],
 ):
-    if instance := instance_service.get(value=id):
+    if instance := instance_service.get(**InstanceIdType.args(id)):
         return instance
     raise HTTPException(status_code=404, detail="Instance not found")
 

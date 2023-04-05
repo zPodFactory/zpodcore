@@ -27,12 +27,14 @@ class ServiceBase:
 
         return self.crud.select(criteria=criteria).all()
 
-    def get(self, *, value, column="id", extra_criteria=None):
-        model_keys = set(self.base_model.__fields__.keys())
-        if column not in model_keys:
-            raise AttributeError(f"Invalid attribute name: {column}")
+    def get(self, *, extra_criteria=None, **filters: dict):
+        arg_criteria = self.crud.build_criteria_when_available(**filters)
+        if len(arg_criteria) == 0:
+            raise AttributeError("Must have at least one filter")
+        if len(arg_criteria) > 1:
+            raise AttributeError("Can only have one filter")
 
-        criteria = (extra_criteria or []) + [getattr(self.base_model, column) == value]
+        criteria = (extra_criteria or []) + arg_criteria
         return self.crud.select(criteria=criteria).one_or_none()
 
     def create(self, *, item_in: SQLModel):
