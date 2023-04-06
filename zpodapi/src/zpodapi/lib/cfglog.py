@@ -1,3 +1,4 @@
+import builtins
 import gzip
 import logging
 import os
@@ -8,12 +9,14 @@ from logging.handlers import TimedRotatingFileHandler
 
 import anyio
 import fastapi
+import rich
 import starlette
 import uvicorn
 
 from zpodapi import settings
 
 logger = logging.getLogger(__name__)
+builtins.print = rich.print
 
 
 def namer(name):
