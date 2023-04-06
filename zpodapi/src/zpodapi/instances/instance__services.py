@@ -26,7 +26,7 @@ class InstanceService(ServiceBase):
         *,
         name: str | None = None,
     ):
-        return self.get_all_filtered(
+        return self.crud.get_all_filtered(
             extra_criteria=EXTRA_CRITERIA,
             name=name,
         )
