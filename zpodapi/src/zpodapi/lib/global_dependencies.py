@@ -45,7 +45,7 @@ def superadmin(current_user: "GlobalAnnotations.GetCurrentUser") -> bool:
     return current_user.superadmin
 
 
-def superadmin_only(superadmin: "GlobalAnnotations.SuperAdmin"):
+def only_superadmin(superadmin: "GlobalAnnotations.SuperAdmin"):
     if not superadmin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -66,7 +66,7 @@ def service_init_annotation(service):
 
 class GlobalDepends:
     UpdateLastConnectionDate = Depends(update_last_connection_date)
-    SuperAdminOnly = Depends(superadmin_only)
+    OnlySuperAdmin = Depends(only_superadmin)
 
 
 class GlobalAnnotations:
