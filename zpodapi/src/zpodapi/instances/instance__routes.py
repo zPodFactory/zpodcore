@@ -48,7 +48,7 @@ def create(
     current_user: GlobalAnnotations.GetCurrentUser,
     instance_in: InstanceCreate,
 ):
-    if instance_service.get_all(name=instance_in.name):
+    if instance_service.get(name=instance_in.name):
         raise HTTPException(status_code=422, detail="Conflicting record found")
     return instance_service.create(current_user=current_user, item_in=instance_in)
 
@@ -64,7 +64,7 @@ def update(
     instance: InstanceAnnotations.GetInstance,
     instance_in: InstanceUpdate,
 ):
-    return instance_service.update(
+    return instance_service.crud.update(
         item=instance,
         item_in=instance_in,
     )

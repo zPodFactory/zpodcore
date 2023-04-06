@@ -16,7 +16,7 @@ router = APIRouter(
     "",
     response_model=list[InstanceFeatureView],
 )
-def features_get_all(
+def instance_features_get_all(
     *,
     instance: InstanceAnnotations.GetInstance,
 ):

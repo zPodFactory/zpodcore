@@ -22,7 +22,7 @@ def get_all(
     *,
     endpoint_service: EndpointAnnotations.EndpointService,
 ):
-    return endpoint_service.get_all()
+    return endpoint_service.crud.get_all()
 
 
 @router.post(
@@ -35,9 +35,9 @@ def create(
     endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointCreate,
 ):
-    if endpoint_service.get(value=endpoint.name):
+    if endpoint_service.crud.get(name=endpoint.name):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return endpoint_service.create(item_in=endpoint)
+    return endpoint_service.crud.create(item_in=endpoint)
 
 
 @router.patch(
@@ -63,7 +63,7 @@ def delete(
     endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointAnnotations.GetEndpoint,
 ):
-    endpoint_service.delete(item=endpoint)
+    endpoint_service.crud.delete(item=endpoint)
 
 
 @router.put(
@@ -72,7 +72,6 @@ def delete(
 )
 async def verify(
     *,
-
     endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointAnnotations.GetEndpoint,
 ):

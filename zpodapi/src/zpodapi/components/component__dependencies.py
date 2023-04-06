@@ -24,8 +24,8 @@ def get_component(
 ):
     args = ComponentIdType.args(id)
     if "uid" in args:
-        args["component-uid"] = args.pop('uid')
-    if component := component_service.get(**args):
+        args["component_uid"] = args.pop("uid")
+    if component := component_service.crud.get(**args):
         return component
     raise HTTPException(status_code=404, detail="Component not found")
 

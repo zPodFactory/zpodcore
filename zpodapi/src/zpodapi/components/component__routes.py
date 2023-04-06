@@ -22,7 +22,7 @@ def get_all(
     *,
     component_service: ComponentAnnotations.ComponentService,
 ):
-    return component_service.get_all()
+    return component_service.crud.get_all()
 
 
 @router.get(

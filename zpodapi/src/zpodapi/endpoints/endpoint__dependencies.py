@@ -22,7 +22,7 @@ async def get_endpoint(
         ),
     ],
 ):
-    if endpoint := endpoint_service.get(**EndpointIdType.args(id)):
+    if endpoint := endpoint_service.crud.get(**EndpointIdType.args(id)):
         return endpoint
     raise HTTPException(status_code=404, detail="Endpoint not found")
 

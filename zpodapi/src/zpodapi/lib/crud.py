@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlmodel import Session, SQLModel, select
+from sqlmodel import Session, SQLModel, or_, select
 from sqlmodel.engine.result import Result
 
 
@@ -53,6 +53,47 @@ class Crud:
         self.session.delete(item)
         self.session.commit()
         return None
+
+    def get(
+        self,
+        *,
+        extra_criteria: list = None,
+        model: SQLModel | None = None,
+        **filters: dict[str, Any],
+    ):
+        arg_criteria = self.build_criteria_when_available(**filters)
+        if len(arg_criteria) == 0:
+            raise AttributeError("Must have at least one filter")
+        if len(arg_criteria) > 1:
+            raise AttributeError("Can only have one filter")
+
+        criteria = (extra_criteria or []) + arg_criteria
+        return self.select(criteria=criteria, model=model).one_or_none()
+
+    def get_all(
+        self,
+        model: SQLModel | None = None,
+    ):
+        return self.select(model=model).all()
+
+    def get_all_filtered(
+        self,
+        *,
+        extra_criteria: list = None,
+        use_or: bool = False,
+        model: SQLModel | None = None,
+        **filters: dict[str, Any],
+    ):
+        criteria = extra_criteria or []
+
+        arg_criteria = self.build_criteria_when_available(**filters)
+
+        if use_or:
+            criteria.append(or_(*arg_criteria))
+        else:
+            criteria.extend(arg_criteria)
+
+        return self.select(criteria=criteria, model=model).all()
 
     def save(self, item: SQLModel):
         self.session.add(item)
