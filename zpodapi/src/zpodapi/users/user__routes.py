@@ -30,7 +30,7 @@ def get_all(
     username: str | None = None,
     email: EmailStr | None = None,
 ):
-    return user_service.get_all_filtered(username=username, email=email)
+    return user_service.crud.get_all_filtered(username=username, email=email)
 
 
 @router.get(
@@ -67,13 +67,13 @@ def create(
     user_service: UserAnnotations.UserService,
     user_in: UserCreate,
 ):
-    if user_service.get_all_filtered(
+    if user_service.crud.get_all_filtered(
         username=user_in.username,
         email=user_in.email,
         use_or=True,
     ):
         raise HTTPException(status_code=422, detail="Conflicting record found")
-    return user_service.create(item_in=user_in)
+    return user_service.crud.create(item_in=user_in)
 
 
 @router.patch(
@@ -88,7 +88,7 @@ def update(
     user: UserAnnotations.GetUser,
     user_in: UserUpdate,
 ):
-    return user_service.update(item=user, item_in=user_in)
+    return user_service.crud.update(item=user, item_in=user_in)
 
 
 @router.delete(
@@ -101,4 +101,4 @@ def delete(
     user_service: UserAnnotations.UserService,
     user: UserAnnotations.GetUser,
 ):
-    return user_service.delete(item=user)
+    return user_service.crud.delete(item=user)
