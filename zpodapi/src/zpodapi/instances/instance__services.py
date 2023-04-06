@@ -31,12 +31,11 @@ class InstanceService(ServiceBase):
             name=name,
         )
 
-    def get(self, *, extra_criteria=None, **filters: dict):
-        return super().get(
-            extra_criteria=[]
-            if filters.get("id")
-            else (extra_criteria or []) + EXTRA_CRITERIA,
-            **filters,
+    def get(self, *, id=None, name=None):
+        return self.crud.get(
+            extra_criteria=EXTRA_CRITERIA if id is None else None,
+            id=id,
+            name=name,
         )
 
     def create(

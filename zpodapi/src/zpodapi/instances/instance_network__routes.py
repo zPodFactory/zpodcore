@@ -16,7 +16,7 @@ router = APIRouter(
     "",
     response_model=list[InstanceNetworkView],
 )
-def networks_get_all(
+def instance_networks_get_all(
     *,
     instance: InstanceAnnotations.GetInstance,
 ):

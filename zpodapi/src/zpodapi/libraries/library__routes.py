@@ -22,7 +22,7 @@ def get_all(
     *,
     library_service: LibraryAnnotations.LibraryService,
 ):
-    return library_service.get_all()
+    return library_service.crud.get_all()
 
 
 @router.get("/{id}", response_model=LibraryView)
@@ -63,7 +63,7 @@ def update(
     library: LibraryAnnotations.GetLibrary,
     library_in: LibraryUpdate,
 ):
-    return library_service.update(
+    return library_service.crud.update(
         item=library,
         item_in=library_in,
     )

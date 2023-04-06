@@ -17,7 +17,7 @@ router = APIRouter(
     "",
     response_model=list[InstanceComponentView],
 )
-def components_get_all(
+def instance_components_get_all(
     *,
     instance: InstanceAnnotations.GetInstance,
 ):
@@ -29,7 +29,7 @@ def components_get_all(
     response_model=InstanceComponentView,
     status_code=status.HTTP_201_CREATED,
 )
-def components_add(
+def instance_components_add(
     *,
     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
     instance: InstanceAnnotations.GetInstance,
@@ -45,13 +45,13 @@ def components_add(
 #     "/{component_uid}",
 #     status_code=status.HTTP_204_NO_CONTENT,
 # )
-# def components_delete(
+# def instance_components_delete(
 #     *,
 #     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
 #     instance: InstanceComponentAnnotations.GetInstance,
 #     component_uid: str,
 # ):
-#     instance_component = instance_component_service.get(
-#         instance_id=instance.id, component_uid=component_uid
+#     instance_component = instance_component_service.crud.get(
+#         id=instance.id, component_uid=component_uid
 #     )
-#     instance_component_service.delete(item=instance_component)
+#     instance_component_service.crud.delete(item=instance_component)
