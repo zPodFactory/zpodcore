@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 

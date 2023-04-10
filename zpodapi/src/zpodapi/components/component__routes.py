@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status
 
-from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .component__dependencies import ComponentAnnotations
@@ -9,7 +8,6 @@ from .component__schemas import ComponentViewFull
 router = APIRouter(
     prefix="/components",
     tags=["components"],
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 

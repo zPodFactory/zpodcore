@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .endpoint__dependencies import EndpointAnnotations
@@ -9,7 +8,6 @@ from .endpoint__schemas import EndpointCreate, EndpointUpdate, EndpointView
 router = APIRouter(
     prefix="/endpoints",
     tags=["endpoints"],
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 
