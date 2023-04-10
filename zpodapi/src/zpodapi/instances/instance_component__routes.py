@@ -1,7 +1,5 @@
 from fastapi import APIRouter, status
 
-from zpodapi.lib.global_dependencies import GlobalDepends
-
 from .instance__dependencies import InstanceAnnotations
 from .instance_component__dependencies import InstanceComponentAnnotations
 from .instance_component__schemas import InstanceComponentCreate, InstanceComponentView
@@ -9,7 +7,6 @@ from .instance_component__schemas import InstanceComponentCreate, InstanceCompon
 router = APIRouter(
     prefix="/instances/{id}/components",
     tags=["instances"],
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
 )
 
 
