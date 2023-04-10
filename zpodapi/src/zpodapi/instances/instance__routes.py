@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
+from zpodapi.lib.global_dependencies import GlobalAnnotations
 from zpodapi.lib.route_logger import RouteLogger
 
 from .instance__dependencies import InstanceAnnotations
@@ -9,7 +9,6 @@ from .instance__schemas import InstanceCreate, InstanceUpdate, InstanceView
 router = APIRouter(
     prefix="/instances",
     tags=["instances"],
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 

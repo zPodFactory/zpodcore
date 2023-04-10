@@ -9,6 +9,7 @@ from zpodapi.instances import (
     instance_feature__routes,
     instance_network__routes,
 )
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.libraries import library__routes
 from zpodapi.root import root__routes
 from zpodapi.users import user__routes
@@ -25,7 +26,10 @@ def simplify_operation_ids(api: FastAPI) -> None:
             route.operation_id = f"{tag}_{route.name}"
 
 
-api = FastAPI(title="zPod API")
+api = FastAPI(
+    title="zPod API",
+    dependencies=[GlobalDepends.UpdateLastConnectionDate],
+)
 api.include_router(root__routes.router)
 api.include_router(component__routes.router)
 api.include_router(endpoint__routes.router)

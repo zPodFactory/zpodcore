@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
 
-from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .library__dependencies import LibraryAnnotations
@@ -9,7 +8,6 @@ from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
 router = APIRouter(
     prefix="/libraries",
     tags=["libraries"],
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
     route_class=RouteLogger,
 )
 
