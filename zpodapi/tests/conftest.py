@@ -30,21 +30,35 @@ def client_fixture(session: Session):
     api.dependency_overrides.clear()
 
 
-@pytest.fixture(name="authed_client")
-def authed_client_fixture(client: TestClient):
-    client.headers["access_token"] = "APITOKEN"
+@pytest.fixture(name="superadmin_client")
+def superadmin_client_fixture(client: TestClient):
+    client.headers["access_token"] = "APITOKEN_SUPERUSER"
     yield client
 
 
-@pytest.fixture(autouse=True, name="add_base_user")
-def add_base_user(session: Session):
-    user = M.User(
+@pytest.fixture(name="normaluser_client")
+def normaluser_client_fixture(client: TestClient):
+    client.headers["access_token"] = "APITOKEN_NORMALUSER"
+    yield client
+
+
+@pytest.fixture(autouse=True, name="db_seed")
+def db_seed(session: Session):
+    superadmin_user = M.User(
         username="superuser",
         email="superuser@zpodfactory.io",
-        api_token="APITOKEN",
+        api_token="APITOKEN_SUPERUSER",
         creation_date="2022-01-01T00:00:00",
         superadmin=True,
     )
+    session.add(superadmin_user)
 
-    session.add(user)
+    normal_user = M.User(
+        username="normaluser",
+        email="normaluser@zpodfactory.io",
+        api_token="APITOKEN_NORMALUSER",
+        creation_date="2022-01-01T00:00:00",
+        superadmin=False,
+    )
+    session.add(normal_user)
     session.commit()

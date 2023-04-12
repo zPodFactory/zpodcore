@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Path, status
+from fastapi import Depends, HTTPException, Path
 
-from zpodapi.lib.global_dependencies import GlobalAnnotations, service_init_annotation
+from zpodapi.lib.global_dependencies import service_init_annotation
 from zpodcommon import models as M
 
 from .user__services import UserService
@@ -23,25 +23,13 @@ def get_user(
         ),
     ],
 ):
-    if user := user_service.crud.get(**UserIdType.args(id)):
+    if user := user_service.get(**UserIdType.args(id)):
         return user
     raise HTTPException(status_code=404, detail="User not found")
 
 
-def only_self(
-    *,
-    current_user: GlobalAnnotations.GetCurrentUser,
-    user: "UserAnnotations.GetUser",
-):
-    if not current_user.superadmin and current_user.id != user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient privileges",
-        )
-
-
 class UserDepends:
-    OnlySelf = Depends(only_self)
+    pass
 
 
 class UserAnnotations:
