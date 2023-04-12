@@ -23,17 +23,11 @@ def flow_deploy_instance(
         instance_name=instance_name,
     )
 
-    # Create instance vapp
-    vapp = instance_vapp.submit(
-        instance_name=instance_name,
-        wait_for=[prep],
-    )
-
-    # Configure DNSMASQ
+    # Configure dnsmasq
     dnsmasq = instance_dnsmasq.submit(
         instance_id=instance_id,
         instance_name=instance_name,
-        wait_for=[vapp],
+        wait_for=[prep],
     )
 
     # Configure Top Level Networking
@@ -43,9 +37,16 @@ def flow_deploy_instance(
         wait_for=[dnsmasq],
     )
 
+    # Create instance vapp
+    vapp = instance_vapp.submit(
+        instance_id=instance_id,
+        instance_name=instance_name,
+        wait_for=[networking],
+    )
+
     # # Deploy profile components
     mod = importlib.import_module(f"zpodengine.instance_profiles.{profile}")
-    mod.instance_profile_flow(instance_id=instance_id, wait_for=[networking])
+    mod.instance_profile_flow(instance_id=instance_id, wait_for=[vapp])
 
 
 if __name__ == "__main__":
