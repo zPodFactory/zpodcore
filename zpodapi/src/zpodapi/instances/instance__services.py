@@ -51,7 +51,7 @@ class InstanceService(ServiceBase):
                 password=instance__utils.gen_password(),
                 permissions=[
                     M.InstancePermission(
-                        permission="zpodowner",
+                        permission=enums.InstancePermission.INSTANCE_OWNER,
                         users=[current_user],
                     )
                 ],

@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
 
+from zpodcommon import enums
+
 from .mixins import CommonDatesMixin
 
 if TYPE_CHECKING:
@@ -163,7 +165,7 @@ class InstancePermission(SQLModel, table=True):
         nullable=False,
         foreign_key="instances.id",
     )
-    permission: str = Field(
+    permission: enums.InstancePermission = Field(
         default=...,
         nullable=False,
     )
