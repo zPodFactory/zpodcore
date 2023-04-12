@@ -20,9 +20,8 @@ router = APIRouter(
 def get_all(
     *,
     instance_service: InstanceAnnotations.InstanceService,
-    name: str | None = None,
 ):
-    return instance_service.get_all(name=name)
+    return instance_service.get_all()
 
 
 @router.get(
@@ -36,6 +35,7 @@ def get(
     return instance
 
 
+# TODO: ADD User Permissions to prevent creation
 @router.post(
     "",
     response_model=InstanceView,
