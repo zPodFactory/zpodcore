@@ -106,6 +106,58 @@ class vCenter:
             ret.append(item)
         return ret
 
+    def find_folder(self, name, folder):
+        if folder.name == name:
+            return folder
+        for child in folder.childEntity:
+            if isinstance(child, vim.Folder):
+                if result := self.find_folder(name, child):
+                    return result
+
+    def create_allocation_object(self, resSpec, value):
+        result = vim.ResourceAllocationInfo()
+        result.shares = vim.SharesInfo()
+        result.shares.shares = value
+        result.shares.level = vim.SharesInfo.Level.normal
+        result.limit = -1
+        result.reservation = 0
+        result.expandableReservation = True
+        return result
+
+    def create_vapp(self, vapp_name, cluster_name, folder_name):
+        content = self.si.content
+
+        clusterMO = None
+
+        container = content.viewManager.CreateContainerView(
+            content.rootFolder, [vim.ClusterComputeResource], True
+        )
+
+        for cluster in container.view:
+            if cluster.name == cluster_name:
+                clusterMO = cluster
+
+        folders = content.viewManager.CreateContainerView(
+            content.rootFolder, [vim.Folder], True
+        ).view
+        vmFolderMO = None
+
+        for folder in folders:
+            if isinstance(folder, vim.Folder):
+                if result := self.find_folder(folder_name, folder):
+                    vmFolderMO = result
+                    break
+
+        resSpec = vim.ResourceConfigSpec()
+        resSpec.memoryAllocation = self.create_allocation_object(resSpec, 163840)
+        resSpec.scaleDescendantsShares = "disabled"
+        resSpec.cpuAllocation = self.create_allocation_object(resSpec, 4000)
+        configSpec = vim.vApp.VAppConfigSpec()
+        configSpec.entityConfig = []
+        configSpec.property = []
+
+        clusterMO.resourcePool.CreateVApp(vapp_name, resSpec, configSpec, vmFolderMO)
+
     def get_vapps(self, props=None):
         return self.get_obj_list([vim.VirtualApp], props=props)
 
