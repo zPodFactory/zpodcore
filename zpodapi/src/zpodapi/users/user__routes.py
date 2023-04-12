@@ -6,7 +6,7 @@ from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .user__dependencies import UserAnnotations
-from .user__schemas import UserCreate, UserUpdate, UserViewFull
+from .user__schemas import UserCreate, UserUpdate, UserUpdateAdmin, UserViewFull
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ def update(
     *,
     user_service: UserAnnotations.UserService,
     user: UserAnnotations.GetUser,
-    user_in: UserUpdate,
+    user_in: UserUpdateAdmin | UserUpdate,
 ):
     return user_service.update(item=user, item_in=user_in)
 

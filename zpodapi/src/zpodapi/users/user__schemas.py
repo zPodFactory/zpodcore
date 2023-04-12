@@ -27,6 +27,9 @@ class UserCreate(SchemaBase):
 class UserUpdate(SchemaBase):
     description: str | None = Field(None, D.description)
     ssh_key: str | None = Field(None, D.ssh_key)
+
+
+class UserUpdateAdmin(UserUpdate):
     superadmin: bool | None = Field(None, D.superadmin)
 
 
