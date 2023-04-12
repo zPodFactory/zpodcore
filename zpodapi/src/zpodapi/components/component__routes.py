@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status
+from zpodapi.lib.global_dependencies import GlobalDepends
 
 from zpodapi.lib.route_logger import RouteLogger
 
@@ -38,6 +39,7 @@ def get(
     "/{id}/enable",
     response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def enable(
     *,
@@ -51,6 +53,7 @@ def enable(
     "/{id}/disable",
     response_model=ComponentViewFull,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def disable(
     *,
