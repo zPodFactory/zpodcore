@@ -2,7 +2,7 @@ from pydantic import EmailStr
 from sqlmodel import SQLModel
 
 from zpodapi.lib.service_base import ServiceBase
-from zpodapi.users.user__schemas import UserUpdate
+from zpodapi.users.user__schemas import UserUpdate, UserUpdateAdmin
 from zpodcommon import models as M
 
 
@@ -31,5 +31,8 @@ class UserService(ServiceBase):
             email=email,
         )
 
-    def update(self, *, item: M.User, item_in: UserUpdate):
+    def update(self, *, item: M.User, item_in: UserUpdateAdmin | UserUpdate):
+        if self.current_user.superadmin is False:
+            item_in = self.convert_schema(UserUpdate, item_in)
+
         return self.crud.update(item=item, item_in=item_in)
