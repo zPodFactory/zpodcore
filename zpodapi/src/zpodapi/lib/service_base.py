@@ -12,8 +12,9 @@ class ServiceBase:
 
     def __init__(self, session: Session, current_user: M.User):
         self.session: Session = session
-        self.current_user: M.User = current_user
         self.crud = Crud(session=session, base_model=self.base_model)
+        self.current_user: M.User = current_user
+        self.is_superadmin = current_user.superadmin
 
     def convert_schema(self, schema, item_in):
         # If already proper schema, just return it
