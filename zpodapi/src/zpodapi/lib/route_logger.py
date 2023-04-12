@@ -15,10 +15,11 @@ class RouteLogger(APIRoute):
 
             url = request.url
             path = f"{url.path}?{url.query}" if url.query else url.path
+            method = request.method.upper()
 
-            log_obj(req, f"REQUEST {path}")
+            log_obj(req, f"REQUEST {method} {path}")
             response: Response = await original_route_handler(request)
-            log_obj(response.body, f"RESPONSE {path}")
+            log_obj(response.body, f"RESPONSE {method} {path}")
             return response
 
         return custom_route_handler
