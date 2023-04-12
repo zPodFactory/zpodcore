@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from zpodapi.lib.global_dependencies import GlobalDepends
 
 from zpodapi.lib.route_logger import RouteLogger
 
@@ -35,6 +36,7 @@ def get(
     "",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def create(
     *,
@@ -54,6 +56,7 @@ def create(
     "/{id}",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def update(
     *,
@@ -70,6 +73,7 @@ def update(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def delete(
     *,
