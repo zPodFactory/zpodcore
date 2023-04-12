@@ -19,12 +19,12 @@ class InstanceService(ServiceBase):
 
     def get_all(self):
         return self.get_instance_records(
-            user_id=None if self.current_user.superadmin else self.current_user.id,
+            user_id=None if self.is_superadmin else self.current_user.id,
             statuses=ACTIVE_STATUSES,
         ).all()
 
     def get(self, *, id=None, name=None):
-        user_id = None if self.current_user.superadmin else self.current_user.id
+        user_id = None if self.is_superadmin else self.current_user.id
         if id:
             records = self.get_instance_records(
                 user_id=user_id,
