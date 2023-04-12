@@ -1,12 +1,11 @@
 import logging
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import EmailStr
 
 from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
-from .user__dependencies import UserAnnotations, UserDepends
+from .user__dependencies import UserAnnotations
 from .user__schemas import UserCreate, UserUpdate, UserViewFull
 
 logger = logging.getLogger(__name__)
@@ -21,15 +20,12 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[UserViewFull],
-    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def get_all(
     *,
     user_service: UserAnnotations.UserService,
-    username: str | None = None,
-    email: EmailStr | None = None,
 ):
-    return user_service.crud.get_all_filtered(username=username, email=email)
+    return user_service.get_all()
 
 
 @router.get(
@@ -46,7 +42,6 @@ def get_me(
 @router.get(
     "/{id}",
     response_model=UserViewFull,
-    dependencies=[UserDepends.OnlySelf],
 )
 def get(
     *,
@@ -79,7 +74,6 @@ def create(
     "/{id}",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[UserDepends.OnlySelf],
 )
 def update(
     *,
@@ -87,7 +81,7 @@ def update(
     user: UserAnnotations.GetUser,
     user_in: UserUpdate,
 ):
-    return user_service.crud.update(item=user, item_in=user_in)
+    return user_service.update(item=user, item_in=user_in)
 
 
 @router.delete(
