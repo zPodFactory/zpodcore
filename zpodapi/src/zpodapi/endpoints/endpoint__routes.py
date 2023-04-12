@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .endpoint__dependencies import EndpointAnnotations
@@ -27,6 +28,7 @@ def get_all(
     "",
     response_model=EndpointCreate,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def create(
     *,
@@ -42,6 +44,7 @@ def create(
     "/{id}",
     response_model=EndpointView,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def update(
     *,
@@ -55,6 +58,7 @@ def update(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def delete(
     *,
@@ -67,6 +71,8 @@ def delete(
 @router.put(
     "/{id}/verify",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+
 )
 async def verify(
     *,
