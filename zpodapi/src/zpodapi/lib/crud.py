@@ -13,7 +13,7 @@ class Crud:
         self.session = session
         self.base_model = base_model
 
-    def build_criteria_when_available(
+    def build_truthy_criteria(
         self,
         *,
         model_: SQLModel = None,
@@ -61,11 +61,9 @@ class Crud:
         model: SQLModel | None = None,
         **filters: dict[str, Any],
     ):
-        arg_criteria = self.build_criteria_when_available(**filters)
+        arg_criteria = self.build_truthy_criteria(**filters)
         if len(arg_criteria) == 0:
             raise AttributeError("Must have at least one filter")
-        if len(arg_criteria) > 1:
-            raise AttributeError("Can only have one filter")
 
         criteria = (extra_criteria or []) + arg_criteria
         return self.select(criteria=criteria, model=model).one_or_none()
@@ -86,7 +84,7 @@ class Crud:
     ):
         criteria = extra_criteria or []
 
-        arg_criteria = self.build_criteria_when_available(**filters)
+        arg_criteria = self.build_truthy_criteria(**filters)
 
         if use_or:
             criteria.append(or_(*arg_criteria))
