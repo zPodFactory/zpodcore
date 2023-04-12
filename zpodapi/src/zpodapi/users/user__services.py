@@ -11,7 +11,7 @@ class UserService(ServiceBase):
 
     def get_all(self):
         return self.crud.get_all_filtered(
-            id=None if self.current_user.superadmin else self.current_user.id,
+            id=None if self.is_superadmin else self.current_user.id,
         )
 
     def get(
@@ -21,7 +21,7 @@ class UserService(ServiceBase):
         username: str | None = None,
         email: EmailStr | None = None,
     ):  # sourcery skip: avoid-builtin-shadow
-        if not self.current_user.superadmin:
+        if not self.is_superadmin:
             if id and int(id) != self.current_user.id:
                 return []
             id = self.current_user.id
@@ -32,7 +32,7 @@ class UserService(ServiceBase):
         )
 
     def update(self, *, item: M.User, item_in: UserUpdateAdmin | UserUpdate):
-        if self.current_user.superadmin is False:
+        if not self.is_superadmin:
             item_in = self.convert_schema(UserUpdate, item_in)
 
         return self.crud.update(item=item, item_in=item_in)
