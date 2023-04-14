@@ -23,7 +23,7 @@ class ZpodEngineBase:
             return {}
 
 
-class ZpodEngineAsync(ZpodEngineBase):
+class ZpodEngineClientAsync(ZpodEngineBase):
     def __init__(self):
         self.aclient = httpx.AsyncClient(
             base_url="http://zpodengineserver:4200/api",
@@ -87,7 +87,7 @@ class ZpodEngineAsync(ZpodEngineBase):
         )
 
 
-class ZpodEngine(ZpodEngineBase):
+class ZpodEngineClient(ZpodEngineBase):
     def __init__(self):
         self.client = httpx.Client(
             base_url="http://zpodengineserver:4200/api",
@@ -152,7 +152,7 @@ class ZpodEngine(ZpodEngineBase):
 
 
 def main():
-    with ZpodEngine() as zpodengine:
+    with ZpodEngineClient() as zpodengine:
         print(
             zpodengine.create_flow_run_by_name(
                 flow_name="deploy-sample",
