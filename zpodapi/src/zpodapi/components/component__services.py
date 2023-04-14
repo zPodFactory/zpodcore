@@ -3,7 +3,7 @@ from sqlmodel import SQLModel
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus as CS
-from zpodcommon.lib import zpodengine
+from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 
 class ComponentService(ServiceBase):
@@ -16,7 +16,7 @@ class ComponentService(ServiceBase):
         component.status = CS.SCHEDULED
         self.crud.save(component)
 
-        zpod_engine = zpodengine.ZpodEngine()
+        zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="flow-download-component",
             deployment_name="default",
