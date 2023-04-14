@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, or_, select
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import enums
 from zpodcommon import models as M
-from zpodcommon.lib.zpodengine import ZpodEngine
+from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 from . import instance__utils
 from .instance__schemas import InstanceCreate, InstanceDelete
@@ -58,7 +58,7 @@ class InstanceService(ServiceBase):
         self.session.add(instance)
         self.session.flush()
 
-        zpod_engine = ZpodEngine()
+        zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="flow-deploy-instance",
             deployment_name="default",
