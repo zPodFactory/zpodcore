@@ -55,7 +55,10 @@ class TopLevelNetworking:
     def t1_attach_edge_cluster(self) -> None:
         edge_cluster_name = self.epnet["edgecluster"]
         print(f"Attach Edge Cluster: {edge_cluster_name} to T1: {self.t1_name}")
-        edge_cluster = self.get_edge_cluster(edge_cluster_name=edge_cluster_name)
+        edge_cluster = self.search_one(
+            resource_type="PolicyEdgeCluster",
+            display_name=edge_cluster_name,
+        )
         self.nsx.patch(
             url=(
                 f"/v1/infra/tier-1s/{self.t1_name}"
@@ -66,7 +69,10 @@ class TopLevelNetworking:
 
     def segment_create(self) -> None:
         print(f"Create Segment: {self.segment_name}")
-        transport_zone = self.get_tranport_zone(self.epnet["transportzone"])
+        transport_zone = self.search_one(
+            resource_type="PolicyTransportZone",
+            display_name=self.epnet["transportzone"],
+        )
         self.nsx.patch(
             url=f"/v1/infra/segments/{self.segment_name}",
             json=dict(
@@ -99,48 +105,9 @@ class TopLevelNetworking:
             ),
         )
 
-    def get_edge_cluster(
-        self,
-        edge_cluster_name: str,
-        site_id: str = "default",
-        enforcementpoint_id: str = "default",
-    ):
-        try:
-            return next(
-                (
-                    x
-                    for x in self.nsx.get(
-                        url=(
-                            f"/v1/infra/sites/{site_id}"
-                            f"/enforcement-points/{enforcementpoint_id}"
-                            "/edge-clusters"
-                        )
-                    ).safejson()["results"]
-                    if x["display_name"] == edge_cluster_name
-                ),
-            )
-        except StopIteration as e:
-            raise ValueError("Edge Cluster not found") from e
-
-    def get_tranport_zone(
-        self,
-        tz_name: str,
-        site_id: str = "default",
-        enforcementpoint_id: str = "default",
-    ):
-        try:
-            return next(
-                (
-                    x
-                    for x in self.nsx.get(
-                        url=(
-                            f"/v1/infra/sites/{site_id}"
-                            f"/enforcement-points/{enforcementpoint_id}"
-                            "/transport-zones"
-                        )
-                    ).safejson()["results"]
-                    if x["display_name"] == tz_name
-                ),
-            )
-        except StopIteration as e:
-            raise ValueError("Transport Zone not found") from e
+    def search_one(self, **terms):
+        query = " AND ".join([f"{k}:{v}" for k, v in terms.items()])
+        data = self.nsx.get(url=f"/v1/search/query?query={query}").safejson()
+        if data.get("results"):
+            return data["results"][0]
+        raise ValueError("Item not found")
