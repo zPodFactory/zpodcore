@@ -3,6 +3,8 @@ import os
 import random
 from ipaddress import IPv4Network
 
+from zpodcommon import models as M
+
 #
 # Defaults
 #
@@ -50,14 +52,16 @@ def get_instance_all_subnets(instance_subnet: IPv4Network):
     )
 
 
-def get_instance_ip_info(instance_primary_subnet: IPv4Network, network_component: str):
-    match network_component:
-        case "gw":
-            return list(instance_primary_subnet.hosts())[0]
-        case "zbox":
-            return list(instance_primary_subnet.hosts())[1]
-        case "vyos":
-            return list(instance_primary_subnet.hosts())[-1]
+def get_primary_subnet_ip(instance: M.Instance, network_component: str):
+    subnet = IPv4Network(instance.networks[0].cidr)
+    ix = {"gw": 0, "zbox": 1, "vyos": -1}[network_component]
+    return str(list(subnet.hosts())[ix])
+
+
+def get_primary_subnet_cidr(instance: M.Instance, network_component: str):
+    subnet = IPv4Network(instance.networks[0].cidr)
+    ip = get_primary_subnet_ip(instance=instance, network_component=network_component)
+    return f"{ip}/{subnet.prefixlen}"
 
 
 #
