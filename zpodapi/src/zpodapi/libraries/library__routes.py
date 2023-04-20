@@ -43,7 +43,7 @@ def create(
     library_service: LibraryAnnotations.LibraryService,
     library_in: LibraryCreate,
 ):
-    if library_service.get_all_filtered(
+    if library_service.crud.get_all_filtered(
         name=library_in.name,
         git_url=library_in.git_url,
         use_or=True,
