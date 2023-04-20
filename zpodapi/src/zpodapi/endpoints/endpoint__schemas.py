@@ -11,7 +11,7 @@ class D:
 
     class endpoint_compute:
         name = {"example": "main"}
-        driver = {"example": "current testing env"}
+        driver = {"example": "vc"}
         hostname = {"example": "my-vcenter.com"}
         username = {"example": "my-username"}
         password = {"example": "my-password"}
@@ -32,9 +32,13 @@ class D:
         transportzone = {"example": "my-transportzone"}
         edgecluster = {"example": "my-edgecluster"}
         t0 = {"example": "my-t0"}
+        macdiscoveryprofile = {"example": "my-macdiscoveryprofile"}
 
 
 class EndpointComputeView(SchemaBase):
+    class Config:
+        extra = "allow"
+
     name: str = Field(..., D.endpoint_compute.name)
     driver: str = Field(..., D.endpoint_compute.driver)
     hostname: str = Field(..., D.endpoint_compute.hostname)
@@ -48,6 +52,9 @@ class EndpointComputeView(SchemaBase):
 
 
 class EndpointNetworkView(SchemaBase):
+    class Config:
+        extra = "allow"
+
     name: str = Field(..., D.endpoint_network.name)
     driver: str = Field(..., D.endpoint_network.driver)
     hostname: str = Field(..., D.endpoint_network.hostname)
@@ -56,6 +63,7 @@ class EndpointNetworkView(SchemaBase):
     transportzone: str = Field(..., D.endpoint_network.transportzone)
     edgecluster: str = Field(..., D.endpoint_network.edgecluster)
     t0: str = Field(..., D.endpoint_network.t0)
+    macdiscoveryprofile: str = Field(..., D.endpoint_network.macdiscoveryprofile)
 
 
 class EndpointsView(SchemaBase):
@@ -95,6 +103,7 @@ class EndpointNetworkCreate(SchemaBase):
     transportzone: str = Field(..., D.endpoint_network.transportzone)
     edgecluster: str = Field(..., D.endpoint_network.edgecluster)
     t0: str = Field(..., D.endpoint_network.t0)
+    macdiscoveryprofile: str = Field(..., D.endpoint_network.macdiscoveryprofile)
 
 
 class EndpointsCreate(SchemaBase):
