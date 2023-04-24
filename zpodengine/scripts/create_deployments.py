@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# flake8: noqa
 from zpodengine.lib.deployments import create_deployment
 
 create_deployment(
@@ -23,5 +24,5 @@ create_deployment(
 )
 
 create_deployment(
-    flow="instance_component.flow_add_instance_component.flow_add_instance_component",
+    flow="instance_component_add.flow_instance_component_add.flow_instance_component_add",
 )

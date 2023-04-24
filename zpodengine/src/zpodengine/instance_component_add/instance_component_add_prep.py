@@ -25,7 +25,7 @@ class InstanceComponentView(SQLModel):
 
 
 @task(task_run_name="{label}: prep")
-def instance_component_prep(
+def instance_component_add_prep(
     instance_id: int,
     component_uid: str,
     extra_id: str,

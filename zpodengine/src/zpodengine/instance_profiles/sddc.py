@@ -1,15 +1,17 @@
-from zpodengine.instance_component.instance_component import add_instance_component
+from zpodengine.instance_component_add.instance_component_add import (
+    instance_component_add,
+)
 
 
 def instance_profile_flow(
     instance_id,
     wait_for=None,
 ):
-    zbox = add_instance_component(
+    zbox = instance_component_add(
         instance_id=instance_id, component_uid="zbox-11.6", wait_for=wait_for
     )
     esxis = [
-        add_instance_component(
+        instance_component_add(
             instance_id=instance_id,
             component_uid="esxi-8.0.0b",
             extra_id=x,
@@ -18,12 +20,12 @@ def instance_profile_flow(
         )
         for x in range(11, 14)
     ]
-    vcsa = add_instance_component(
+    vcsa = instance_component_add(
         instance_id=instance_id,
         component_uid="vcsa-8.0.0b",
         wait_for=[esxis],
     )
-    add_instance_component(
+    instance_component_add(
         instance_id=instance_id,
         component_uid="nsx-4.1.0.0",
         wait_for=[vcsa],
