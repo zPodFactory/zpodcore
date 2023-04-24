@@ -4,7 +4,7 @@ from prefect import task
 
 
 @task(task_run_name="{label}: execute post_scripts")
-def instance_component_post_scripts(
+def instance_component_add_post_scripts(
     instance_component: dict[str, Any],
     label: str,
 ):
