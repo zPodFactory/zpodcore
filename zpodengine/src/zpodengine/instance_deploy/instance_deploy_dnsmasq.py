@@ -6,7 +6,7 @@ from zpodengine.lib import database
 
 
 @task(task_run_name="{instance_name}: configure dnsmasq")
-def instance_dnsmasq(
+def instance_deploy_dnsmasq(
     instance_id: int,
     instance_name: str,
 ):

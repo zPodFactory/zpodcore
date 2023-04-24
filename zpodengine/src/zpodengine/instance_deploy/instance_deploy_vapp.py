@@ -6,7 +6,7 @@ from zpodengine.lib import database
 
 
 @task(task_run_name="{instance_name}: create vapp")
-def instance_vapp(instance_id: int, instance_name: str):
+def instance_deploy_vapp(instance_id: int, instance_name: str):
     print("Create Instance VAPP")
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)

@@ -2,43 +2,46 @@ import importlib
 
 from prefect import flow
 
-from zpodengine.instance.instance_dnsmasq import instance_dnsmasq
-from zpodengine.instance.instance_networking import instance_networking
-from zpodengine.instance.instance_prep import instance_prep
-from zpodengine.instance.instance_vapp import instance_vapp
+from zpodengine.instance_deploy.instance_deploy_dnsmasq import instance_deploy_dnsmasq
+from zpodengine.instance_deploy.instance_deploy_networking import (
+    instance_deploy_networking,
+)
+from zpodengine.instance_deploy.instance_deploy_prep import instance_deploy_prep
+from zpodengine.instance_deploy.instance_deploy_vapp import instance_deploy_vapp
 
 
 @flow(
+    name="instance_deploy",
     flow_run_name="deploy_{instance_name}",
     log_prints=True,
 )
-def flow_deploy_instance(
+def flow_instance_deploy(
     instance_id: int,
     profile: str,
     instance_name: str,
 ):
     # Prep
-    prep = instance_prep.submit(
+    prep = instance_deploy_prep.submit(
         instance_id=instance_id,
         instance_name=instance_name,
     )
 
     # Configure dnsmasq
-    dnsmasq = instance_dnsmasq.submit(
+    dnsmasq = instance_deploy_dnsmasq.submit(
         instance_id=instance_id,
         instance_name=instance_name,
         wait_for=[prep],
     )
 
     # Configure Top Level Networking
-    networking = instance_networking.submit(
+    networking = instance_deploy_networking.submit(
         instance_id=instance_id,
         instance_name=instance_name,
         wait_for=[dnsmasq],
     )
 
     # Create instance vapp
-    vapp = instance_vapp.submit(
+    vapp = instance_deploy_vapp.submit(
         instance_id=instance_id,
         instance_name=instance_name,
         wait_for=[networking],
@@ -50,7 +53,7 @@ def flow_deploy_instance(
 
 
 if __name__ == "__main__":
-    flow_deploy_instance(
+    flow_instance_deploy(
         instance_id=3,
         profile="sddc",
         instance_name="abc",

@@ -19,7 +19,7 @@ create_deployment(
 )
 
 create_deployment(
-    flow="instance.flow_deploy_instance.flow_deploy_instance",
+    flow="instance_deploy.flow_instance_deploy.flow_instance_deploy",
 )
 
 create_deployment(
