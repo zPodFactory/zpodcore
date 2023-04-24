@@ -7,7 +7,7 @@ from zpodengine.lib import database
 
 
 @task(task_run_name="{instance_name}: prep")
-def instance_prep(instance_id: int, instance_name: str):
+def instance_deploy_prep(instance_id: int, instance_name: str):
     # Add default network
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)

@@ -60,7 +60,7 @@ class InstanceService(ServiceBase):
 
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
-            flow_name="flow-deploy-instance",
+            flow_name="instance_deploy",
             deployment_name="default",
             instance_id=instance.id,
             profile=instance.profile,
