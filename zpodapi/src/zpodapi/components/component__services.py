@@ -18,7 +18,7 @@ class ComponentService(ServiceBase):
 
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
-            flow_name="flow-download-component",
+            flow_name="component_download",
             deployment_name="default",
             uid=component.component_uid,
         )
