@@ -7,7 +7,7 @@ from zpodengine.lib import database
 
 
 @task(task_run_name="{instance_name}: configure top level networking")
-def instance_networking(
+def instance_deploy_networking(
     instance_id: int,
     instance_name: str,
 ):
