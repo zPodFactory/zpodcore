@@ -354,8 +354,12 @@ def rename_file(component: Component):
         logger.info(f"{component.component_uid} renamed")
 
 
-@flow(log_prints=True, flow_run_name="{uid}-download")
-def flow_download_component(uid: str):
+@flow(
+    name="component_download",
+    log_prints=True,
+    flow_run_name="{uid}-download",
+)
+def flow_component_download(uid: str):
     logger = get_run_logger()
     request = get_component_request(uid=uid)
     logger.info(f"Request: {request}")
@@ -399,4 +403,4 @@ def flow_download_component(uid: str):
 
 
 if __name__ == "__main__":
-    flow_download_component()
+    flow_component_download()
