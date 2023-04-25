@@ -26,21 +26,12 @@ class InstanceComponentView(SQLModel):
 
 @task(task_run_name="{label}: prep")
 def instance_component_add_prep(
-    instance_id: int,
-    component_uid: str,
-    extra_id: str,
+    keys: dict[str, str | int | None],
     data: dict[str, Any],
     label: str,
 ):
     with database.get_session_ctx() as session:
-        instance_component = M.InstanceComponent(
-            instance_id=instance_id,
-            component_uid=component_uid,
-            extra_id=extra_id,
-            data=data,
-        )
-
+        instance_component = M.InstanceComponent(**keys, data=data)
         session.add(instance_component)
         session.commit()
         session.refresh(instance_component)
-        return InstanceComponentView.from_orm(instance_component).dict()
