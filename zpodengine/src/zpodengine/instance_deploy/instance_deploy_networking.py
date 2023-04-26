@@ -17,7 +17,7 @@ def instance_deploy_networking(
             f"Configure top level networking with {instance.networks[0].cidr} network"
         )
 
-        with NsxClient.by_instance(instance) as nsx:
+        with NsxClient.auth_by_instance(instance) as nsx:
             tln = TopLevelNetworking(nsx=nsx, instance=instance)
             tln.t1_create()
             tln.t1_attach_edge_cluster()

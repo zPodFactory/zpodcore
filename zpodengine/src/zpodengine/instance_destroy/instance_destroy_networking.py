@@ -16,7 +16,7 @@ def instance_destroy_networking(
         t1_path = f"/infra/tier-1s/{t1_name}"
         print(f"Destroy {t1_name}")
 
-        with NsxClient.by_instance(instance) as nsx:
+        with NsxClient.auth_by_instance(instance) as nsx:
             # Destroy Connected Items (Segments)
             for connected in search(nsx, connectivity_path=t1_path):
                 # Destroy Connected Item Children (Segment BindingMaps)

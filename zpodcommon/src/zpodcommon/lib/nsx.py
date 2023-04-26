@@ -107,28 +107,27 @@ class NsxClient(httpx.Client):
         )
 
     @classmethod
-    def by_endpoint_network(cls, epnet: dict, **kwargs):
+    def auth_by_endpoints(cls, endpoints: dict, **kwargs):
+        network = endpoints["network"]
         return cls(
-            nsx_url=f"https://{epnet['hostname']}",
-            username=epnet["username"],
-            password=epnet["password"],
+            nsx_url=f"https://{network['hostname']}",
+            username=network["username"],
+            password=network["password"],
             **kwargs,
         )
 
     @classmethod
-    def by_endpoint_id(cls, endpoint_id: int, **kwargs):
+    def auth_by_endpoint_id(cls, endpoint_id: int, **kwargs):
         with database.get_session_ctx() as session:
             endpoint = session.get(M.Endpoint, endpoint_id)
-            epnet = endpoint.endpoints["network"]
-        return cls.by_endpoint_network(epnet, **kwargs)
+            return cls.auth_by_endpoints(endpoint.endpoints, **kwargs)
 
     @classmethod
-    def by_instance(cls, instance: M.Instance, **kwargs):
-        epnet = instance.endpoint.endpoints["network"]
-        return cls.by_endpoint_network(epnet, **kwargs)
+    def auth_by_instance(cls, instance: M.Instance, **kwargs):
+        return cls.auth_by_endpoints(instance.endpoint.endpoints, **kwargs)
 
 
 if __name__ == "__main__":
-    nsx = NsxClient.by_endpoint_id(endpoint_id=1)
+    nsx = NsxClient.auth_by_endpoint_id(endpoint_id=1)
     x = nsx.get(url="/v1/infra/segments")
     print([x["display_name"] for x in x.safejson()["results"]])
