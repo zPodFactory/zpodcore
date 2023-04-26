@@ -3,6 +3,7 @@ from datetime import datetime
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon import enums
 
+from ..endpoints.endpoint__schemas import EndpointView
 from .instance_component__schemas import InstanceComponentView
 from .instance_feature__schemas import InstanceFeatureView
 from .instance_network__schemas import InstanceNetworkView
@@ -21,7 +22,6 @@ class D:
     status = {"example": enums.InstanceStatus.ACTIVE}
     creation_date = {"example": datetime(2023, 1, 1)}
     last_modified_date = {"example": datetime(2023, 1, 1)}
-    endpoint_id = {"example": 1}
 
 
 class InstanceCreate(SchemaBase):
@@ -45,7 +45,7 @@ class InstanceView(SchemaBase):
     status: enums.InstanceStatus = Field(..., D.status)
     creation_date: datetime = Field(..., D.creation_date)
     last_modified_date: datetime = Field(..., D.last_modified_date)
-    endpoint_id: int = Field(..., D.endpoint_id)
+    endpoint: EndpointView
     networks: list["InstanceNetworkView"] = []
     components: list["InstanceComponentView"] = []
     permissions: list["InstancePermissionView"] = []

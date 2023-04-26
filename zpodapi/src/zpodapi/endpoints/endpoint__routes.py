@@ -4,7 +4,7 @@ from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .endpoint__dependencies import EndpointAnnotations
-from .endpoint__schemas import EndpointCreate, EndpointUpdate, EndpointView
+from .endpoint__schemas import EndpointCreate, EndpointUpdate, EndpointViewFull
 
 router = APIRouter(
     prefix="/endpoints",
@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=list[EndpointView],
+    response_model=list[EndpointViewFull],
 )
 def get_all(
     *,
@@ -42,7 +42,7 @@ def create(
 
 @router.patch(
     "/{id}",
-    response_model=EndpointView,
+    response_model=EndpointViewFull,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )

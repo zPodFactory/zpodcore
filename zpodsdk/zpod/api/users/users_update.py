@@ -7,6 +7,7 @@ from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_update import UserUpdate
+from ...models.user_update_admin import UserUpdateAdmin
 from ...models.user_view_full import UserViewFull
 from ...types import Response
 
@@ -19,14 +20,20 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: UserUpdate,
+        json_body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Dict[str, Any]:
         url = "{}/users/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
-        json_json_body = json_body.to_dict()
+        json_json_body: Dict[str, Any]
+
+        if isinstance(json_body, UserUpdateAdmin):
+            json_json_body = json_body.to_dict()
+
+        else:
+            json_json_body = json_body.to_dict()
 
         return {
             "method": "patch",
@@ -69,13 +76,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: UserUpdate,
+        json_body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,13 +108,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: UserUpdate,
+        json_body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -126,13 +133,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: UserUpdate,
+        json_body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -156,13 +163,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: UserUpdate,
+        json_body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (UserUpdate):
+            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
