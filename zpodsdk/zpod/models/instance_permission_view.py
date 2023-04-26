@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import attr
 
+from ..models.instance_permission import InstancePermission
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -17,19 +18,20 @@ class InstancePermissionView:
     """
     Attributes:
         id (int):  Example: 1.
-        permission (str):  Example: zpodowner.
+        permission (InstancePermission): An enumeration.
         groups (Union[Unset, List['PermissionGroupView']]):
         users (Union[Unset, List['UserView']]):
     """
 
     id: int
-    permission: str
+    permission: InstancePermission
     groups: Union[Unset, List["PermissionGroupView"]] = UNSET
     users: Union[Unset, List["UserView"]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
-        permission = self.permission
+        permission = self.permission.value
+
         groups: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.groups, Unset):
             groups = []
@@ -68,7 +70,7 @@ class InstancePermissionView:
         d = src_dict.copy()
         id = d.pop("id")
 
-        permission = d.pop("permission")
+        permission = InstancePermission(d.pop("permission"))
 
         groups = []
         _groups = d.pop("groups", UNSET)

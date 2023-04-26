@@ -11,6 +11,7 @@ from .endpoint_network_update import EndpointNetworkUpdate
 from .endpoint_network_view import EndpointNetworkView
 from .endpoint_update import EndpointUpdate
 from .endpoint_view import EndpointView
+from .endpoint_view_full import EndpointViewFull
 from .endpoints_create import EndpointsCreate
 from .endpoints_update import EndpointsUpdate
 from .endpoints_view import EndpointsView
@@ -22,6 +23,7 @@ from .instance_create import InstanceCreate
 from .instance_feature_view import InstanceFeatureView
 from .instance_feature_view_data import InstanceFeatureViewData
 from .instance_network_view import InstanceNetworkView
+from .instance_permission import InstancePermission
 from .instance_permission_view import InstancePermissionView
 from .instance_status import InstanceStatus
 from .instance_update import InstanceUpdate
@@ -32,6 +34,7 @@ from .library_view import LibraryView
 from .permission_group_view import PermissionGroupView
 from .user_create import UserCreate
 from .user_update import UserUpdate
+from .user_update_admin import UserUpdateAdmin
 from .user_view import UserView
 from .user_view_full import UserViewFull
 from .validation_error import ValidationError
@@ -51,6 +54,7 @@ __all__ = (
     "EndpointsView",
     "EndpointUpdate",
     "EndpointView",
+    "EndpointViewFull",
     "HTTPValidationError",
     "InstanceComponentCreate",
     "InstanceComponentView",
@@ -59,6 +63,7 @@ __all__ = (
     "InstanceFeatureView",
     "InstanceFeatureViewData",
     "InstanceNetworkView",
+    "InstancePermission",
     "InstancePermissionView",
     "InstanceStatus",
     "InstanceUpdate",
@@ -69,6 +74,7 @@ __all__ = (
     "PermissionGroupView",
     "UserCreate",
     "UserUpdate",
+    "UserUpdateAdmin",
     "UserView",
     "UserViewFull",
     "ValidationError",

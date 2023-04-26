@@ -11,7 +11,7 @@ class EndpointComputeCreate:
     Attributes:
         contentlibrary (str):  Example: my-contentlibrary.
         datacenter (str):  Example: my-datacenter.
-        driver (str):  Example: current testing env.
+        driver (str):  Example: vc.
         hostname (str):  Example: my-vcenter.com.
         name (str):  Example: main.
         password (str):  Example: my-password.

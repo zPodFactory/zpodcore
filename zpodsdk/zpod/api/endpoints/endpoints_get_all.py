@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import Client
-from ...models.endpoint_view import EndpointView
+from ...models.endpoint_view_full import EndpointViewFull
 from ...types import Response
 
 
@@ -31,12 +31,12 @@ class EndpointsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[List["EndpointView"]]:
+    ) -> Optional[List["EndpointViewFull"]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
-                response_200_item = EndpointView.from_dict(response_200_item_data)
+                response_200_item = EndpointViewFull.from_dict(response_200_item_data)
 
                 response_200.append(response_200_item)
 
@@ -50,7 +50,7 @@ class EndpointsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[List["EndpointView"]]:
+    ) -> Response[List["EndpointViewFull"]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -60,7 +60,7 @@ class EndpointsGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[List["EndpointView"]]:
+    ) -> Response[List["EndpointViewFull"]]:
         """Get All
 
         Raises:
@@ -68,7 +68,7 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['EndpointView']]
+            Response[List['EndpointViewFull']]
         """  # noqa e501
 
         kwargs = self._get_kwargs()
@@ -82,7 +82,7 @@ class EndpointsGetAll:
 
     def sync(
         self,
-    ) -> Optional[List["EndpointView"]]:
+    ) -> Optional[List["EndpointViewFull"]]:
         """Get All
 
         Raises:
@@ -90,14 +90,14 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['EndpointView']]
+            Response[List['EndpointViewFull']]
         """  # noqa e501
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[List["EndpointView"]]:
+    ) -> Response[List["EndpointViewFull"]]:
         """Get All
 
         Raises:
@@ -105,7 +105,7 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['EndpointView']]
+            Response[List['EndpointViewFull']]
         """  # noqa e501
 
         kwargs = self._get_kwargs()
@@ -117,7 +117,7 @@ class EndpointsGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[List["EndpointView"]]:
+    ) -> Optional[List["EndpointViewFull"]]:
         """Get All
 
         Raises:
@@ -125,7 +125,7 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['EndpointView']]
+            Response[List['EndpointViewFull']]
         """  # noqa e501
 
         return (await self.asyncio_detailed()).parsed
