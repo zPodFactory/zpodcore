@@ -25,7 +25,7 @@ def instance_profile_flow(
         component_uid="vcsa-8.0.0b",
         wait_for=[esxis],
     )
-    instance_component_add(
+    return instance_component_add(
         instance_id=instance_id,
         component_uid="nsx-4.1.0.0",
         wait_for=[vcsa],
