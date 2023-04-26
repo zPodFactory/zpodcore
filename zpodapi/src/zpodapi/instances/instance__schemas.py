@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from sqlmodel import SQLModel
-
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon import enums
 
@@ -36,10 +34,6 @@ class InstanceCreate(SchemaBase):
 
 class InstanceUpdate(SchemaBase):
     description: str | None = Field(None, D.description)
-
-
-class InstanceDelete(SQLModel):
-    status: enums.InstanceStatus
 
 
 class InstanceView(SchemaBase):
