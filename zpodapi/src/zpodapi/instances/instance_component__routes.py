@@ -12,9 +12,10 @@ router = APIRouter(
 
 @router.get(
     "",
+    summary="Instance Component Get All",
     response_model=list[InstanceComponentView],
 )
-def instance_components_get_all(
+def components_get_all(
     *,
     instance: InstanceAnnotations.GetInstance,
 ):
@@ -23,10 +24,11 @@ def instance_components_get_all(
 
 @router.post(
     "",
+    summary="Instance Component Add",
     response_model=InstanceComponentView,
     status_code=status.HTTP_201_CREATED,
 )
-def instance_components_add(
+def components_add(
     *,
     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
     instance: InstanceAnnotations.GetInstance,
@@ -40,9 +42,10 @@ def instance_components_add(
 
 # @router.delete(
 #     "/{component_uid}",
+#     summary="Instance Component Delete",
 #     status_code=status.HTTP_204_NO_CONTENT,
 # )
-# def instance_components_delete(
+# def components_delete(
 #     *,
 #     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
 #     instance: InstanceComponentAnnotations.GetInstance,
