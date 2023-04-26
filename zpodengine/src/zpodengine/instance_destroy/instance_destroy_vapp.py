@@ -10,11 +10,5 @@ def instance_destroy_vapp(instance_id: int, instance_name: str):
     print("Delete Instance VAPP")
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
-
-        ep_compute = instance.endpoint.endpoints["compute"]
-        v = vCenter(
-            host=ep_compute["hostname"],
-            user=ep_compute["username"],
-            pwd=ep_compute["password"],
-        )
-        v.delete_vapp(f"zPod-{instance.name}")
+        with vCenter.auth_by_instance(instance=instance) as vc:
+            vc.delete_vapp(f"zPod-{instance.name}")
