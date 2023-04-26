@@ -11,7 +11,7 @@ def instance_deploy_prep(instance_id: int, instance_name: str):
     # Add default network
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
-        instance.status = InstanceStatus.ACTIVE
+        instance.status = InstanceStatus.BUILDING
 
         # fetching endpoint data for networks
         endpoint_networks = instance.endpoint.endpoints["network"]["networks"]

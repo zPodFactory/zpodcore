@@ -18,6 +18,8 @@ class InstancePermission(str, Enum):
 
 class InstanceStatus(str, Enum):
     ACTIVE = "ACTIVE"
+    BUILDING = "BUILDING"
     DELETING = "DELETING"
     DELETED = "DELETED"
     PENDING = "PENDING"
+    FAILED = "FAILED"
