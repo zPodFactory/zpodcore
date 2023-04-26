@@ -78,4 +78,4 @@ def delete(
     instance_service: InstanceAnnotations.InstanceService,
     instance: InstanceAnnotations.GetInstance,
 ):
-    return instance_service.delete(item=instance)
+    return instance_service.delete(instance=instance)

@@ -59,7 +59,7 @@ class Auth(httpx.Auth):
         logger.debug(f"{request.method} {request.url} - {request.headers}")
         response: httpx.Response = yield request
 
-        if response.status_code == 401:
+        if response.status_code in (401, 403):
             del self.sync_auth_info
             self.update_request(request)
             yield request

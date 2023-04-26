@@ -158,6 +158,10 @@ class vCenter:
 
         clusterMO.resourcePool.CreateVApp(vapp_name, resSpec, configSpec, vmFolderMO)
 
+    def delete_vapp(self, vapp_name):
+        if vapp := self.get_vapp(vapp_name):
+            vapp.Destroy_Task()
+
     def get_vapps(self, props=None):
         return self.get_obj_list([vim.VirtualApp], props=props)
 

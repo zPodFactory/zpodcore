@@ -6,7 +6,7 @@ from zpodcommon import models as M
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 from . import instance__utils
-from .instance__schemas import InstanceCreate, InstanceDelete
+from .instance__schemas import InstanceCreate
 
 ACTIVE_STATUSES = [
     enums.InstanceStatus.ACTIVE.value,
@@ -72,9 +72,12 @@ class InstanceService(ServiceBase):
         return instance
 
     def delete(self, *, instance: SQLModel):
-        self.crud.update(
-            item=instance,
-            item_in=InstanceDelete(status=enums.InstanceStatus.DELETED),
+        zpod_engine = ZpodEngineClient()
+        zpod_engine.create_flow_run_by_name(
+            flow_name="instance_destroy",
+            deployment_name="default",
+            instance_id=instance.id,
+            instance_name=instance.name,
         )
         return None
 
