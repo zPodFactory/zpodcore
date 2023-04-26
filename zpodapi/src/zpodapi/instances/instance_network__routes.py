@@ -11,9 +11,10 @@ router = APIRouter(
 
 @router.get(
     "",
+    summary="Instance Networks Get All",
     response_model=list[InstanceNetworkView],
 )
-def instance_networks_get_all(
+def networks_get_all(
     *,
     instance: InstanceAnnotations.GetInstance,
 ):

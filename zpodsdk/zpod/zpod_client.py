@@ -75,6 +75,20 @@ class ZpodClient:
 
     @property
     @cache
+    def instances_components_add(self):
+        from zpod.api.instances import instances_components_add
+
+        return instances_components_add.InstancesComponentsAdd(self._client)
+
+    @property
+    @cache
+    def instances_components_get_all(self):
+        from zpod.api.instances import instances_components_get_all
+
+        return instances_components_get_all.InstancesComponentsGetAll(self._client)
+
+    @property
+    @cache
     def instances_create(self):
         from zpod.api.instances import instances_create
 
@@ -86,6 +100,13 @@ class ZpodClient:
         from zpod.api.instances import instances_delete
 
         return instances_delete.InstancesDelete(self._client)
+
+    @property
+    @cache
+    def instances_features_get_all(self):
+        from zpod.api.instances import instances_features_get_all
+
+        return instances_features_get_all.InstancesFeaturesGetAll(self._client)
 
     @property
     @cache
@@ -103,39 +124,10 @@ class ZpodClient:
 
     @property
     @cache
-    def instances_instance_components_add(self):
-        from zpod.api.instances import instances_instance_components_add
+    def instances_networks_get_all(self):
+        from zpod.api.instances import instances_networks_get_all
 
-        return instances_instance_components_add.InstancesInstanceComponentsAdd(
-            self._client
-        )
-
-    @property
-    @cache
-    def instances_instance_components_get_all(self):
-        from zpod.api.instances import instances_instance_components_get_all
-
-        return instances_instance_components_get_all.InstancesInstanceComponentsGetAll(
-            self._client
-        )
-
-    @property
-    @cache
-    def instances_instance_features_get_all(self):
-        from zpod.api.instances import instances_instance_features_get_all
-
-        return instances_instance_features_get_all.InstancesInstanceFeaturesGetAll(
-            self._client
-        )
-
-    @property
-    @cache
-    def instances_instance_networks_get_all(self):
-        from zpod.api.instances import instances_instance_networks_get_all
-
-        return instances_instance_networks_get_all.InstancesInstanceNetworksGetAll(
-            self._client
-        )
+        return instances_networks_get_all.InstancesNetworksGetAll(self._client)
 
     @property
     @cache

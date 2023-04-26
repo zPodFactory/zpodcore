@@ -11,9 +11,10 @@ router = APIRouter(
 
 @router.get(
     "",
+    summary="Instance Feature Get All",
     response_model=list[InstanceFeatureView],
 )
-def instance_features_get_all(
+def features_get_all(
     *,
     instance: InstanceAnnotations.GetInstance,
 ):
