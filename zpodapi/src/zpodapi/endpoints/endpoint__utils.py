@@ -4,20 +4,17 @@ from zpodcommon.lib.vmware import vCenter
 
 def zpod_endpoint_check(endpoint: M.Endpoint):
     print(f"Checking Endpoint: {endpoint.name}...")
-    compute = endpoint.endpoints["compute"]
 
     try:
-        vc = vCenter(
-            host=compute["hostname"], user=compute["username"], pwd=compute["password"]
-        )
+        vc = vCenter.auth_by_endpoints(endpoint.endpoints)
     except Exception as e:
-        return f"Connection Error to endpoint: {compute['hostname']} - ({e})"
+        return f"Connection Error to endpoint ({e})"
 
-    portgroups = vc.get_portgroups()
-    for pg in portgroups:
-        print(pg.name)
+    with vc:
+        portgroups = vc.get_portgroups()
+        for pg in portgroups:
+            print(pg.name)
 
-    vc.disconnect()
     return True
 
 
