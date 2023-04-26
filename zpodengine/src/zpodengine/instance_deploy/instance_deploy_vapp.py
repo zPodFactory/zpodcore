@@ -10,10 +10,5 @@ def instance_deploy_vapp(instance_id: int, instance_name: str):
     print("Create Instance VAPP")
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
-
-        hostname = instance.endpoint.endpoints["compute"]["hostname"]
-        username = instance.endpoint.endpoints["compute"]["username"]
-        password = instance.endpoint.endpoints["compute"]["password"]
-
-        v = vCenter(hostname, username, password)
-        v.create_vapp(f"zPod-{instance.name}", "Cluster", "zPods")
+        with vCenter.auth_by_instance(instance=instance) as vc:
+            vc.create_vapp(f"zPod-{instance.name}", "Cluster", "zPods")

@@ -5,6 +5,9 @@ import ssl
 from pyVim import connect
 from pyVmomi import vim, vmodl
 
+from zpodcommon import models as M
+from zpodcommon.lib import database
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +38,7 @@ class vCenter:
         except vim.fault.InvalidLogin as e:
             raise ConnectionError("Invalid username or password.") from e
         except IOError as e:
-            raise ConnectionError("Unable to connect to host.") from e
+            raise ConnectionError(f"Unable to connect to host: {self.host}.") from e
 
     def create_filter_spec(self, pc, data, props, vimtype):
         filterSpec = vmodl.query.PropertyCollector.FilterSpec()
@@ -173,3 +176,29 @@ class vCenter:
 
     def get_vm(self, name, props=None):
         return self.get_obj(vim.VirtualMachine, "name", name, props=props)
+
+    @classmethod
+    def auth_by_endpoints(cls, endpoints: dict, **kwargs):
+        compute = endpoints["compute"]
+        return cls(
+            host=compute["hostname"],
+            user=compute["username"],
+            pwd=compute["password"],
+            **kwargs,
+        )
+
+    @classmethod
+    def auth_by_endpoint_id(cls, endpoint_id: int, **kwargs):
+        with database.get_session_ctx() as session:
+            endpoint = session.get(M.Endpoint, endpoint_id)
+            return cls.auth_by_endpoints(endpoint.endpoints, **kwargs)
+
+    @classmethod
+    def auth_by_instance(cls, instance: M.Instance, **kwargs):
+        return cls.auth_by_endpoints(instance.endpoint.endpoints, **kwargs)
+
+    @classmethod
+    def auth_by_instance_id(cls, instance_id: int, **kwargs):
+        with database.get_session_ctx() as session:
+            instance = session.get(M.Instance, instance_id)
+            return cls.auth_by_instance(instance, **kwargs)
