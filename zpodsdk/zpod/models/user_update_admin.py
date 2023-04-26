@@ -4,23 +4,26 @@ import attr
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="UserUpdate")
+T = TypeVar("T", bound="UserUpdateAdmin")
 
 
 @attr.s(auto_attribs=True)
-class UserUpdate:
+class UserUpdateAdmin:
     """
     Attributes:
         description (Union[Unset, str]):  Example: Sample User.
         ssh_key (Union[Unset, str]):  Example: <key>.
+        superadmin (Union[Unset, bool]):
     """
 
     description: Union[Unset, str] = UNSET
     ssh_key: Union[Unset, str] = UNSET
+    superadmin: Union[Unset, bool] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
         ssh_key = self.ssh_key
+        superadmin = self.superadmin
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -28,6 +31,8 @@ class UserUpdate:
             field_dict["description"] = description
         if ssh_key is not UNSET:
             field_dict["ssh_key"] = ssh_key
+        if superadmin is not UNSET:
+            field_dict["superadmin"] = superadmin
 
         return field_dict
 
@@ -38,9 +43,12 @@ class UserUpdate:
 
         ssh_key = d.pop("ssh_key", UNSET)
 
-        user_update = cls(
+        superadmin = d.pop("superadmin", UNSET)
+
+        user_update_admin = cls(
             description=description,
             ssh_key=ssh_key,
+            superadmin=superadmin,
         )
 
-        return user_update
+        return user_update_admin

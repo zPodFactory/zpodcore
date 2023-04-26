@@ -8,6 +8,7 @@ from ..models.instance_status import InstanceStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.endpoint_view import EndpointView
     from ..models.instance_component_view import InstanceComponentView
     from ..models.instance_feature_view import InstanceFeatureView
     from ..models.instance_network_view import InstanceNetworkView
@@ -24,7 +25,7 @@ class InstanceView:
         creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         description (str):  Example: Tanzu Lab zPod.
         domain (str):  Example: tanzu-lab.maindomain.com.
-        endpoint_id (int):  Example: 1.
+        endpoint (EndpointView):
         id (int):  Example: 1.
         last_modified_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         name (str):  Example: tanzu-lab.
@@ -39,7 +40,7 @@ class InstanceView:
     creation_date: datetime.datetime
     description: str
     domain: str
-    endpoint_id: int
+    endpoint: "EndpointView"
     id: int
     last_modified_date: datetime.datetime
     name: str
@@ -55,7 +56,8 @@ class InstanceView:
 
         description = self.description
         domain = self.domain
-        endpoint_id = self.endpoint_id
+        endpoint = self.endpoint.to_dict()
+
         id = self.id
         last_modified_date = self.last_modified_date.isoformat()
 
@@ -101,7 +103,7 @@ class InstanceView:
                 "creation_date": creation_date,
                 "description": description,
                 "domain": domain,
-                "endpoint_id": endpoint_id,
+                "endpoint": endpoint,
                 "id": id,
                 "last_modified_date": last_modified_date,
                 "name": name,
@@ -122,6 +124,7 @@ class InstanceView:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+        from ..models.endpoint_view import EndpointView
         from ..models.instance_component_view import InstanceComponentView
         from ..models.instance_feature_view import InstanceFeatureView
         from ..models.instance_network_view import InstanceNetworkView
@@ -134,7 +137,7 @@ class InstanceView:
 
         domain = d.pop("domain")
 
-        endpoint_id = d.pop("endpoint_id")
+        endpoint = EndpointView.from_dict(d.pop("endpoint"))
 
         id = d.pop("id")
 
@@ -178,7 +181,7 @@ class InstanceView:
             creation_date=creation_date,
             description=description,
             domain=domain,
-            endpoint_id=endpoint_id,
+            endpoint=endpoint,
             id=id,
             last_modified_date=last_modified_date,
             name=name,

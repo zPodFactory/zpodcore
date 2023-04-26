@@ -75,8 +75,11 @@ class EndpointView(SchemaBase):
     id: str = Field(..., D.endpoint.id)
     name: str = Field(..., D.endpoint.name)
     description: str = Field(..., D.endpoint.description)
-    endpoints: EndpointsView
     enabled: bool = Field(..., D.endpoint.enabled)
+
+
+class EndpointViewFull(EndpointView):
+    endpoints: EndpointsView
 
 
 class EndpointComputeCreate(SchemaBase):

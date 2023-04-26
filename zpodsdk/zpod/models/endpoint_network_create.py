@@ -12,6 +12,7 @@ class EndpointNetworkCreate:
         driver (str):  Example: nsxt.
         edgecluster (str):  Example: my-edgecluster.
         hostname (str):  Example: my-nsxt-manager.com.
+        macdiscoveryprofile (str):  Example: my-macdiscoveryprofile.
         name (str):  Example: main.
         networks (str):  Example: 10.196.64.0/18.
         password (str):  Example: my-password.
@@ -23,6 +24,7 @@ class EndpointNetworkCreate:
     driver: str
     edgecluster: str
     hostname: str
+    macdiscoveryprofile: str
     name: str
     networks: str
     password: str
@@ -34,6 +36,7 @@ class EndpointNetworkCreate:
         driver = self.driver
         edgecluster = self.edgecluster
         hostname = self.hostname
+        macdiscoveryprofile = self.macdiscoveryprofile
         name = self.name
         networks = self.networks
         password = self.password
@@ -47,6 +50,7 @@ class EndpointNetworkCreate:
                 "driver": driver,
                 "edgecluster": edgecluster,
                 "hostname": hostname,
+                "macdiscoveryprofile": macdiscoveryprofile,
                 "name": name,
                 "networks": networks,
                 "password": password,
@@ -67,6 +71,8 @@ class EndpointNetworkCreate:
 
         hostname = d.pop("hostname")
 
+        macdiscoveryprofile = d.pop("macdiscoveryprofile")
+
         name = d.pop("name")
 
         networks = d.pop("networks")
@@ -83,6 +89,7 @@ class EndpointNetworkCreate:
             driver=driver,
             edgecluster=edgecluster,
             hostname=hostname,
+            macdiscoveryprofile=macdiscoveryprofile,
             name=name,
             networks=networks,
             password=password,

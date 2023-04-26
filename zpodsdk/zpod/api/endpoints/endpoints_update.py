@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import Client
 from ...models.endpoint_update import EndpointUpdate
-from ...models.endpoint_view import EndpointView
+from ...models.endpoint_view_full import EndpointViewFull
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -39,9 +39,9 @@ class EndpointsUpdate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[EndpointView, HTTPValidationError]]:
+    ) -> Optional[Union[EndpointViewFull, HTTPValidationError]]:
         if response.status_code == HTTPStatus.CREATED:
-            response_201 = EndpointView.from_dict(response.json())
+            response_201 = EndpointViewFull.from_dict(response.json())
 
             return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
@@ -57,7 +57,7 @@ class EndpointsUpdate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[EndpointView, HTTPValidationError]]:
+    ) -> Response[Union[EndpointViewFull, HTTPValidationError]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -70,7 +70,7 @@ class EndpointsUpdate:
         id: str,
         *,
         json_body: EndpointUpdate,
-    ) -> Response[Union[EndpointView, HTTPValidationError]]:
+    ) -> Response[Union[EndpointViewFull, HTTPValidationError]]:
         """Update
 
         Args:
@@ -82,7 +82,7 @@ class EndpointsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointView, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -102,7 +102,7 @@ class EndpointsUpdate:
         id: str,
         *,
         json_body: EndpointUpdate,
-    ) -> Optional[Union[EndpointView, HTTPValidationError]]:
+    ) -> Optional[Union[EndpointViewFull, HTTPValidationError]]:
         """Update
 
         Args:
@@ -114,7 +114,7 @@ class EndpointsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointView, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         return self.sync_detailed(
@@ -127,7 +127,7 @@ class EndpointsUpdate:
         id: str,
         *,
         json_body: EndpointUpdate,
-    ) -> Response[Union[EndpointView, HTTPValidationError]]:
+    ) -> Response[Union[EndpointViewFull, HTTPValidationError]]:
         """Update
 
         Args:
@@ -139,7 +139,7 @@ class EndpointsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointView, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -157,7 +157,7 @@ class EndpointsUpdate:
         id: str,
         *,
         json_body: EndpointUpdate,
-    ) -> Optional[Union[EndpointView, HTTPValidationError]]:
+    ) -> Optional[Union[EndpointViewFull, HTTPValidationError]]:
         """Update
 
         Args:
@@ -169,7 +169,7 @@ class EndpointsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointView, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         return (
