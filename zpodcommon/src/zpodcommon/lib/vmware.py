@@ -1,8 +1,9 @@
 import atexit
 import logging
 import ssl
+import time
 
-from pyVim import connect
+from pyVim import connect, task
 from pyVmomi import vim, vmodl
 
 from zpodcommon import models as M
@@ -163,7 +164,14 @@ class vCenter:
 
     def delete_vapp(self, vapp_name):
         if vapp := self.get_vapp(vapp_name):
-            vapp.Destroy_Task()
+            if vapp.summary.vAppState != "stopped":
+                # Wait for vApp PowerOff operation to complete
+                task_id = vapp.PowerOffVApp_Task(True)
+                task.WaitForTask(task_id)
+
+            # Wait for vApp Destroy operation to complete
+            task_id = vapp.Destroy_Task()
+            task.WaitForTask(task_id)
 
     def get_vapps(self, props=None):
         return self.get_obj_list([vim.VirtualApp], props=props)
