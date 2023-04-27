@@ -85,4 +85,10 @@ def create_dnsmasq_config(
 
 
 def delete_dnsmasq_config(instance_name: str):
-    os.remove(f"/etc/dnsmasq.d/{instance_name}.conf")
+    filename = f"/etc/dnsmasq.d/{instance_name}.conf"
+
+    if os.path.exists(filename):
+        os.remove(filename)
+        print(f"{filename} deleted successfully")
+    else:
+        print(f"{filename} does not exist")
