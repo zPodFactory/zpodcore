@@ -9,7 +9,7 @@ T = TypeVar("T", bound="ComponentView")
 class ComponentView:
     """
     Attributes:
-        component_description (str):  Example: VMWare NSX.
+        component_description (str):  Example: VMware Cloud Director Availabilty.
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
         component_version (str):  Example: 4.4.1.

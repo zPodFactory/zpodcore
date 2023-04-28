@@ -180,6 +180,41 @@ class ZpodClient:
 
     @property
     @cache
+    def settings_create(self):
+        from zpod.api.settings import settings_create
+
+        return settings_create.SettingsCreate(self._client)
+
+    @property
+    @cache
+    def settings_delete(self):
+        from zpod.api.settings import settings_delete
+
+        return settings_delete.SettingsDelete(self._client)
+
+    @property
+    @cache
+    def settings_get(self):
+        from zpod.api.settings import settings_get
+
+        return settings_get.SettingsGet(self._client)
+
+    @property
+    @cache
+    def settings_get_all(self):
+        from zpod.api.settings import settings_get_all
+
+        return settings_get_all.SettingsGetAll(self._client)
+
+    @property
+    @cache
+    def settings_update(self):
+        from zpod.api.settings import settings_update
+
+        return settings_update.SettingsUpdate(self._client)
+
+    @property
+    @cache
     def users_create(self):
         from zpod.api.users import users_create
 

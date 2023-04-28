@@ -9,13 +9,14 @@ T = TypeVar("T", bound="ComponentViewFull")
 class ComponentViewFull:
     """
     Attributes:
-        component_description (str):  Example: VMWare NSX.
+        component_description (str):  Example: VMware Cloud Director Availabilty.
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
         component_version (str):  Example: 4.4.1.
         enabled (bool):
-        filename (str):  Example: vmware_nsx/vmware-nsxt-4.0.1.1.json.
+        filename (str):  Example: VMware-Cloud-Director-Availability-Provider-4.4.1.4448762-b80bae6591_OVF10.ova.
         id (str):  Example: 1.
+        jsonfile (str):  Example: /library/default/vmware/vmware_cloud_director_availability/4.4.1.json.
         library_name (str):  Example: main.
         status (str):  Example: SCHEDULED.
     """
@@ -27,6 +28,7 @@ class ComponentViewFull:
     enabled: bool
     filename: str
     id: str
+    jsonfile: str
     library_name: str
     status: str
 
@@ -38,6 +40,7 @@ class ComponentViewFull:
         enabled = self.enabled
         filename = self.filename
         id = self.id
+        jsonfile = self.jsonfile
         library_name = self.library_name
         status = self.status
 
@@ -51,6 +54,7 @@ class ComponentViewFull:
                 "enabled": enabled,
                 "filename": filename,
                 "id": id,
+                "jsonfile": jsonfile,
                 "library_name": library_name,
                 "status": status,
             }
@@ -75,6 +79,8 @@ class ComponentViewFull:
 
         id = d.pop("id")
 
+        jsonfile = d.pop("jsonfile")
+
         library_name = d.pop("library_name")
 
         status = d.pop("status")
@@ -87,6 +93,7 @@ class ComponentViewFull:
             enabled=enabled,
             filename=filename,
             id=id,
+            jsonfile=jsonfile,
             library_name=library_name,
             status=status,
         )
