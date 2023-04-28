@@ -103,7 +103,7 @@ def list():
     generate_table(instances, "List")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def delete(
     name: str = typer.Option(..., "--name", "-n"),
 ):
@@ -120,7 +120,7 @@ def delete(
         console.print(f"Error: {error_message}", style="red")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def create(
     name: str = typer.Option(..., "--name", "-n"),
     description: str = typer.Option(..., "--description"),
