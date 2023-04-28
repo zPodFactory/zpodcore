@@ -32,6 +32,9 @@ from .library_create import LibraryCreate
 from .library_update import LibraryUpdate
 from .library_view import LibraryView
 from .permission_group_view import PermissionGroupView
+from .setting_create import SettingCreate
+from .setting_update import SettingUpdate
+from .setting_view import SettingView
 from .user_create import UserCreate
 from .user_update import UserUpdate
 from .user_update_admin import UserUpdateAdmin
@@ -72,6 +75,9 @@ __all__ = (
     "LibraryUpdate",
     "LibraryView",
     "PermissionGroupView",
+    "SettingCreate",
+    "SettingUpdate",
+    "SettingView",
     "UserCreate",
     "UserUpdate",
     "UserUpdateAdmin",
