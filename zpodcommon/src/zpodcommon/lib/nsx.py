@@ -126,6 +126,16 @@ class NsxClient(httpx.Client):
     def auth_by_instance(cls, instance: M.Instance, **kwargs):
         return cls.auth_by_endpoints(instance.endpoint.endpoints, **kwargs)
 
+    def search_one(self, **terms):
+        if data := self.search(**terms):
+            return data[0]
+        raise ValueError("Item not found")
+
+    def search(self, **terms):
+        query = " AND ".join([f"{k}:{v}" for k, v in terms.items()])
+        data = self.get(url=f"/v1/search/query?query={query}").safejson()
+        return data.get("results", [])
+
 
 if __name__ == "__main__":
     nsx = NsxClient.auth_by_endpoint_id(endpoint_id=1)

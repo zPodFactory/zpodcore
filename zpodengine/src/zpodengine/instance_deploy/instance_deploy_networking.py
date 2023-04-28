@@ -42,7 +42,7 @@ class TopLevelNetworking:
             url=f"/v1/infra/tier-1s/{self.t1_name}",
             json=dict(
                 arp_limit=5000,
-                display_name=self.t1_name,
+                id=self.t1_name,
                 ha_mode="ACTIVE_STANDBY",
                 route_advertisement_types=[
                     "TIER1_CONNECTED",
@@ -55,7 +55,7 @@ class TopLevelNetworking:
     def t1_attach_edge_cluster(self) -> None:
         edge_cluster_name = self.epnet["edgecluster"]
         print(f"Attach Edge Cluster: {edge_cluster_name} to T1: {self.t1_name}")
-        edge_cluster = self.search_one(
+        edge_cluster = self.nsx.search_one(
             resource_type="PolicyEdgeCluster",
             display_name=edge_cluster_name,
         )
@@ -69,15 +69,15 @@ class TopLevelNetworking:
 
     def segment_create(self) -> None:
         print(f"Create Segment: {self.segment_name}")
-        transport_zone = self.search_one(
+        transport_zone = self.nsx.search_one(
             resource_type="PolicyTransportZone",
             display_name=self.epnet["transportzone"],
         )
         self.nsx.patch(
             url=f"/v1/infra/segments/{self.segment_name}",
             json=dict(
+                id=self.segment_name,
                 connectivity_path=f"/infra/tier-1s/{self.t1_name}",
-                display_name=self.segment_name,
                 subnets=[dict(gateway_address=get_mgmt_cidr(self.instance, "gw"))],
                 transport_zone_path=transport_zone["path"],
                 vlan_ids=["0-4094"],
@@ -103,9 +103,6 @@ class TopLevelNetworking:
             ),
         )
 
-    def search_one(self, **terms):
-        query = " AND ".join([f"{k}:{v}" for k, v in terms.items()])
-        data = self.nsx.get(url=f"/v1/search/query?query={query}").safejson()
-        if data.get("results"):
-            return data["results"][0]
-        raise ValueError("Item not found")
+
+if __name__ == "__main__":
+    instance_deploy_networking.fn(22, "test")
