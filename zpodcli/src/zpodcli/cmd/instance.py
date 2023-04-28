@@ -123,8 +123,8 @@ def delete(
 @app.command(no_args_is_help=True)
 def create(
     name: str = typer.Option(..., "--name", "-n"),
-    description: str = typer.Option(..., "--description"),
-    domain: str = typer.Option(..., "--domain"),
+    description: str = typer.Option("", "--description"),
+    domain: str = typer.Option("", "--domain"),
     endpoint: str = typer.Option(..., "--endpoint", "-e"),
     profile: str = typer.Option(..., "--profile", "-p"),
 ):
