@@ -11,7 +11,7 @@ T = TypeVar("T", bound="InstanceUpdate")
 class InstanceUpdate:
     """
     Attributes:
-        description (Union[Unset, str]):  Example: Tanzu Lab zPod.
+        description (Union[Unset, str]):  Example: Demo zPod.
     """
 
     description: Union[Unset, str] = UNSET

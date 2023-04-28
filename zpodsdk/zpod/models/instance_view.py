@@ -23,12 +23,13 @@ class InstanceView:
     """
     Attributes:
         creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        description (str):  Example: Tanzu Lab zPod.
-        domain (str):  Example: tanzu-lab.maindomain.com.
+        description (str):  Example: Demo zPod.
+        domain (str):  Example: demo.maindomain.com.
         endpoint (EndpointView):
         id (int):  Example: 1.
         last_modified_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        name (str):  Example: tanzu-lab.
+        name (str):  Example: demo.
+        password (str):  Example: yZnqji!a4xbo.
         profile (str):  Example: sddc.
         status (InstanceStatus): An enumeration.
         components (Union[Unset, List['InstanceComponentView']]):
@@ -44,6 +45,7 @@ class InstanceView:
     id: int
     last_modified_date: datetime.datetime
     name: str
+    password: str
     profile: str
     status: InstanceStatus
     components: Union[Unset, List["InstanceComponentView"]] = UNSET
@@ -62,6 +64,7 @@ class InstanceView:
         last_modified_date = self.last_modified_date.isoformat()
 
         name = self.name
+        password = self.password
         profile = self.profile
         status = self.status.value
 
@@ -107,6 +110,7 @@ class InstanceView:
                 "id": id,
                 "last_modified_date": last_modified_date,
                 "name": name,
+                "password": password,
                 "profile": profile,
                 "status": status,
             }
@@ -144,6 +148,8 @@ class InstanceView:
         last_modified_date = isoparse(d.pop("last_modified_date"))
 
         name = d.pop("name")
+
+        password = d.pop("password")
 
         profile = d.pop("profile")
 
@@ -185,6 +191,7 @@ class InstanceView:
             id=id,
             last_modified_date=last_modified_date,
             name=name,
+            password=password,
             profile=profile,
             status=status,
             components=components,

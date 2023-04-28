@@ -14,9 +14,10 @@ example_creation_date = datetime(2023, 1, 1)
 
 class D:
     id = {"example": 1}
-    name = {"example": "tanzu-lab"}
-    description = {"example": "Tanzu Lab zPod"}
-    domain = {"example": "tanzu-lab.maindomain.com"}
+    name = {"example": "demo"}
+    description = {"example": "Demo zPod"}
+    password = {"example": "yZnqji!a4xbo"}
+    domain = {"example": "demo.maindomain.com"}
     endpoint_id = {"example": 1}
     profile = {"example": "sddc"}
     status = {"example": enums.InstanceStatus.ACTIVE}
@@ -40,6 +41,7 @@ class InstanceView(SchemaBase):
     id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
+    password: str = Field(..., D.password)
     domain: str = Field(..., D.domain)
     profile: str = Field(..., D.profile)
     status: enums.InstanceStatus = Field(..., D.status)
