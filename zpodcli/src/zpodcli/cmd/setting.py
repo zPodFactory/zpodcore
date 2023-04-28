@@ -5,9 +5,7 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
-from zpod.models.setting_create import SettingCreate
 from zpod.models.setting_update import SettingUpdate
-from zpod.models.setting_view import SettingView
 
 from zpodcli.lib import zpod_client
 
@@ -45,7 +43,7 @@ def list():
     generate_table(settings=settings, action="List")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def update(
     name: str = typer.Option(..., "--name", "-n"),
     description: Optional[str] = typer.Option(None, "--description", "-d"),
@@ -61,7 +59,8 @@ def update(
     response = z.settings_update.sync_detailed(json_body=setting, id=f"name={name}")
     if response.status_code == 201:
         console.print(
-            f"Setting [magenta]{name}[/magenta] has been modified to [yellow]{value}[/yellow]."
+            f"Setting [magenta]{name}[/magenta] has been modified to "
+            f"[yellow]{value}[/yellow]."
         )
     else:
         content = json.loads(response.content.decode())

@@ -50,7 +50,7 @@ def list():
     generate_table(libraries=libraries, action="List")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def create(
     name: str = typer.Option(..., "--name", "-n"),
     git_url: str = typer.Option(ZPOD_LIBRARY_GIT_URL, "--git_url", "-u"),
@@ -62,7 +62,7 @@ def create(
     generate_table(libraries=[library], action="Create")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def delete(
     name: str = typer.Option(..., "--name", "-n"),
 ):
@@ -77,7 +77,7 @@ def delete(
         console.print(f"Error {library}", style="red")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def update(
     enabled: Optional[bool] = typer.Option(None, "--enable/--disable"),
     name: str = typer.Option(..., "--name", "-n"),
@@ -100,7 +100,7 @@ def update(
         console.print(f"Error {library}", style="red")
 
 
-@app.command()
+@app.command(no_args_is_help=True)
 def get(name: str = typer.Option(..., "--name", "-n")):
     z = zpod_client.ZpodClient()
     library = z.libraries_get.sync(id=f"name={name}")
