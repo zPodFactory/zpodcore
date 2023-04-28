@@ -24,7 +24,7 @@ def get_status_markdown(status: str):
         case "DELETING":
             return "[orange3]DELETING...[/orange3]"
         case "DELETED":
-            return "[dark_orange3D]ELETED[/dark_orange3]"
+            return "[dark_orange3]DELETED[/dark_orange3]"
         case "ERROR":
             return "[red3]ERROR[/red3]"
         case _:
@@ -48,7 +48,7 @@ def generate_table(instances: list[InstanceView], action: str = None):
     table.add_column("Endpoint")
     table.add_column("Networks")
     table.add_column("Owner")
-    #  table.add_column("Password")
+    table.add_column("Password")
     table.add_column("Status")
 
     for instance in instances:
@@ -84,7 +84,7 @@ def generate_table(instances: list[InstanceView], action: str = None):
             instance.endpoint.name,
             networks,
             owner,
-            # instance.password,
+            instance.password,
             get_status_markdown(instance.status),
         )
 
