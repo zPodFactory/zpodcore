@@ -1,9 +1,15 @@
+import time
+from datetime import datetime
+
 from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.network import get_mgmt_cidr
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine.lib import database
+
+SEGMENT_MAX_WAIT_FOR_REALIZED = 120
+SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
 @task(task_run_name="{instance_name}: configure top level networking")
@@ -23,6 +29,7 @@ def instance_deploy_networking(
             tln.t1_attach_edge_cluster()
             tln.segment_create()
             tln.segment_set_mac_discovery_profile()
+            tln.wait_for_segment_to_realize()
 
 
 class TopLevelNetworking:
@@ -102,6 +109,31 @@ class TopLevelNetworking:
                 )
             ),
         )
+
+    def wait_for_segment_to_realize(self) -> None:
+        start = datetime.now()
+        while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_REALIZED:
+            real = self.nsx.get(
+                "/v1/infra/realized-state/realized-entities"
+                f"?intent_path=/infra/segments/{self.segment_name}"
+            ).safejson()
+
+            rls = next(
+                x
+                for x in real["results"]
+                if x["entity_type"] == "RealizedLogicalSwitch"
+            )
+            if rls["state"] == "REALIZED" and rls["runtime_status"] == "SUCCESS":
+                print(f"Segment ({self.segment_name}) is ready for use")
+                break
+            print(
+                f"Segment ({self.segment_name}) is not ready. "
+                f"State:{rls['state']}, "
+                f"Runtime Status:{rls['runtime_status']}"
+            )
+            time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
+        else:
+            raise ValueError("Failed: Segment is not realized.")
 
 
 if __name__ == "__main__":
