@@ -1,6 +1,9 @@
+import fcntl
 import ipaddress
 import os
 import random
+import socket
+import struct
 from ipaddress import IPv4Network
 
 from zpodcommon import models as M
@@ -92,3 +95,25 @@ def delete_dnsmasq_config(instance_name: str):
         print(f"{filename} deleted successfully")
     else:
         print(f"{filename} does not exist")
+
+
+#
+# Fetch Host IP address
+# This will be used for sending this ip to Instances/components with:
+#  - Shared ISO Read Only Datastore
+#  - NTP server for all zPods
+#  - xyz new things
+#    - (WireGuard Global VPN potentially for DNAT Redirections)
+#
+
+
+def get_host_ip_address(interface_name):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        interface = bytes(interface_name, "utf-8")
+        packed_interface = struct.pack("256s", interface[:15])
+        info = fcntl.ioctl(sock.fileno(), 0x8915, packed_interface)  # SIOCGIFADDR
+        return socket.inet_ntoa(info[20:24])
+    except Exception as e:
+        print(f"Error fetching IP address for {interface_name}: {e}")
+        return None
