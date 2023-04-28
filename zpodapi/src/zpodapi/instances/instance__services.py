@@ -8,11 +8,6 @@ from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 from . import instance__utils
 from .instance__schemas import InstanceCreate
 
-ACTIVE_STATUSES = [
-    enums.InstanceStatus.ACTIVE.value,
-    enums.InstanceStatus.PENDING.value,
-]
-
 
 class InstanceService(ServiceBase):
     base_model: SQLModel = M.Instance
@@ -20,7 +15,7 @@ class InstanceService(ServiceBase):
     def get_all(self):
         return self.get_instance_records(
             user_id=None if self.is_superadmin else self.current_user.id,
-            statuses=ACTIVE_STATUSES,
+            notstatuses=[enums.InstanceStatus.DELETED.value],
         ).all()
 
     def get(self, *, id=None, name=None):
@@ -34,7 +29,7 @@ class InstanceService(ServiceBase):
             records = self.get_instance_records(
                 user_id=user_id,
                 name=name,
-                statuses=ACTIVE_STATUSES,
+                notstatuses=[enums.InstanceStatus.DELETED.value],
             )
         return records.one_or_none()
 
@@ -89,6 +84,7 @@ class InstanceService(ServiceBase):
         instance_id: int | None = None,
         permissions: list[str] | None = None,
         statuses: list[str] | None = None,
+        notstatuses: list[str] | None = None,
         order_by=M.Instance.name,
     ):
         stmt = (
@@ -116,6 +112,8 @@ class InstanceService(ServiceBase):
             stmt = stmt.where(M.InstancePermission.permission.in_(permissions))
         if statuses:
             stmt = stmt.where(M.Instance.status.in_(statuses))
+        if notstatuses:
+            stmt = stmt.where(M.Instance.status.not_in(notstatuses))
         if order_by:
             stmt = stmt.order_by(order_by)
         return self.session.exec(stmt)
