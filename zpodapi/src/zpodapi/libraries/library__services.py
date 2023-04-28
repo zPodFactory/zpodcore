@@ -1,3 +1,4 @@
+import os
 import shutil
 
 import git
@@ -23,9 +24,11 @@ class LibraryService(ServiceBase):
         components_filename = zpod_fetch_library_components_filename(library)
         for component_filename in components_filename:
             component = get_component(component_filename)
+            filename = os.path.basename(component["component_download_file"])
             c = M.Component(
                 library_name=item_in.name,
-                filename=component_filename,
+                filename=filename,
+                jsonfile=component_filename,
                 enabled=False,
                 status="",
                 component_uid=(

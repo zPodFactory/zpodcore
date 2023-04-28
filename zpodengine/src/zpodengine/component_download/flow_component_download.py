@@ -81,7 +81,7 @@ def get_component_request(uid: str):
     logger = get_run_logger()
     component = get_component_record(uid)
     logger.info("Extracting raw component details")
-    return get_json_from_file(component.filename)
+    return get_json_from_file(component.jsonfile)
 
 
 def run_command(cmd: str, cmd_engine: str):

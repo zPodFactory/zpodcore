@@ -6,9 +6,14 @@ class D:
     component_uid = {"example": "vcda-4.4.1"}
     component_name = {"example": "vcda"}
     component_version = {"example": "4.4.1"}
-    component_description = {"example": "VMWare NSX"}
+    component_description = {"example": "VMware Cloud Director Availabilty"}
     library_name = {"example": "main"}
-    filename = {"example": "vmware_nsx/vmware-nsxt-4.0.1.1.json"}
+    filename = {
+        "example": "VMware-Cloud-Director-Availability-Provider-4.4.1.4448762-b80bae6591_OVF10.ova"
+    }
+    jsonfile = {
+        "example": "/library/default/vmware/vmware_cloud_director_availability/4.4.1.json"
+    }
     enabled = {"example": False}
     status = {"example": "SCHEDULED"}
 
@@ -24,5 +29,6 @@ class ComponentView(SchemaBase):
 class ComponentViewFull(ComponentView):
     library_name: str = Field(..., D.library_name)
     filename: str = Field(..., D.filename)
+    jsonfile: str = Field(..., D.jsonfile)
     enabled: bool = Field(..., D.enabled)
     status: str = Field(..., D.status)
