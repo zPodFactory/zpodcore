@@ -18,15 +18,15 @@ def instance_destroy_networking(
 
         with NsxClient.auth_by_instance(instance) as nsx:
             # Destroy Connected Items (Segments)
-            for connected in search(nsx, connectivity_path=t1_path):
+            for connected in nsx.search(connectivity_path=fmt(t1_path)):
                 # Destroy Connected Item Children (Segment BindingMaps)
-                for connected_child in search(nsx, parent_path=connected["path"]):
+                for connected_child in nsx.search(parent_path=fmt(connected["path"])):
                     delete(nsx, connected_child["path"])
                 delete(nsx, connected["path"])
 
             # Destroy Children (LocaleServices)
-            for child in search(nsx, parent_path=t1_path):
-                if child["resource_type"] not in ("SecurityFeatures"):
+            for child in nsx.search(parent_path=fmt(t1_path)):
+                if child["resource_type"] not in ("SecurityFeatures", "PolicyNat"):
                     delete(nsx, child["path"])
 
             # Destroy T1
@@ -42,18 +42,5 @@ def fmt(txt):
     return txt.replace("/", "\\/")
 
 
-def search(nsx, **terms):
-    query = " AND ".join([f"{k}:{fmt(v)}" for k, v in terms.items()])
-    data = nsx.get(url=f"/v1/search/query?query={query}").safejson()
-    return data.get("results")
-
-
 if __name__ == "__main__":
-    from prefect import flow
-    from rich import print
-
-    @flow
-    def f():
-        instance_destroy_networking(9, "junk")
-
-    f()
+    instance_destroy_networking.fn(22, "test")
