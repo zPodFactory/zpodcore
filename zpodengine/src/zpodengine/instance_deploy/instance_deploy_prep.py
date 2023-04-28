@@ -1,4 +1,5 @@
 from prefect import task
+from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceStatus
@@ -12,6 +13,14 @@ def instance_deploy_prep(instance_id: int, instance_name: str):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
         instance.status = InstanceStatus.BUILDING
+
+        if not instance.domain:
+            setting = session.exec(
+                select(M.Setting).where(
+                    M.Setting.name == "zpodfactory_instances_domain"
+                )
+            ).one()
+            instance.domain = f"{instance.name}.{setting.value}"
 
         # fetching endpoint data for networks
         endpoint_networks = instance.endpoint.endpoints["network"]["networks"]
