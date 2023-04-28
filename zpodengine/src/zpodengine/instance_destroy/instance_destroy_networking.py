@@ -1,8 +1,14 @@
+import time
+from datetime import datetime
+
 from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine.lib import database
+
+SEGMENT_MAX_WAIT_FOR_EMPTY = 120
+SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
 @task(task_run_name="{instance_name}: remove top level networking")
@@ -19,9 +25,14 @@ def instance_destroy_networking(
         with NsxClient.auth_by_instance(instance) as nsx:
             # Destroy Connected Items (Segments)
             for connected in nsx.search(connectivity_path=fmt(t1_path)):
-                # Destroy Connected Item Children (Segment BindingMaps)
-                for connected_child in nsx.search(parent_path=fmt(connected["path"])):
-                    delete(nsx, connected_child["path"])
+                if connected["resource_type"] == "Segment":
+                    segment_wait_for_empty(nsx, connected)
+
+                    # Destroy Connected Item Children (Segment BindingMaps)
+                    for connected_child in nsx.search(
+                        parent_path=fmt(connected["path"])
+                    ):
+                        delete(nsx, connected_child["path"])
                 delete(nsx, connected["path"])
 
             # Destroy Children (LocaleServices)
@@ -31,6 +42,27 @@ def instance_destroy_networking(
 
             # Destroy T1
             delete(nsx, t1_path)
+
+
+def segment_wait_for_empty(nsx, segment):
+    """Waits for the segment to have no ports/interfaces"""
+
+    start = datetime.now()
+    while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_EMPTY:
+        ports = nsx.get(f"/v1{segment['path']}/ports").safejson()
+        if ports["result_count"] == 0:
+            print(
+                f"Segment ({segment['display_name']}) has no ports / "
+                "interfaces attached. Continuing."
+            )
+            break
+        print(
+            f"Segment ({segment['display_name']}) has ports / "
+            "interfaces attached. Waiting..."
+        )
+        time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
+    else:
+        raise ValueError("Failed: Segment has connected ports / interfaces.")
 
 
 def delete(nsx, path):
