@@ -12,8 +12,7 @@ class Component(CommonDatesMixin, SQLModel, table=True):
     component_version: str = Field(..., unique=False, nullable=False)
     component_description: str = Field(..., unique=False, nullable=False)
     library_name: str = Field(default=None, foreign_key="libraries.name")
-    filename: str = Field(..., unique=True, index=True, nullable=False)
-    # jsonfile to become current filename
-    # filename to be only the correct filename
+    filename: str = Field(..., unique=False, nullable=False)
+    jsonfile: str = Field(..., unique=True, index=True, nullable=False)
     enabled: bool = Field(False, nullable=False)
     status: str = Field(..., nullable=True)
