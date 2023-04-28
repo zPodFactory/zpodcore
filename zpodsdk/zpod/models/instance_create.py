@@ -11,11 +11,11 @@ T = TypeVar("T", bound="InstanceCreate")
 class InstanceCreate:
     """
     Attributes:
-        domain (str):  Example: tanzu-lab.maindomain.com.
+        domain (str):  Example: demo.maindomain.com.
         endpoint_id (int):  Example: 1.
-        name (str):  Example: tanzu-lab.
+        name (str):  Example: demo.
         profile (str):  Example: sddc.
-        description (Union[Unset, str]):  Default: ''. Example: Tanzu Lab zPod.
+        description (Union[Unset, str]):  Default: ''. Example: Demo zPod.
     """
 
     domain: str
