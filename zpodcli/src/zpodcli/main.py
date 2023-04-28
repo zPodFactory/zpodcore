@@ -8,10 +8,11 @@ from zpodcli.cmd import (
     connect,
     endpoint,
     group,
+    instance,
     library,
     permission,
-    pod,
     profile,
+    setting,
     user,
 )
 from zpodcli.lib.callback import isauthenticated
@@ -31,13 +32,14 @@ def launch():
     )
 
     authed_typer(group.app, name="group")
-    authed_typer(pod.app, name="pod")
+    authed_typer(instance.app, name="instance")
     authed_typer(profile.app, name="profile")
     authed_typer(library.app, name="library")
     authed_typer(permission.app, name="permission")
     authed_typer(endpoint.app, name="endpoint")
     authed_typer(component.app, name="component")
     authed_typer(user.app, name="user")
+    authed_typer(setting.app, name="setting")
 
     app()
 
