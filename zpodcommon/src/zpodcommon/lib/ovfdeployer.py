@@ -21,7 +21,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     i = instance_component.instance
 
     # Open Component JSON
-    f = open(c.filename)
+    f = open(c.jsonfile)
 
     # Load govc deploy spec
     govc_spec = json.load(f)["component_deploy_govc_spec"]
@@ -58,12 +58,6 @@ def ovf_deployer(instance_component: M.InstanceComponent):
 
     url = f"https://{username}:{password}@{hostname}/sdk"
 
-    # This should be in DB (component)
-    # c.filename will be switched to c.jsonfile
-    # c.filename will hold the real filename
-    component_data = get_json_from_file(c.filename)
-    component_filename = component_data["component_download_file"].split("/")[-1]
-
     # This should be checked properly
     print("Sleeping for portgroup ...")
     time.sleep(5)
@@ -77,7 +71,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         " -ds=NFS-01"
         " -json=true"
         f" -options={options_filename}"
-        f" /products/{c.component_name}/{c.component_version}/{component_filename}"
+        f" /products/{c.component_name}/{c.component_version}/{c.filename}"
     )
     print("govc deploy command")
     print(cmd)
@@ -91,6 +85,8 @@ def ovf_deployer(instance_component: M.InstanceComponent):
             check=False,
         )
         print(h)
+        if h.returncode != 0:
+            return RuntimeError(message=f"govc error: {h.stderr}")
 
     except subprocess.CalledProcessError as e:
         print(e.output)
