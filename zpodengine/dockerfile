@@ -37,6 +37,7 @@ RUN apt-get update \
     && apt-get install -y \
     curl \
     gcc \
+    git \
     libpq-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -46,6 +47,7 @@ RUN python3 -m venv $POETRY_VENV \
     && . $POETRY_VENV/bin/activate \
     && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
     && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
+    && pip install --upgrade git+https://github.com/vmware/vsphere-automation-sdk-python.git \
     && poetry install --no-interaction --no-cache $(test "$INSTALL_DEV" != "true" && echo "--without dev")
 
 RUN echo "I'm building for $TARGETPLATFORM"
