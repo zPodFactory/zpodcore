@@ -20,6 +20,8 @@ def get_current_user_unvalidated(
         criteria = M.User.api_token == api_key
     elif settings.DEV_AUTOAUTH_USER:
         criteria = M.User.id == settings.DEV_AUTOAUTH_USER
+    else:
+        criteria = M.User.id == -1
     return session.exec(select(M.User).where(criteria)).first()
 
 
