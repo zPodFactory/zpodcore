@@ -28,7 +28,7 @@ class D:
 class InstanceCreate(SchemaBase):
     name: str = Field(..., D.name)
     description: str = Field("", D.description)
-    domain: str = Field(..., D.domain)
+    domain: str = Field("", D.domain)
     endpoint_id: int = Field(..., D.endpoint_id)
     profile: str = Field(..., D.profile)
 
