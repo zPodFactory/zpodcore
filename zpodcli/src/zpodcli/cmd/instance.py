@@ -18,15 +18,15 @@ console = Console()
 def get_status_markdown(status: str):
     match status:
         case "ACTIVE":
-            return "[dark_sea_green4]ACTIVE[/dark_sea_green4]"
-        case "PENDING":
-            return "[grey63]DEPLOYING...[/grey63]"
+            return f"[dark_sea_green4]{status}[/dark_sea_green4]"
+        case "PENDING" | "BUILDING":
+            return f"[grey63]{status}...[/grey63]"
         case "DELETING":
-            return "[orange3]DELETING...[/orange3]"
+            return f"[orange3]{status}...[/orange3]"
         case "DELETED":
-            return "[dark_orange3]DELETED[/dark_orange3]"
-        case "ERROR":
-            return "[red3]ERROR[/red3]"
+            return f"[dark_orange3]{status}[/dark_orange3]"
+        case "DEPLOY_FAILED" | "DESTROY_FAILED":
+            return f"[red3]{status}[/red3]"
         case _:
             return "[royal_blue1]UNKNOWN[/royal_blue1]"
 

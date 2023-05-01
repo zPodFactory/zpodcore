@@ -17,7 +17,7 @@ from zpodengine.lib import database
 def flow_failed(flow, flow_run, state):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, flow_run.parameters["instance_id"])
-        instance.status = InstanceStatus.FAILED
+        instance.status = InstanceStatus.DEPLOY_FAILED
         session.add(instance)
         session.commit()
 
