@@ -4,10 +4,11 @@ from enum import Enum
 class InstanceStatus(str, Enum):
     ACTIVE = "ACTIVE"
     BUILDING = "BUILDING"
-    DELETING = "DELETING"
     DELETED = "DELETED"
+    DELETING = "DELETING"
+    DEPLOY_FAILED = "DEPLOY_FAILED"
+    DESTROY_FAILED = "DESTROY_FAILED"
     PENDING = "PENDING"
-    FAILED = "FAILED"
 
     def __str__(self) -> str:
         return str(self.value)

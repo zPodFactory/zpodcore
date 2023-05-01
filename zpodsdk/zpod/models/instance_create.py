@@ -11,30 +11,29 @@ T = TypeVar("T", bound="InstanceCreate")
 class InstanceCreate:
     """
     Attributes:
-        domain (str):  Example: demo.maindomain.com.
         endpoint_id (int):  Example: 1.
         name (str):  Example: demo.
         profile (str):  Example: sddc.
         description (Union[Unset, str]):  Default: ''. Example: Demo zPod.
+        domain (Union[Unset, str]):  Default: ''. Example: demo.maindomain.com.
     """
 
-    domain: str
     endpoint_id: int
     name: str
     profile: str
     description: Union[Unset, str] = ""
+    domain: Union[Unset, str] = ""
 
     def to_dict(self) -> Dict[str, Any]:
-        domain = self.domain
         endpoint_id = self.endpoint_id
         name = self.name
         profile = self.profile
         description = self.description
+        domain = self.domain
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
-                "domain": domain,
                 "endpoint_id": endpoint_id,
                 "name": name,
                 "profile": profile,
@@ -42,14 +41,14 @@ class InstanceCreate:
         )
         if description is not UNSET:
             field_dict["description"] = description
+        if domain is not UNSET:
+            field_dict["domain"] = domain
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        domain = d.pop("domain")
-
         endpoint_id = d.pop("endpoint_id")
 
         name = d.pop("name")
@@ -58,12 +57,14 @@ class InstanceCreate:
 
         description = d.pop("description", UNSET)
 
+        domain = d.pop("domain", UNSET)
+
         instance_create = cls(
-            domain=domain,
             endpoint_id=endpoint_id,
             name=name,
             profile=profile,
             description=description,
+            domain=domain,
         )
 
         return instance_create
