@@ -1,5 +1,7 @@
 from prefect import flow
 
+from zpodcommon import models as M
+from zpodcommon.enums import InstanceStatus
 from zpodengine.instance_destroy.instance_destroy_dnsmasq import (
     instance_destroy_dnsmasq,
 )
@@ -11,11 +13,21 @@ from zpodengine.instance_destroy.instance_destroy_networking import (
 )
 from zpodengine.instance_destroy.instance_destroy_prep import instance_destroy_prep
 from zpodengine.instance_destroy.instance_destroy_vapp import instance_destroy_vapp
+from zpodengine.lib import database
+
+
+def flow_failed(flow, flow_run, state):
+    with database.get_session_ctx() as session:
+        instance = session.get(M.Instance, flow_run.parameters["instance_id"])
+        instance.status = InstanceStatus.DESTROY_FAILED
+        session.add(instance)
+        session.commit()
 
 
 @flow(
     name="instance_destroy",
     flow_run_name="destroy_{instance_name}",
+    on_failure=[flow_failed],
     log_prints=True,
 )
 def flow_instance_destroy(
