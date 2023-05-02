@@ -25,7 +25,6 @@ def components_get_all(
 @router.post(
     "",
     summary="Instance Component Add",
-    response_model=InstanceComponentView,
     status_code=status.HTTP_201_CREATED,
 )
 def components_add(
@@ -36,7 +35,7 @@ def components_add(
 ):
     return instance_component_service.add(
         instance_id=instance.id,
-        component_uid=component_in.component_uid,
+        component_in=component_in,
     )
 
 
