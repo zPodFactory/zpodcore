@@ -8,14 +8,9 @@ from zpodengine.vcenter_operations.vapi import VCenterOps
 @task
 def get_vcenter_updates():
     # TODO: will get these values from individual vapps.
-    # hostname = os.getenv("VCENTER_HOSTNAME")
-    # username = os.getenv("VCENTER_USERNAME")
-    # password = os.getenv("VCENTER_PASSWORD")
-
-    hostname = "vcsa.vdonkor.zpod.io"
-    username = "administrator@vdonkor.zpod.io"
-    password = "aawt!R4w0!bd"
-
+    hostname = os.getenv("VCENTER_HOSTNAME")
+    username = os.getenv("VCENTER_USERNAME")
+    password = os.getenv("VCENTER_PASSWORD")
     vc = VCenterOps(hostname=hostname, username=username, password=password)
     updates = vc.get_vc_updates()
     return [
