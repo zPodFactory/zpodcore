@@ -61,5 +61,5 @@ class VCenterOps:
         try:
             console.print("Checking for VCenter updates", style="green")
             return self.pending_client.list(source_type)
-        except Error:
-            console.print_exception(extra_lines=8, show_locals=True)
+        except Error as e:
+            console.print(f"Error: {e}", style="red")
