@@ -13,6 +13,9 @@ from zpodengine.instance_component_add.instance_component_add_pre_scripts import
 from zpodengine.instance_component_add.instance_component_add_prep import (
     instance_component_add_prep,
 )
+from zpodengine.instance_component_add.instance_component_add_utils import (
+    instance_component_add_failed,
+)
 
 
 def instance_component_add(
@@ -27,29 +30,41 @@ def instance_component_add(
         component_uid=component_uid,
         extra_id=str(extra_id),
     )
+    failed_func = instance_component_add_failed(keys)
     label = component_uid
-    instance_component = instance_component_add_prep.submit(
+
+    instance_component = instance_component_add_prep.with_options(
+        on_failure=[failed_func]
+    ).submit(
         keys=keys,
         data=data or {},
         label=label,
         wait_for=wait_for,
     )
-    pre_scripts = instance_component_add_pre_scripts.submit(
+    pre_scripts = instance_component_add_pre_scripts.with_options(
+        on_failure=[failed_func]
+    ).submit(
         keys=keys,
         label=label,
         wait_for=[instance_component],
     )
-    package = instance_component_add_deploy.submit(
+    package = instance_component_add_deploy.with_options(
+        on_failure=[failed_func]
+    ).submit(
         keys=keys,
         label=label,
         wait_for=[pre_scripts],
     )
-    post_scripts = instance_component_add_post_scripts.submit(
+    post_scripts = instance_component_add_post_scripts.with_options(
+        on_failure=[failed_func]
+    ).submit(
         keys=keys,
         label=label,
         wait_for=[package],
     )
-    return instance_component_add_finalize.submit(
+    return instance_component_add_finalize.with_options(
+        on_failure=[failed_func]
+    ).submit(
         keys=keys,
         label=label,
         wait_for=[post_scripts],

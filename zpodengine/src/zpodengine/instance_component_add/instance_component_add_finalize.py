@@ -1,7 +1,9 @@
 from prefect import task
 
-# from zpodcommon import models as M
-# from zpodengine.lib import database
+from zpodcommon.enums import InstanceComponentStatus
+from zpodengine.instance_component_add.instance_component_add_utils import (
+    set_instance_component_status,
+)
 
 
 @task(task_run_name="{label}: finalize")
@@ -10,5 +12,4 @@ def instance_component_add_finalize(
     label: str,
 ):
     print("Finalizing")
-    # with database.get_session_ctx() as session:
-    #     instance_component = session.get(M.InstanceComponent, keys)
+    set_instance_component_status(keys, InstanceComponentStatus.ACTIVE)

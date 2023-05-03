@@ -10,6 +10,13 @@ class ComponentStatus(str, Enum):
     DOWNLOAD_INCOMPLETE = "DOWNLOAD_INCOMPLETE"
 
 
+class InstanceComponentStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    BUILDING = "BUILDING"
+    ADD_FAILED = "ADD_FAILED"
+    DELETE_FAILED = "DELETE_FAILED"
+
+
 class InstancePermission(str, Enum):
     INSTANCE_ADMIN = "INSTANCE_ADMIN"
     INSTANCE_OWNER = "INSTANCE_OWNER"

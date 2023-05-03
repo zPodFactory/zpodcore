@@ -4,6 +4,7 @@ from prefect import task
 from sqlmodel import SQLModel
 
 from zpodcommon import models as M
+from zpodcommon.enums import InstanceComponentStatus
 from zpodengine.lib import database
 
 
@@ -31,7 +32,11 @@ def instance_component_add_prep(
     label: str,
 ):
     with database.get_session_ctx() as session:
-        instance_component = M.InstanceComponent(**keys, data=data)
+        instance_component = M.InstanceComponent(
+            **keys,
+            data=data,
+            status=InstanceComponentStatus.BUILDING,
+        )
         session.add(instance_component)
         session.commit()
         session.refresh(instance_component)
