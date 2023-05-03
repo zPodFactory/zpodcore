@@ -49,7 +49,7 @@ class Instance(CommonDatesMixin, SQLModel, table=True):
         foreign_key="endpoints.id",
     )
     status: str = Field(
-        default="ACTIVE",
+        default=...,
         nullable=False,
     )
 
@@ -98,6 +98,10 @@ class InstanceComponent(SQLModel, table=True):
     extra_id: str = Field(
         primary_key=True,
         default="",
+    )
+    status: str = Field(
+        default=...,
+        nullable=True,
     )
     data: Dict[Any, Any] | None = Field(
         default={},
