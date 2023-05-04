@@ -12,14 +12,19 @@ class InstanceComponentService(ServiceBase):
     def add(
         self,
         *,
-        instance_id: int,
+        instance: M.Instance,
         component_in: InstanceComponentCreate,
     ):
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_component_add",
             deployment_name="default",
-            instance_id=instance_id,
+            run_name=(
+                f"For {instance.name} add {component_in.component_uid}"
+                f"{component_in.extra_id}"
+            ),
+            instance_id=instance.id,
+            instance_name=instance.name,
             component_uid=component_in.component_uid,
             extra_id=component_in.extra_id,
             data=component_in.data,

@@ -11,11 +11,8 @@ SEGMENT_MAX_WAIT_FOR_EMPTY = 120
 SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
-@task(task_run_name="{instance_name}: remove top level networking")
-def instance_destroy_networking(
-    instance_id: int,
-    instance_name: str,
-):
+@task
+def instance_destroy_networking(instance_id: int):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
         t1_name = f"T1-zPod-{instance.name}"

@@ -25,11 +25,10 @@ class InstanceComponentView(SQLModel):
     extra_id: str
 
 
-@task(task_run_name="{label}: prep")
+@task
 def instance_component_add_prep(
     keys: dict[str, str | int | None],
     data: dict[str, Any],
-    label: str,
 ):
     with database.get_session_ctx() as session:
         instance_component = M.InstanceComponent(
