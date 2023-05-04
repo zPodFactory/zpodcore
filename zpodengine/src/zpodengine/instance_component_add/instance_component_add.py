@@ -57,7 +57,7 @@ def instance_component_add(
     )
 
     package = instance_component_add_deploy.with_options(
-        **options('deploy'),
+        **options(name='deploy'),
     ).submit(
         keys=keys,
         wait_for=[pre_scripts],
