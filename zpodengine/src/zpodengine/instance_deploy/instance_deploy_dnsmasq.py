@@ -5,11 +5,8 @@ from zpodcommon.lib.network import create_dnsmasq_config, get_mgmt_ip
 from zpodengine.lib import database
 
 
-@task(task_run_name="{instance_name}: configure dnsmasq")
-def instance_deploy_dnsmasq(
-    instance_id: int,
-    instance_name: str,
-):
+@task
+def instance_deploy_dnsmasq(instance_id: int):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
 

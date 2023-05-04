@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, or_, select
+from sqlmodel import or_, select
 
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import enums
@@ -10,7 +10,7 @@ from .instance__schemas import InstanceCreate
 
 
 class InstanceService(ServiceBase):
-    base_model: SQLModel = M.Instance
+    base_model: M.Instance = M.Instance
 
     def get_all(self):
         return self.get_instance_records(
@@ -57,6 +57,7 @@ class InstanceService(ServiceBase):
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_deploy",
             deployment_name="default",
+            run_name=f"Deploy {instance.name}",
             instance_id=instance.id,
             profile=instance.profile,
             instance_name=instance.name,
@@ -66,11 +67,12 @@ class InstanceService(ServiceBase):
         self.session.commit()
         return instance
 
-    def delete(self, *, instance: SQLModel):
+    def delete(self, *, instance: M.Instance):
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_destroy",
             deployment_name="default",
+            run_name=f"Destroy {instance.name}",
             instance_id=instance.id,
             instance_name=instance.name,
         )

@@ -16,10 +16,13 @@ from zpodengine.instance_component_add.instance_component_add_prep import (
 from zpodengine.instance_component_add.instance_component_add_utils import (
     instance_component_add_failed,
 )
+from zpodengine.lib.options import task_options_setup
 
 
 def instance_component_add(
+    *,
     instance_id: int,
+    instance_name: str,
     component_uid: str,
     extra_id: str = "",
     data=None,
@@ -30,42 +33,46 @@ def instance_component_add(
         component_uid=component_uid,
         extra_id=str(extra_id),
     )
-    failed_func = instance_component_add_failed(keys)
-    label = component_uid
+    prefix = f"{instance_name} {component_uid}"
+    if extra_id:
+        prefix += f" ({extra_id})"
+    options = task_options_setup(
+        prefix=prefix,
+        on_failure=[instance_component_add_failed(keys)],
+    )
 
     instance_component = instance_component_add_prep.with_options(
-        on_failure=[failed_func]
+        **options(name="prep"),
     ).submit(
         keys=keys,
         data=data or {},
-        label=label,
         wait_for=wait_for,
     )
+
     pre_scripts = instance_component_add_pre_scripts.with_options(
-        on_failure=[failed_func]
+        **options(name="prescripts"),
     ).submit(
         keys=keys,
-        label=label,
         wait_for=[instance_component],
     )
+
     package = instance_component_add_deploy.with_options(
-        on_failure=[failed_func]
+        **options('deploy'),
     ).submit(
         keys=keys,
-        label=label,
         wait_for=[pre_scripts],
     )
+
     post_scripts = instance_component_add_post_scripts.with_options(
-        on_failure=[failed_func]
+        **options(name="postscripts"),
     ).submit(
         keys=keys,
-        label=label,
         wait_for=[package],
     )
+
     return instance_component_add_finalize.with_options(
-        on_failure=[failed_func]
+        **options(name="finalize"),
     ).submit(
         keys=keys,
-        label=label,
         wait_for=[post_scripts],
     )
