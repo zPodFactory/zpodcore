@@ -111,26 +111,29 @@ class TopLevelNetworking:
         )
 
     def wait_for_segment_to_realize(self) -> None:
+        print("Wait for segment to realize")
         start = datetime.now()
         while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_REALIZED:
             real = self.nsx.get(
                 "/v1/infra/realized-state/realized-entities"
                 f"?intent_path=/infra/segments/{self.segment_name}"
             ).safejson()
-
-            rls = next(
-                x
-                for x in real["results"]
-                if x["entity_type"] == "RealizedLogicalSwitch"
-            )
-            if rls["state"] == "REALIZED" and rls["runtime_status"] == "SUCCESS":
-                print(f"Segment ({self.segment_name}) is ready for use")
-                break
-            print(
-                f"Segment ({self.segment_name}) is not ready. "
-                f"State:{rls['state']}, "
-                f"Runtime Status:{rls['runtime_status']}"
-            )
+            if real.get("results"):
+                rls = next(
+                    x
+                    for x in real["results"]
+                    if x["entity_type"] == "RealizedLogicalSwitch"
+                )
+                if rls["state"] == "REALIZED" and rls["runtime_status"] == "SUCCESS":
+                    print(f"Segment ({self.segment_name}) is ready for use")
+                    break
+                print(
+                    f"Segment ({self.segment_name}) is not ready. "
+                    f"State:{rls['state']}, "
+                    f"Runtime Status:{rls['runtime_status']}"
+                )
+            else:
+                print("Status not readable.  Trying again...")
             time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
         else:
             raise ValueError("Failed: Segment is not realized.")
