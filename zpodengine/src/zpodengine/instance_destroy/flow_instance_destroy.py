@@ -14,6 +14,7 @@ from zpodengine.instance_destroy.instance_destroy_networking import (
 from zpodengine.instance_destroy.instance_destroy_prep import instance_destroy_prep
 from zpodengine.instance_destroy.instance_destroy_vapp import instance_destroy_vapp
 from zpodengine.lib import database
+from zpodengine.lib.options import task_options_setup
 
 
 def flow_failed(flow, flow_run, state):
@@ -26,7 +27,7 @@ def flow_failed(flow, flow_run, state):
 
 @flow(
     name="instance_destroy",
-    flow_run_name="destroy_{instance_name}",
+    flow_run_name="Destroy {instance_name}",
     on_failure=[flow_failed],
     log_prints=True,
 )
@@ -34,35 +35,45 @@ def flow_instance_destroy(
     instance_id: int,
     instance_name: str,
 ):
-    prep = instance_destroy_prep.submit(
+    options = task_options_setup(prefix=instance_name)
+
+    prep = instance_destroy_prep.with_options(
+        **options(name="prep"),
+    ).submit(
         instance_id=instance_id,
-        instance_name=instance_name,
     )
 
-    dnsmasq = instance_destroy_dnsmasq.submit(
+    dnsmasq = instance_destroy_dnsmasq.with_options(
+        **options(name="dnsmasq"),
+    ).submit(
         instance_id=instance_id,
-        instance_name=instance_name,
         wait_for=[prep],
     )
 
-    vapp = instance_destroy_vapp.submit(
+    vapp = instance_destroy_vapp.with_options(
+        **options(name="vapp"),
+    ).submit(
         instance_id=instance_id,
-        instance_name=instance_name,
         wait_for=[prep],
     )
 
-    networking = instance_destroy_networking.submit(
+    networking = instance_destroy_networking.with_options(
+        **options(name="top level networking"),
+    ).submit(
         instance_id=instance_id,
-        instance_name=instance_name,
         wait_for=[vapp],
     )
 
-    instance_destroy_finalize.submit(
+    instance_destroy_finalize.with_options(
+        **options(name="finalize"),
+    ).submit(
         instance_id=instance_id,
-        instance_name=instance_name,
         wait_for=[dnsmasq, vapp, networking],
     )
 
 
 if __name__ == "__main__":
-    flow_instance_destroy(instance_id=3, instance_name="abc")
+    flow_instance_destroy(
+        instance_id=3,
+        instance_name="abc",
+    )

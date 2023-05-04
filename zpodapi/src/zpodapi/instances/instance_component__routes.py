@@ -34,7 +34,7 @@ def components_add(
     component_in: InstanceComponentCreate,
 ):
     return instance_component_service.add(
-        instance_id=instance.id,
+        instance=instance,
         component_in=component_in,
     )
 

@@ -5,13 +5,9 @@ from zpodcommon.lib.ovfdeployer import ovf_deployer
 from zpodengine.lib import database
 
 
-@task(task_run_name="{label}: deploy")
-def instance_component_add_deploy(
-    keys: dict[str, str | int | None],
-    label: str,
-):
+@task
+def instance_component_add_deploy(keys: dict[str, str | int | None]):
     print("Deploy OVA")
     with database.get_session_ctx() as session:
         instance_component = session.get(M.InstanceComponent, keys)
-
         ovf_deployer(instance_component)

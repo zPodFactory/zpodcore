@@ -6,10 +6,7 @@ from zpodengine.instance_component_add.instance_component_add_utils import (
 )
 
 
-@task(task_run_name="{label}: finalize")
-def instance_component_add_finalize(
-    keys: dict[str, str | int | None],
-    label: str,
-):
+@task
+def instance_component_add_finalize(keys: dict[str, str | int | None]):
     print("Finalizing")
     set_instance_component_status(keys, InstanceComponentStatus.ACTIVE)
