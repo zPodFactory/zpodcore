@@ -1,4 +1,4 @@
-from datetime import datetime
+from pydantic import constr
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 
@@ -11,7 +11,7 @@ class D:
 
 
 class SettingCreate(SchemaBase):
-    name: str = Field(..., example="default")
+    name: constr(to_lower=True) = Field(..., example="default")
     description: str = Field(..., D.description)
     value: str = Field(..., D.value)
 
