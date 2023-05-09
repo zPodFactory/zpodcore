@@ -1,5 +1,6 @@
 from typing import Any
 
+from sqlalchemy import func
 from sqlmodel import Session, SQLModel, or_, select
 from sqlmodel.engine.result import Result
 
@@ -22,16 +23,19 @@ class Crud:
         model = model_ or self.base_model
         model_keys = set(self.base_model.__fields__.keys())
 
-        for column in filters:
+        ret = []
+        for column, value in filters.items():
+            column, insensitive, _ = column.partition("_insensitive")
             if column not in model_keys:
                 raise AttributeError(f"Invalid attribute name: {column}")
 
-        # Add each truthy item to the criteria
-        return [
-            getattr(model, column) == value
-            for column, value in filters.items()
-            if value
-        ]
+            # Add each truthy item to the criteria
+            if value:
+                if insensitive:
+                    ret.append(func.lower(getattr(model, column)) == value.lower())
+                else:
+                    ret.append(getattr(model, column) == value)
+        return ret
 
     def create(
         self,
@@ -57,7 +61,7 @@ class Crud:
     def get(
         self,
         *,
-        extra_criteria: list = None,
+        where_extra: list | None = None,
         model: SQLModel | None = None,
         **filters: dict[str, Any],
     ):
@@ -65,8 +69,8 @@ class Crud:
         if len(arg_criteria) == 0:
             raise AttributeError("Must have at least one filter")
 
-        criteria = (extra_criteria or []) + arg_criteria
-        return self.select(criteria=criteria, model=model).one_or_none()
+        where = (where_extra or []) + arg_criteria
+        return self.select(where=where, model=model).one_or_none()
 
     def get_all(
         self,
@@ -77,21 +81,21 @@ class Crud:
     def get_all_filtered(
         self,
         *,
-        extra_criteria: list = None,
+        where_extra: list = None,
         use_or: bool = False,
         model: SQLModel | None = None,
         **filters: dict[str, Any],
     ):
-        criteria = extra_criteria or []
+        where = where_extra or []
 
         arg_criteria = self.build_truthy_criteria(**filters)
 
         if use_or:
-            criteria.append(or_(*arg_criteria))
+            where.append(or_(*arg_criteria))
         else:
-            criteria.extend(arg_criteria)
+            where.extend(arg_criteria)
 
-        return self.select(criteria=criteria, model=model).all()
+        return self.select(where=where, model=model).all()
 
     def save(self, item: SQLModel):
         self.session.add(item)
@@ -102,13 +106,13 @@ class Crud:
     def select(
         self,
         *,
-        criteria: list | None = None,
+        where: list | None = None,
         model: SQLModel | None = None,
     ) -> Result[Any]:
         model = model or self.base_model
         sel = select(model)
-        if criteria:
-            sel = sel.where(*criteria)
+        if where:
+            sel = sel.where(*where)
         return self.session.exec(sel)
 
     def update(
