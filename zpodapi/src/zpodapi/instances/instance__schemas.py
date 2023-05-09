@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from pydantic import constr
+
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon import enums
 
@@ -26,7 +28,7 @@ class D:
 
 
 class InstanceCreate(SchemaBase):
-    name: str = Field(..., D.name)
+    name: constr(to_lower=True) = Field(..., D.name)
     description: str = Field("", D.description)
     domain: str = Field("", D.domain)
     endpoint_id: int = Field(..., D.endpoint_id)
