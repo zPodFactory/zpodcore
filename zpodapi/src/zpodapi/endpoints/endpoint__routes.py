@@ -24,6 +24,17 @@ def get_all(
     return endpoint_service.crud.get_all()
 
 
+@router.get(
+    "/{id}",
+    response_model=EndpointViewFull,
+)
+def get(
+    *,
+    endpoint: EndpointAnnotations.GetEndpoint,
+):
+    return endpoint
+
+
 @router.post(
     "",
     response_model=EndpointCreate,
@@ -72,7 +83,6 @@ def delete(
     "/{id}/verify",
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
-
 )
 async def verify(
     *,
