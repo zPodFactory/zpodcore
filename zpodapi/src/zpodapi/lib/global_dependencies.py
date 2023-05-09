@@ -17,12 +17,12 @@ def get_current_user_unvalidated(
     api_key: Annotated[APIKey, Security(api_key_header)],
 ) -> M.User:
     if api_key:
-        criteria = M.User.api_token == api_key
+        where = M.User.api_token == api_key
     elif settings.DEV_AUTOAUTH_USER:
-        criteria = M.User.id == settings.DEV_AUTOAUTH_USER
+        where = M.User.id == settings.DEV_AUTOAUTH_USER
     else:
-        criteria = M.User.id == -1
-    return session.exec(select(M.User).where(criteria)).first()
+        where = M.User.id == -1
+    return session.exec(select(M.User).where(where)).first()
 
 
 def get_current_user(
