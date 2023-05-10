@@ -58,10 +58,6 @@ def ovf_deployer(instance_component: M.InstanceComponent):
 
     url = f"https://{username}:{password}@{hostname}/sdk"
 
-    # This should be checked properly
-    print("Sleeping for portgroup ...")
-    time.sleep(5)
-
     cmd = (
         "govc import.ova"
         " -k"
