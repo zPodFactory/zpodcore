@@ -1,28 +1,10 @@
 from typing import Any
 
 from prefect import task
-from sqlmodel import SQLModel
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceComponentStatus
 from zpodengine.lib import database
-
-
-class ComponentView(SQLModel):
-    component_uid: str
-    component_name: str
-    component_version: str
-    library_name: str
-    filename: str
-    enabled: bool
-    status: str
-
-
-class InstanceComponentView(SQLModel):
-    instance_id: int
-    component: ComponentView
-    data: dict[Any, Any]
-    extra_id: str
 
 
 @task
