@@ -1,47 +1,43 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
+from ...models.endpoint_view_full import EndpointViewFull
 from ...models.http_validation_error import HTTPValidationError
-from ...models.instance_component_create import InstanceComponentCreate
 from ...types import Response
 
 
-class InstancesComponentsAdd:
+class EndpointsGet:
     def __init__(self, client: Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
-        *,
-        json_body: InstanceComponentCreate,
     ) -> Dict[str, Any]:
-        url = "{}/instances/{id}/components".format(self.client.base_url, id=id)
+        url = "{}/endpoints/{id}".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
-        json_json_body = json_body.to_dict()
-
         return {
-            "method": "post",
+            "method": "get",
             "url": url,
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
-            "json": json_json_body,
         }
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        if response.status_code == HTTPStatus.CREATED:
-            response_201 = cast(Any, response.json())
-            return response_201
+    ) -> Optional[Union[EndpointViewFull, HTTPValidationError]]:
+        if response.status_code == HTTPStatus.OK:
+            response_200 = EndpointViewFull.from_dict(response.json())
+
+            return response_200
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
             response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -55,7 +51,7 @@ class InstancesComponentsAdd:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Union[EndpointViewFull, HTTPValidationError]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -66,26 +62,22 @@ class InstancesComponentsAdd:
     def sync_detailed(
         self,
         id: str,
-        *,
-        json_body: InstanceComponentCreate,
-    ) -> Response[Union[Any, HTTPValidationError]]:
-        """Instance Component Add
+    ) -> Response[Union[EndpointViewFull, HTTPValidationError]]:
+        """Get
 
         Args:
             id (str):
-            json_body (InstanceComponentCreate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
         )
 
         response = httpx.request(
@@ -98,51 +90,43 @@ class InstancesComponentsAdd:
     def sync(
         self,
         id: str,
-        *,
-        json_body: InstanceComponentCreate,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        """Instance Component Add
+    ) -> Optional[Union[EndpointViewFull, HTTPValidationError]]:
+        """Get
 
         Args:
             id (str):
-            json_body (InstanceComponentCreate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         return self.sync_detailed(
             id=id,
-            json_body=json_body,
         ).parsed
 
     async def asyncio_detailed(
         self,
         id: str,
-        *,
-        json_body: InstanceComponentCreate,
-    ) -> Response[Union[Any, HTTPValidationError]]:
-        """Instance Component Add
+    ) -> Response[Union[EndpointViewFull, HTTPValidationError]]:
+        """Get
 
         Args:
             id (str):
-            json_body (InstanceComponentCreate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -153,26 +137,22 @@ class InstancesComponentsAdd:
     async def asyncio(
         self,
         id: str,
-        *,
-        json_body: InstanceComponentCreate,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        """Instance Component Add
+    ) -> Optional[Union[EndpointViewFull, HTTPValidationError]]:
+        """Get
 
         Args:
             id (str):
-            json_body (InstanceComponentCreate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Union[EndpointViewFull, HTTPValidationError]]
         """  # noqa e501
 
         return (
             await self.asyncio_detailed(
                 id=id,
-                json_body=json_body,
             )
         ).parsed
