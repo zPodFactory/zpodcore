@@ -19,3 +19,8 @@ logs/*
 # Openapi files
 zpodsdk_builder/openapi.json
 zpodapi/scripts/openapi/openapi.json
+
+#pycharm
+**/.idea/*
+.idea
+.idea/*

@@ -81,3 +81,17 @@ def delete(
     library: LibraryAnnotations.GetLibrary,
 ):
     return library_service.delete(item=library)
+
+@router.put(
+    "/{id}/update",
+    response_model=LibraryView,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin]
+)
+def library_update(
+        *,
+        library: LibraryAnnotations.GetLibrary,
+        library_service: LibraryAnnotations.LibraryService,
+):
+    library_service.update(item_in=library)
+    return library
