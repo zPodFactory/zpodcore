@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from zpodapi.lib.global_dependencies import GlobalDepends
-
+from zpodapi.components.component__dependencies import ComponentAnnotations
 from zpodapi.lib.route_logger import RouteLogger
 
 from .library__dependencies import LibraryAnnotations
@@ -92,6 +92,8 @@ def library_update(
         *,
         library: LibraryAnnotations.GetLibrary,
         library_service: LibraryAnnotations.LibraryService,
+        component_service: ComponentAnnotations.ComponentService,
 ):
-    library_service.update(item_in=library)
+    db_components = component_service.crud.get_all()
+    library_service.update(item_in=library,db_components=db_components)
     return library

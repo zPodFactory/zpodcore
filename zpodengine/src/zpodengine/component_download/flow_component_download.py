@@ -61,7 +61,7 @@ def get_component_by_uid(uid: str) -> M.Component:
         ).first()
 
 
-def update_db(uid: str, status: str):
+def update_db(uid: str, status: str, active: bool = False):
     component = get_component_by_uid(uid)
     component.status = status
     with database.get_session_ctx() as session:
@@ -260,7 +260,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         update_db(component.component_uid, CS.DOWNLOAD_INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
+    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE, active=True)
     return True
 
 
@@ -338,6 +338,18 @@ def update_download_progress(component):
     )
     return success
 
+@task(task_run_name="{component.component_uid}-dir-clean-up")
+def clean_up_existing_files(component: Component):
+    logger = get_run_logger()
+    logger.info(f"Cleaning up existing files for {component.component_uid}")
+    dst_dir = (
+            Path(PRODUCTS_PATH) / component.component_name / component.component_version
+    )
+    if dst_dir.exists():
+        logger.info(f"Removing {dst_dir}")
+        dst_dir.rmdir()
+    logger.info(f"Finished cleaning up existing files for {component.component_uid}")
+
 
 @task(task_run_name="{component.component_uid}-rename")
 def rename_file(component: Component):
@@ -376,6 +388,9 @@ def flow_component_download(uid: str):
     ):
         logger.info(f"{uid} already exists. Exiting")
         return
+
+    clean_up_existing_files(component=component)
+
     logger.info(f"No {uid} found, will proceed to download the component")
     download_component.submit(component=component)
 

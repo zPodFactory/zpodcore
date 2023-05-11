@@ -6,6 +6,7 @@ from rich import print
 from sqlmodel import SQLModel, select
 
 from zpodapi.components.component__utils import get_component
+
 from zpodapi.lib.service_base import ServiceBase
 from zpodapi.lib.utils import list_json_files
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
@@ -39,6 +40,7 @@ class LibraryService(ServiceBase):
                 component_name=component["component_name"],
                 component_version=component["component_version"],
                 component_description=component["component_description"],
+                active=False,
             )
             self.session.add(c)
         self.session.commit()
@@ -64,33 +66,37 @@ class LibraryService(ServiceBase):
         zpod_delete_library(library=item)
         return None
 
-    def update(self, *, item_in: LibraryCreate):
+    def update(self, *, item_in: LibraryCreate, db_components: M.Component):
         library = self.crud.get(id=item_in.id)
-        # zpod_update_library(library=item_in)
+
+        zpod_update_library(library=item_in)
+
         component_filename_list = zpod_fetch_library_components_filename(library)
+        updated_components = [get_component(comp_file) for comp_file in component_filename_list]
+
         for component_filename in component_filename_list:
             component = get_component(component_filename)
-
+            component_uid = f"{component['component_name']}-{component['component_version']}"
             if component["component_name"] == "zpod-engine":
                 continue
-            statement = select(M.Component).where(
-                M.Component.component_uid == f"{component['component_name']}-{component['component_version']}"
-            )
-            result = self.session.exec(statement).first()
-            if result and result.active is True:
+
+            db_component = check_for_component(component_uid, db_components)
+            if db_component and db_component.active is True:
                 updated_component = initialize_component(
                     component_filename=component_filename,
                     component=component,
                     library_name=library.name,
-                    is_enabled=result.enabled,
-                    is_active=True,
-                    status=result.status,
+                    is_enabled=db_component.enabled,
+                    is_active=db_component.active,
+                    status=db_component.status,
                 )
+                result = self.session.query(M.Component).filter(M.Component.component_uid == component_uid).first()
                 for key, value in updated_component.items():
                     setattr(result, key, value)
                 self.session.add(result)
                 self.session.commit()
 
+                #add download the component
                 zpod_engine = ZpodEngineClient()
                 zpod_engine.create_flow_run_by_name(
                     flow_name="component_download",
@@ -98,7 +104,7 @@ class LibraryService(ServiceBase):
                     uid=result.component_uid,
                 )
 
-            if result is None:
+            if db_component is None:
                 new_component = initialize_component(
                     component_filename=component_filename,
                     component=component,
@@ -111,23 +117,30 @@ class LibraryService(ServiceBase):
                 self.session.add(c)
                 self.session.commit()
 
-            else:
-                print("No")
-                # for key, value in hero_data.items():
-                #     setattr(db_hero, key, value)
-                # session.add(db_hero)
-                # session.commit()
-                # session.refresh(db_hero)
-                # print("yes")
-                # three possible cases:
-                # if the component exists update the fields and if active kick off download
-                # if the component does not exist create it
-                # if the component is enabled q
+            # if result and component
+            #
+            # else:
+            #     print("No")
+            # for key, value in hero_data.items():
+            #     setattr(db_hero, key, value)
+            # session.add(db_hero)
+            # session.commit()
+            # session.refresh(db_hero)
+            # print("yes")
+            # three possible cases:
+            # if the component exists update the fields and if active kick off download
+            # if the component does not exist create it
+            # if the component is enabled q
             #
             #     continue:
             # else:
             #     #compose the component
             #     #add it to the db;
+
+
+def check_for_component(component_id: str, results: list):
+    filtered_results = filter(lambda x: x.component_uid == component_id, results)
+    return next(iter(filtered_results), None)
 
 
 def zpod_create_library(library: M.Library):

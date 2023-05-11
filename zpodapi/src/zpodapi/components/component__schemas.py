@@ -14,6 +14,7 @@ class D:
     jsonfile = {
         "example": "/library/default/vmware/vmware_cloud_director_availability/4.4.1.json"
     }
+    active = {"example": True}
     enabled = {"example": False}
     status = {"example": "SCHEDULED"}
 
@@ -26,9 +27,11 @@ class ComponentView(SchemaBase):
     component_description: str = Field(..., D.component_description)
 
 
+
 class ComponentViewFull(ComponentView):
     library_name: str = Field(..., D.library_name)
     filename: str = Field(..., D.filename)
     jsonfile: str = Field(..., D.jsonfile)
     enabled: bool = Field(..., D.enabled)
+    active: bool = Field(..., D.active)
     status: str = Field(..., D.status)
