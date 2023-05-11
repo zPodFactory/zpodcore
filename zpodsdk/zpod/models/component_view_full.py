@@ -9,6 +9,7 @@ T = TypeVar("T", bound="ComponentViewFull")
 class ComponentViewFull:
     """
     Attributes:
+        active (bool):  Example: True.
         component_description (str):  Example: VMware Cloud Director Availabilty.
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
@@ -21,6 +22,7 @@ class ComponentViewFull:
         status (str):  Example: SCHEDULED.
     """
 
+    active: bool
     component_description: str
     component_name: str
     component_uid: str
@@ -33,6 +35,7 @@ class ComponentViewFull:
     status: str
 
     def to_dict(self) -> Dict[str, Any]:
+        active = self.active
         component_description = self.component_description
         component_name = self.component_name
         component_uid = self.component_uid
@@ -47,6 +50,7 @@ class ComponentViewFull:
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
+                "active": active,
                 "component_description": component_description,
                 "component_name": component_name,
                 "component_uid": component_uid,
@@ -65,6 +69,8 @@ class ComponentViewFull:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
+        active = d.pop("active")
+
         component_description = d.pop("component_description")
 
         component_name = d.pop("component_name")
@@ -86,6 +92,7 @@ class ComponentViewFull:
         status = d.pop("status")
 
         component_view_full = cls(
+            active=active,
             component_description=component_description,
             component_name=component_name,
             component_uid=component_uid,

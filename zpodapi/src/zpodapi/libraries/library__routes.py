@@ -95,5 +95,5 @@ def library_update(
         component_service: ComponentAnnotations.ComponentService,
 ):
     db_components = component_service.crud.get_all()
-    library_service.update(item_in=library,db_components=db_components)
-    return library
+
+    return library_service.update(item_in=library,db_components=db_components)

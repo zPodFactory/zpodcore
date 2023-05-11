@@ -54,6 +54,13 @@ class ZpodClient:
 
     @property
     @cache
+    def endpoints_get(self):
+        from zpod.api.endpoints import endpoints_get
+
+        return endpoints_get.EndpointsGet(self._client)
+
+    @property
+    @cache
     def endpoints_get_all(self):
         from zpod.api.endpoints import endpoints_get_all
 
@@ -163,6 +170,13 @@ class ZpodClient:
         from zpod.api.libraries import libraries_get_all
 
         return libraries_get_all.LibrariesGetAll(self._client)
+
+    @property
+    @cache
+    def libraries_library_update(self):
+        from zpod.api.libraries import libraries_library_update
+
+        return libraries_library_update.LibrariesLibraryUpdate(self._client)
 
     @property
     @cache

@@ -1,12 +1,12 @@
 import os
 import shutil
-
+from pathlib import Path
 import git
 from rich import print
 from sqlmodel import SQLModel, select
 
 from zpodapi.components.component__utils import get_component
-
+from zpodcommon.enums import ComponentStatus as CS
 from zpodapi.lib.service_base import ServiceBase
 from zpodapi.lib.utils import list_json_files
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
@@ -72,19 +72,21 @@ class LibraryService(ServiceBase):
         zpod_update_library(library=item_in)
 
         component_filename_list = zpod_fetch_library_components_filename(library)
+
         updated_components = [get_component(comp_file) for comp_file in component_filename_list]
+        component_uids = [get_component_uid(comp) for comp in updated_components]
+        removed_components = [comp for comp in db_components if comp.component_uid not in component_uids]
 
-        for component_filename in component_filename_list:
-            component = get_component(component_filename)
-            component_uid = f"{component['component_name']}-{component['component_version']}"
-            if component["component_name"] == "zpod-engine":
+        for item in updated_components:
+            component_uid = get_component_uid(item)
+            component_filename = get_component_jsonfile(item["component_version"],component_filename_list)
+            if item["component_name"] == "zpod-engine":
                 continue
-
             db_component = check_for_component(component_uid, db_components)
             if db_component and db_component.active is True:
                 updated_component = initialize_component(
                     component_filename=component_filename,
-                    component=component,
+                    component=item,
                     library_name=library.name,
                     is_enabled=db_component.enabled,
                     is_active=db_component.active,
@@ -96,18 +98,19 @@ class LibraryService(ServiceBase):
                 self.session.add(result)
                 self.session.commit()
 
-                #add download the component
+                # add download the component
                 zpod_engine = ZpodEngineClient()
                 zpod_engine.create_flow_run_by_name(
                     flow_name="component_download",
                     deployment_name="default",
                     uid=result.component_uid,
                 )
+                return library
 
             if db_component is None:
                 new_component = initialize_component(
                     component_filename=component_filename,
-                    component=component,
+                    component=item,
                     library_name=library.name,
                     is_enabled=False,
                     is_active=False,
@@ -116,26 +119,27 @@ class LibraryService(ServiceBase):
                 c = M.Component(**new_component)
                 self.session.add(c)
                 self.session.commit()
+                return library
 
-            # if result and component
-            #
-            # else:
-            #     print("No")
-            # for key, value in hero_data.items():
-            #     setattr(db_hero, key, value)
-            # session.add(db_hero)
-            # session.commit()
-            # session.refresh(db_hero)
-            # print("yes")
-            # three possible cases:
-            # if the component exists update the fields and if active kick off download
-            # if the component does not exist create it
-            # if the component is enabled q
-            #
-            #     continue:
-            # else:
-            #     #compose the component
-            #     #add it to the db;
+        for comp in removed_components:
+            result = self.session.query(M.Component).filter(M.Component.component_uid == comp.component_uid).first()
+            result.status = CS.DELETED
+            result.enabled = False
+            result.active = False
+            self.session.add(result)
+            self.session.commit()
+        return library
+
+
+def get_component_jsonfile(component_version, component_filelist):
+    for comp_file in component_filelist:
+        version = Path(comp_file).stem
+        if version == component_version:
+            return comp_file
+
+
+def get_component_uid(component):
+    return f"{component['component_name']}-{component['component_version']}"
 
 
 def check_for_component(component_id: str, results: list):

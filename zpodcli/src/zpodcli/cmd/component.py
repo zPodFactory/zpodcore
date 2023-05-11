@@ -18,17 +18,19 @@ def generate_table(components: list, component_uid: str = None, action: str = No
     table.add_column("Version")
     table.add_column("Library", style="dim")
     table.add_column("Description")
-    table.add_column("Enabled", style="dim")
-    table.add_column("Status")
+    table.add_column("Active",style="dim")
+    table.add_column("Enabled")
+    table.add_column("Status",style="dim")
     for component in components:
         table.add_row(
-            f"[green]{component.component_uid}[/green]",
+            f"[green3]{component.component_uid}[/green3]",
             f"[magenta]{component.component_name}[/magenta]",
             component.component_version,
-            f"[yellow]{component.library_name}[/yellow]",
-            f"[green]{component.component_description}[/green]",
-            f"[magenta]{component.enabled.__str__()}[/magenta]",
-            component.status,
+            f"[yellow1]{component.library_name}[/yellow1]",
+            f"[green4]{component.component_description}[/green4]",
+            f"[dodger_blue1]{component.active.__str__()}[/dodger_blue1]",
+            f"[purple4]{component.enabled.__str__()}[/purple4]",
+            f"[deep_pink2]{component.status}[/deep_pink2]"
         )
     console.print(table)
 

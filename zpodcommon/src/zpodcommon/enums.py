@@ -8,6 +8,7 @@ class ComponentStatus(str, Enum):
     FAILED_AUTHENTICATION = "FAILED_AUTHENTICATION"
     SCHEDULED = "SCHEDULED"
     DOWNLOAD_INCOMPLETE = "DOWNLOAD_INCOMPLETE"
+    DELETED = "DELETED"
 
 
 class InstanceComponentStatus(str, Enum):
