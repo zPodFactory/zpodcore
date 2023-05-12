@@ -23,7 +23,7 @@ rich = "13.3.3"
 sqlmodel = "0.0.8"
 tenacity = "8.2.2"
 uvicorn = "0.21.1"
-pyvmomi = "^8.0.0.1.2"
+pyvmomi = "^8.0.1.0"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "^2.0.2"
