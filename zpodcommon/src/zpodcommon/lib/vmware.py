@@ -173,6 +173,21 @@ class vCenter:
             task_id = vapp.Destroy_Task()
             task.WaitForTask(task_id)
 
+    def poweroff_vapp(self, vapp_name):
+        if vapp := self.get_vapp(vapp_name):
+            if vapp.summary.vAppState != "stopped":
+                # Wait for vApp PowerOff operation to complete
+                task_id = vapp.PowerOffVApp_Task(True)
+                task.WaitForTask(task_id)
+
+    def poweron_vapp(self, vapp_name):
+        if vapp := self.get_vapp(vapp_name):
+            if vapp.summary.vAppState != "started":
+                # We don't need to wait here
+                # That means an instance was explictly powered off by a user
+                # restart will go through all vms in that vApp anyway.
+                vapp.PowerOnVApp_Task(True)
+
     def get_vapps(self, props=None):
         return self.get_obj_list([vim.VirtualApp], props=props)
 
@@ -184,6 +199,59 @@ class vCenter:
 
     def get_vm(self, name, props=None):
         return self.get_obj(vim.VirtualMachine, "name", name, props=props)
+
+    def poweron_vm(self, vm_name):
+        vm = self.get_vm(vm_name)
+        task_id = vm.PowerOnVM_Task()
+        task.WaitForTask(task_id)
+
+    def add_disk_to_vm(self, vm_name, disk_size_in_kb):
+        #
+        # Method to add a disk to a vm_name with specific disk_size_in_kb
+        #
+
+        # Fetch VM
+        # For this example:
+        # zbox.{instance_name}.{domain}
+        vm = self.get_vm(vm_name)
+
+        #
+        # Prepare spec for second disk
+        #
+        spec = vim.vm.ConfigSpec()
+        spec_deviceChange = vim.vm.device.VirtualDeviceSpec()
+        spec_deviceChange.fileOperation = "create"
+        spec_deviceChange.device = vim.vm.device.VirtualDisk()
+        spec_deviceChange.device.capacityInBytes = disk_size_in_kb * 1024
+        spec_deviceChange.device.storageIOAllocation = (
+            vim.StorageResourceManager.IOAllocationInfo()
+        )
+        spec_deviceChange.device.storageIOAllocation.shares = vim.SharesInfo()
+        spec_deviceChange.device.storageIOAllocation.shares.shares = 1000
+        spec_deviceChange.device.storageIOAllocation.shares.level = "normal"
+        spec_deviceChange.device.storageIOAllocation.limit = -1
+        spec_deviceChange.device.backing = (
+            vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+        )
+        spec_deviceChange.device.backing.fileName = ""
+        spec_deviceChange.device.backing.thinProvisioned = True
+        spec_deviceChange.device.backing.diskMode = "persistent"
+        spec_deviceChange.device.controllerKey = 1000
+        spec_deviceChange.device.unitNumber = 1
+        spec_deviceChange.device.capacityInKB = disk_size_in_kb
+        spec_deviceChange.device.deviceInfo = vim.Description()
+        spec_deviceChange.device.deviceInfo.summary = "New Hard disk"
+        spec_deviceChange.device.deviceInfo.label = "New Hard disk"
+        # Really not sure about this one ... (from code capture)
+        spec_deviceChange.device.key = -102
+
+        spec_deviceChange.operation = "add"
+        spec.deviceChange = [spec_deviceChange]
+        spec.virtualNuma = vim.vm.VirtualNuma()
+
+        # Reconfigure VM with new spec
+        task_id = vm.ReconfigVM_Task(spec)
+        task.WaitForTask(task_id)
 
     @classmethod
     def auth_by_endpoints(cls, endpoints: dict, **kwargs):
