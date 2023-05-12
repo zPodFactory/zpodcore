@@ -5,15 +5,14 @@ from zpodapi.lib.schema_base import Field, SchemaBase
 class D:
     id = {"example": 1}
     component_uid = {"example": "vcda-4.4.1"}
-    data = {"example": "{}"}
     extra_id = {"example": "11"}
 
     class data:
-        mgmt_ip = {"example": 11}
+        last_octet = {"example": 11}
 
 
 class InstanceComponentDataView(SchemaBase):
-    mgmt_ip: int | None = Field(None, D.data.mgmt_ip)
+    last_octet: int | None = Field(None, D.data.last_octet)
 
 
 class InstanceComponentView(SchemaBase):
@@ -22,7 +21,7 @@ class InstanceComponentView(SchemaBase):
 
 
 class InstanceComponentDataCreate(SchemaBase):
-    mgmt_ip: int = Field(None, D.data.mgmt_ip)
+    last_octet: int = Field(None, D.data.last_octet)
 
 
 class InstanceComponentCreate(SchemaBase):
