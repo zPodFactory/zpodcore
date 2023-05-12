@@ -27,5 +27,5 @@ class InstanceComponentService(ServiceBase):
             instance_name=instance.name,
             component_uid=component_in.component_uid,
             extra_id=component_in.extra_id,
-            data=component_in.data,
+            data=component_in.data.dict(exclude_unset=True),
         )
