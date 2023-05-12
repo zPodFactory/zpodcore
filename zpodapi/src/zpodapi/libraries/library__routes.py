@@ -82,18 +82,16 @@ def delete(
 ):
     return library_service.delete(item=library)
 
+
 @router.put(
     "/{id}/update",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[GlobalDepends.OnlySuperAdmin]
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
-def library_update(
-        *,
-        library: LibraryAnnotations.GetLibrary,
-        library_service: LibraryAnnotations.LibraryService,
-        component_service: ComponentAnnotations.ComponentService,
+def sync(
+    *,
+    library: LibraryAnnotations.GetLibrary,
+    library_service: LibraryAnnotations.LibraryService,
 ):
-    db_components = component_service.crud.get_all()
-
-    return library_service.update(item_in=library,db_components=db_components)
+    return library_service.update(library=library)

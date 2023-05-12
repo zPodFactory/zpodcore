@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
-
+from enum import Enum
 from prefect import flow, get_run_logger, task
 from pydantic import BaseModel
 from sqlmodel import select
@@ -61,9 +61,10 @@ def get_component_by_uid(uid: str) -> M.Component:
         ).first()
 
 
-def update_db(uid: str, status: str, active: bool = False):
+def update_db(uid: str, download_status: str, active_state: Enum = CS.INACTIVE):
     component = get_component_by_uid(uid)
-    component.status = status
+    component.download_status = download_status
+    component.status = active_state
     with database.get_session_ctx() as session:
         session.add(component)
         session.commit()
@@ -260,7 +261,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         update_db(component.component_uid, CS.DOWNLOAD_INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE, active=True)
+    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE, CS.ACTIVE)
     return True
 
 
@@ -338,12 +339,13 @@ def update_download_progress(component):
     )
     return success
 
+
 @task(task_run_name="{component.component_uid}-dir-clean-up")
 def clean_up_existing_files(component: Component):
     logger = get_run_logger()
     logger.info(f"Cleaning up existing files for {component.component_uid}")
     dst_dir = (
-            Path(PRODUCTS_PATH) / component.component_name / component.component_version
+        Path(PRODUCTS_PATH) / component.component_name / component.component_version
     )
     if dst_dir.exists():
         logger.info(f"Removing {dst_dir}")

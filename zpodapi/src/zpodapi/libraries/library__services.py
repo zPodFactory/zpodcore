@@ -31,12 +31,9 @@ class LibraryService(ServiceBase):
                 library_name=item_in.name,
                 filename=filename,
                 jsonfile=component_filename,
-                enabled=False,
-                status="",
-                component_uid=(
-                    f"{component['component_name']}-"
-                    f"{component['component_version']}"
-                ),
+                status=CS.INACTIVE,
+                download_status=CS.NOT_STARTED,
+                component_uid=get_component_uid(component),
                 component_name=component["component_name"],
                 component_version=component["component_version"],
                 component_description=component["component_description"],
@@ -66,67 +63,74 @@ class LibraryService(ServiceBase):
         zpod_delete_library(library=item)
         return None
 
-    def update(self, *, item_in: LibraryCreate, db_components: M.Component):
-        library = self.crud.get(id=item_in.id)
+    def update(self, *, library: M.Library):
+        db_components = self.crud.get_all(M.Component)
+        zpod_update_library(library=library)
 
-        zpod_update_library(library=item_in)
+        git_component_filename_list = zpod_fetch_library_components_filename(library)
+        git_components = [
+            get_component(comp_file) for comp_file in git_component_filename_list
+        ]
+        git_component_uids = [get_component_uid(comp) for comp in git_components]
 
-        component_filename_list = zpod_fetch_library_components_filename(library)
-
-        updated_components = [get_component(comp_file) for comp_file in component_filename_list]
-        component_uids = [get_component_uid(comp) for comp in updated_components]
-        removed_components = [comp for comp in db_components if comp.component_uid not in component_uids]
-
-        for item in updated_components:
+        # Resolving  differences between git_components and db/downloaded components
+        for item in git_components:
             component_uid = get_component_uid(item)
-            component_filename = get_component_jsonfile(item["component_version"],component_filename_list)
+            component_filename = get_component_jsonfile(
+                item["component_version"], git_component_filename_list
+            )
             if item["component_name"] == "zpod-engine":
                 continue
-            db_component = check_for_component(component_uid, db_components)
-            if db_component and db_component.active is True:
+
+            component = check_for_component(component_uid, db_components)
+
+            # update component
+            if component:
                 updated_component = initialize_component(
                     component_filename=component_filename,
-                    component=item,
+                    git_component=item,
                     library_name=library.name,
-                    is_enabled=db_component.enabled,
-                    is_active=db_component.active,
-                    status=db_component.status,
+                    status=component.status,
                 )
-                result = self.session.query(M.Component).filter(M.Component.component_uid == component_uid).first()
+
                 for key, value in updated_component.items():
-                    setattr(result, key, value)
-                self.session.add(result)
+                    setattr(component, key, value)
+                self.session.add(component)
                 self.session.commit()
 
-                # add download the component
-                zpod_engine = ZpodEngineClient()
-                zpod_engine.create_flow_run_by_name(
-                    flow_name="component_download",
-                    deployment_name="default",
-                    uid=result.component_uid,
-                )
-                return library
+                # Download files if component is active
+                if component.status == CS.ACTIVE:
+                    zpod_engine = ZpodEngineClient()
+                    zpod_engine.create_flow_run_by_name(
+                        flow_name="component_download",
+                        deployment_name="default",
+                        uid=component.component_uid,
+                    )
+                continue
 
-            if db_component is None:
+            # create new component if it does not exist in db
+            if component is None:
                 new_component = initialize_component(
                     component_filename=component_filename,
-                    component=item,
+                    git_component=item,
                     library_name=library.name,
-                    is_enabled=False,
-                    is_active=False,
-                    status=""
+                    status=CS.INACTIVE,
+                    download_status=CS.NOT_STARTED,
                 )
                 c = M.Component(**new_component)
                 self.session.add(c)
                 self.session.commit()
-                return library
+                continue
 
+        # Marking deleted components in DB
+        removed_components = [
+            comp
+            for comp in db_components
+            if comp.component_uid not in git_component_uids
+        ]
         for comp in removed_components:
-            result = self.session.query(M.Component).filter(M.Component.component_uid == comp.component_uid).first()
-            result.status = CS.DELETED
-            result.enabled = False
-            result.active = False
-            self.session.add(result)
+            comp.status = CS.DELETED
+            self.session.add(comp)
             self.session.commit()
         return library
 
@@ -142,8 +146,8 @@ def get_component_uid(component):
     return f"{component['component_name']}-{component['component_version']}"
 
 
-def check_for_component(component_id: str, results: list):
-    filtered_results = filter(lambda x: x.component_uid == component_id, results)
+def check_for_component(component_uid: str, results: list):
+    filtered_results = filter(lambda x: x.component_uid == component_uid, results)
     return next(iter(filtered_results), None)
 
 
@@ -170,25 +174,21 @@ def zpod_fetch_library_components_filename(library: M.Library):
 
 
 def initialize_component(
-        library_name: str,
-        component: dict,
-        component_filename: str,
-        is_enabled: bool = False,
-        is_active: bool = False,
-        status: str = ""):
-    filename = os.path.basename(component["component_download_file"])
+    library_name: str,
+    git_component: dict,
+    component_filename: str,
+    download_status: str = "",
+    status: str = "",
+):
+    filename = os.path.basename(git_component["component_download_file"])
     return dict(
         library_name=library_name,
         filename=filename,
         jsonfile=component_filename,
-        enabled=is_enabled,
         status=status,
-        component_uid=(
-            f"{component['component_name']}-"
-            f"{component['component_version']}"
-        ),
-        component_name=component["component_name"],
-        component_version=component["component_version"],
-        component_description=component["component_description"],
-        active=is_active,
+        download_status=download_status,
+        component_uid=get_component_uid(git_component),
+        component_name=git_component["component_name"],
+        component_version=git_component["component_version"],
+        component_description=git_component["component_description"],
     )

@@ -10,10 +10,12 @@ class ComponentService(ServiceBase):
     base_model: SQLModel = M.Component
 
     def enable(self, *, component: M.Component):
-        if component.status == CS.DOWNLOAD_COMPLETE and component.enabled is True:
+        if (
+            component.download_status == CS.DOWNLOAD_COMPLETE
+            and component.status == CS.ACTIVE
+        ):
             return component
-        component.enabled = True
-        component.status = CS.SCHEDULED
+        component.download_status = CS.SCHEDULED
         self.crud.save(component)
 
         zpod_engine = ZpodEngineClient()
@@ -25,5 +27,5 @@ class ComponentService(ServiceBase):
         return component
 
     def disable(self, *, component: M.Component):
-        component.enabled = False
+        component.status = CS.INACTIVE
         return self.crud.save(component)

@@ -9,6 +9,9 @@ class ComponentStatus(str, Enum):
     SCHEDULED = "SCHEDULED"
     DOWNLOAD_INCOMPLETE = "DOWNLOAD_INCOMPLETE"
     DELETED = "DELETED"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    NOT_STARTED = "NOT_STARTED"
 
 
 class InstanceComponentStatus(str, Enum):

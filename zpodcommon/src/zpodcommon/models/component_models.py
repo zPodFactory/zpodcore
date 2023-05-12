@@ -14,6 +14,5 @@ class Component(CommonDatesMixin, SQLModel, table=True):
     library_name: str = Field(default=None, foreign_key="libraries.name")
     filename: str = Field(..., unique=False, nullable=False)
     jsonfile: str = Field(..., unique=True, index=True, nullable=False)
-    active: bool = Field(False, nullable=False)
-    enabled: bool = Field(False, nullable=False)
     status: str = Field(..., nullable=True)
+    download_status: str = Field(..., nullable=True)
