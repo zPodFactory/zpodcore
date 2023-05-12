@@ -65,6 +65,7 @@ class LibraryService(ServiceBase):
 
     def update(self, *, library: M.Library):
         db_components = self.crud.get_all(M.Component)
+
         zpod_update_library(library=library)
 
         git_component_filename_list = zpod_fetch_library_components_filename(library)
@@ -74,12 +75,11 @@ class LibraryService(ServiceBase):
         git_component_uids = [get_component_uid(comp) for comp in git_components]
 
         # Resolving  differences between git_components and db/downloaded components
-        for item in git_components:
-            component_uid = get_component_uid(item)
-            component_filename = get_component_jsonfile(
-                item["component_version"], git_component_filename_list
-            )
-            if item["component_name"] == "zpod-engine":
+        for comp_file in git_component_filename_list:
+            git_component = get_component(comp_file)
+            component_uid = get_component_uid(git_component)
+
+            if git_component["component_name"] == "zpod-engine":
                 continue
 
             component = check_for_component(component_uid, db_components)
@@ -87,10 +87,11 @@ class LibraryService(ServiceBase):
             # update component
             if component:
                 updated_component = initialize_component(
-                    component_filename=component_filename,
-                    git_component=item,
+                    component_filename=comp_file,
+                    git_component=git_component,
                     library_name=library.name,
                     status=component.status,
+                    download_status=component.download_status,
                 )
 
                 for key, value in updated_component.items():
@@ -111,8 +112,8 @@ class LibraryService(ServiceBase):
             # create new component if it does not exist in db
             if component is None:
                 new_component = initialize_component(
-                    component_filename=component_filename,
-                    git_component=item,
+                    component_filename=comp_file,
+                    git_component=git_component,
                     library_name=library.name,
                     status=CS.INACTIVE,
                     download_status=CS.NOT_STARTED,
