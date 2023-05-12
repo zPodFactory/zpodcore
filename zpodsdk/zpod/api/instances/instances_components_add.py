@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 import httpx
 
@@ -7,7 +7,6 @@ from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.instance_component_create import InstanceComponentCreate
-from ...models.instance_component_view import InstanceComponentView
 from ...types import Response
 
 
@@ -39,10 +38,9 @@ class InstancesComponentsAdd:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, InstanceComponentView]]:
+    ) -> Optional[Union[Any, HTTPValidationError]]:
         if response.status_code == HTTPStatus.CREATED:
-            response_201 = InstanceComponentView.from_dict(response.json())
-
+            response_201 = cast(Any, response.json())
             return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
             response_422 = HTTPValidationError.from_dict(response.json())
@@ -57,7 +55,7 @@ class InstancesComponentsAdd:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, InstanceComponentView]]:
+    ) -> Response[Union[Any, HTTPValidationError]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -70,7 +68,7 @@ class InstancesComponentsAdd:
         id: str,
         *,
         json_body: InstanceComponentCreate,
-    ) -> Response[Union[HTTPValidationError, InstanceComponentView]]:
+    ) -> Response[Union[Any, HTTPValidationError]]:
         """Instance Component Add
 
         Args:
@@ -82,7 +80,7 @@ class InstancesComponentsAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, InstanceComponentView]]
+            Response[Union[Any, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -102,7 +100,7 @@ class InstancesComponentsAdd:
         id: str,
         *,
         json_body: InstanceComponentCreate,
-    ) -> Optional[Union[HTTPValidationError, InstanceComponentView]]:
+    ) -> Optional[Union[Any, HTTPValidationError]]:
         """Instance Component Add
 
         Args:
@@ -114,7 +112,7 @@ class InstancesComponentsAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, InstanceComponentView]]
+            Response[Union[Any, HTTPValidationError]]
         """  # noqa e501
 
         return self.sync_detailed(
@@ -127,7 +125,7 @@ class InstancesComponentsAdd:
         id: str,
         *,
         json_body: InstanceComponentCreate,
-    ) -> Response[Union[HTTPValidationError, InstanceComponentView]]:
+    ) -> Response[Union[Any, HTTPValidationError]]:
         """Instance Component Add
 
         Args:
@@ -139,7 +137,7 @@ class InstancesComponentsAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, InstanceComponentView]]
+            Response[Union[Any, HTTPValidationError]]
         """  # noqa e501
 
         kwargs = self._get_kwargs(
@@ -157,7 +155,7 @@ class InstancesComponentsAdd:
         id: str,
         *,
         json_body: InstanceComponentCreate,
-    ) -> Optional[Union[HTTPValidationError, InstanceComponentView]]:
+    ) -> Optional[Union[Any, HTTPValidationError]]:
         """Instance Component Add
 
         Args:
@@ -169,7 +167,7 @@ class InstancesComponentsAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, InstanceComponentView]]
+            Response[Union[Any, HTTPValidationError]]
         """  # noqa e501
 
         return (
