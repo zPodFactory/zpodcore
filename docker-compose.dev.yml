@@ -50,7 +50,7 @@ services:
   # Prefect Server API
   zpodengineserver:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineserver
-    image: prefecthq/prefect:2.10.4-python3.11
+    image: prefecthq/prefect:2.10.6-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "server", "start" ]
@@ -71,19 +71,10 @@ services:
   # Prefect Agent
   zpodengineagent:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineagent
-    image: prefecthq/prefect:2.10.4-python3.11
+    image: prefecthq/prefect:2.10.6-python3.11
     depends_on:
       - zpodpostgres
-    entrypoint:
-      [
-        "prefect",
-        "agent",
-        "start",
-        "-q",
-        "default",
-        #"--limit",
-        #"1"
-      ]
+    entrypoint: [ "prefect", "agent", "start", "-q", "default" ]
     environment:
       - PREFECT_API_URL=http://zpodengineserver:4200/api
       # Keeping those variables for potential future tuning.
