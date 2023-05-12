@@ -4,7 +4,7 @@ import attr
 
 if TYPE_CHECKING:
     from ..models.component_view import ComponentView
-    from ..models.instance_component_view_data import InstanceComponentViewData
+    from ..models.instance_component_data_view import InstanceComponentDataView
 
 
 T = TypeVar("T", bound="InstanceComponentView")
@@ -15,11 +15,11 @@ class InstanceComponentView:
     """
     Attributes:
         component (ComponentView):
-        data (InstanceComponentViewData):  Example: {}.
+        data (InstanceComponentDataView):
     """
 
     component: "ComponentView"
-    data: "InstanceComponentViewData"
+    data: "InstanceComponentDataView"
 
     def to_dict(self) -> Dict[str, Any]:
         component = self.component.to_dict()
@@ -39,12 +39,12 @@ class InstanceComponentView:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         from ..models.component_view import ComponentView
-        from ..models.instance_component_view_data import InstanceComponentViewData
+        from ..models.instance_component_data_view import InstanceComponentDataView
 
         d = src_dict.copy()
         component = ComponentView.from_dict(d.pop("component"))
 
-        data = InstanceComponentViewData.from_dict(d.pop("data"))
+        data = InstanceComponentDataView.from_dict(d.pop("data"))
 
         instance_component_view = cls(
             component=component,

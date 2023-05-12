@@ -3,16 +3,16 @@ from typing import Any
 
 class IdType(str):
     fields = dict(id=int)
+    arg_mapper = {}
 
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v: str):
         if not isinstance(v, str):
             raise TypeError("string required")
-        v = v.lower()
         column, value = cls.parse(v)
         if column not in cls.fields:
             raise ValueError(f"Invalid Key: {column}")
@@ -28,12 +28,16 @@ class IdType(str):
         return cls(v)
 
     @staticmethod
-    def parse(value) -> tuple[str, str]:
-        return (value if "=" in value else f"id={value}").split("=")
+    def parse(text: str) -> tuple[str, str]:
+        return (text if "=" in text else f"id={text}").split("=")
 
-    @staticmethod
-    def args(value) -> dict[str, Any]:
-        col, val = IdType.parse(value)
+    @classmethod
+    def args(cls, text: str) -> dict[str, Any]:
+        col, val = cls.parse(text)
+        if col in cls.arg_mapper:
+            col = cls.arg_mapper[col]
+        if col != "id":
+            col = f"{col}_insensitive"
         return {col: val}
 
     def __repr__(self):
