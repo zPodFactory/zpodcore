@@ -21,9 +21,9 @@ def generate_table(libraries: list, action: str = None):
 
     table = Table(
         title=title,
+        title_style="bold",
         show_header=True,
         header_style="bold cyan",
-        title_style="bold green",
     )
     table.add_column("Name")
     table.add_column("Decription", style="dim")
