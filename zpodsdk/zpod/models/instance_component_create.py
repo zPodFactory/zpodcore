@@ -5,7 +5,7 @@ import attr
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.instance_component_create_data import InstanceComponentCreateData
+    from ..models.instance_component_data_create import InstanceComponentDataCreate
 
 
 T = TypeVar("T", bound="InstanceComponentCreate")
@@ -16,12 +16,12 @@ class InstanceComponentCreate:
     """
     Attributes:
         component_uid (str):  Example: vcda-4.4.1.
-        data (InstanceComponentCreateData):  Example: {}.
+        data (InstanceComponentDataCreate):
         extra_id (Union[Unset, str]):  Default: ''. Example: 11.
     """
 
     component_uid: str
-    data: "InstanceComponentCreateData"
+    data: "InstanceComponentDataCreate"
     extra_id: Union[Unset, str] = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -44,12 +44,12 @@ class InstanceComponentCreate:
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        from ..models.instance_component_create_data import InstanceComponentCreateData
+        from ..models.instance_component_data_create import InstanceComponentDataCreate
 
         d = src_dict.copy()
         component_uid = d.pop("component_uid")
 
-        data = InstanceComponentCreateData.from_dict(d.pop("data"))
+        data = InstanceComponentDataCreate.from_dict(d.pop("data"))
 
         extra_id = d.pop("extra_id", UNSET)
 

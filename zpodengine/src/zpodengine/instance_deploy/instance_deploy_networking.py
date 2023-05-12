@@ -121,7 +121,7 @@ class TopLevelNetworking:
                     for x in real["results"]
                     if x["entity_type"] == "RealizedLogicalSwitch"
                 )
-                if rls["state"] == "REALIZED" and rls["runtime_status"] == "SUCCESS":
+                if rls["state"] == "REALIZED":
                     print(f"Segment ({self.segment_name}) is ready for use")
                     break
                 print(

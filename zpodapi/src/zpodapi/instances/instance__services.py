@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlmodel import or_, select
 
 from zpodapi.lib.service_base import ServiceBase
@@ -14,24 +15,23 @@ class InstanceService(ServiceBase):
 
     def get_all(self):
         return self.get_instance_records(
-            user_id=None if self.is_superadmin else self.current_user.id,
-            notstatuses=[enums.InstanceStatus.DELETED.value],
+            where_user=True,
+            where=[M.Instance.status.not_in([enums.InstanceStatus.DELETED.value])],
         ).all()
 
-    def get(self, *, id=None, name=None):
-        user_id = None if self.is_superadmin else self.current_user.id
+    def get(self, *, id=None, name=None, name_insensitive=None):
+        where = []
         if id:
-            records = self.get_instance_records(
-                user_id=user_id,
-                instance_id=id,
-            )
-        if name:
-            records = self.get_instance_records(
-                user_id=user_id,
-                name=name,
-                notstatuses=[enums.InstanceStatus.DELETED.value],
-            )
-        return records.one_or_none()
+            where.append(M.Instance.id == id),
+        elif name or name_insensitive:
+            if name:
+                where.append(M.Instance.name == name)
+            else:
+                where.append(func.lower(M.Instance.name) == name_insensitive.lower())
+            where.append(M.Instance.status.not_in([enums.InstanceStatus.DELETED.value]))
+        else:
+            return None
+        return self.get_instance_records(where_user=True, where=where).one_or_none()
 
     def create(
         self,
@@ -81,12 +81,8 @@ class InstanceService(ServiceBase):
     def get_instance_records(
         self,
         select_fields=M.Instance,
-        name: str | None = None,
-        user_id: int | None = None,
-        instance_id: int | None = None,
-        permissions: list[str] | None = None,
-        statuses: list[str] | None = None,
-        notstatuses: list[str] | None = None,
+        where_user=True,
+        where=None,
         order_by=M.Instance.name,
     ):
         stmt = (
@@ -99,23 +95,15 @@ class InstanceService(ServiceBase):
             .outerjoin(M.PermissionGroup, full=True)
             .outerjoin(M.PermissionGroupUserLink, full=True)
         )
-        if user_id:
+        if where_user and not self.is_superadmin:
             stmt = stmt.where(
                 or_(
-                    M.InstancePermissionUserLink.user_id == user_id,
-                    M.PermissionGroupUserLink.user_id == user_id,
+                    M.InstancePermissionUserLink.user_id == self.current_user.id,
+                    M.PermissionGroupUserLink.user_id == self.current_user.id,
                 )
             )
-        if name:
-            stmt = stmt.where(M.Instance.name == name)
-        if instance_id:
-            stmt = stmt.where(M.Instance.id == instance_id)
-        if permissions:
-            stmt = stmt.where(M.InstancePermission.permission.in_(permissions))
-        if statuses:
-            stmt = stmt.where(M.Instance.status.in_(statuses))
-        if notstatuses:
-            stmt = stmt.where(M.Instance.status.not_in(notstatuses))
+        if where:
+            stmt = stmt.where(*where)
         if order_by:
             stmt = stmt.order_by(order_by)
         return self.session.exec(stmt)
@@ -123,8 +111,8 @@ class InstanceService(ServiceBase):
     def get_user_instance_permissions(self, user_id: int, instance_id: int) -> set[str]:
         permissions = self.get_instance_records(
             select_fields=M.InstancePermission.permission,
-            user_id=user_id,
-            instance_id=instance_id,
+            where_user=True,
+            where=[M.Instance.id == id],
             order_by=None,
         ).all()
         return set(permissions)
