@@ -19,13 +19,9 @@ class InstanceComponentService(ServiceBase):
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_component_add",
             deployment_name="default",
-            run_name=(
-                f"For {instance.name} add {component_in.component_uid}"
-                f"{component_in.extra_id}"
-            ),
+            run_name=(f"For {instance.name} add {component_in.component_uid}"),
             instance_id=instance.id,
             instance_name=instance.name,
             component_uid=component_in.component_uid,
-            extra_id=component_in.extra_id,
             data=component_in.data.dict(exclude_unset=True),
         )

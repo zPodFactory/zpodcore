@@ -19,7 +19,6 @@ def instance_profile_flow(
             instance_id=instance_id,
             instance_name=instance_name,
             component_uid="esxi-8.0u1",
-            extra_id=x,
             data=dict(last_octet=x),
             wait_for=[zbox],
         )
