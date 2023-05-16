@@ -8,7 +8,6 @@ class D:
     name = {"example": "default"}
     description = {"example": "Default zPodFactory library"}
     git_url = {"example": "https://github.com/zpodfactory/zpodlibrary"}
-    active = {"example": True}
     enabled = {"example": True}
     creation_date = {"example": datetime(2023, 1, 1)}
     last_modified_date = {"example": datetime(2023, 1, 1, 0, 1)}
@@ -33,4 +32,3 @@ class LibraryView(SchemaBase):
     enabled: bool = Field(..., D.enabled)
     creation_date: datetime = Field(..., D.creation_date)
     last_modified_date: datetime | None = Field(None, D.last_modified_date)
-

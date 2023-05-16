@@ -23,7 +23,7 @@ def generate_table(components: list, component_uid: str = None, action: str = No
     for component in components:
         table.add_row(
             f"[green3]{component.component_uid}[/green3]",
-            f"[magenta]{component.component_name}[/magenta]",
+            f"[purple]{component.component_name}[/purple]",
             component.component_version,
             f"[bright_yellow]{component.library_name}[/bright_yellow]",
             f"[green4]{component.component_description}[/green4]",

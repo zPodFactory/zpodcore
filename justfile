@@ -16,6 +16,10 @@ alembic *args:
 alembic-upgrade rev="head":
   docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic upgrade {{rev}}"
 
+#Merge revisions
+alembic-merge *args:
+  docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic merge {{args}}"
+
 # Downgrade database schema -1
 alembic-downgrade rev="-1":
   docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic downgrade {{rev}}"
@@ -52,6 +56,9 @@ zpodapi-pytest *args:
 # Start Docker Environment
 zpodcore-start $COLUMNS=rich_cols:
   docker compose up
+
+zpodcore-start-background $COLUMNS=rich_cols:
+  docker compose up -d
 
 # Stop Docker Environment
 zpodcore-stop:

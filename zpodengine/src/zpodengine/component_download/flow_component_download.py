@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 
 from zpodcommon import models as M
+from zpodcommon.enums import ComponentDownloadStatus as DS
 from zpodcommon.enums import ComponentStatus as CS
 from zpodengine import settings
 from zpodengine.lib import database
@@ -170,11 +171,11 @@ def download_component(component: Component) -> int:
             return 0
     except RuntimeError as e:
         if e.args[0] == "AuthenticationError":
-            update_db(component.component_uid, CS.FAILED_AUTHENTICATION)
+            update_db(component.component_uid, DS.FAILED_AUTHENTICATION)
             logger.error("The provided credentials are not correct.")
             raise e
         if e.args[0] == "EntitlementError":
-            update_db(component.component_uid, CS.NOT_ENTITLED)
+            update_db(component.component_uid, DS.NOT_ENTITLED)
             logger.error("You are not entitled to download this sub-product")
             raise e
     except Exception as e:
@@ -249,7 +250,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
 
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
-            update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
+            update_db(component.component_uid, DS.DOWNLOAD_COMPLETE)
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
@@ -258,10 +259,10 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum = compute_checksum(component, filename)
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
-        update_db(component.component_uid, CS.DOWNLOAD_INCOMPLETE)
+        update_db(component.component_uid, DS.DOWNLOAD_INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE, CS.ACTIVE)
+    update_db(component.component_uid, DS.DOWNLOAD_COMPLETE, CS.ACTIVE)
     return True
 
 
@@ -313,10 +314,10 @@ def update_download_progress(component):
 
         current_state = get_component_by_uid(component.component_uid).status
         if current_state in (
-            CS.FAILED_AUTHENTICATION,
-            CS.FAILED_DOWNLOAD,
-            CS.NOT_ENTITLED,
-            CS.DOWNLOAD_COMPLETE,
+            DS.FAILED_AUTHENTICATION,
+            DS.FAILED_DOWNLOAD,
+            DS.NOT_ENTITLED,
+            DS.DOWNLOAD_COMPLETE,
         ):
             logger.error(
                 f"Cannot track {component.component_uid} - state {current_state}"
