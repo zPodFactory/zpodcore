@@ -2,13 +2,17 @@ from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
+from zpodengine.instance_component_add.instance_component_add_utils import (
+    handle_instance_component_add_failure,
+)
 from zpodengine.lib import database
 
 
 @task
-def instance_component_add_post_scripts(keys: dict[str, str | int | None]):
+@handle_instance_component_add_failure
+def instance_component_add_post_scripts(*, instance_component_id: int):
     with database.get_session_ctx() as session:
-        instance_component = session.get(M.InstanceComponent, keys)
+        instance_component = session.get(M.InstanceComponent, instance_component_id)
         custom_postscripts = instance_component.data.get("postscripts", [])
         print(f"Run Postscripts: {custom_postscripts}")
 

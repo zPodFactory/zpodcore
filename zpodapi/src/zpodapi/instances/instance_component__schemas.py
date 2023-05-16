@@ -5,7 +5,6 @@ from zpodapi.lib.schema_base import Field, SchemaBase
 class D:
     id = {"example": 1}
     component_uid = {"example": "vcda-4.4.1"}
-    extra_id = {"example": "11"}
 
     class data:
         last_octet = {"example": 11}
@@ -26,5 +25,4 @@ class InstanceComponentDataCreate(SchemaBase):
 
 class InstanceComponentCreate(SchemaBase):
     component_uid: str = Field(..., D.component_uid)
-    extra_id: str = Field("", D.extra_id)
     data: InstanceComponentDataCreate
