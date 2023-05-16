@@ -11,7 +11,7 @@ class ComponentService(ServiceBase):
 
     def enable(self, *, component: M.Component):
         if (
-            component.download_status == ComponentDownloadStatus.DOWNLOAD_COMPLETE
+            component.download_status == ComponentDownloadStatus.COMPLETE
             and component.status == ComponentStatus.ACTIVE
         ):
             return component

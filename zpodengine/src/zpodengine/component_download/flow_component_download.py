@@ -13,8 +13,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 
 from zpodcommon import models as M
-from zpodcommon.enums import ComponentDownloadStatus as DS
-from zpodcommon.enums import ComponentStatus as CS
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus 
 from zpodengine import settings
 from zpodengine.lib import database
 
@@ -62,7 +61,7 @@ def get_component_by_uid(uid: str) -> M.Component:
         ).first()
 
 
-def update_db(uid: str, download_status: str, active_state: Enum = CS.INACTIVE):
+def update_db(uid: str, download_status: str, active_state: Enum = ComponentStatus.INACTIVE):
     component = get_component_by_uid(uid)
     component.download_status = download_status
     component.status = active_state
@@ -171,11 +170,11 @@ def download_component(component: Component) -> int:
             return 0
     except RuntimeError as e:
         if e.args[0] == "AuthenticationError":
-            update_db(component.component_uid, DS.FAILED_AUTHENTICATION)
+            update_db(component.component_uid, ComponentDownloadStatus.FAILED_AUTHENTICATION)
             logger.error("The provided credentials are not correct.")
             raise e
         if e.args[0] == "EntitlementError":
-            update_db(component.component_uid, DS.NOT_ENTITLED)
+            update_db(component.component_uid, ComponentDownloadStatus.NOT_ENTITLED)
             logger.error("You are not entitled to download this sub-product")
             raise e
     except Exception as e:
@@ -250,7 +249,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
 
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
-            update_db(component.component_uid, DS.DOWNLOAD_COMPLETE)
+            update_db(component.component_uid, ComponentDownloadStatus.COMPLETE)
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
@@ -259,10 +258,10 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum = compute_checksum(component, filename)
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
-        update_db(component.component_uid, DS.DOWNLOAD_INCOMPLETE)
+        update_db(component.component_uid, ComponentDownloadStatus.INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component.component_uid, DS.DOWNLOAD_COMPLETE, CS.ACTIVE)
+    update_db(component.component_uid, ComponentDownloadStatus.COMPLETE, ComponentStatus.ACTIVE)
     return True
 
 
@@ -314,10 +313,10 @@ def update_download_progress(component):
 
         current_state = get_component_by_uid(component.component_uid).status
         if current_state in (
-            DS.FAILED_AUTHENTICATION,
-            DS.FAILED_DOWNLOAD,
-            DS.NOT_ENTITLED,
-            DS.DOWNLOAD_COMPLETE,
+            ComponentDownloadStatus.FAILED_AUTHENTICATION,
+            ComponentDownloadStatus.FAILED,
+            ComponentDownloadStatus.NOT_ENTITLED,
+            ComponentDownloadStatus.COMPLETE,
         ):
             logger.error(
                 f"Cannot track {component.component_uid} - state {current_state}"
@@ -403,6 +402,7 @@ def flow_component_download(uid: str):
     logger.info(f"Status: {result}")
 
     if not result:
+        update_db(component.component_uid, ComponentDownloadStatus.FAILED)
         raise ValueError(f"Unable to download {uid}")
 
     verify = verify_checksum(
