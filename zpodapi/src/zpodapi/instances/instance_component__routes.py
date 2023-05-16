@@ -14,6 +14,7 @@ router = APIRouter(
     "",
     summary="Instance Component Get All",
     response_model=list[InstanceComponentView],
+    response_model_exclude_unset=True,
 )
 def components_get_all(
     *,

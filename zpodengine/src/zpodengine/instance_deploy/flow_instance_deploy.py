@@ -16,6 +16,11 @@ from zpodengine.lib.options import task_options_setup
 
 
 def flow_failed(flow, flow_run, state):
+    from prefect.logging.loggers import flow_run_logger
+
+    logger = flow_run_logger(flow_run, flow)
+    logger.info("FAILED")
+
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, flow_run.parameters["instance_id"])
         instance.status = InstanceStatus.DEPLOY_FAILED

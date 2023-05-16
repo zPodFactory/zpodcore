@@ -1,9 +1,11 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+
+from zpodcommon.models.model_base import ModelBase
 
 from .mixins import CommonDatesMixin
 
 
-class Component(CommonDatesMixin, SQLModel, table=True):
+class Component(CommonDatesMixin, ModelBase, table=True):
     __tablename__ = "components"
 
     id: int | None = Field(default=None, primary_key=True, nullable=False)

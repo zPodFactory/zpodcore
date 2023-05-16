@@ -1,6 +1,5 @@
 import json
 import subprocess
-import time
 from pathlib import Path
 
 from jinja2 import Template
@@ -20,24 +19,34 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     c = instance_component.component
     i = instance_component.instance
 
+    # Fetch component IP address from instance
+    if "last_octet" in instance_component.data:
+        zpod_ipaddress = instance_component.data["last_octet"]
+    else:
+        zpod_ipaddress = get_mgmt_ip(i, c.component_name)
+
+    # Fetch component default gw from instance
+    zpod_gateway = get_mgmt_ip(i, "gw")
+
+    if "hostname" in instance_component.data:
+        zpod_hostname = instance_component.data["hostname"]
+    elif "last_octet" in instance_component.data:
+        zpod_hostname = f"{c.component_name}{instance_component.data['last_octet']}"
+    else:
+        zpod_hostname = c.component_name
+
     # Open Component JSON
     f = open(c.jsonfile)
 
     # Load govc deploy spec
     govc_spec = json.load(f)["component_deploy_govc_spec"]
 
-    # Fetch component IP address from instance
-    component_ipaddress = get_mgmt_ip(i, c.component_name)
-
-    # Fetch component default gw from instance
-    component_gateway = get_mgmt_ip(i, "gw")
-
     t = Template(json.dumps(govc_spec))
     govc_spec_render = t.render(
-        zpod_hostname=c.component_name,
-        zpod_ipaddress=component_ipaddress,
+        zpod_hostname=zpod_hostname,
+        zpod_ipaddress=zpod_ipaddress,
         zpod_netprefix=INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN,
-        zpod_gateway=component_gateway,
+        zpod_gateway=zpod_gateway,
         zpod_dns="10.96.42.11",  # TBD
         zpod_domain=i.domain,
         zpod_password=i.password,
@@ -48,7 +57,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     print("govc ovf property options generated file")
     print(govc_spec_render)
 
-    options_filename = f"/tmp/{i.name}-{c.component_uid}.json"
+    options_filename = f"/tmp/{i.name}-{c.component_uid}-{instance_component.id}.json"
     with open(options_filename, "w") as f:
         f.write(govc_spec_render)
 
@@ -58,14 +67,10 @@ def ovf_deployer(instance_component: M.InstanceComponent):
 
     url = f"https://{username}:{password}@{hostname}/sdk"
 
-    # This should be checked properly
-    print("Sleeping for portgroup ...")
-    time.sleep(5)
-
     cmd = (
         "govc import.ova"
         " -k"
-        f" -name={c.component_name}.{i.domain}"
+        f" -name={zpod_hostname}.{i.domain}"
         f" -u='{url}'"
         f" -pool=zPod-{i.name}"
         " -ds=NFS-01"
@@ -86,7 +91,8 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         )
         print(h)
         if h.returncode != 0:
-            return RuntimeError(message=f"govc error: {h.stderr}")
+            print(h.stderr)
+            raise RuntimeError(message=f"govc error: {h.stderr}")
 
     except subprocess.CalledProcessError as e:
         print(e.output)

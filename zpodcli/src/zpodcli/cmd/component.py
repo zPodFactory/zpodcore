@@ -12,7 +12,13 @@ console = Console()
 def generate_table(components: list, component_uid: str = None, action: str = None):
     title = f"{action} {component_uid}" if len(components) == 1 else "Component List"
 
-    table = Table(title=title, show_header=True, header_style="bold cyan")
+    table = Table(
+        title=title,
+        title_style="bold",
+        show_header=True,
+        header_style="bold cyan",
+    )
+
     table.add_column("UID")
     table.add_column("Name", style="dim")
     table.add_column("Version")

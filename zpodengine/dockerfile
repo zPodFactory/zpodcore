@@ -47,7 +47,7 @@ RUN python3 -m venv $POETRY_VENV \
     && . $POETRY_VENV/bin/activate \
     && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
     && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
-    && pip install --upgrade git+https://github.com/vmware/vsphere-automation-sdk-python@v8.0.0.1 \
+    && pip install --upgrade git+https://github.com/vmware/vsphere-automation-sdk-python@v8.0.1.0 \
     && poetry install --no-interaction --no-cache $(test "$INSTALL_DEV" != "true" && echo "--without dev")
 
 RUN echo "I'm building for $TARGETPLATFORM"

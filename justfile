@@ -57,6 +57,7 @@ zpodapi-pytest *args:
 zpodcore-start $COLUMNS=rich_cols:
   docker compose up
 
+# Start Docker Environment in background
 zpodcore-start-background $COLUMNS=rich_cols:
   docker compose up -d
 
