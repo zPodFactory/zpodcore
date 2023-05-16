@@ -79,7 +79,7 @@ def create_dnsmasq_config(
 ):
     print(f"Creating /etc/dnsmasq.d/{instance_name}.conf")
     with open(f"/etc/dnsmasq.d/{instance_name}.conf", "w") as f:
-        f.write(f"address=/{instance_domain}/{instance_dns_ip}\n")
+        f.write(f"server=/{instance_domain}/{instance_dns_ip}\n")
 
 
 #

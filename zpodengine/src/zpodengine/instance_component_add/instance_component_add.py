@@ -13,9 +13,6 @@ from zpodengine.instance_component_add.instance_component_add_pre_scripts import
 from zpodengine.instance_component_add.instance_component_add_prep import (
     instance_component_add_prep,
 )
-from zpodengine.instance_component_add.instance_component_add_utils import (
-    instance_component_add_failed,
-)
 from zpodengine.lib.options import task_options_setup
 
 
@@ -24,27 +21,17 @@ def instance_component_add(
     instance_id: int,
     instance_name: str,
     component_uid: str,
-    extra_id: str = "",
     data=None,
     wait_for=None,
 ):  # sourcery skip: remove-unnecessary-cast
-    keys = dict(
-        instance_id=instance_id,
-        component_uid=component_uid,
-        extra_id=str(extra_id),
-    )
     prefix = f"{instance_name} {component_uid}"
-    if extra_id:
-        prefix += f" ({extra_id})"
-    options = task_options_setup(
-        prefix=prefix,
-        on_failure=[instance_component_add_failed(keys)],
-    )
+    options = task_options_setup(prefix=prefix)
 
-    instance_component = instance_component_add_prep.with_options(
+    instance_component_id = instance_component_add_prep.with_options(
         **options(name="prep"),
     ).submit(
-        keys=keys,
+        instance_id=instance_id,
+        component_uid=component_uid,
         data=data or {},
         wait_for=wait_for,
     )
@@ -52,27 +39,27 @@ def instance_component_add(
     pre_scripts = instance_component_add_pre_scripts.with_options(
         **options(name="prescripts"),
     ).submit(
-        keys=keys,
-        wait_for=[instance_component],
+        instance_component_id=instance_component_id,
+        wait_for=[instance_component_id],
     )
 
-    package = instance_component_add_deploy.with_options(
-        **options(name='deploy'),
+    deploy = instance_component_add_deploy.with_options(
+        **options(name="deploy"),
     ).submit(
-        keys=keys,
+        instance_component_id=instance_component_id,
         wait_for=[pre_scripts],
     )
 
     post_scripts = instance_component_add_post_scripts.with_options(
         **options(name="postscripts"),
     ).submit(
-        keys=keys,
-        wait_for=[package],
+        instance_component_id=instance_component_id,
+        wait_for=[deploy],
     )
 
     return instance_component_add_finalize.with_options(
         **options(name="finalize"),
     ).submit(
-        keys=keys,
+        instance_component_id=instance_component_id,
         wait_for=[post_scripts],
     )

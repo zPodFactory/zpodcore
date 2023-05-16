@@ -18,8 +18,7 @@ def instance_profile_flow(
         instance_component_add(
             instance_id=instance_id,
             instance_name=instance_name,
-            component_uid="esxi-8.0U1",
-            extra_id=x,
+            component_uid="esxi-8.0u1",
             data=dict(last_octet=x),
             wait_for=[zbox],
         )
@@ -28,7 +27,7 @@ def instance_profile_flow(
     vcsa = instance_component_add(
         instance_id=instance_id,
         instance_name=instance_name,
-        component_uid="vcsa-8.0U1",
+        component_uid="vcsa-8.0u1",
         wait_for=[esxis],
     )
     return instance_component_add(
