@@ -11,28 +11,28 @@ T = TypeVar("T", bound="InstanceComponentDataCreate")
 class InstanceComponentDataCreate:
     """
     Attributes:
-        mgmt_ip (Union[Unset, int]):  Example: 11.
+        last_octet (Union[Unset, int]):  Example: 11.
     """
 
-    mgmt_ip: Union[Unset, int] = UNSET
+    last_octet: Union[Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        mgmt_ip = self.mgmt_ip
+        last_octet = self.last_octet
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
-        if mgmt_ip is not UNSET:
-            field_dict["mgmt_ip"] = mgmt_ip
+        if last_octet is not UNSET:
+            field_dict["last_octet"] = last_octet
 
         return field_dict
 
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        mgmt_ip = d.pop("mgmt_ip", UNSET)
+        last_octet = d.pop("last_octet", UNSET)
 
         instance_component_data_create = cls(
-            mgmt_ip=mgmt_ip,
+            last_octet=last_octet,
         )
 
         return instance_component_data_create
