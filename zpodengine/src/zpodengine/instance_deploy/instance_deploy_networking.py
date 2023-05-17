@@ -4,7 +4,7 @@ from datetime import datetime
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.network import get_mgmt_cidr
+from zpodcommon.lib.network import get_instance_mgmt_cidr
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine.lib import database
 
@@ -82,7 +82,9 @@ class TopLevelNetworking:
             json=dict(
                 id=self.segment_name,
                 connectivity_path=f"/infra/tier-1s/{self.t1_name}",
-                subnets=[dict(gateway_address=get_mgmt_cidr(self.instance, "gw"))],
+                subnets=[
+                    dict(gateway_address=get_instance_mgmt_cidr(self.instance, "gw"))
+                ],
                 transport_zone_path=transport_zone["path"],
                 vlan_ids=["0-4094"],
             ),
