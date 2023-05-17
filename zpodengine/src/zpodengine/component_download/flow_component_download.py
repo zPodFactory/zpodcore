@@ -7,7 +7,6 @@ import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
-from enum import Enum
 from prefect import flow, get_run_logger, task
 from pydantic import BaseModel
 from sqlmodel import select
@@ -61,10 +60,14 @@ def get_component_by_uid(uid: str) -> M.Component:
         ).first()
 
 
-def update_db(uid: str, download_status: str, active_state: Enum = ComponentStatus.INACTIVE):
+def update_db(
+        uid: str, 
+        download_status: str,
+        status: ComponentStatus = ComponentStatus.INACTIVE
+):
     component = get_component_by_uid(uid)
     component.download_status = download_status
-    component.status = active_state
+    component.status = status
     with database.get_session_ctx() as session:
         session.add(component)
         session.commit()
@@ -170,7 +173,10 @@ def download_component(component: Component) -> int:
             return 0
     except RuntimeError as e:
         if e.args[0] == "AuthenticationError":
-            update_db(component.component_uid, ComponentDownloadStatus.FAILED_AUTHENTICATION)
+            update_db(
+                component.component_uid,
+                ComponentDownloadStatus.FAILED_AUTHENTICATION
+            )
             logger.error("The provided credentials are not correct.")
             raise e
         if e.args[0] == "EntitlementError":
@@ -261,7 +267,11 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         update_db(component.component_uid, ComponentDownloadStatus.INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component.component_uid, ComponentDownloadStatus.COMPLETE, ComponentStatus.ACTIVE)
+    update_db(
+        component.component_uid, 
+        ComponentDownloadStatus.COMPLETE,
+        ComponentStatus.ACTIVE
+    )
     return True
 
 

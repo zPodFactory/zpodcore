@@ -6,8 +6,7 @@ from rich import print
 from sqlmodel import SQLModel, select
 
 from zpodapi.components.component__utils import get_component
-from zpodcommon.enums import ComponentStatus as CS
-from zpodcommon.enums import ComponentDownloadStatus as DS
+from zpodcommon.enums import ComponentStatus,ComponentDownloadStatus
 from zpodapi.lib.service_base import ServiceBase
 from zpodapi.lib.utils import list_json_files
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
@@ -27,12 +26,12 @@ class LibraryService(ServiceBase):
         components_filename = zpod_get_component_paths(library)
         for component_filename in components_filename:
             component = get_component(component_filename)
-            c = zpod_create_component_dict(
+            component_dict = zpod_create_component_dict(
                 library_name=item_in.name,
                 component_filename=component_filename,
                 git_component=component,
             )
-            self.session.add(M.Component(**c))
+            self.session.add(M.Component(**component_dict))
         self.session.commit()
         return library
 
@@ -78,15 +77,15 @@ class LibraryService(ServiceBase):
 
             # update existing component
             if component is not None:
-                modified_component = zpod_create_component_dict(
+                modified_component_dict = zpod_create_component_dict(
                     component_filename=component_file,
                     git_component=git_component,
                     library_name=library.name,
                 )
 
-                zpod_update_component(component, modified_component, self.session)
+                zpod_update_component(component, modified_component_dict, self.session)
 
-                if component.status == CS.ACTIVE:
+                if component.status == ComponentStatus.ACTIVE:
                     zpod_download_component(component.component_uid)
             else:
                 new_component = zpod_create_component_dict(
@@ -111,10 +110,7 @@ def zpod_get_component_uid(component):
 
 
 def zpod_find_component_by_uid(components: List[M.Component], uid: str) -> M.Component:
-    for comp in components:
-        if comp.component_uid == uid:
-            return comp
-    return None
+    return next((comp for comp in components if comp.component_uid == uid), None)
 
 
 def zpod_create_component(component, session):
@@ -132,7 +128,7 @@ def zpod_download_component(component_uid: str):
 
 
 def zpod_mark_component_deleted(component, session):
-    component.status = CS.DELETED
+    component.status = ComponentStatus.DELETED
     session.add(component)
 
 
@@ -153,9 +149,7 @@ def zpod_delete_library(library: M.Library):
 
 
 def zpod_get_component_paths(library: M.Library):
-    component_file_list = list_json_files(f"/library/{library.name}")
-    print(component_file_list)
-    return component_file_list
+    return list_json_files(f"/library/{library.name}")t
 
 
 def zpod_update_component(component, modified_component, session):
@@ -167,8 +161,8 @@ def zpod_create_component_dict(
     library_name: str,
     git_component: dict,
     component_filename: str,
-    download_status: str = DS.NOT_STARTED,
-    status: str = CS.INACTIVE,
+    download_status: str = ComponentDownloadStatus.NOT_STARTED,
+    status: str = ComponentStatus.INACTIVE,
 ):
     filename = os.path.basename(git_component["component_download_file"])
     return {
