@@ -1,17 +1,18 @@
 import os
 import shutil
-from pathlib import Path
+from typing import List
+
 import git
 from rich import print
 from sqlmodel import SQLModel, select
 
 from zpodapi.components.component__utils import get_component
-from zpodcommon.enums import ComponentStatus,ComponentDownloadStatus
 from zpodapi.lib.service_base import ServiceBase
 from zpodapi.lib.utils import list_json_files
-from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 from zpodcommon import models as M
-from typing import List
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
+from zpodcommon.lib.zpodengine_client import ZpodEngineClient
+
 from .library__schemas import LibraryCreate
 
 
@@ -25,11 +26,11 @@ class LibraryService(ServiceBase):
         zpod_create_library(library)
         components_filename = zpod_get_component_paths(library)
         for component_filename in components_filename:
-            component = get_component(component_filename)
+            git_component = get_component(component_filename)
             component_dict = zpod_create_component_dict(
                 library_name=item_in.name,
                 component_filename=component_filename,
-                git_component=component,
+                git_component=git_component,
             )
             self.session.add(M.Component(**component_dict))
         self.session.commit()
@@ -55,7 +56,7 @@ class LibraryService(ServiceBase):
         zpod_delete_library(library=item)
         return None
 
-    def update(self, *, library: M.Library):
+    def sync(self, *, library: M.Library):
         zpod_update_library(library=library)
 
         db_components = self.crud.get_all(M.Component)
@@ -113,9 +114,9 @@ def zpod_find_component_by_uid(components: List[M.Component], uid: str) -> M.Com
     return next((comp for comp in components if comp.component_uid == uid), None)
 
 
-def zpod_create_component(component, session):
-    c = M.Component(**component)
-    session.add(c)
+def zpod_create_component(comp, session):
+    component = M.Component(**comp)
+    session.add(component)
 
 
 def zpod_download_component(component_uid: str):
@@ -149,7 +150,7 @@ def zpod_delete_library(library: M.Library):
 
 
 def zpod_get_component_paths(library: M.Library):
-    return list_json_files(f"/library/{library.name}")t
+    return list_json_files(f"/library/{library.name}")
 
 
 def zpod_update_component(component, modified_component, session):

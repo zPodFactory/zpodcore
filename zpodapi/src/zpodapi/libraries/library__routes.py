@@ -93,4 +93,4 @@ def sync(
     library: LibraryAnnotations.GetLibrary,
     library_service: LibraryAnnotations.LibraryService,
 ):
-    return library_service.update(library=library)
+    return library_service.sync(library=library)
