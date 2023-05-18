@@ -24,7 +24,7 @@ def generate_table(components: list, component_uid: str = None, action: str = No
     table.add_column("Version")
     table.add_column("Library", style="dim")
     table.add_column("Description")
-    table.add_column("Status", style="dim"),
+    table.add_column("Status", style="dim")
     table.add_column("Download Status")
     for component in components:
         table.add_row(

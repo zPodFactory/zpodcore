@@ -67,12 +67,10 @@ class LibraryService(ServiceBase):
 
         # Resolving  differences between git_components and db/downloaded components
         for component_file in git_component_paths:
+            
             git_component = get_component(component_file)
             git_components.append(git_component)
             component_uid = zpod_get_component_uid(git_component)
-
-            if git_component["component_name"] == "zpod-engine":
-                continue
 
             component = zpod_find_component_by_uid(db_components, component_uid)
 
@@ -89,18 +87,18 @@ class LibraryService(ServiceBase):
                 if component.status == ComponentStatus.ACTIVE:
                     zpod_download_component(component.component_uid)
             else:
-                new_component = zpod_create_component_dict(
+                new_component_dict = zpod_create_component_dict(
                     component_filename=component_file,
                     git_component=git_component,
                     library_name=library.name,
                 )
-                zpod_create_component(new_component, self.session)
+                zpod_create_component(new_component_dict, self.session)
 
         # mark deleted components
         git_component_uids = [zpod_get_component_uid(comp) for comp in git_components]
-        for db_comp in db_components:
-            if db_comp.component_uid not in git_component_uids:
-                zpod_mark_component_deleted(db_comp, self.session)
+        for component in db_components:
+            if component.component_uid not in git_component_uids:
+                zpod_mark_component_deleted(component, self.session)
 
         self.session.commit()
         return library
@@ -114,8 +112,8 @@ def zpod_find_component_by_uid(components: List[M.Component], uid: str) -> M.Com
     return next((comp for comp in components if comp.component_uid == uid), None)
 
 
-def zpod_create_component(comp, session):
-    component = M.Component(**comp)
+def zpod_create_component(component_dict, session):
+    component = M.Component(**component_dict)
     session.add(component)
 
 
