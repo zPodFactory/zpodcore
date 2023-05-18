@@ -11,15 +11,9 @@ from zpodcommon import models as M
 #
 # Defaults
 #
-
-
 INSTANCE_PUBLIC_NETWORK_PREFIXLEN = 24
 INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
-MGMT_LAST_OCTETS = dict(
-    gw=1,
-    zbox=2,
-    vyos=0,  # vyos(0) will get the subnet's last ip
-)
+
 
 #
 # Main Network that is validated for route advertisement.
@@ -59,53 +53,48 @@ def get_instance_all_subnets(instance_subnet: IPv4Network):
     )
 
 
-def get_instance_component_mgmt_ip(instance_component: M.InstanceComponent):
-    """Get assigned ip from instance_component"""
-    if instance_component.data.get("last_octet"):
-        last_octet = instance_component.data["last_octet"]
-    elif (comp_name := instance_component.component.component_name) in MGMT_LAST_OCTETS:
-        last_octet = MGMT_LAST_OCTETS[comp_name]
-    return get_instance_mgmt_ip(
-        instance=instance_component.instance,
-        last_octet=last_octet,
+class MgmtIp:
+    MGMT_LAST_OCTETS = dict(
+        gw=1,
+        zbox=2,
+        vyos=0,  # vyos(0) will get the subnet's last ip
     )
 
+    def __init__(self, ipv4network: IPv4Network, last_octet: int):
+        self.ipv4network = ipv4network
+        self.ipv4address = list(ipv4network.hosts())[last_octet - 1]
 
-def get_instance_mgmt_ip(
-    instance: M.Instance,
-    component_name: str | None = None,
-    last_octet: int | None = None,
-):
-    """Get requested ip from instance"""
-    if last_octet is None:
-        last_octet = MGMT_LAST_OCTETS[component_name]
-    ipv4network = get_instance_mgmt_ipv4network(instance=instance)
-    return get_ip(ipv4network=ipv4network, last_octet=last_octet)
+    @classmethod
+    def instance_component(cls, instance_component: M.InstanceComponent):
+        """Load from instance_component"""
+        if instance_component.data.get("last_octet"):
+            last_octet = instance_component.data["last_octet"]
+        elif (
+            comp_name := instance_component.component.component_name
+        ) in cls.MGMT_LAST_OCTETS:
+            last_octet = cls.MGMT_LAST_OCTETS[comp_name]
+        return cls.instance(instance=instance_component.instance, last_octet=last_octet)
 
+    @classmethod
+    def instance(
+        cls,
+        instance: M.Instance,
+        component_name: str | None = None,
+        last_octet: int | None = None,
+    ):
+        """Load from instance"""
+        if last_octet is None:
+            last_octet = cls.MGMT_LAST_OCTETS[component_name]
+        ipv4network = IPv4Network(instance.networks[0].cidr)
+        return cls(ipv4network=ipv4network, last_octet=last_octet)
 
-def get_instance_mgmt_cidr(
-    instance: M.Instance,
-    component_name: str | None = None,
-    last_octet: int | None = None,
-):
-    """Get requested cidr from instance"""
-    ipv4network = get_instance_mgmt_ipv4network(instance=instance)
-    ip = get_instance_mgmt_ip(
-        instance=instance,
-        component_name=component_name,
-        last_octet=last_octet,
-    )
-    return f"{ip}/{ipv4network.prefixlen}"
+    @property
+    def ip(self):
+        return str(self.ipv4address)
 
-
-def get_instance_mgmt_ipv4network(instance: M.Instance):
-    """Get requested ipv4network from instance"""
-    return IPv4Network(instance.networks[0].cidr)
-
-
-def get_ip(ipv4network: IPv4Network, last_octet: int):
-    """Get requested ip from ipv4network"""
-    return str(list(ipv4network.hosts())[last_octet - 1])
+    @property
+    def cidr(self):
+        return f"{self.ip}/{self.ipv4network.prefixlen}"
 
 
 #
