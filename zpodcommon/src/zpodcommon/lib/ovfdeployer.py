@@ -5,11 +5,7 @@ from pathlib import Path
 from jinja2 import Template
 
 from zpodcommon import models as M
-from zpodcommon.lib.network import (
-    INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN,
-    get_instance_component_mgmt_ip,
-    get_instance_mgmt_ip,
-)
+from zpodcommon.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
 
 
 def get_json_from_file(filename: str):
@@ -22,9 +18,6 @@ def get_json_from_file(filename: str):
 def ovf_deployer(instance_component: M.InstanceComponent):
     c = instance_component.component
     i = instance_component.instance
-
-    # Fetch component default gw from instance
-    zpod_gateway = get_instance_mgmt_ip(i, "gw")
 
     if "hostname" in instance_component.data:
         zpod_hostname = instance_component.data["hostname"]
@@ -42,9 +35,9 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     t = Template(json.dumps(govc_spec))
     govc_spec_render = t.render(
         zpod_hostname=zpod_hostname,
-        zpod_ipaddress=get_instance_component_mgmt_ip(instance_component),
+        zpod_ipaddress=MgmtIp.instance_component(instance_component).ip,
         zpod_netprefix=INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN,
-        zpod_gateway=zpod_gateway,
+        zpod_gateway=MgmtIp.instance(i, "gw").ip,
         zpod_dns="10.96.42.11",  # TBD
         zpod_domain=i.domain,
         zpod_password=i.password,
