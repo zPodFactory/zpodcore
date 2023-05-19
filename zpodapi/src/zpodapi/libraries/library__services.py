@@ -23,11 +23,11 @@ class LibraryService(ServiceBase):
         library = self.crud.create(item_in=item_in)
 
         # TODO: git clone git_url, and create all the components
-        zpod_create_library(library)
-        components_filename = zpod_get_component_paths(library)
+        create_library(library)
+        components_filename = get_component_paths(library)
         for component_filename in components_filename:
             git_component = get_component(component_filename)
-            component_dict = zpod_create_component_dict(
+            component_dict = create_component_dict(
                 library_name=item_in.name,
                 component_filename=component_filename,
                 git_component=git_component,
@@ -53,71 +53,70 @@ class LibraryService(ServiceBase):
         self.crud.delete(item=item)
 
         # Delete Library from filesystem (not potential products download yet)
-        zpod_delete_library(library=item)
+        delete_library(library=item)
         return None
 
     def sync(self, *, library: M.Library):
-        zpod_update_library(library=library)
+        update_library(library=library)
 
         db_components = self.crud.get_all(M.Component)
 
-        git_component_paths = zpod_get_component_paths(library)
+        git_component_paths = get_component_paths(library)
 
         git_components = []
 
         # Resolving  differences between git_components and db/downloaded components
         for component_file in git_component_paths:
-            
             git_component = get_component(component_file)
             git_components.append(git_component)
-            component_uid = zpod_get_component_uid(git_component)
+            component_uid = get_component_uid(git_component)
 
-            component = zpod_find_component_by_uid(db_components, component_uid)
+            component = find_component_by_uid(db_components, component_uid)
 
             # update existing component
             if component is not None:
-                modified_component_dict = zpod_create_component_dict(
+                modified_component_dict = create_component_dict(
                     component_filename=component_file,
                     git_component=git_component,
                     library_name=library.name,
                 )
 
-                zpod_update_component(component, modified_component_dict, self.session)
+                update_component(component, modified_component_dict, self.session)
 
                 if component.status == ComponentStatus.ACTIVE:
-                    zpod_download_component(component.component_uid)
+                    download_component(component.component_uid)
             else:
-                new_component_dict = zpod_create_component_dict(
+                new_component_dict = create_component_dict(
                     component_filename=component_file,
                     git_component=git_component,
                     library_name=library.name,
                 )
-                zpod_create_component(new_component_dict, self.session)
+                create_component(new_component_dict, self.session)
 
         # mark deleted components
-        git_component_uids = [zpod_get_component_uid(comp) for comp in git_components]
+        git_component_uids = [get_component_uid(comp) for comp in git_components]
         for component in db_components:
             if component.component_uid not in git_component_uids:
-                zpod_mark_component_deleted(component, self.session)
+                mark_component_deleted(component, self.session)
 
         self.session.commit()
         return library
 
 
-def zpod_get_component_uid(component):
+def get_component_uid(component):
     return f"{component['component_name']}-{component['component_version']}"
 
 
-def zpod_find_component_by_uid(components: List[M.Component], uid: str) -> M.Component:
+def find_component_by_uid(components: List[M.Component], uid: str) -> M.Component:
     return next((comp for comp in components if comp.component_uid == uid), None)
 
 
-def zpod_create_component(component_dict, session):
+def create_component(component_dict, session):
     component = M.Component(**component_dict)
     session.add(component)
 
 
-def zpod_download_component(component_uid: str):
+def download_component(component_uid: str):
     zpod_engine = ZpodEngineClient()
     zpod_engine.create_flow_run_by_name(
         flow_name="component_download",
@@ -126,37 +125,37 @@ def zpod_download_component(component_uid: str):
     )
 
 
-def zpod_mark_component_deleted(component, session):
+def mark_component_deleted(component, session):
     component.status = ComponentStatus.DELETED
     session.add(component)
 
 
-def zpod_create_library(library: M.Library):
+def create_library(library: M.Library):
     print(f"Creating Library: {library.name}...")
     git.Repo.clone_from(library.git_url, f"/library/{library.name}")
 
 
-def zpod_update_library(library: M.Library):
+def update_library(library: M.Library):
     print(f"Updating Library: {library.name}...")
     repo = git.Repo(f"/library/{library.name}")
     repo.remotes.origin.pull()
 
 
-def zpod_delete_library(library: M.Library):
+def delete_library(library: M.Library):
     print(f"Deleting Library: {library.name}...")
     shutil.rmtree(f"/library/{library.name}")
 
 
-def zpod_get_component_paths(library: M.Library):
+def get_component_paths(library: M.Library):
     return list_json_files(f"/library/{library.name}")
 
 
-def zpod_update_component(component, modified_component, session):
+def update_component(component, modified_component, session):
     for key, value in modified_component.items():
         setattr(component, key, value)
 
 
-def zpod_create_component_dict(
+def create_component_dict(
     library_name: str,
     git_component: dict,
     component_filename: str,
@@ -170,7 +169,7 @@ def zpod_create_component_dict(
         "jsonfile": component_filename,
         "status": status,
         "download_status": download_status,
-        "component_uid": zpod_get_component_uid(git_component),
+        "component_uid": get_component_uid(git_component),
         **{
             k: v
             for k, v in git_component.items()

@@ -2,7 +2,7 @@ from sqlmodel import SQLModel
 
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
-from zpodcommon.enums import ComponentStatus, ComponentDownloadStatus
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 

@@ -18,7 +18,7 @@ class LibrariesSync:
         self,
         id: str,
     ) -> Dict[str, Any]:
-        url = "{}/libraries/{id}/update".format(self.client.base_url, id=id)
+        url = "{}/libraries/{id}/sync".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()

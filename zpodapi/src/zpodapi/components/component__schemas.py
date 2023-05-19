@@ -1,5 +1,5 @@
-from zpodcommon.enums import ComponentStatus, ComponentDownloadStatus
 from zpodapi.lib.schema_base import Field, SchemaBase
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 
 
 class D:

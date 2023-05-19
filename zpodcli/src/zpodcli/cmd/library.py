@@ -117,6 +117,6 @@ def sync(
     z = zpod_client.ZpodClient()
     library = z.libraries_sync.sync(id=id)
     if library is None:
-        console.print(f"Library not found", style="red")
+        console.print("Library not found", style="red")
         return
     generate_table(libraries=[library], action="Sync")

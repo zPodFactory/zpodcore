@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+
 from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
@@ -83,7 +84,7 @@ def delete(
 
 
 @router.put(
-    "/{id}/update",
+    "/{id}/sync",
     response_model=LibraryView,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
