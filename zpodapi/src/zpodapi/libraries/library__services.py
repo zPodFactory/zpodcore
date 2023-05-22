@@ -72,16 +72,26 @@ class LibraryService(ServiceBase):
             component_uid = get_component_uid(git_component)
 
             component = find_component_by_uid(db_components, component_uid)
-            
-            component_dict = create_component_dict(
-                component_jsonfile=component_jsonfile,
-                git_component=git_component,
-                library_name=library.name,
-            )
-            # update existing component
-            if component is not None:
-                update_component(component, component_dict, self.session)
 
+            component_dict = (
+                create_component_dict(
+                    status=component.status,
+                    download_status=component.download_status,
+                    component_jsonfile=component_jsonfile,
+                    git_component=git_component,
+                    library_name=library.name,
+                )
+                if component
+                else create_component_dict(
+                    component_jsonfile=component_jsonfile,
+                    git_component=git_component,
+                    library_name=library.name,
+                )
+            )
+
+            # update existing component
+            if component:
+                update_component(component, component_dict, self.session)
                 if component.status == ComponentStatus.ACTIVE:
                     download_component(component.component_uid)
             else:
