@@ -8,7 +8,7 @@ from sqlmodel import SQLModel, select
 
 from zpodapi.components.component__utils import get_component
 from zpodapi.lib.service_base import ServiceBase
-from zpodapi.lib.utils import list_json_files
+from zpodapi.lib.utils import list_jsonfiles
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
@@ -24,12 +24,12 @@ class LibraryService(ServiceBase):
 
         # TODO: git clone git_url, and create all the components
         create_library(library)
-        component_jsonpaths = list_json_files(f"/library/{library.name}")
-        for component_jsonpath in component_jsonpaths:
-            git_component = get_component(component_jsonpath)
+        component_jsonfiles = list_jsonfiles(f"/library/{library.name}")
+        for component_jsonfile in component_jsonfiles:
+            git_component = get_component(component_jsonfile)
             component_dict = create_component_dict(
                 library_name=item_in.name,
-                component_jsonpath=component_jsonpath,
+                component_jsonfile=component_jsonfile,
                 git_component=git_component,
             )
             self.session.add(M.Component(**component_dict))
@@ -61,20 +61,20 @@ class LibraryService(ServiceBase):
 
         db_components = self.crud.get_all(M.Component)
 
-        git_component_paths = list_json_files(f"/library/{library.name}")
+        component_jsonfiles = list_jsonfiles(f"/library/{library.name}")
 
         git_components = []
 
         # Resolving  differences between git_components and db/downloaded components
-        for component_jsonpath in git_component_paths:
-            git_component = get_component(component_jsonpath)
+        for component_jsonfile in component_jsonfiles:
+            git_component = get_component(component_jsonfile)
             git_components.append(git_component)
             component_uid = get_component_uid(git_component)
 
             component = find_component_by_uid(db_components, component_uid)
             
             component_dict = create_component_dict(
-                component_jsonpath=component_jsonpath,
+                component_jsonfile=component_jsonfile,
                 git_component=git_component,
                 library_name=library.name,
             )
@@ -148,7 +148,7 @@ def update_component(component, modified_component, session):
 def create_component_dict(
     library_name: str,
     git_component: dict,
-    component_jsonpath: str,
+    component_jsonfile: str,
     download_status: str = ComponentDownloadStatus.NOT_STARTED,
     status: str = ComponentStatus.INACTIVE,
 ):
@@ -156,7 +156,7 @@ def create_component_dict(
     return {
         "library_name": library_name,
         "filename": filename,
-        "jsonfile": component_jsonpath,
+        "jsonfile": component_jsonfile,
         "status": status,
         "download_status": download_status,
         "component_uid": get_component_uid(git_component),
