@@ -2,17 +2,19 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import time
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
+
 from prefect import flow, get_run_logger, task
 from pydantic import BaseModel
 from sqlmodel import select
 
 from zpodcommon import models as M
-from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus 
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 from zpodengine import settings
 from zpodengine.lib import database
 
@@ -61,9 +63,7 @@ def get_component_by_uid(uid: str) -> M.Component:
 
 
 def update_db(
-        uid: str, 
-        download_status: str,
-        status: ComponentStatus = ComponentStatus.INACTIVE
+    uid: str, download_status: str, status: ComponentStatus = ComponentStatus.INACTIVE
 ):
     component = get_component_by_uid(uid)
     component.download_status = download_status
@@ -174,8 +174,7 @@ def download_component(component: Component) -> int:
     except RuntimeError as e:
         if e.args[0] == "AuthenticationError":
             update_db(
-                component.component_uid,
-                ComponentDownloadStatus.FAILED_AUTHENTICATION
+                component.component_uid, ComponentDownloadStatus.FAILED_AUTHENTICATION
             )
             logger.error("The provided credentials are not correct.")
             raise e
@@ -268,9 +267,9 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
     update_db(
-        component.component_uid, 
+        component.component_uid,
         ComponentDownloadStatus.COMPLETE,
-        ComponentStatus.ACTIVE
+        ComponentStatus.ACTIVE,
     )
     return True
 
@@ -359,7 +358,7 @@ def clean_up_existing_files(component: Component):
     )
     if dst_dir.exists():
         logger.info(f"Removing {dst_dir}")
-        dst_dir.rmdir()
+        shutil.rmtree(str(dst_dir), ignore_errors=True)
     logger.info(f"Finished cleaning up existing files for {component.component_uid}")
 
 
