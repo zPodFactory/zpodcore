@@ -24,12 +24,12 @@ class LibraryService(ServiceBase):
 
         # TODO: git clone git_url, and create all the components
         create_library(library)
-        components_filename = list_json_files(f"/library/{library.name}")
-        for component_filename in components_filename:
-            git_component = get_component(component_filename)
+        component_jsonpaths = list_json_files(f"/library/{library.name}")
+        for component_jsonpath in component_jsonpaths:
+            git_component = get_component(component_jsonpath)
             component_dict = create_component_dict(
                 library_name=item_in.name,
-                component_filename=component_filename,
+                component_jsonpath=component_jsonpath,
                 git_component=git_component,
             )
             self.session.add(M.Component(**component_dict))
@@ -66,15 +66,15 @@ class LibraryService(ServiceBase):
         git_components = []
 
         # Resolving  differences between git_components and db/downloaded components
-        for component_jsonfile in git_component_paths:
-            git_component = get_component(component_jsonfile)
+        for component_jsonpath in git_component_paths:
+            git_component = get_component(component_jsonpath)
             git_components.append(git_component)
             component_uid = get_component_uid(git_component)
 
             component = find_component_by_uid(db_components, component_uid)
             
             component_dict = create_component_dict(
-                component_filename=component_jsonfile,
+                component_jsonpath=component_jsonpath,
                 git_component=git_component,
                 library_name=library.name,
             )
