@@ -24,7 +24,7 @@ class LibraryService(ServiceBase):
 
         # TODO: git clone git_url, and create all the components
         create_library(library)
-        components_filename = get_component_paths(library)
+        components_filename = list_json_files(f"/library/{library.name}")
         for component_filename in components_filename:
             git_component = get_component(component_filename)
             component_dict = create_component_dict(
@@ -61,37 +61,31 @@ class LibraryService(ServiceBase):
 
         db_components = self.crud.get_all(M.Component)
 
-        git_component_paths = get_component_paths(library)
+        git_component_paths = list_json_files(f"/library/{library.name}")
 
         git_components = []
 
         # Resolving  differences between git_components and db/downloaded components
-        for component_file in git_component_paths:
-            git_component = get_component(component_file)
+        for component_jsonfile in git_component_paths:
+            git_component = get_component(component_jsonfile)
             git_components.append(git_component)
             component_uid = get_component_uid(git_component)
 
             component = find_component_by_uid(db_components, component_uid)
-
+            
+            component_dict = create_component_dict(
+                component_filename=component_jsonfile,
+                git_component=git_component,
+                library_name=library.name,
+            )
             # update existing component
             if component is not None:
-                modified_component_dict = create_component_dict(
-                    component_filename=component_file,
-                    git_component=git_component,
-                    library_name=library.name,
-                )
-
-                update_component(component, modified_component_dict, self.session)
+                update_component(component, component_dict, self.session)
 
                 if component.status == ComponentStatus.ACTIVE:
                     download_component(component.component_uid)
             else:
-                new_component_dict = create_component_dict(
-                    component_filename=component_file,
-                    git_component=git_component,
-                    library_name=library.name,
-                )
-                create_component(new_component_dict, self.session)
+                create_component(component_dict, self.session)
 
         # mark deleted components
         git_component_uids = [get_component_uid(comp) for comp in git_components]
@@ -146,10 +140,6 @@ def delete_library(library: M.Library):
     shutil.rmtree(f"/library/{library.name}")
 
 
-def get_component_paths(library: M.Library):
-    return list_json_files(f"/library/{library.name}")
-
-
 def update_component(component, modified_component, session):
     for key, value in modified_component.items():
         setattr(component, key, value)
@@ -158,7 +148,7 @@ def update_component(component, modified_component, session):
 def create_component_dict(
     library_name: str,
     git_component: dict,
-    component_filename: str,
+    component_jsonpath: str,
     download_status: str = ComponentDownloadStatus.NOT_STARTED,
     status: str = ComponentStatus.INACTIVE,
 ):
@@ -166,7 +156,7 @@ def create_component_dict(
     return {
         "library_name": library_name,
         "filename": filename,
-        "jsonfile": component_filename,
+        "jsonfile": component_jsonpath,
         "status": status,
         "download_status": download_status,
         "component_uid": get_component_uid(git_component),
