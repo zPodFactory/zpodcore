@@ -6,7 +6,6 @@ from sqlmodel import SQLModel, select
 
 from zpodapi.components.component__utils import get_component
 from zpodapi.lib.service_base import ServiceBase
-from zpodapi.lib.utils import list_json_files
 from zpodcommon import models as M
 
 from .setting__schemas import SettingCreate, SettingUpdate
