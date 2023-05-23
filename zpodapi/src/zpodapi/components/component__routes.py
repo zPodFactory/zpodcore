@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
-from zpodapi.lib.global_dependencies import GlobalDepends
 
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .component__dependencies import ComponentAnnotations

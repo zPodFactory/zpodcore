@@ -173,6 +173,13 @@ class ZpodClient:
 
     @property
     @cache
+    def libraries_sync(self):
+        from zpod.api.libraries import libraries_sync
+
+        return libraries_sync.LibrariesSync(self._client)
+
+    @property
+    @cache
     def libraries_update(self):
         from zpod.api.libraries import libraries_update
 

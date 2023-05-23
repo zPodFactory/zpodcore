@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
-from zpodapi.lib.global_dependencies import GlobalDepends
 
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .library__dependencies import LibraryAnnotations
@@ -81,3 +81,17 @@ def delete(
     library: LibraryAnnotations.GetLibrary,
 ):
     return library_service.delete(item=library)
+
+
+@router.put(
+    "/{id}/sync",
+    response_model=LibraryView,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
+def sync(
+    *,
+    library: LibraryAnnotations.GetLibrary,
+    library_service: LibraryAnnotations.LibraryService,
+):
+    return library_service.sync(library=library)

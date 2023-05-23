@@ -108,3 +108,13 @@ def get(name: str = typer.Option(..., "--name", "-n")):
         console.print(f"Library [magenta]{name}[/magenta] not found", style="red")
         return
     generate_table(libraries=[library], action="Get")
+
+
+@app.command(no_args_is_help=True)
+def sync(name: str = typer.Option(..., "--name", "-n")):
+    z = zpod_client.ZpodClient()
+    library = z.libraries_sync.sync(id=f"name={name}")
+    if library is None:
+        console.print("Library not found", style="red")
+        return
+    generate_table(libraries=[library], action="Sync")

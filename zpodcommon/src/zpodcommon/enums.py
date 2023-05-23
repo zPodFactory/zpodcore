@@ -2,12 +2,19 @@ from enum import Enum
 
 
 class ComponentStatus(str, Enum):
-    FAILED_DOWNLOAD = "FAILED_DOWNLOAD"
+    DELETED = "DELETED"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+
+
+class ComponentDownloadStatus(str, Enum):
+    FAILED = "FAILED"
     NOT_ENTITLED = "NOT_ENTITLED"
-    DOWNLOAD_COMPLETE = "DOWNLOAD_COMPLETE"
+    COMPLETE = "COMPLETE"
     FAILED_AUTHENTICATION = "FAILED_AUTHENTICATION"
     SCHEDULED = "SCHEDULED"
-    DOWNLOAD_INCOMPLETE = "DOWNLOAD_INCOMPLETE"
+    INCOMPLETE = "INCOMPLETE"
+    NOT_STARTED = "NOT_STARTED"
 
 
 class InstanceComponentStatus(str, Enum):

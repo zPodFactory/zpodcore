@@ -2,6 +2,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -13,7 +14,7 @@ from pydantic import BaseModel
 from sqlmodel import select
 
 from zpodcommon import models as M
-from zpodcommon.enums import ComponentStatus as CS
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 from zpodengine import settings
 from zpodengine.lib import database
 
@@ -61,8 +62,11 @@ def get_component_by_uid(uid: str) -> M.Component:
         ).first()
 
 
-def update_db(uid: str, status: str):
+def update_db(
+    uid: str, download_status: str, status: ComponentStatus = ComponentStatus.INACTIVE
+):
     component = get_component_by_uid(uid)
+    component.download_status = download_status
     component.status = status
     with database.get_session_ctx() as session:
         session.add(component)
@@ -169,11 +173,13 @@ def download_component(component: Component) -> int:
             return 0
     except RuntimeError as e:
         if e.args[0] == "AuthenticationError":
-            update_db(component.component_uid, CS.FAILED_AUTHENTICATION)
+            update_db(
+                component.component_uid, ComponentDownloadStatus.FAILED_AUTHENTICATION
+            )
             logger.error("The provided credentials are not correct.")
             raise e
         if e.args[0] == "EntitlementError":
-            update_db(component.component_uid, CS.NOT_ENTITLED)
+            update_db(component.component_uid, ComponentDownloadStatus.NOT_ENTITLED)
             logger.error("You are not entitled to download this sub-product")
             raise e
     except Exception as e:
@@ -248,7 +254,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
 
     if component.component_download_file_checksum is None:
         if component.component_dl_path.exists():
-            update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
+            update_db(component.component_uid, ComponentDownloadStatus.COMPLETE)
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
@@ -257,10 +263,14 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum = compute_checksum(component, filename)
     logger.info(f"Checksum: {checksum}")
     if checksum != expected_checksum:
-        update_db(component.component_uid, CS.DOWNLOAD_INCOMPLETE)
+        update_db(component.component_uid, ComponentDownloadStatus.INCOMPLETE)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
-    update_db(component.component_uid, CS.DOWNLOAD_COMPLETE)
+    update_db(
+        component.component_uid,
+        ComponentDownloadStatus.COMPLETE,
+        ComponentStatus.ACTIVE,
+    )
     return True
 
 
@@ -312,10 +322,10 @@ def update_download_progress(component):
 
         current_state = get_component_by_uid(component.component_uid).status
         if current_state in (
-            CS.FAILED_AUTHENTICATION,
-            CS.FAILED_DOWNLOAD,
-            CS.NOT_ENTITLED,
-            CS.DOWNLOAD_COMPLETE,
+            ComponentDownloadStatus.FAILED_AUTHENTICATION,
+            ComponentDownloadStatus.FAILED,
+            ComponentDownloadStatus.NOT_ENTITLED,
+            ComponentDownloadStatus.COMPLETE,
         ):
             logger.error(
                 f"Cannot track {component.component_uid} - state {current_state}"
@@ -337,6 +347,19 @@ def update_download_progress(component):
         f"Finished tracking download progress for component {component.component_uid}"
     )
     return success
+
+
+@task(task_run_name="{component.component_uid}-dir-clean-up")
+def clean_up_existing_files(component: Component):
+    logger = get_run_logger()
+    logger.info(f"Cleaning up existing files for {component.component_uid}")
+    dst_dir = (
+        Path(PRODUCTS_PATH) / component.component_name / component.component_version
+    )
+    if dst_dir.exists():
+        logger.info(f"Removing {dst_dir}")
+        shutil.rmtree(str(dst_dir), ignore_errors=True)
+    logger.info(f"Finished cleaning up existing files for {component.component_uid}")
 
 
 @task(task_run_name="{component.component_uid}-rename")
@@ -376,6 +399,9 @@ def flow_component_download(uid: str):
     ):
         logger.info(f"{uid} already exists. Exiting")
         return
+
+    clean_up_existing_files(component=component)
+
     logger.info(f"No {uid} found, will proceed to download the component")
     download_component.submit(component=component)
 
@@ -385,6 +411,7 @@ def flow_component_download(uid: str):
     logger.info(f"Status: {result}")
 
     if not result:
+        update_db(component.component_uid, ComponentDownloadStatus.FAILED)
         raise ValueError(f"Unable to download {uid}")
 
     verify = verify_checksum(
