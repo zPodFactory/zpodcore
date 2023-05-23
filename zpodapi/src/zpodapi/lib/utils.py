@@ -1,7 +1,7 @@
 import os
 
 
-def list_json_files(folder_path):
+def list_jsonfiles(folder_path):
     json_files = []
     for root, _, files in os.walk(folder_path):
         json_files.extend(

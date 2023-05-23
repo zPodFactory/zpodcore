@@ -1,8 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
 import attr
-
-from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.instance_component_data_create import InstanceComponentDataCreate
@@ -17,18 +15,14 @@ class InstanceComponentCreate:
     Attributes:
         component_uid (str):  Example: vcda-4.4.1.
         data (InstanceComponentDataCreate):
-        extra_id (Union[Unset, str]):  Default: ''. Example: 11.
     """
 
     component_uid: str
     data: "InstanceComponentDataCreate"
-    extra_id: Union[Unset, str] = ""
 
     def to_dict(self) -> Dict[str, Any]:
         component_uid = self.component_uid
         data = self.data.to_dict()
-
-        extra_id = self.extra_id
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -37,8 +31,6 @@ class InstanceComponentCreate:
                 "data": data,
             }
         )
-        if extra_id is not UNSET:
-            field_dict["extra_id"] = extra_id
 
         return field_dict
 
@@ -51,12 +43,9 @@ class InstanceComponentCreate:
 
         data = InstanceComponentDataCreate.from_dict(d.pop("data"))
 
-        extra_id = d.pop("extra_id", UNSET)
-
         instance_component_create = cls(
             component_uid=component_uid,
             data=data,
-            extra_id=extra_id,
         )
 
         return instance_component_create

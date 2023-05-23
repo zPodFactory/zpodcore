@@ -13,19 +13,19 @@ class ComponentViewFull:
         component_name (str):  Example: vcda.
         component_uid (str):  Example: vcda-4.4.1.
         component_version (str):  Example: 4.4.1.
-        enabled (bool):
+        download_status (str):  Example: SCHEDULED.
         filename (str):  Example: VMware-Cloud-Director-Availability-Provider-4.4.1.4448762-b80bae6591_OVF10.ova.
         id (str):  Example: 1.
         jsonfile (str):  Example: /library/default/vmware/vmware_cloud_director_availability/4.4.1.json.
         library_name (str):  Example: main.
-        status (str):  Example: SCHEDULED.
+        status (str):  Example: ACTIVE.
     """
 
     component_description: str
     component_name: str
     component_uid: str
     component_version: str
-    enabled: bool
+    download_status: str
     filename: str
     id: str
     jsonfile: str
@@ -37,7 +37,7 @@ class ComponentViewFull:
         component_name = self.component_name
         component_uid = self.component_uid
         component_version = self.component_version
-        enabled = self.enabled
+        download_status = self.download_status
         filename = self.filename
         id = self.id
         jsonfile = self.jsonfile
@@ -51,7 +51,7 @@ class ComponentViewFull:
                 "component_name": component_name,
                 "component_uid": component_uid,
                 "component_version": component_version,
-                "enabled": enabled,
+                "download_status": download_status,
                 "filename": filename,
                 "id": id,
                 "jsonfile": jsonfile,
@@ -73,7 +73,7 @@ class ComponentViewFull:
 
         component_version = d.pop("component_version")
 
-        enabled = d.pop("enabled")
+        download_status = d.pop("download_status")
 
         filename = d.pop("filename")
 
@@ -90,7 +90,7 @@ class ComponentViewFull:
             component_name=component_name,
             component_uid=component_uid,
             component_version=component_version,
-            enabled=enabled,
+            download_status=download_status,
             filename=filename,
             id=id,
             jsonfile=jsonfile,
