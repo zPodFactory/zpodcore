@@ -1,4 +1,5 @@
 from zpodapi.lib.schema_base import Field, SchemaBase
+from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 
 
 class D:
@@ -14,8 +15,8 @@ class D:
     jsonfile = {
         "example": "/library/default/vmware/vmware_cloud_director_availability/4.4.1.json"
     }
-    enabled = {"example": False}
-    status = {"example": "SCHEDULED"}
+    status = {"example": ComponentStatus.ACTIVE}
+    download_status = {"example": ComponentDownloadStatus.SCHEDULED}
 
 
 class ComponentView(SchemaBase):
@@ -30,5 +31,5 @@ class ComponentViewFull(ComponentView):
     library_name: str = Field(..., D.library_name)
     filename: str = Field(..., D.filename)
     jsonfile: str = Field(..., D.jsonfile)
-    enabled: bool = Field(..., D.enabled)
     status: str = Field(..., D.status)
+    download_status: str = Field(..., D.download_status)
