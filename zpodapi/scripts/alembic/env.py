@@ -1,7 +1,9 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from alembic.autogenerate import rewriter
+from alembic.operations import ops
+from sqlalchemy import Column, engine_from_config, pool
 from sqlmodel import SQLModel
 
 from zpodapi import settings
@@ -28,6 +30,34 @@ target_metadata = SQLModel.metadata
 # ... etc.
 
 
+writer = rewriter.Rewriter()
+
+
+@writer.rewrites(ops.CreateTableOp)
+def order_columns(context, revision, op):
+    special_names = {"id": -100, "creation_date": 1001, "last_modified_date": 1002}
+    cols_by_key = [
+        (
+            special_names.get(col.key, index) if isinstance(col, Column) else 2000,
+            col.copy(),
+        )
+        for index, col in enumerate(op.columns)
+    ]
+
+    columns = [col for idx, col in sorted(cols_by_key, key=lambda entry: entry[0])]
+    return ops.CreateTableOp(
+        op.table_name,
+        columns=columns,
+        schema=op.schema,
+        info=op.info,
+        comment=op.comment,
+        prefixes=op.prefixes,
+        _namespace_metadata=op._namespace_metadata,
+        _constraints_included=op._constraints_included,
+        **op.kw
+    )
+
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -46,6 +76,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        process_revision_directives=writer,
     )
 
     with context.begin_transaction():
@@ -71,6 +102,7 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
+            process_revision_directives=writer,
         )
 
         with context.begin_transaction():

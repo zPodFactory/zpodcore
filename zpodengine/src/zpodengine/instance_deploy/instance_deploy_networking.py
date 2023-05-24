@@ -4,7 +4,7 @@ from datetime import datetime
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.network import get_mgmt_cidr
+from zpodcommon.lib.network import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine.lib import database
 
@@ -12,11 +12,8 @@ SEGMENT_MAX_WAIT_FOR_REALIZED = 120
 SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
-@task(task_run_name="{instance_name}: configure top level networking")
-def instance_deploy_networking(
-    instance_id: int,
-    instance_name: str,
-):
+@task
+def instance_deploy_networking(instance_id: int):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
         print(
@@ -85,7 +82,9 @@ class TopLevelNetworking:
             json=dict(
                 id=self.segment_name,
                 connectivity_path=f"/infra/tier-1s/{self.t1_name}",
-                subnets=[dict(gateway_address=get_mgmt_cidr(self.instance, "gw"))],
+                subnets=[
+                    dict(gateway_address=MgmtIp.instance(self.instance, "gw").cidr)
+                ],
                 transport_zone_path=transport_zone["path"],
                 vlan_ids=["0-4094"],
             ),
@@ -111,26 +110,29 @@ class TopLevelNetworking:
         )
 
     def wait_for_segment_to_realize(self) -> None:
+        print("Wait for segment to realize")
         start = datetime.now()
         while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_REALIZED:
             real = self.nsx.get(
                 "/v1/infra/realized-state/realized-entities"
                 f"?intent_path=/infra/segments/{self.segment_name}"
             ).safejson()
-
-            rls = next(
-                x
-                for x in real["results"]
-                if x["entity_type"] == "RealizedLogicalSwitch"
-            )
-            if rls["state"] == "REALIZED" and rls["runtime_status"] == "SUCCESS":
-                print(f"Segment ({self.segment_name}) is ready for use")
-                break
-            print(
-                f"Segment ({self.segment_name}) is not ready. "
-                f"State:{rls['state']}, "
-                f"Runtime Status:{rls['runtime_status']}"
-            )
+            if real.get("results"):
+                rls = next(
+                    x
+                    for x in real["results"]
+                    if x["entity_type"] == "RealizedLogicalSwitch"
+                )
+                if rls["state"] == "REALIZED":
+                    print(f"Segment ({self.segment_name}) is ready for use")
+                    break
+                print(
+                    f"Segment ({self.segment_name}) is not ready. "
+                    f"State:{rls['state']}, "
+                    f"Runtime Status:{rls['runtime_status']}"
+                )
+            else:
+                print("Status not readable.  Trying again...")
             time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
         else:
             raise ValueError("Failed: Segment is not realized.")

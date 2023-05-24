@@ -8,9 +8,9 @@ class D:
     name = {"example": "default"}
     description = {"example": "Default zPodFactory library"}
     git_url = {"example": "https://github.com/zpodfactory/zpodlibrary"}
+    enabled = {"example": True}
     creation_date = {"example": datetime(2023, 1, 1)}
     last_modified_date = {"example": datetime(2023, 1, 1, 0, 1)}
-    enabled = {"example": True}
 
 
 class LibraryCreate(SchemaBase):
@@ -29,6 +29,6 @@ class LibraryView(SchemaBase):
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
     git_url: str = Field(..., D.git_url)
+    enabled: bool = Field(..., D.enabled)
     creation_date: datetime = Field(..., D.creation_date)
     last_modified_date: datetime | None = Field(None, D.last_modified_date)
-    enabled: bool = Field(..., D.enabled)

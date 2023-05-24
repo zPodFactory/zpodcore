@@ -16,6 +16,7 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[InstanceView],
+    response_model_exclude_unset=True,
 )
 def get_all(
     *,
@@ -27,6 +28,7 @@ def get_all(
 @router.get(
     "/{id}",
     response_model=InstanceView,
+    response_model_exclude_unset=True,
 )
 def get(
     *,
@@ -40,6 +42,7 @@ def get(
     "",
     response_model=InstanceView,
     status_code=status.HTTP_201_CREATED,
+    response_model_exclude_unset=True,
 )
 def create(
     *,
@@ -56,6 +59,7 @@ def create(
     "/{id}",
     response_model=InstanceView,
     status_code=status.HTTP_201_CREATED,
+    response_model_exclude_unset=True,
 )
 def update(
     *,

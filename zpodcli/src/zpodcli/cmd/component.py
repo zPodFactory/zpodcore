@@ -12,23 +12,29 @@ console = Console()
 def generate_table(components: list, component_uid: str = None, action: str = None):
     title = f"{action} {component_uid}" if len(components) == 1 else "Component List"
 
-    table = Table(title=title, show_header=True, header_style="bold cyan")
+    table = Table(
+        title=title,
+        title_style="bold",
+        show_header=True,
+        header_style="bold cyan",
+    )
+
     table.add_column("UID")
     table.add_column("Name", style="dim")
     table.add_column("Version")
     table.add_column("Library", style="dim")
     table.add_column("Description")
-    table.add_column("Enabled", style="dim")
-    table.add_column("Status")
+    table.add_column("Status", style="dim")
+    table.add_column("Download Status")
     for component in components:
         table.add_row(
-            f"[green]{component.component_uid}[/green]",
-            f"[magenta]{component.component_name}[/magenta]",
+            f"[green3]{component.component_uid}[/green3]",
+            f"[purple]{component.component_name}[/purple]",
             component.component_version,
-            f"[yellow]{component.library_name}[/yellow]",
-            f"[green]{component.component_description}[/green]",
-            f"[magenta]{component.enabled.__str__()}[/magenta]",
-            component.status,
+            f"[bright_yellow]{component.library_name}[/bright_yellow]",
+            f"[green4]{component.component_description}[/green4]",
+            f"[cyan1]{component.status}[/cyan1]",
+            f"[deep_pink2]{component.download_status}[/deep_pink2]",
         )
     console.print(table)
 

@@ -1,7 +1,9 @@
-from sqlmodel import JSON, Column, Field, SQLModel
+from sqlmodel import JSON, Column, Field
+
+from zpodcommon.models.model_base import ModelBase
 
 
-class Endpoint(SQLModel, table=True):
+class Endpoint(ModelBase, table=True):
     __tablename__ = "endpoints"
 
     id: int | None = Field(default=None, primary_key=True, nullable=False)

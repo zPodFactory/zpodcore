@@ -25,6 +25,7 @@ def list():
             "Last Connection",
             "Superadmin",
             title="User List",
+            title_style="bold",
             show_header=True,
             header_style="bold cyan",
         )

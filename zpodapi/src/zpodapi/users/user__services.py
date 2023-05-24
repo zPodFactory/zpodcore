@@ -19,7 +19,9 @@ class UserService(ServiceBase):
         *,
         id: int | None = None,
         username: str | None = None,
+        username_insensitive: str | None = None,
         email: EmailStr | None = None,
+        email_insensitive: EmailStr | None = None,
     ):  # sourcery skip: avoid-builtin-shadow
         if not self.is_superadmin:
             if id and int(id) != self.current_user.id:
@@ -28,7 +30,9 @@ class UserService(ServiceBase):
         return self.crud.get(
             id=id,
             username=username,
+            username_insensitive=username_insensitive,
             email=email,
+            email_insensitive=email_insensitive,
         )
 
     def update(self, *, item: M.User, item_in: UserUpdateAdmin | UserUpdate):

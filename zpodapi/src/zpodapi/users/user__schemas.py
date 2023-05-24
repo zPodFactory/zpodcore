@@ -1,8 +1,15 @@
 from datetime import datetime
 
-from pydantic import EmailStr
+from pydantic import EmailStr, constr, validate_email
 
 from zpodapi.lib.schema_base import Field, SchemaBase
+
+
+class EmailStrLower(EmailStr):
+    @classmethod
+    def validate(cls, value: EmailStr) -> EmailStr:
+        email = validate_email(value)[1]
+        return email.lower()
 
 
 class D:
@@ -17,8 +24,8 @@ class D:
 
 
 class UserCreate(SchemaBase):
-    username: str = Field(..., D.username)
-    email: EmailStr = Field(..., D.email)
+    username: constr(to_lower=True) = Field(..., D.username)
+    email: EmailStrLower = Field(..., D.email)
     description: str = Field("", D.description)
     ssh_key: str = Field("", D.ssh_key)
     superadmin: bool = Field(False, D.superadmin)

@@ -50,16 +50,16 @@ services:
   # Prefect Server API
   zpodengineserver:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineserver
-    image: prefecthq/prefect:2.10.4-python3.11
+    image: prefecthq/prefect:2.10.10-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "server", "start" ]
     environment:
-      - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
       # Keeping those variables for potential future tuning
       - PREFECT_API_DATABASE_TIMEOUT=30
       - PREFECT_API_DATABASE_CONNECTION_TIMEOUT=15
       - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODCORE_POSTGRES_PASSWORD}@zpodpostgres/prefect
+      - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
       - PREFECT_SERVER_API_HOST=0.0.0.0
       - TELEMETRY_ENABLED=false
     ports:
@@ -71,24 +71,15 @@ services:
   # Prefect Agent
   zpodengineagent:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineagent
-    image: prefecthq/prefect:2.10.4-python3.11
+    image: prefecthq/prefect:2.10.10-python3.11
     depends_on:
       - zpodpostgres
-    entrypoint:
-      [
-        "prefect",
-        "agent",
-        "start",
-        "-q",
-        "default",
-        #"--limit",
-        #"1"
-      ]
+    entrypoint: [ "prefect", "agent", "start", "-q", "default" ]
     environment:
-      - PREFECT_API_URL=http://zpodengineserver:4200/api
       # Keeping those variables for potential future tuning.
       - PREFECT_API_DATABASE_TIMEOUT=30
       - PREFECT_API_DATABASE_CONNECTION_TIMEOUT=15
+      - PREFECT_API_URL=http://zpodengineserver:4200/api
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -106,9 +97,10 @@ services:
       - zpodpostgres
     entrypoint: [ "/bin/bash" ]
     environment:
-      - PREFECT_API_URL=http://zpodengineserver:4200/api
-      - ZPODCORE_PATH=${PWD}
       - HISTFILE=/commandhistory/.zpodenginecli_bash_history
+      - PREFECT_API_URL=http://zpodengineserver:4200/api
+      - PREFECT_LOCAL_STORAGE_PATH=/results
+      - ZPODCORE_PATH=${PWD}
     env_file:
       - .env
     profiles: [ "cli" ]
@@ -117,9 +109,10 @@ services:
       - ./zpodengine/src/zpodengine:/zpodcore/src/zpodengine:cached
       - ./zpodengine/scripts:/zpodcore/scripts:cached
       - zpod_vol_history:/commandhistory
+      - ${ZPODCORE_DNSMASQ_PATH}:/etc/dnsmasq.d
       - ${ZPODCORE_LIBRARY_PATH}:/library
       - ${ZPODCORE_PRODUCTS_PATH}:/products
-      - ${ZPODCORE_DNSMASQ_PATH}:/etc/dnsmasq.d
+      - ${ZPODCORE_RESULTS_PATH}:/results
 
 volumes:
   zpod_vol_history: null

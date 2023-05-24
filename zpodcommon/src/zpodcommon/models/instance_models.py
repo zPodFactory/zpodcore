@@ -1,9 +1,10 @@
 from ipaddress import IPv4Network
 from typing import TYPE_CHECKING, Any, Dict, List
 
-from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+from sqlmodel import JSON, Column, Field, Relationship
 
 from zpodcommon import enums
+from zpodcommon.models.model_base import ModelBase
 
 from .mixins import CommonDatesMixin
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from .user_models import User
 
 
-class Instance(CommonDatesMixin, SQLModel, table=True):
+class Instance(CommonDatesMixin, ModelBase, table=True):
     __tablename__ = "instances"
 
     id: int | None = Field(
@@ -49,7 +50,7 @@ class Instance(CommonDatesMixin, SQLModel, table=True):
         foreign_key="endpoints.id",
     )
     status: str = Field(
-        default="ACTIVE",
+        default=...,
         nullable=False,
     )
 
@@ -80,24 +81,27 @@ class Instance(CommonDatesMixin, SQLModel, table=True):
     endpoint: "Endpoint" = Relationship()
 
 
-class InstanceComponent(SQLModel, table=True):
+class InstanceComponent(CommonDatesMixin, ModelBase, table=True):
     __tablename__ = "instance_components"
 
-    instance_id: int = Field(
+    id: int | None = Field(
+        default=None,
         primary_key=True,
+        nullable=False,
+    )
+    instance_id: int = Field(
         default=...,
         nullable=False,
         foreign_key="instances.id",
     )
-    component_uid: str = Field(
-        primary_key=True,
+    component_id: int = Field(
         default=...,
         nullable=False,
-        foreign_key="components.component_uid",
+        foreign_key="components.id",
     )
-    extra_id: str = Field(
-        primary_key=True,
-        default="",
+    status: str = Field(
+        default=...,
+        nullable=False,
     )
     data: Dict[Any, Any] | None = Field(
         default={},
@@ -109,7 +113,7 @@ class InstanceComponent(SQLModel, table=True):
     component: "Component" = Relationship()
 
 
-class InstanceFeature(SQLModel, table=True):
+class InstanceFeature(ModelBase, table=True):
     __tablename__ = "instance_features"
 
     id: int | None = Field(
@@ -131,7 +135,7 @@ class InstanceFeature(SQLModel, table=True):
     instance: "Instance" = Relationship(back_populates="features")
 
 
-class InstanceNetwork(SQLModel, table=True):
+class InstanceNetwork(ModelBase, table=True):
     __tablename__ = "instance_networks"
 
     id: int | None = Field(
@@ -152,7 +156,7 @@ class InstanceNetwork(SQLModel, table=True):
     instance: "Instance" = Relationship(back_populates="networks")
 
 
-class InstancePermission(SQLModel, table=True):
+class InstancePermission(ModelBase, table=True):
     __tablename__ = "instance_permissions"
 
     id: int | None = Field(
@@ -185,7 +189,7 @@ class InstancePermission(SQLModel, table=True):
     )
 
 
-class InstancePermissionUserLink(SQLModel, table=True):
+class InstancePermissionUserLink(ModelBase, table=True):
     __tablename__ = "instance_permission_user_link"
 
     instance_permission_id: int = Field(
@@ -202,7 +206,7 @@ class InstancePermissionUserLink(SQLModel, table=True):
     )
 
 
-class InstancePermissionGroupLink(SQLModel, table=True):
+class InstancePermissionGroupLink(ModelBase, table=True):
     __tablename__ = "instance_permission_group_link"
 
     instance_permission_id: int = Field(

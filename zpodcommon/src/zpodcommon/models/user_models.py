@@ -2,7 +2,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, List
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
+
+from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
     from .instance_models import InstancePermission
@@ -11,7 +13,7 @@ if TYPE_CHECKING:
 from .mixins import CommonDatesMixin
 
 
-class User(CommonDatesMixin, SQLModel, table=True):
+class User(CommonDatesMixin, ModelBase, table=True):
     __tablename__ = "users"
 
     id: int | None = Field(

@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING, List
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
+from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
     from .instance_models import InstancePermission
     from .user_models import User
 
 
-class PermissionGroup(SQLModel, table=True):
+class PermissionGroup(ModelBase, table=True):
     __tablename__ = "permission_groups"
 
     id: int | None = Field(
@@ -34,7 +35,7 @@ class PermissionGroup(SQLModel, table=True):
     )
 
 
-class PermissionGroupUserLink(SQLModel, table=True):
+class PermissionGroupUserLink(ModelBase, table=True):
     __tablename__ = "permission_group_user_link"
 
     permission_group_id: int = Field(

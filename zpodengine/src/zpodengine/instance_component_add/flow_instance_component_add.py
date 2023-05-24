@@ -5,17 +5,20 @@ from zpodengine.instance_component_add.instance_component_add import (
 )
 
 
-@flow(name="instance_component_add", log_prints=True)
+@flow(
+    name="instance_component_add",
+    flow_run_name="For {instance_name} add {component_uid}",
+    log_prints=True,
+)
 def flow_instance_component_add(
     instance_id: int,
+    instance_name: str,
     component_uid: str,
-    extra_id: str = "",
     data=None,
 ):
     instance_component_add(
         instance_id=instance_id,
         component_uid=component_uid,
-        extra_id=extra_id,
         data=data,
     )
 

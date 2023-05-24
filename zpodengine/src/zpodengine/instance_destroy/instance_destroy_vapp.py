@@ -5,8 +5,8 @@ from zpodcommon.lib.vmware import vCenter
 from zpodengine.lib import database
 
 
-@task(task_run_name="{instance_name}: delete vapp")
-def instance_destroy_vapp(instance_id: int, instance_name: str):
+@task
+def instance_destroy_vapp(instance_id: int):
     print("Delete Instance VAPP")
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)

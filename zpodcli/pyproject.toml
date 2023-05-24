@@ -13,7 +13,7 @@ zcli = "zpodcli.main:launch"
 [tool.poetry.dependencies]
 python = "^3.10"
 pydantic = "^1.10.4"
-typer = {extras = ["all"], version = "^0.7.0"}
+typer = {extras = ["all"], version = "^0.9.0"}
 zpodsdk = {path = "../zpodsdk", develop = true}
 
 [tool.poetry.group.dev.dependencies]

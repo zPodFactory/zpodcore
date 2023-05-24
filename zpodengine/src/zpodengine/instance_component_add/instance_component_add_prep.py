@@ -1,37 +1,34 @@
 from typing import Any
 
 from prefect import task
-from sqlmodel import SQLModel
+from sqlmodel import select
 
 from zpodcommon import models as M
+from zpodcommon.enums import ComponentStatus, InstanceComponentStatus
 from zpodengine.lib import database
 
 
-class ComponentView(SQLModel):
-    component_uid: str
-    component_name: str
-    component_version: str
-    library_name: str
-    filename: str
-    enabled: bool
-    status: str
-
-
-class InstanceComponentView(SQLModel):
-    instance_id: int
-    component: ComponentView
-    data: dict[Any, Any]
-    extra_id: str
-
-
-@task(task_run_name="{label}: prep")
+@task(persist_result=True)
 def instance_component_add_prep(
-    keys: dict[str, str | int | None],
+    instance_id: int,
+    component_uid: str,
     data: dict[str, Any],
-    label: str,
-):
+):  # sourcery skip: remove-unnecessary-cast
     with database.get_session_ctx() as session:
-        instance_component = M.InstanceComponent(**keys, data=data)
+        component = session.exec(
+            select(M.Component).where(
+                M.Component.component_uid == component_uid,
+                # Needs new status value
+                M.Component.status == ComponentStatus.DOWNLOAD_COMPLETE,
+            )
+        ).one()
+        instance_component = M.InstanceComponent(
+            instance_id=instance_id,
+            component_id=component.id,
+            data=data,
+            status=InstanceComponentStatus.BUILDING,
+        )
         session.add(instance_component)
         session.commit()
         session.refresh(instance_component)
+    return instance_component.id

@@ -30,6 +30,7 @@ with database.get_session_ctx() as session:
 
         #
         # Adding Default settings value for the whole zPodFactory Instance
+        # Settings Permissions = superadmin ONLY
         # Right now the topology of this VM is:
         # - eth0 public ip
         # - eth1 private ip
@@ -72,6 +73,13 @@ with database.get_session_ctx() as session:
             value="amazingpassword",
         )
         session.add(setting_cc_password)
+
+        settings_ssh_key = M.Setting(
+            name="zpodfactory_ssh_key",
+            description="Public SSH Key to be pushed on instance/components",
+            value="",
+        )
+        session.add(settings_ssh_key)
 
         # Commit all settings
         session.commit()

@@ -1,9 +1,11 @@
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field
+
+from zpodcommon.models.model_base import ModelBase
 
 from .mixins import CommonDatesMixin
 
 
-class Component(CommonDatesMixin, SQLModel, table=True):
+class Component(CommonDatesMixin, ModelBase, table=True):
     __tablename__ = "components"
 
     id: int | None = Field(default=None, primary_key=True, nullable=False)
@@ -14,5 +16,5 @@ class Component(CommonDatesMixin, SQLModel, table=True):
     library_name: str = Field(default=None, foreign_key="libraries.name")
     filename: str = Field(..., unique=False, nullable=False)
     jsonfile: str = Field(..., unique=True, index=True, nullable=False)
-    enabled: bool = Field(False, nullable=False)
     status: str = Field(..., nullable=True)
+    download_status: str = Field(..., nullable=True)
