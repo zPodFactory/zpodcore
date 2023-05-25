@@ -15,7 +15,6 @@ class VAPIClient:
         self.username = username
         self.password = password
         self.stub_config = self.get_stub_config()
-       
 
     def get_stub_config(self, vclient_only: bool = False):
         api_url = f"https://{self.hostname}/api"
@@ -53,4 +52,3 @@ class VAPIClient:
         )
         connector.set_security_context(security_context)
         return StubConfigurationFactory.new_std_configuration(connector)
-

@@ -1,7 +1,7 @@
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.network import create_dnsmasq_config, MgmtIp
+from zpodcommon.lib.network import MgmtIp, create_dnsmasq_config
 from zpodengine.lib import database
 
 

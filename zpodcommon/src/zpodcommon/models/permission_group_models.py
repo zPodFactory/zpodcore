@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, List
 
 from sqlmodel import Field, Relationship
+
 from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:

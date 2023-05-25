@@ -14,7 +14,7 @@ def show_error(obj):
         print(f"Error: {obj}")
         return
 
-    if 'detail' in obj_json:
+    if "detail" in obj_json:
         print(f"Error: {obj_json['detail']}")
     else:
         print(f"Error: {obj_json}")
