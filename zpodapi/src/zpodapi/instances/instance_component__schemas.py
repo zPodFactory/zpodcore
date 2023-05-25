@@ -8,10 +8,14 @@ class D:
 
     class data:
         last_octet = {"example": 11}
+        vcpu = {"example": 4}
+        vmem = {"example": 16}
 
 
 class InstanceComponentDataView(SchemaBase):
     last_octet: int | None = Field(None, D.data.last_octet)
+    vcpu: int | None = Field(None, D.data.vcpu)
+    vmem: int | None = Field(None, D.data.vmem)
 
 
 class InstanceComponentView(SchemaBase):
@@ -21,6 +25,8 @@ class InstanceComponentView(SchemaBase):
 
 class InstanceComponentDataCreate(SchemaBase):
     last_octet: int = Field(None, D.data.last_octet)
+    vcpu: int = Field(None, D.data.vcpu)
+    vmem: int = Field(None, D.data.vmem)
 
 
 class InstanceComponentCreate(SchemaBase):
