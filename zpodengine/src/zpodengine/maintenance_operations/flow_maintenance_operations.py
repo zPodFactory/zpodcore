@@ -1,19 +1,21 @@
 import os
 
+from com.vmware.appliance.update_client import Pending
 from prefect import flow, task
 
-from zpodengine.vcenter_operations.vapi import VCenterOps
+from zpodcommon.lib.vapi import VAPIClient
 
 
 @task
 def get_vcenter_updates():
-    
     # TODO: will get these values from individual vapps.
     hostname = os.getenv("VCENTER_HOSTNAME")
     username = os.getenv("VCENTER_USERNAME")
     password = os.getenv("VCENTER_PASSWORD")
 
-    vc = VCenterOps(hostname=hostname, username=username, password=password)
+    stub_config = VAPIClient(hostname=hostname, username=username, password=password)
+
+    pending_client = Pending(stub_config)
 
     updates = vc.get_vc_updates()
     return [

@@ -1,12 +1,10 @@
 import requests
-from com.vmware.vapi.std.errors_client import Error
 from rich.console import Console
 from vmware.vapi.lib.connect import get_requests_connector
 from vmware.vapi.security.session import create_session_security_context
 from vmware.vapi.security.user_password import create_user_password_security_context
 from vmware.vapi.stdlib.client.factories import StubConfigurationFactory
 from vmware.vapi.vsphere.client import Session, create_vsphere_client
-from com.vmware.appliance.update_client import Pending
 
 console = Console()
 
@@ -17,7 +15,7 @@ class VAPIClient:
         self.username = username
         self.password = password
         self.stub_config = self.get_stub_config()
-        self.pending_client = Pending(self.stub_config)
+       
 
     def get_stub_config(self, vclient_only: bool = False):
         api_url = f"https://{self.hostname}/api"
