@@ -1,7 +1,7 @@
 import os
 
+import com.vmware.vapi.std.errors_client as vapi_exceptions
 from com.vmware.appliance.update_client import Pending
-from com.vmware.vapi.std.errors_client import Error
 from prefect import flow, get_run_logger, task
 
 from zpodcommon.lib.vapi import VAPIClient
@@ -9,6 +9,8 @@ from zpodcommon.lib.vapi import VAPIClient
 
 @task(task_run_name="parse VCenter Updates object")
 def parse_vc_update_object(updates: list):
+    if not updates:
+        return "no updates found"
     return [
         {
             "version": update.version,
@@ -37,21 +39,20 @@ def get_vcenter_updates():
     hostname = os.getenv("VCENTER_HOSTNAME")
     username = os.getenv("VCENTER_USERNAME")
     password = os.getenv("VCENTER_PASSWORD")
+    
+    vc = VAPIClient(hostname=hostname, username=username, password=password)
 
-    print(os.environ)
-    print(hostname, username, password)
-
-    stub_config = VAPIClient(hostname=hostname, username=username, password=password)
+    stub_config = vc.get_stub_config()
 
     logger = get_run_logger()
     pending_client = Pending(stub_config)
     source_type = pending_client.SourceType.LOCAL_AND_ONLINE
 
     try:
-        logger.info("Checking for VCenter updates", style="green")
+        logger.info("Checking for VCenter updates")
         return pending_client.list(source_type)
-    except Error as e:
-        logger.info("No updates available", e)
+    except vapi_exceptions.NotFound:
+        logger.info("No applicable update found")
         return []
 
 
