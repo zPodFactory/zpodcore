@@ -11,7 +11,7 @@ from com.vmware.appliance.update_client import Pending
 console = Console()
 
 
-class VCenterOps:
+class VAPIClient:
     def __init__(self, hostname, username, password):
         self.hostname = hostname
         self.username = username
@@ -56,10 +56,3 @@ class VCenterOps:
         connector.set_security_context(security_context)
         return StubConfigurationFactory.new_std_configuration(connector)
 
-    def get_vc_updates(self):
-        source_type = self.pending_client.SourceType.LOCAL_AND_ONLINE
-        try:
-            console.print("Checking for VCenter updates", style="green")
-            return self.pending_client.list(source_type)
-        except Error as e:
-            console.print(f"Error: {e}", style="red")
