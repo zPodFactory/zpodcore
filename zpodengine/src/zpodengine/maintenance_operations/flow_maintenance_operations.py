@@ -35,11 +35,10 @@ def parse_vc_update_object(updates: list):
 
 @task(task_run_name="Get VCenter Updates")
 def get_vcenter_updates():
-
     hostname = os.getenv("VCENTER_HOSTNAME")
     username = os.getenv("VCENTER_USERNAME")
     password = os.getenv("VCENTER_PASSWORD")
-    
+
     vc = VAPIClient(hostname=hostname, username=username, password=password)
 
     stub_config = vc.get_stub_config()
