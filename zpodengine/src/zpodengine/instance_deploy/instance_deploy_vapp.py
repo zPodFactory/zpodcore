@@ -11,4 +11,8 @@ def instance_deploy_vapp(instance_id: int):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
         with vCenter.auth_by_instance(instance=instance) as vc:
-            vc.create_vapp(f"zPod-{instance.name}", "Cluster", "zPods")
+            # Fetch cluster name & folder name from endpoint.
+            rpool_name = instance.endpoint.endpoints["compute"]["resource_pool"]
+            folder_name = instance.endpoint.endpoints["compute"]["vmfolder"]
+
+            vc.create_vapp(f"zPod-{instance.name}", rpool_name, folder_name)
