@@ -50,7 +50,7 @@ services:
   # Prefect Server API
   zpodengineserver:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineserver
-    image: prefecthq/prefect:2.10.10-python3.11
+    image: prefecthq/prefect:2.10.11-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "server", "start" ]
@@ -71,10 +71,19 @@ services:
   # Prefect Agent
   zpodengineagent:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineagent
-    image: prefecthq/prefect:2.10.10-python3.11
+    image: prefecthq/prefect:2.10.11-python3.11
     depends_on:
       - zpodpostgres
-    entrypoint: [ "prefect", "agent", "start", "-q", "default" ]
+    entrypoint:
+      [
+        "prefect",
+        "agent",
+        "start",
+        "--limit",
+        "1",
+        "-q",
+        "default"
+      ]
     environment:
       # Keeping those variables for potential future tuning.
       - PREFECT_API_DATABASE_TIMEOUT=30
