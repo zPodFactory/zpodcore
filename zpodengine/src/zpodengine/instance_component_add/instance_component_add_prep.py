@@ -19,7 +19,7 @@ def instance_component_add_prep(
             select(M.Component).where(
                 M.Component.component_uid == component_uid,
                 # Needs new status value
-                M.Component.status == ComponentStatus.DOWNLOAD_COMPLETE,
+                M.Component.status == ComponentStatus.ACTIVE,
             )
         ).one()
         instance_component = M.InstanceComponent(
