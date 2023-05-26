@@ -107,8 +107,8 @@ class NsxClient(httpx.Client):
         )
 
     @classmethod
-    def auth_by_endpoints(cls, endpoints: dict, **kwargs):
-        network = endpoints["network"]
+    def auth_by_endpoint(cls, endpoint: M.Endpoint, **kwargs):
+        network = endpoint.endpoints["network"]
         return cls(
             nsx_url=f"https://{network['hostname']}",
             username=network["username"],
@@ -120,11 +120,11 @@ class NsxClient(httpx.Client):
     def auth_by_endpoint_id(cls, endpoint_id: int, **kwargs):
         with database.get_session_ctx() as session:
             endpoint = session.get(M.Endpoint, endpoint_id)
-            return cls.auth_by_endpoints(endpoint.endpoints, **kwargs)
+            return cls.auth_by_endpoint(endpoint, **kwargs)
 
     @classmethod
     def auth_by_instance(cls, instance: M.Instance, **kwargs):
-        return cls.auth_by_endpoints(instance.endpoint.endpoints, **kwargs)
+        return cls.auth_by_endpoint(instance.endpoint, **kwargs)
 
     def search_one(self, **terms):
         if data := self.search(**terms):

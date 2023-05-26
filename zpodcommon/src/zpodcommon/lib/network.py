@@ -57,6 +57,16 @@ class MgmtIp:
     MGMT_LAST_OCTETS = dict(
         gw=1,
         zbox=2,
+        nsx=5,
+        nsxt=5,
+        nsxv=6,
+        avi=7,
+        vcsa=10,
+        hcx=20,
+        vrops=30,
+        vrli=31,
+        vcd=40,
+        vcda=41,
         vyos=0,  # vyos(0) will get the subnet's last ip
     )
 
@@ -73,6 +83,8 @@ class MgmtIp:
             comp_name := instance_component.component.component_name
         ) in cls.MGMT_LAST_OCTETS:
             last_octet = cls.MGMT_LAST_OCTETS[comp_name]
+        else:
+            last_octet = None
         return cls.instance(instance=instance_component.instance, last_octet=last_octet)
 
     @classmethod
@@ -91,6 +103,14 @@ class MgmtIp:
     @property
     def ip(self):
         return str(self.ipv4address)
+
+    @property
+    def netmask(self):
+        return str(self.ipv4network.netmask)
+
+    @property
+    def prefixlen(self):
+        return str(self.ipv4network.prefixlen)
 
     @property
     def cidr(self):

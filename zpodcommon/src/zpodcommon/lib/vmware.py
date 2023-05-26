@@ -1,7 +1,6 @@
 import atexit
 import logging
 import ssl
-import time
 
 from pyVim import connect, task
 from pyVmomi import vim, vmodl
@@ -205,6 +204,36 @@ class vCenter:
         task_id = vm.PowerOnVM_Task()
         task.WaitForTask(task_id)
 
+    def set_vm_vcpu(self, vm_name, vcpu_num):
+        # sourcery skip: class-extract-method
+        # Fetch VM
+        # For this example:
+        # zbox.{instance_name}.{domain}
+        vm = self.get_vm(vm_name)
+        spec = vim.vm.ConfigSpec()
+        spec.cpuAllocation = vim.ResourceAllocationInfo()
+        spec.cpuAllocation.shares = vim.SharesInfo()
+        spec.cpuAllocation.shares.shares = 4000
+        spec.cpuAllocation.shares.level = "normal"
+        spec.numCPUs = vcpu_num
+        spec.deviceChange = []
+        spec.virtualNuma = vim.vm.VirtualNuma()
+        task_id = vm.ReconfigVM_Task(spec)
+        task.WaitForTask(task_id)
+
+    def set_vm_vmem(self, vm_name, vmem_gb):
+        vm = self.get_vm(vm_name)
+        spec = vim.vm.ConfigSpec()
+        spec.memoryMB = vmem_gb * 1024
+        spec.memoryAllocation = vim.ResourceAllocationInfo()
+        spec.memoryAllocation.shares = vim.SharesInfo()
+        spec.memoryAllocation.shares.shares = vmem_gb * 1024 * 10
+        spec.memoryAllocation.shares.level = "normal"
+        spec.deviceChange = []
+        spec.virtualNuma = vim.vm.VirtualNuma()
+        task_id = vm.ReconfigVM_Task(spec)
+        task.WaitForTask(task_id)
+
     def add_disk_to_vm(self, vm_name, disk_size_in_kb):
         #
         # Method to add a disk to a vm_name with specific disk_size_in_kb
@@ -254,8 +283,8 @@ class vCenter:
         task.WaitForTask(task_id)
 
     @classmethod
-    def auth_by_endpoints(cls, endpoints: dict, **kwargs):
-        compute = endpoints["compute"]
+    def auth_by_endpoint(cls, endpoint: M.Endpoint, **kwargs):
+        compute = endpoint.endpoints["compute"]
         return cls(
             host=compute["hostname"],
             user=compute["username"],
@@ -267,11 +296,11 @@ class vCenter:
     def auth_by_endpoint_id(cls, endpoint_id: int, **kwargs):
         with database.get_session_ctx() as session:
             endpoint = session.get(M.Endpoint, endpoint_id)
-            return cls.auth_by_endpoints(endpoint.endpoints, **kwargs)
+            return cls.auth_by_endpoint(endpoint, **kwargs)
 
     @classmethod
     def auth_by_instance(cls, instance: M.Instance, **kwargs):
-        return cls.auth_by_endpoints(instance.endpoint.endpoints, **kwargs)
+        return cls.auth_by_endpoint(instance.endpoint, **kwargs)
 
     @classmethod
     def auth_by_instance_id(cls, instance_id: int, **kwargs):

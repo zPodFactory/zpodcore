@@ -19,7 +19,7 @@ def instance_profile_flow(
             instance_id=instance_id,
             instance_name=instance_name,
             component_uid="esxi-8.0u1",
-            data=dict(last_octet=x),
+            data=dict(last_octet=x, vcpu=4, vmem=12),
             wait_for=[zbox],
         )
         for x in range(11, 14)
