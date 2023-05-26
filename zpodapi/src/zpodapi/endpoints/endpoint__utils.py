@@ -6,7 +6,7 @@ def zpod_endpoint_check(endpoint: M.Endpoint):
     print(f"Checking Endpoint: {endpoint.name}...")
 
     try:
-        vc = vCenter.auth_by_endpoints(endpoint.endpoints)
+        vc = vCenter.auth_by_endpoint(endpoint)
     except Exception as e:
         return f"Connection Error to endpoint ({e})"
 
