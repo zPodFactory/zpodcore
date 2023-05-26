@@ -1,7 +1,6 @@
 import atexit
 import logging
 import ssl
-import time
 
 from pyVim import connect, task
 from pyVmomi import vim, vmodl
@@ -284,8 +283,8 @@ class vCenter:
         task.WaitForTask(task_id)
 
     @classmethod
-    def auth_by_endpoints(cls, endpoints: dict, **kwargs):
-        compute = endpoints["compute"]
+    def auth_by_endpoint(cls, endpoint: M.Endpoint, **kwargs):
+        compute = endpoint.endpoints["compute"]
         return cls(
             host=compute["hostname"],
             user=compute["username"],
@@ -297,11 +296,11 @@ class vCenter:
     def auth_by_endpoint_id(cls, endpoint_id: int, **kwargs):
         with database.get_session_ctx() as session:
             endpoint = session.get(M.Endpoint, endpoint_id)
-            return cls.auth_by_endpoints(endpoint.endpoints, **kwargs)
+            return cls.auth_by_endpoint(endpoint, **kwargs)
 
     @classmethod
     def auth_by_instance(cls, instance: M.Instance, **kwargs):
-        return cls.auth_by_endpoints(instance.endpoint.endpoints, **kwargs)
+        return cls.auth_by_endpoint(instance.endpoint, **kwargs)
 
     @classmethod
     def auth_by_instance_id(cls, instance_id: int, **kwargs):
