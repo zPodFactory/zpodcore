@@ -120,7 +120,7 @@ def download_component(component: Component) -> int:
         f" --pass {shlex.quote(settings.VCC_PASSWORD)}"
         f" -p {shlex.quote(component.component_download_product)}"
         f" -s {shlex.quote(component.component_download_subproduct)}"
-        f" -v {shlex.quote(component.component_version)}"
+        f" -v {shlex.quote(component.component_download_version)}"
         f" -f {shlex.quote(component.component_download_file)}"
         f" -o {shlex.quote(PRODUCTS_PATH)}"
     )
