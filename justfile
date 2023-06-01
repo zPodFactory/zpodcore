@@ -1,4 +1,5 @@
 set dotenv-load
+set positional-arguments
 
 # This calculates the number of columns for rich to aligne with docker-compose logs
 # 16 is the length of the longest container name
@@ -30,7 +31,7 @@ docker-fullclean:
   docker volume prune -f
 
 zcli *args:
-  @cd zpodcli && poetry run zcli {{args}}
+  @cd zpodcli && poetry run zcli "$@"
 
 # Generate coverage docs
 zpodapi-coverage:
