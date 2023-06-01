@@ -136,6 +136,8 @@ RUN apt-get update \
     libgssapi-krb5-2 \
     libstdc++6 \
     zlib1g \
+    iputils-ping \
+    p7zip-full \
     # PowerShell remoting over SSH dependencies
     openssh-client \
     # Postgres libs
