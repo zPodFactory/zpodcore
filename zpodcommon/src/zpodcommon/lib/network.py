@@ -7,6 +7,7 @@ import struct
 from ipaddress import IPv4Network
 
 from zpodcommon import models as M
+from zpodcommon.lib.nsx import NsxClient
 
 #
 # Defaults
@@ -21,12 +22,33 @@ INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
 #
 
 
-def get_instance_primary_subnet(endpoint_supernet: str):
-    endpoint_network = ipaddress.ip_network(endpoint_supernet)
+def get_instance_primary_subnet(endpoint: str):
+    endpoint_network = ipaddress.ip_network(endpoint.endpoints["network"]["networks"])
+    with NsxClient.auth_by_endpoint(endpoint=endpoint) as nsx:
+        segments = nsx.search(resource_type="Segment")
 
-    return random.choice(
-        list(endpoint_network.subnets(new_prefix=INSTANCE_PUBLIC_NETWORK_PREFIXLEN))
-    )
+        # Get all in use subnets
+        in_use_subnets = [
+            IPv4Network(subnet["network"])
+            for segment in segments
+            for subnet in segment.get("subnets", [])
+        ]
+
+        # Get all possible subnets
+        possible_subnets = list(
+            endpoint_network.subnets(new_prefix=INSTANCE_PUBLIC_NETWORK_PREFIXLEN)
+        )
+
+        # Randomize possible subnet list
+        random.shuffle(possible_subnets)
+
+        # Walk through possible subnets until an unused one is found
+        for subnet in possible_subnets:
+            # If subnet is not in use anywhere, return subnet
+            if all(not subnet.overlaps(x) for x in in_use_subnets):
+                return subnet
+
+    raise ValueError("No networks available")
 
 
 #
