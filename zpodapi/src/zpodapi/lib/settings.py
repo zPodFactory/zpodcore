@@ -51,5 +51,7 @@ class Settings(BaseSettings):
     )
     POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
 
+    SITE_ID: str = Field("zpod", env="ZPODCORE_SITE_ID")
+
 
 settings = Settings()
