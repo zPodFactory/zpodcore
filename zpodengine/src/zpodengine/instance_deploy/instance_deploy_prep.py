@@ -22,11 +22,10 @@ def instance_deploy_prep(instance_id: int):
             ).one()
             instance.domain = f"{instance.name}.{setting.value}"
 
-        # fetching endpoint data for networks
-        endpoint_networks = instance.endpoint.endpoints["network"]["networks"]
-
         # Fetching main /24 network for Instance
-        instance_primary_subnet = get_instance_primary_subnet(endpoint_networks)
+        instance_primary_subnet = get_instance_primary_subnet(
+            endpoint=instance.endpoint
+        )
 
         # Fetching all 4 x /26 networks for Instance
         instance_subnets = get_instance_all_subnets(instance_primary_subnet)
