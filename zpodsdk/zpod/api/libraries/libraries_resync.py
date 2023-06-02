@@ -10,7 +10,7 @@ from ...models.library_view import LibraryView
 from ...types import Response
 
 
-class LibrariesSync:
+class LibrariesResync:
     def __init__(self, client: Client) -> None:
         self.client = client
 
@@ -63,7 +63,7 @@ class LibrariesSync:
         self,
         id: str,
     ) -> Response[Union[HTTPValidationError, LibraryView]]:
-        """Sync
+        """Resync
 
         Args:
             id (str):
@@ -91,7 +91,7 @@ class LibrariesSync:
         self,
         id: str,
     ) -> Optional[Union[HTTPValidationError, LibraryView]]:
-        """Sync
+        """Resync
 
         Args:
             id (str):
@@ -112,7 +112,7 @@ class LibrariesSync:
         self,
         id: str,
     ) -> Response[Union[HTTPValidationError, LibraryView]]:
-        """Sync
+        """Resync
 
         Args:
             id (str):
@@ -138,7 +138,7 @@ class LibrariesSync:
         self,
         id: str,
     ) -> Optional[Union[HTTPValidationError, LibraryView]]:
-        """Sync
+        """Resync
 
         Args:
             id (str):

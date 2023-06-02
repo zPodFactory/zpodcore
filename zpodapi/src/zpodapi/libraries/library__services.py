@@ -1,11 +1,12 @@
 import os
 import shutil
+import json
 from typing import List
 
 import git
 from rich import print
 from sqlmodel import SQLModel, select
-
+from datetime import datetime
 from zpodapi.components.component__utils import get_component
 from zpodapi.lib.service_base import ServiceBase
 from zpodapi.lib.utils import list_jsonfiles
@@ -56,7 +57,7 @@ class LibraryService(ServiceBase):
         delete_library(library=item)
         return None
 
-    def sync(self, *, library: M.Library):
+    def resync(self, *, library: M.Library):
         update_library(library=library)
 
         db_components = self.crud.get_all(M.Component)
@@ -89,21 +90,18 @@ class LibraryService(ServiceBase):
                 )
             )
 
-            # update existing component
+            # update existing component only if it has changed
             if component:
-                update_component(component, component_dict, self.session)
-                if component.status == ComponentStatus.ACTIVE:
-                    download_component(component.component_uid)
+                update_component_state(component_dict, component, self.session)
             else:
                 create_component(component_dict, self.session)
 
         # mark deleted components
-        git_component_uids = [get_component_uid(comp) for comp in git_components]
-        for component in db_components:
-            if component.component_uid not in git_component_uids:
-                mark_component_deleted(component, self.session)
+        update_deleted_component(db_components, git_components, self.session)
 
         self.session.commit()
+
+        update_last_modified_date(self.session, library=library)
         return library
 
 
@@ -176,3 +174,34 @@ def create_component_dict(
             if k in ["component_name", "component_version", "component_description"]
         },
     }
+
+
+def is_component_changed(component_model, db_component):
+    return any(
+        component_model.get(field) != db_component.dict().get(field)
+        for field in component_model.keys()
+    )
+
+
+def update_last_modified_date(session, library: M.Library):
+    library.last_modified_date = datetime.now()
+    session.add(library)
+    session.commit()
+
+
+def update_component_state(
+    component_dict: dict, component: M.Component, session: object
+):
+    if is_component_changed(component_dict, component):
+        update_component(component, component_dict, session)
+        if component.status == ComponentStatus.ACTIVE:
+            download_component(component.component_uid)
+
+
+def update_deleted_component(
+    components: M.Component, git_components: dict, session: object
+):
+    git_component_uids = [get_component_uid(comp) for comp in git_components]
+    for component in components:
+        if component.component_uid not in git_component_uids:
+            mark_component_deleted(component, session)

@@ -111,9 +111,9 @@ def get(name: str = typer.Option(..., "--name", "-n")):
 
 
 @app.command(no_args_is_help=True)
-def sync(name: str = typer.Option(..., "--name", "-n")):
+def resync(name: str = typer.Option(..., "--name", "-n")):
     z = zpod_client.ZpodClient()
-    library = z.libraries_sync.sync(id=f"name={name}")
+    library = z.libraries_resync.sync(id=f"name={name}")
     if library is None:
         console.print("Library not found", style="red")
         return
