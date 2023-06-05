@@ -1,5 +1,5 @@
-
 import os
+import shutil
 from datetime import datetime
 from typing import List
 
@@ -92,16 +92,16 @@ class LibraryService(ServiceBase):
 
             # update existing component only if it has changed
             if component:
-                update_component_state(component_dict, component, self.session)
+                update_component_fields(component, component_dict, self.session)
             else:
                 create_component(component_dict, self.session)
 
         # mark deleted components
-        update_deleted_component(db_components, git_components, self.session)
+        deleted_components(db_components, git_components, self.session)
 
         self.session.commit()
 
-        update_last_modified_date(self.session, library=library)
+        # update_last_modified_date(self.session, library=library)
         return library
 
 
@@ -148,8 +148,8 @@ def delete_library(library: M.Library):
     shutil.rmtree(f"/library/{library.name}")
 
 
-def update_component(component, modified_component, session):
-    for key, value in modified_component.items():
+def update_component_fields(component, component_dict, session):
+    for key, value in component_dict.items():
         setattr(component, key, value)
 
 
@@ -176,10 +176,11 @@ def create_component_dict(
     }
 
 
-def is_component_changed(component_model, db_component):
+def is_component_changed(component_dict, component):
     return any(
-        component_model.get(field) != db_component.dict().get(field)
-        for field in component_model.keys()
+        # component_dict.get(field) != component.dict().get(field)
+        component_dict.get(field) != getattr(component, field)
+        for field in component_dict.keys()
     )
 
 
@@ -189,18 +190,14 @@ def update_last_modified_date(session, library: M.Library):
     session.commit()
 
 
-def update_component_state(
-    component_dict: dict, component: M.Component, session: object
-):
+def update_component(component_dict: dict, component: M.Component, session: object):
     if is_component_changed(component_dict, component):
-        update_component(component, component_dict, session)
+        update_component_fields(component, component_dict, session)
         if component.status == ComponentStatus.ACTIVE:
             download_component(component.component_uid)
 
 
-def update_deleted_component(
-    components: M.Component, git_components: dict, session: object
-):
+def deleted_components(components: M.Component, git_components: dict, session: object):
     git_component_uids = [get_component_uid(comp) for comp in git_components]
     for component in components:
         if component.component_uid not in git_component_uids:
