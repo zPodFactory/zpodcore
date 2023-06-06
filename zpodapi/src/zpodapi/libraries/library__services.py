@@ -58,12 +58,10 @@ class LibraryService(ServiceBase):
         return None
 
     def resync(self, *, library: M.Library):
-        update_library(library=library)
-
+        if not update_library(library=library, session=self.session):
+            return library
         db_components = self.crud.get_all(M.Component)
-
         component_jsonfiles = list_jsonfiles(f"/library/{library.name}")
-
         git_components = []
 
         # Resolving  differences between git_components and db/downloaded components
@@ -137,10 +135,19 @@ def create_library(library: M.Library):
     git.Repo.clone_from(library.git_url, f"/library/{library.name}")
 
 
-def update_library(library: M.Library):
-    print(f"Updating Library: {library.name}...")
-    repo = git.Repo(f"/library/{library.name}")
-    repo.remotes.origin.pull()
+def update_library(library: M.Library, session: object):
+    local_repo_path = f"/library/{library.name}"
+    repo = git.Repo(local_repo_path)
+    local_commit_id = repo.head.commit.hexsha
+    remote_commit_id = repo.remotes.origin.refs.main.commit.hexsha
+    if local_commit_id != remote_commit_id:
+        print(f"Updating Library: {library.name}...")
+        repo.remotes.origin.pull()
+        update_last_modified_date(session, library=library)
+        return True
+
+    print(f"Library: {library.name} is up to date")
+    return False
 
 
 def delete_library(library: M.Library):
