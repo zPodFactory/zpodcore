@@ -7,6 +7,7 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
+from zpodengine import settings
 from zpodengine.lib import database
 
 
@@ -79,8 +80,9 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         username = i.endpoint.endpoints["compute"]["username"]
         password = i.endpoint.endpoints["compute"]["password"]
         datastore = i.endpoint.endpoints["compute"]["storage_datastore"]
-        resource_pool = f"zPod-{i.name}"
-        zpod_portgroup = f"Segment-zPod-{i.name}"
+        site_id = settings.SITE_ID
+        resource_pool = f"{site_id}-{i.name}"
+        zpod_portgroup = f"{site_id}-{i.name}-segment"
 
     else:
         print(f"[L2] Deployment for {c.component_name}")

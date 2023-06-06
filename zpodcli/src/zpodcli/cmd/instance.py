@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 import typer
 from rich import print
@@ -105,19 +106,20 @@ def list():
 
 @app.command(no_args_is_help=True)
 def delete(
-    name: str = typer.Option(..., "--name", "-n"),
+    names: List[str] = typer.Option(..., "--name", "-n"),
 ):
     z = zpod_client.ZpodClient()
 
-    instance = z.instances_delete.sync_detailed(id=f"name={name}")
-    if instance.status_code == 204:
-        console.print(
-            f"Instance [magenta]{name}[/magenta] has been scheduled for deletion."
-        )
-    else:
-        content = json.loads(instance.content.decode())
-        error_message = content["detail"]
-        console.print(f"Error: {error_message}", style="red")
+    for name in names:
+        instance = z.instances_delete.sync_detailed(id=f"name={name}")
+        if instance.status_code == 204:
+            console.print(
+                f"Instance [magenta]{name}[/magenta] has been scheduled for deletion."
+            )
+        else:
+            content = json.loads(instance.content.decode())
+            error_message = content["detail"]
+            console.print(f"Error: {error_message}", style="red")
 
 
 @app.command(no_args_is_help=True)
@@ -127,6 +129,7 @@ def create(
     domain: str = typer.Option("", "--domain"),
     endpoint: str = typer.Option(..., "--endpoint", "-e"),
     profile: str = typer.Option(..., "--profile", "-p"),
+    enet_project_id: str = typer.Option(None, "--enet"),
 ):
     instance_details = InstanceCreate(
         name=name,
@@ -134,6 +137,7 @@ def create(
         description=description,
         profile=profile,
         endpoint_id=endpoint,
+        enet_project_id=enet_project_id,
     )
     z = zpod_client.ZpodClient()
     result = z.instances_create.sync_detailed(json_body=instance_details)

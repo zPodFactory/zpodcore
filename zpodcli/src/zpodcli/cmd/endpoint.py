@@ -1,11 +1,7 @@
 import typer
-from rich import print
 from rich.console import Console
 from rich.pretty import Pretty
 from rich.table import Table
-from zpod.models.endpoint_compute_view import EndpointComputeView
-from zpod.models.endpoint_network_view import EndpointNetworkView
-from zpod.models.endpoint_view_full import EndpointViewFull
 
 from zpodcli.lib import zpod_client
 

@@ -22,6 +22,7 @@ class D:
     domain = {"example": "demo.maindomain.com"}
     endpoint_id = {"example": 1}
     profile = {"example": "sddc"}
+    enet_project_id = {"example": "advanced_networking"}
     status = {"example": enums.InstanceStatus.ACTIVE}
     creation_date = {"example": datetime(2023, 1, 1)}
     last_modified_date = {"example": datetime(2023, 1, 1)}
@@ -33,6 +34,7 @@ class InstanceCreate(SchemaBase):
     domain: str = Field("", D.domain)
     endpoint_id: int = Field(..., D.endpoint_id)
     profile: str = Field(..., D.profile)
+    enet_project_id: str = Field(None, D.enet_project_id)
 
 
 class InstanceUpdate(SchemaBase):

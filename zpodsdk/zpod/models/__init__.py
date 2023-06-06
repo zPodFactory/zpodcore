@@ -6,6 +6,8 @@ from .endpoint_compute_create import EndpointComputeCreate
 from .endpoint_compute_update import EndpointComputeUpdate
 from .endpoint_compute_view import EndpointComputeView
 from .endpoint_create import EndpointCreate
+from .endpoint_enet_create import EndpointENetCreate
+from .endpoint_enet_view import EndpointENetView
 from .endpoint_network_create import EndpointNetworkCreate
 from .endpoint_network_update import EndpointNetworkUpdate
 from .endpoint_network_view import EndpointNetworkView
@@ -50,6 +52,8 @@ __all__ = (
     "EndpointComputeUpdate",
     "EndpointComputeView",
     "EndpointCreate",
+    "EndpointENetCreate",
+    "EndpointENetView",
     "EndpointNetworkCreate",
     "EndpointNetworkUpdate",
     "EndpointNetworkView",

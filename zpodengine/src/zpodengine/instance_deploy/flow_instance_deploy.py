@@ -38,6 +38,7 @@ def flow_instance_deploy(
     instance_id: int,
     profile: str,
     instance_name: str,
+    enet_project_id: str | None,
 ):
     options = task_options_setup(prefix=instance_name)
 
@@ -59,6 +60,7 @@ def flow_instance_deploy(
         **options(name="top level networking"),
     ).submit(
         instance_id=instance_id,
+        enet_project_id=enet_project_id,
         wait_for=[dnsmasq],
     )
 
