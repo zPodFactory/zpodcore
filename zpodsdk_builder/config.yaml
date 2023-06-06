@@ -1,6 +1,12 @@
 project_name_override: zpodsdk
 package_name_override: zpod
 
+class_overrides:
+  EndpointENetCreate:
+    module_name: endpoint_enet_create
+  EndpointENetView:
+    module_name: endpoint_enet_view
+
 post_hooks:
   - python /zpodcore/zpodsdk_builder/build_client.py "zpod"
   - autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .

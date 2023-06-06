@@ -24,7 +24,7 @@ INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
 
 def get_instance_primary_subnet(endpoint: str):
     endpoint_network = ipaddress.ip_network(endpoint.endpoints["network"]["networks"])
-    with NsxClient.auth_by_endpoint(endpoint=endpoint) as nsx:
+    with NsxClient(endpoint=endpoint) as nsx:
         segments = nsx.search(resource_type="Segment")
 
         # Get all in use subnets

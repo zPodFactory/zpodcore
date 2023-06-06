@@ -1,6 +1,7 @@
 from sqlalchemy import func
 from sqlmodel import or_, select
 
+from zpodapi import settings
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import enums
 from zpodcommon import models as M
@@ -40,7 +41,11 @@ class InstanceService(ServiceBase):
         current_user: M.User,
     ):
         instance = M.Instance(
-            **item_in.dict(),
+            name=item_in.name,
+            description=item_in.description,
+            domain=item_in.domain,
+            endpoint_id=item_in.endpoint_id,
+            profile=item_in.profile,
             status=enums.InstanceStatus.PENDING,
             password=instance__utils.gen_password(),
             permissions=[
@@ -59,6 +64,11 @@ class InstanceService(ServiceBase):
             deployment_name="default",
             run_name=f"Deploy {instance.name}",
             instance_id=instance.id,
+            enet_project_id=(
+                f"{settings.SITE_ID}-{item_in.enet_project_id}-enet-project"
+                if item_in.enet_project_id
+                else None
+            ),
             profile=instance.profile,
             instance_name=instance.name,
         )

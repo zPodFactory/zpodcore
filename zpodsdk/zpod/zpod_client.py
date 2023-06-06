@@ -54,6 +54,34 @@ class ZpodClient:
 
     @property
     @cache
+    def endpoints_enet_create(self):
+        from zpod.api.endpoints import endpoints_enet_create
+
+        return endpoints_enet_create.EndpointsEnetCreate(self._client)
+
+    @property
+    @cache
+    def endpoints_enet_delete(self):
+        from zpod.api.endpoints import endpoints_enet_delete
+
+        return endpoints_enet_delete.EndpointsEnetDelete(self._client)
+
+    @property
+    @cache
+    def endpoints_enet_get(self):
+        from zpod.api.endpoints import endpoints_enet_get
+
+        return endpoints_enet_get.EndpointsEnetGet(self._client)
+
+    @property
+    @cache
+    def endpoints_enet_get_all(self):
+        from zpod.api.endpoints import endpoints_enet_get_all
+
+        return endpoints_enet_get_all.EndpointsEnetGetAll(self._client)
+
+    @property
+    @cache
     def endpoints_get(self):
         from zpod.api.endpoints import endpoints_get
 

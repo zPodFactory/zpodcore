@@ -2,6 +2,7 @@ from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
+from zpodengine import settings
 from zpodengine.lib import database
 
 
@@ -15,4 +16,8 @@ def instance_deploy_vapp(instance_id: int):
             rpool_name = instance.endpoint.endpoints["compute"]["resource_pool"]
             folder_name = instance.endpoint.endpoints["compute"]["vmfolder"]
 
-            vc.create_vapp(f"zPod-{instance.name}", rpool_name, folder_name)
+            vc.create_vapp(
+                f"{settings.SITE_ID}-{instance.name}",
+                rpool_name,
+                folder_name,
+            )

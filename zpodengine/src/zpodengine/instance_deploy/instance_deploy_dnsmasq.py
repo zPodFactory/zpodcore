@@ -1,7 +1,9 @@
+import time
+
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.network import create_dnsmasq_config, MgmtIp
+from zpodcommon.lib.network import MgmtIp, create_dnsmasq_config
 from zpodengine.lib import database
 
 
@@ -15,3 +17,6 @@ def instance_deploy_dnsmasq(instance_id: int):
 
         # Create dnsmasq configuration
         create_dnsmasq_config(instance.name, instance.domain, dns_ip)
+
+        # TODO: Add better code here
+        time.sleep(5)

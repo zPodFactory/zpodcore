@@ -7,6 +7,7 @@ from zpodcli.cmd import (
     component,
     connect,
     endpoint,
+    enet,
     group,
     instance,
     library,
@@ -31,15 +32,16 @@ def launch():
         no_args_is_help=True,
     )
 
+    authed_typer(component.app, name="component")
+    authed_typer(endpoint.app, name="endpoint")
+    authed_typer(enet.app, name="enet")
     authed_typer(group.app, name="group")
     authed_typer(instance.app, name="instance")
-    authed_typer(profile.app, name="profile")
     authed_typer(library.app, name="library")
     authed_typer(permission.app, name="permission")
-    authed_typer(endpoint.app, name="endpoint")
-    authed_typer(component.app, name="component")
-    authed_typer(user.app, name="user")
+    authed_typer(profile.app, name="profile")
     authed_typer(setting.app, name="setting")
+    authed_typer(user.app, name="user")
 
     app()
 
