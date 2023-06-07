@@ -175,7 +175,8 @@ class InstanceDeployNetworking:
             f"/security-policies/{security_policies_id}"
             f"/rules/{self.dfw_allow_all_id}"
         )
-        if not self.nsx.get(url=url):
+
+        if not self.nsx.get(url=url).safejson():
             self.nsx.patch(
                 url=url,
                 json=dict(
@@ -231,14 +232,12 @@ class InstanceDeployNetworking:
         print("Wait for segment to realize")
         start = datetime.now()
         while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_REALIZED:
-            if not (
-                results := self.nsx.get(
-                    f"/policy/api/v1{self.project_path}"
-                    "/infra/realized-state/realized-entities"
-                    f"?intent_path={self.project_path}"
-                    f"/infra/segments/{self.segment_id}"
-                ).results()
-            ):
+            if results := self.nsx.get(
+                f"/policy/api/v1{self.project_path}"
+                "/infra/realized-state/realized-entities"
+                f"?intent_path={self.project_path}"
+                f"/infra/segments/{self.segment_id}"
+            ).results():
                 rls = next(
                     x for x in results if x["entity_type"] == "RealizedLogicalSwitch"
                 )
