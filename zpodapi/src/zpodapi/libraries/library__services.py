@@ -60,6 +60,7 @@ class LibraryService(ServiceBase):
     def resync(self, *, library: M.Library):
         if not update_library(library=library, session=self.session):
             return library
+
         db_components = self.crud.get_all(M.Component)
         component_jsonfiles = list_jsonfiles(f"/library/{library.name}")
         git_components = []
@@ -98,8 +99,6 @@ class LibraryService(ServiceBase):
         deleted_components(db_components, git_components, self.session)
 
         self.session.commit()
-
-        # update_last_modified_date(self.session, library=library)
         return library
 
 
@@ -185,7 +184,6 @@ def create_component_dict(
 
 def is_component_changed(component_dict, component):
     return any(
-        # component_dict.get(field) != component.dict().get(field)
         component_dict.get(field) != getattr(component, field)
         for field in component_dict.keys()
     )
