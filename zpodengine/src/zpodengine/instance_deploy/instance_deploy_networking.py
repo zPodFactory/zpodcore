@@ -231,12 +231,14 @@ class InstanceDeployNetworking:
         print("Wait for segment to realize")
         start = datetime.now()
         while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_REALIZED:
-            if results := self.nsx.get(
-                f"/policy/api/v1{self.project_path}"
-                "/infra/realized-state/realized-entities"
-                f"?intent_path={self.project_path}"
-                f"/infra/segments/{self.segment_id}"
-            ).results():
+            if not (
+                results := self.nsx.get(
+                    f"/policy/api/v1{self.project_path}"
+                    "/infra/realized-state/realized-entities"
+                    f"?intent_path={self.project_path}"
+                    f"/infra/segments/{self.segment_id}"
+                ).results()
+            ):
                 rls = next(
                     x for x in results if x["entity_type"] == "RealizedLogicalSwitch"
                 )
