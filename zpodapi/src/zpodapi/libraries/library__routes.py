@@ -89,9 +89,9 @@ def delete(
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
-def sync(
+def resync(
     *,
     library: LibraryAnnotations.GetLibrary,
     library_service: LibraryAnnotations.LibraryService,
 ):
-    return library_service.sync(library=library)
+    return library_service.resync(library=library)
