@@ -26,15 +26,14 @@ class RootRoot:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
+            "follow_redirects": self.client.follow_redirects,
         }
 
     def _parse_response(self, *, response: httpx.Response) -> Optional[Any]:
         if response.status_code == HTTPStatus.OK:
             return None
         if self.client.raise_on_unexpected_status:
-            raise errors.UnexpectedStatus(
-                f"Unexpected status code:     {response.status_code}"
-            )
+            raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
@@ -57,7 +56,7 @@ class RootRoot:
 
         Returns:
             Response[Any]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs()
 
@@ -79,7 +78,7 @@ class RootRoot:
 
         Returns:
             Response[Any]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs()
 

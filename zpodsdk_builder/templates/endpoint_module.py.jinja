@@ -17,10 +17,6 @@ from ... import errors
 {% set return_string = endpoint.response_type() %}
 {% set parsed_responses = (endpoint.responses | length > 0) and return_string != "Any" %}
 
-{# {{endpoint}} #}
-
-{#endpoint.path_parameters.values()}#}
-
 class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
     def __init__(self, client: Client) -> None:
         self.client = client
@@ -54,10 +50,11 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
+            "follow_redirects": self.client.follow_redirects,
             {% if endpoint.form_body %}
             "data": form_data.to_dict(),
             {% elif endpoint.multipart_body %}
-            "files": {{ "multipart_" + endpoint.multipart_body.    python_name }},
+            "files": {{ "multipart_" + endpoint.multipart_body.python_name }},
             {% elif endpoint.json_body %}
             "json": {{ "json_" + endpoint.json_body.python_name }},
             {% endif %}
@@ -67,14 +64,14 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
         }
 
 
-    def _parse_response(self, *, response: httpx.Response) ->   Optional  [{{ return_string }}]:
+    def _parse_response(self, *, response: httpx.Response) -> Optional  [{{ return_string }}]:
         {% for response in endpoint.responses %}
         if response.status_code == HTTPStatus.{{ response.status_code.name }}:
-            {% if parsed_responses %}{% import "property_templates/"   +   response.prop.template as prop_template %}
+            {% if parsed_responses %}{% import "property_templates/" + response.prop.template as prop_template %}
             {% if prop_template.construct %}
-            {{ prop_template.construct(response.prop, response.  source) |   indent(12) }}
+            {{ prop_template.construct(response.prop, response.source) | indent(12) }}
             {% else %}
-            {{ response.prop.python_name }} = cast({{ response.prop.    get_type_string() }}, {{ response.source }})
+            {{ response.prop.python_name }} = cast({{ response.prop.get_type_string() }}, {{ response.source }})
             {% endif %}
             return {{ response.prop.python_name }}
             {% else %}
@@ -82,12 +79,12 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
             {% endif %}
         {% endfor %}
         if self.client.raise_on_unexpected_status:
-            raise errors.UnexpectedStatus(f"Unexpected status code:     {response.status_code}")
+            raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
 
-    def _build_response(self, *, response: httpx.Response) ->   Response  [{{ return_string }}]:
+    def _build_response(self, *, response: httpx.Response) -> Response[{{ return_string }}]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -100,7 +97,7 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
     def sync_detailed(
         self, {{ arguments(endpoint) | indent(8) }}
     ) -> Response[{{ return_string }}]:
-        {{ docstring(endpoint, return_string) | indent(8) }}
+        {{ docstring(endpoint, return_string, is_detailed=true) | indent(8) }}
 
         kwargs = self._get_kwargs(
             {{ kwargs(endpoint) | indent(12) }}
@@ -117,7 +114,7 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
     def sync(
         self, {{ arguments(endpoint) | indent(8) }}
     ) -> Optional[{{ return_string }}]:
-        {{ docstring(endpoint, return_string) | indent(8) }}
+        {{ docstring(endpoint, return_string, is_detailed=false) | indent(8) }}
 
         return self.sync_detailed(
             {{ kwargs(endpoint) | indent(12) }}
@@ -127,7 +124,7 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
     async def asyncio_detailed(
         self, {{ arguments(endpoint) | indent(8) }}
     ) -> Response[{{ return_string }}]:
-        {{ docstring(endpoint, return_string) | indent(8) }}
+        {{ docstring(endpoint, return_string, is_detailed=true) | indent(8) }}
 
         kwargs = self._get_kwargs(
             {{ kwargs(endpoint) | indent(12) }}
@@ -144,7 +141,7 @@ class {{endpoint.name|replace("_", " ")|title|replace(" ", "")}}:
     async def asyncio(
         self, {{ arguments(endpoint) | indent(8) }}
     ) -> Optional[{{ return_string }}]:
-        {{ docstring(endpoint, return_string) | indent(8) }}
+        {{ docstring(endpoint, return_string, is_detailed=false) | indent(8) }}
 
         return (await self.asyncio_detailed(
             {{ kwargs(endpoint) | indent(12)}}

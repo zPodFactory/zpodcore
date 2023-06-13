@@ -41,6 +41,7 @@ class UsersUpdate:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
+            "follow_redirects": self.client.follow_redirects,
             "json": json_json_body,
         }
 
@@ -56,9 +57,7 @@ class UsersUpdate:
 
             return response_422
         if self.client.raise_on_unexpected_status:
-            raise errors.UnexpectedStatus(
-                f"Unexpected status code:     {response.status_code}"
-            )
+            raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
@@ -90,7 +89,7 @@ class UsersUpdate:
 
         Returns:
             Response[Union[HTTPValidationError, UserViewFull]]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs(
             id=id,
@@ -121,8 +120,8 @@ class UsersUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserViewFull]]
-        """  # noqa e501
+            Union[HTTPValidationError, UserViewFull]
+        """
 
         return self.sync_detailed(
             id=id,
@@ -147,7 +146,7 @@ class UsersUpdate:
 
         Returns:
             Response[Union[HTTPValidationError, UserViewFull]]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs(
             id=id,
@@ -176,8 +175,8 @@ class UsersUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserViewFull]]
-        """  # noqa e501
+            Union[HTTPValidationError, UserViewFull]
+        """
 
         return (
             await self.asyncio_detailed(

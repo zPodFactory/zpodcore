@@ -27,6 +27,7 @@ class SettingsGetAll:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
+            "follow_redirects": self.client.follow_redirects,
         }
 
     def _parse_response(
@@ -42,9 +43,7 @@ class SettingsGetAll:
 
             return response_200
         if self.client.raise_on_unexpected_status:
-            raise errors.UnexpectedStatus(
-                f"Unexpected status code:     {response.status_code}"
-            )
+            raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
@@ -69,7 +68,7 @@ class SettingsGetAll:
 
         Returns:
             Response[List['SettingView']]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs()
 
@@ -90,8 +89,8 @@ class SettingsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['SettingView']]
-        """  # noqa e501
+            List['SettingView']
+        """
 
         return self.sync_detailed().parsed
 
@@ -106,7 +105,7 @@ class SettingsGetAll:
 
         Returns:
             Response[List['SettingView']]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs()
 
@@ -125,7 +124,7 @@ class SettingsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['SettingView']]
-        """  # noqa e501
+            List['SettingView']
+        """
 
         return (await self.asyncio_detailed()).parsed

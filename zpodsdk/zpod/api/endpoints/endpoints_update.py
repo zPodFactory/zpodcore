@@ -34,6 +34,7 @@ class EndpointsUpdate:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
+            "follow_redirects": self.client.follow_redirects,
             "json": json_json_body,
         }
 
@@ -49,9 +50,7 @@ class EndpointsUpdate:
 
             return response_422
         if self.client.raise_on_unexpected_status:
-            raise errors.UnexpectedStatus(
-                f"Unexpected status code:     {response.status_code}"
-            )
+            raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
@@ -83,7 +82,7 @@ class EndpointsUpdate:
 
         Returns:
             Response[Union[EndpointViewFull, HTTPValidationError]]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs(
             id=id,
@@ -114,8 +113,8 @@ class EndpointsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointViewFull, HTTPValidationError]]
-        """  # noqa e501
+            Union[EndpointViewFull, HTTPValidationError]
+        """
 
         return self.sync_detailed(
             id=id,
@@ -140,7 +139,7 @@ class EndpointsUpdate:
 
         Returns:
             Response[Union[EndpointViewFull, HTTPValidationError]]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs(
             id=id,
@@ -169,8 +168,8 @@ class EndpointsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointViewFull, HTTPValidationError]]
-        """  # noqa e501
+            Union[EndpointViewFull, HTTPValidationError]
+        """
 
         return (
             await self.asyncio_detailed(

@@ -27,6 +27,7 @@ class UsersGetMe:
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
+            "follow_redirects": self.client.follow_redirects,
         }
 
     def _parse_response(self, *, response: httpx.Response) -> Optional[UserViewFull]:
@@ -35,9 +36,7 @@ class UsersGetMe:
 
             return response_200
         if self.client.raise_on_unexpected_status:
-            raise errors.UnexpectedStatus(
-                f"Unexpected status code:     {response.status_code}"
-            )
+            raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
@@ -60,7 +59,7 @@ class UsersGetMe:
 
         Returns:
             Response[UserViewFull]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs()
 
@@ -81,8 +80,8 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserViewFull]
-        """  # noqa e501
+            UserViewFull
+        """
 
         return self.sync_detailed().parsed
 
@@ -97,7 +96,7 @@ class UsersGetMe:
 
         Returns:
             Response[UserViewFull]
-        """  # noqa e501
+        """
 
         kwargs = self._get_kwargs()
 
@@ -116,7 +115,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserViewFull]
-        """  # noqa e501
+            UserViewFull
+        """
 
         return (await self.asyncio_detailed()).parsed
