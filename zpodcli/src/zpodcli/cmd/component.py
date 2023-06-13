@@ -34,7 +34,7 @@ def generate_table(components: list, component_uid: str = None, action: str = No
             f"[bright_yellow]{component.library_name}[/bright_yellow]",
             f"[green4]{component.component_description}[/green4]",
             f"[cyan1]{component.status}[/cyan1]",
-            f"[deep_pink2]{component.download_status}[/deep_pink2]",
+            f"[deep_pink2]{component.download_status or ''}[/deep_pink2]",
         )
     console.print(table)
 

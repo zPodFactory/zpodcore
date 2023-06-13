@@ -32,4 +32,4 @@ class ComponentViewFull(ComponentView):
     filename: str = Field(..., D.filename)
     jsonfile: str = Field(..., D.jsonfile)
     status: str = Field(..., D.status)
-    download_status: str = Field(..., D.download_status)
+    download_status: str | None = Field(None, D.download_status)
