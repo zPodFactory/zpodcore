@@ -43,8 +43,8 @@ def generate_table(libraries: list, action: str = None):
     console.print(table)
 
 
-@app.command()
-def list():
+@app.command(name="list")
+def _list():
     z = zpod_client.ZpodClient()
     libraries = z.libraries_get_all.sync()
     generate_table(libraries=libraries, action="List")

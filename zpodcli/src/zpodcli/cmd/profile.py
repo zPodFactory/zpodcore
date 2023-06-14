@@ -3,8 +3,8 @@ import typer
 app = typer.Typer(help="Manage profiles")
 
 
-@app.command()
-def list():
+@app.command(name="list")
+def _list():
     """
     List profiles
     """

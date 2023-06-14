@@ -92,8 +92,8 @@ def generate_table(instances: list[InstanceView], action: str = None):
     console.print(table)
 
 
-@app.command()
-def list():
+@app.command(name="list")
+def _list():
     """
     List pods
     """
