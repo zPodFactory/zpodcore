@@ -1,6 +1,6 @@
 from typing import Callable
 
-from fastapi import Request, Response
+from fastapi import HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import APIRoute
 
@@ -23,6 +23,9 @@ class RouteLogger(APIRoute):
                 return response
             except RequestValidationError as exc:
                 log_obj(dict(detail=exc.errors()), f"RESPONSE {mp}")
+                raise
+            except HTTPException as exc:
+                log_obj(dict(detail=exc.detail), f"RESPONSE {mp}")
                 raise
 
         return custom_route_handler
