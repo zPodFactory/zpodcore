@@ -44,7 +44,10 @@ def create(
     setting_in: SettingCreate,
 ):
     if setting_service.crud.get_all_filtered(name=setting_in.name):
-        raise HTTPException(status_code=422, detail="Conflicting record found")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicting record found",
+        )
     return setting_service.create(item_in=setting_in)
 
 

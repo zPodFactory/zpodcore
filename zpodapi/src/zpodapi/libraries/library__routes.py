@@ -48,7 +48,10 @@ def create(
         git_url=library_in.git_url,
         use_or=True,
     ):
-        raise HTTPException(status_code=422, detail="Conflicting record found")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicting record found",
+        )
     return library_service.create(item_in=library_in)
 
 

@@ -66,7 +66,10 @@ def create(
         email=user_in.email,
         use_or=True,
     ):
-        raise HTTPException(status_code=422, detail="Conflicting record found")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicting record found",
+        )
     return user_service.crud.create(item_in=user_in)
 
 

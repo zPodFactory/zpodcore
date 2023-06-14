@@ -51,7 +51,10 @@ def create(
     instance_in: InstanceCreate,
 ):
     if instance_service.get(name=instance_in.name):
-        raise HTTPException(status_code=422, detail="Conflicting record found")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicting record found",
+        )
     return instance_service.create(current_user=current_user, item_in=instance_in)
 
 
