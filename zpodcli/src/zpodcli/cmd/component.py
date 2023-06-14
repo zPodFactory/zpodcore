@@ -39,8 +39,8 @@ def generate_table(components: list, component_uid: str = None, action: str = No
     console.print(table)
 
 
-@app.command()
-def list():
+@app.command(name="list")
+def _list():
     z = zpod_client.ZpodClient()
     components = z.components_get_all.sync()
     generate_table(components)

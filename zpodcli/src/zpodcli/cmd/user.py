@@ -9,8 +9,8 @@ from zpodcli.lib import utils, zpod_client
 app = typer.Typer(help="Manage users")
 
 
-@app.command()
-def list():
+@app.command(name="list")
+def _list():
     """
     List users
     """

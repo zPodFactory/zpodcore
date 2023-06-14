@@ -3,8 +3,8 @@ import typer
 app = typer.Typer(help="Manage endpoints")
 
 
-@app.command()
-def list():
+@app.command(name="list")
+def _list():
     """
     List Groups
     """
