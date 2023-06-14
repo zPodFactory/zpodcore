@@ -47,7 +47,10 @@ def create(
     endpoint: EndpointCreate,
 ):
     if endpoint_service.crud.get(name=endpoint.name):
-        raise HTTPException(status_code=422, detail="Conflicting record found")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicting record found",
+        )
     return endpoint_service.crud.create(item_in=endpoint)
 
 
