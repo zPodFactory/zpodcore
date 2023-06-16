@@ -1,0 +1,15 @@
+[Unit]
+Description=zpod dnsmasq servers watchdog
+After=network.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/usr/bin/python3 -u /usr/local/bin/zdnsmasqservers-watchdog.py
+Restart=always
+
+SyslogIdentifier=zdnsmasqservers
+
+
+[Install]
+WantedBy=multi-user.target

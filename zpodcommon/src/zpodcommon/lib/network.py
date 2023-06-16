@@ -1,6 +1,5 @@
 import fcntl
 import ipaddress
-import os
 import random
 import socket
 import struct
@@ -137,36 +136,6 @@ class MgmtIp:
     @property
     def cidr(self):
         return f"{self.ip}/{self.ipv4network.prefixlen}"
-
-
-#
-# Create Instance dnsmasq config
-# This will be the zbox VM IP by default
-# This COULD be the vyos IP (future)
-#
-
-
-def create_dnsmasq_config(
-    instance_name: str, instance_domain: str, instance_dns_ip: str
-):
-    print(f"Creating /etc/dnsmasq.d/{instance_name}.conf")
-    with open(f"/etc/dnsmasq.d/{instance_name}.conf", "w") as f:
-        f.write(f"server=/{instance_domain}/{instance_dns_ip}\n")
-
-
-#
-# Delete the dns configuration for Instance name
-#
-
-
-def delete_dnsmasq_config(instance_name: str):
-    filename = f"/etc/dnsmasq.d/{instance_name}.conf"
-
-    if os.path.exists(filename):
-        os.remove(filename)
-        print(f"{filename} deleted successfully")
-    else:
-        print(f"{filename} does not exist")
 
 
 #
