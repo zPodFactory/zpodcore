@@ -35,6 +35,12 @@ from .library_create import LibraryCreate
 from .library_update import LibraryUpdate
 from .library_view import LibraryView
 from .permission_group_view import PermissionGroupView
+from .profile_create import ProfileCreate
+from .profile_item_create import ProfileItemCreate
+from .profile_item_update import ProfileItemUpdate
+from .profile_item_view import ProfileItemView
+from .profile_update import ProfileUpdate
+from .profile_view import ProfileView
 from .setting_create import SettingCreate
 from .setting_update import SettingUpdate
 from .setting_view import SettingView
@@ -81,6 +87,12 @@ __all__ = (
     "LibraryUpdate",
     "LibraryView",
     "PermissionGroupView",
+    "ProfileCreate",
+    "ProfileItemCreate",
+    "ProfileItemUpdate",
+    "ProfileItemView",
+    "ProfileUpdate",
+    "ProfileView",
     "SettingCreate",
     "SettingUpdate",
     "SettingView",

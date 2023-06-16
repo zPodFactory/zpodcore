@@ -22,10 +22,10 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     c = instance_component.component
     i = instance_component.instance
 
-    if "hostname" in instance_component.data:
-        zpod_hostname = instance_component.data["hostname"]
-    elif "last_octet" in instance_component.data:
-        zpod_hostname = f"{c.component_name}{instance_component.data['last_octet']}"
+    if _ := instance_component.data.get("hostname"):
+        zpod_hostname = _
+    elif _ := instance_component.data.get("last_octet"):
+        zpod_hostname = f"{c.component_name}{_}"
     else:
         zpod_hostname = c.component_name
 

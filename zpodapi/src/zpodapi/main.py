@@ -11,6 +11,7 @@ from zpodapi.instances import (
 )
 from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.libraries import library__routes
+from zpodapi.profiles import profile__routes
 from zpodapi.root import root__routes
 from zpodapi.settings import setting__routes
 from zpodapi.users import user__routes
@@ -40,7 +41,8 @@ api.include_router(instance_component__routes.router)
 api.include_router(instance_feature__routes.router)
 api.include_router(instance_network__routes.router)
 api.include_router(library__routes.router)
-api.include_router(user__routes.router)
+api.include_router(profile__routes.router)
 api.include_router(setting__routes.router)
+api.include_router(user__routes.router)
 
 simplify_operation_ids(api)

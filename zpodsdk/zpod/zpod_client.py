@@ -215,6 +215,41 @@ class ZpodClient:
 
     @property
     @cache
+    def profiles_create(self):
+        from zpod.api.profiles import profiles_create
+
+        return profiles_create.ProfilesCreate(self._client)
+
+    @property
+    @cache
+    def profiles_delete(self):
+        from zpod.api.profiles import profiles_delete
+
+        return profiles_delete.ProfilesDelete(self._client)
+
+    @property
+    @cache
+    def profiles_get(self):
+        from zpod.api.profiles import profiles_get
+
+        return profiles_get.ProfilesGet(self._client)
+
+    @property
+    @cache
+    def profiles_get_all(self):
+        from zpod.api.profiles import profiles_get_all
+
+        return profiles_get_all.ProfilesGetAll(self._client)
+
+    @property
+    @cache
+    def profiles_update(self):
+        from zpod.api.profiles import profiles_update
+
+        return profiles_update.ProfilesUpdate(self._client)
+
+    @property
+    @cache
     def root_root(self):
         from zpod.api.root import root_root
 

@@ -20,10 +20,10 @@ def instance_component_add(
     *,
     instance_id: int,
     instance_name: str,
-    component_uid: str,
-    data=None,
+    profile_item: dict,
     wait_for=None,
 ):  # sourcery skip: remove-unnecessary-cast
+    component_uid = profile_item["component_uid"]
     prefix = f"{instance_name} {component_uid}"
     options = task_options_setup(prefix=prefix)
 
@@ -31,8 +31,7 @@ def instance_component_add(
         **options(name="prep"),
     ).submit(
         instance_id=instance_id,
-        component_uid=component_uid,
-        data=data or {},
+        profile_item=profile_item,
         wait_for=wait_for,
     )
 
