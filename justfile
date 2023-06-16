@@ -31,7 +31,7 @@ docker-fullclean:
   docker volume prune -f
 
 zcli *args:
-  @cd zpodcli && poetry run zcli "$@"
+  @poetry -C zpodcli run zcli "$@"
 
 # Generate coverage docs
 zpodapi-coverage:

@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlmodel import or_, select
 
@@ -7,6 +8,7 @@ from zpodcommon import enums
 from zpodcommon import models as M
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
+from ..profiles.profile__utils import validate_profile
 from . import instance__utils
 from .instance__schemas import InstanceCreate
 
@@ -76,6 +78,20 @@ class InstanceService(ServiceBase):
         # Only commit if zpodengine flow scheduled properly
         self.session.commit()
         return instance
+
+    def validate_profile(self, *, profile_name):
+        if profile := self.session.exec(
+            select(M.Profile).where(
+                M.Profile.name == profile_name.lower(),
+            )
+        ).one_or_none():
+            print(profile)
+            validate_profile(session=self.session, profile_obj=profile.profile)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail=f"Profile not found for name: {profile_name}",
+            )
 
     def delete(self, *, instance: M.Instance):
         zpod_engine = ZpodEngineClient()

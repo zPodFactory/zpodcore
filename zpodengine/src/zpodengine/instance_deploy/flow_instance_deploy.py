@@ -1,11 +1,15 @@
-import importlib
-
 from prefect import flow
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceStatus
+from zpodengine.instance_component_add.instance_component_add import (
+    instance_component_add,
+)
 from zpodengine.instance_deploy.instance_deploy_dnsmasq import instance_deploy_dnsmasq
 from zpodengine.instance_deploy.instance_deploy_finalize import instance_deploy_finalize
+from zpodengine.instance_deploy.instance_deploy_get_profile import (
+    instance_deploy_get_profile,
+)
 from zpodengine.instance_deploy.instance_deploy_networking import (
     instance_deploy_networking,
 )
@@ -72,19 +76,45 @@ def flow_instance_deploy(
         wait_for=[networking],
     )
 
-    # # Deploy profile components
-    mod = importlib.import_module(f"zpodengine.instance_profiles.{profile}")
-    last_component_task = mod.instance_profile_flow(
-        instance_id=instance_id,
-        instance_name=instance_name,
+    # Get profile
+    profile_obj = instance_deploy_get_profile.with_options(
+        **options(name="get_profile"),
+    )(
+        profile_name=profile,
         wait_for=[vapp],
     )
 
+    # Deploy profile components
+    wait_for = [profile_obj]
+    for profile_item in profile_obj:
+        print(profile_item)
+        if isinstance(profile_item, list):
+            # Add in parallel
+            last_component_item = [
+                instance_component_add(
+                    instance_id=instance_id,
+                    instance_name=instance_name,
+                    profile_item=sub_profile_item,
+                    wait_for=wait_for,
+                )
+                for sub_profile_item in profile_item
+            ]
+        else:
+            # Add serial (wait for previous to finish)
+            last_component_item = instance_component_add(
+                instance_id=instance_id,
+                instance_name=instance_name,
+                profile_item=profile_item,
+                wait_for=wait_for,
+            )
+        wait_for = [last_component_item]
+
+    # Finalize
     instance_deploy_finalize.with_options(
         **options(name="finalize"),
     ).submit(
         instance_id=instance_id,
-        wait_for=[last_component_task],
+        wait_for=[last_component_item],
     )
 
 

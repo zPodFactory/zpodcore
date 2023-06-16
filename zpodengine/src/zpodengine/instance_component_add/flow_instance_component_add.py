@@ -13,15 +13,18 @@ from zpodengine.instance_component_add.instance_component_add import (
 def flow_instance_component_add(
     instance_id: int,
     instance_name: str,
-    component_uid: str,
-    data=None,
+    profile_item: dict,
 ):
     instance_component_add(
         instance_id=instance_id,
-        component_uid=component_uid,
-        data=data,
+        profile_item=profile_item,
     )
 
 
 if __name__ == "__main__":
-    print(flow_instance_component_add(1, "cds-10.2"))
+    print(
+        flow_instance_component_add(
+            instance_id=1,
+            profile_item=dict(component_uid="cds-10.2"),
+        )
+    )

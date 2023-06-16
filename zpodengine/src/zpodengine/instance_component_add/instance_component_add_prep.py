@@ -1,5 +1,3 @@
-from typing import Any
-
 from prefect import task
 from sqlmodel import select
 
@@ -11,9 +9,9 @@ from zpodengine.lib import database
 @task(persist_result=True)
 def instance_component_add_prep(
     instance_id: int,
-    component_uid: str,
-    data: dict[str, Any],
+    profile_item: dict,
 ):  # sourcery skip: remove-unnecessary-cast
+    component_uid = profile_item.pop("component_uid")
     with database.get_session_ctx() as session:
         component = session.exec(
             select(M.Component).where(
@@ -25,7 +23,7 @@ def instance_component_add_prep(
         instance_component = M.InstanceComponent(
             instance_id=instance_id,
             component_id=component.id,
-            data=data,
+            data=profile_item,
             status=InstanceComponentStatus.BUILDING,
         )
         session.add(instance_component)

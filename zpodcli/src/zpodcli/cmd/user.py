@@ -41,4 +41,4 @@ def _list():
             )
         print(table)
     else:
-        utils.show_error(users.content)
+        utils.handle_response(users.content)

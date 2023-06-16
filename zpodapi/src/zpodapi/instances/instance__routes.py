@@ -55,7 +55,12 @@ def create(
             status_code=status.HTTP_409_CONFLICT,
             detail="Conflicting record found",
         )
-    return instance_service.create(current_user=current_user, item_in=instance_in)
+
+    instance_service.validate_profile(profile_name=instance_in.profile)
+    return instance_service.create(
+        current_user=current_user,
+        item_in=instance_in,
+    )
 
 
 @router.patch(

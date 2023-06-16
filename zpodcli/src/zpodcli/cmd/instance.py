@@ -9,7 +9,7 @@ from zpod.models.instance_create import InstanceCreate
 from zpod.models.instance_permission import InstancePermission
 from zpod.models.instance_view import InstanceView
 
-from zpodcli.lib import zpod_client
+from zpodcli.lib import utils, zpod_client
 
 app = typer.Typer(help="Manage zPods Instances")
 
@@ -144,4 +144,4 @@ def create(
     if result.status_code == 201:
         print(f"Instance [magenta]{name}[/magenta] is being deployed...")
     else:
-        console.print(f"Error: {result}", style="red")
+        utils.handle_response(result)
