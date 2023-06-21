@@ -25,8 +25,5 @@ class Settings(BaseSettings):
 
     SITE_ID: str = Field("zpod", env="ZPODCORE_SITE_ID")
 
-    VCC_PASSWORD: str = Field("password", env="ZPODCORE_VCC_PASSWORD")
-    VCC_USERNAME: str = Field(..., env="ZPODCORE_VCC_USERNAME")
-
 
 settings = Settings()
