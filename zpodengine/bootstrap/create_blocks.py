@@ -19,6 +19,7 @@ docker_block = DockerContainer(
     volumes=[
         f"{ZPODCORE_PATH}/zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon",
         f"{ZPODCORE_PATH}/zpodengine/src/zpodengine:/zpodcore/src/zpodengine",
+        f"{ZPODCORE_PATH}/zpodengine/scripts:/zpodengine/scripts",
         f"{ZPODCORE_PATH}/.env:/zpodcore/.env",
         f"{ZPODCORE_DNS_SERVERS_PATH}:/zpod/dns_servers",
         f"{ZPODCORE_DNSMASQ_PATH}:/etc/dnsmasq.d",
