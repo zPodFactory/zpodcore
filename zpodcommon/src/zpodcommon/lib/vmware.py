@@ -1,6 +1,8 @@
 import atexit
+import datetime
 import logging
 import ssl
+import time
 
 from pyVim import connect, task
 from pyVmomi import vim, vmodl
@@ -281,6 +283,47 @@ class vCenter:
         # Reconfigure VM with new spec
         task_id = vm.ReconfigVM_Task(spec)
         task.WaitForTask(task_id)
+
+    def wait_for_tools(self, vm_name, timeout=120):
+        tools_running = False
+        start_at = datetime.datetime.now()
+        timeout = datetime.timedelta(seconds=timeout)
+
+        print("Waiting for VMware Tools...")
+        while start_at + timeout > datetime.datetime.now():
+            vm = self.get_vm(vm_name)
+
+            if vm.guest.toolsRunningStatus == "guestToolsRunning":
+                return True
+            print("Sleeping ...")
+            time.sleep(5)
+
+        if not tools_running:
+            print("VMware Tools not running and timeout exceeded !")
+            return False
+
+    def wait_for_tools_ip(self, vm_name, ipaddress, timeout=120):
+        start_at = datetime.datetime.now()
+        timeout = datetime.timedelta(seconds=timeout)
+
+        # We first need to wait for vmware tools to be ready
+        status = self.wait_for_tools(vm_name)
+        if not status:
+            return False
+
+        print("Waiting for VMware Tools IP...")
+        while start_at + timeout > datetime.datetime.now():
+            vm = self.get_vm(vm_name)
+
+            if vm.guest.ipAddress == ipaddress:
+                print(f"IP {ipaddress} found.")
+                return True
+
+            print("Sleeping...")
+            time.sleep(5)
+
+        if not ipaddress:
+            return False
 
     @classmethod
     def auth_by_endpoint(cls, endpoint: M.Endpoint, **kwargs):

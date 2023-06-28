@@ -2,6 +2,7 @@ from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.ovfdeployer import ovf_deployer
+from zpodcommon.lib.vcsadeployer import vcsa_deployer
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.instance_component_add.instance_component_add_utils import (
     handle_instance_component_add_failure,
@@ -48,7 +49,7 @@ def instance_component_add_deploy(*, instance_component_id: int):
                 print("--- vcsa ---")
                 # Prep component ISO to folder
                 # Prep deploy template from component json
-                # vcsa_deployer(instance_component)
+                vcsa_deployer(instance_component)
 
             case "esxi":
                 print("--- esxi ---")

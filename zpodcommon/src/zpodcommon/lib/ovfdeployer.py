@@ -1,21 +1,14 @@
 import json
 import subprocess
-from pathlib import Path
 
 from jinja2 import Template
 from sqlmodel import select
 
 from zpodcommon import models as M
+from zpodcommon.lib.commands import cmd_execute
 from zpodcommon.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
 from zpodengine import settings
 from zpodengine.lib import database
-
-
-def get_json_from_file(filename: str):
-    if not Path(filename).is_file():
-        raise ValueError(f"The provided {filename} does not exist")
-    with open(filename, "r") as f:
-        return json.load(f)
 
 
 def ovf_deployer(instance_component: M.InstanceComponent):
@@ -80,6 +73,8 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         username = i.endpoint.endpoints["compute"]["username"]
         password = i.endpoint.endpoints["compute"]["password"]
         datastore = i.endpoint.endpoints["compute"]["storage_datastore"]
+        # FIXME: we might want this in a zcli setting key/value ?
+        # if set, then set prefix, else default to normal one.
         site_id = settings.SITE_ID
         resource_pool = f"{site_id}-{i.name}"
         zpod_portgroup = f"{site_id}-{i.name}-segment"
@@ -140,17 +135,4 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     print("govc deploy command")
     print(cmd)
 
-    try:
-        h = subprocess.run(
-            args=cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-            check=False,
-        )
-        print(h)
-        if h.returncode != 0:
-            return RuntimeError(message=f"govc error: {h.stderr}")
-
-    except subprocess.CalledProcessError as e:
-        print(e.output)
+    cmd_execute(cmd, debug=True)
