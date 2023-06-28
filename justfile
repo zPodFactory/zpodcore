@@ -77,13 +77,13 @@ zpodengine-cli:
 
 # Deploy zpodengine Blocks
 zpodengine-create-blocks:
-  docker compose run --rm zpodenginecli -c /zpodcore/scripts/create_blocks.py
+  docker compose run --rm zpodenginecli -c /zpodcore/bootstrap/create_blocks.py
 
 # Deploy zpodengine Flows
 zpodengine-create-deployments:
-  docker compose run --rm zpodenginecli -c /zpodcore/scripts/create_deployments.py
+  docker compose run --rm zpodenginecli -c /zpodcore/bootstrap/create_deployments.py
 
 # zpodengine initial config
 zpodengine-init:
   just zpodengine-build-docker-image
-  docker compose run --rm zpodenginecli -c "/zpodcore/scripts/create_default_settings.sh && /zpodcore/scripts/create_blocks.py && /zpodcore/scripts/create_deployments.py"
+  docker compose run --rm zpodenginecli -c "/zpodcore/bootstrap/create_default_settings.sh && /zpodcore/bootstrap/create_blocks.py && /zpodcore/bootstrap/create_deployments.py"

@@ -116,7 +116,8 @@ services:
     volumes:
       - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
       - ./zpodengine/src/zpodengine:/zpodcore/src/zpodengine:cached
-      - ./zpodengine/scripts:/zpodcore/scripts:cached
+      - ./zpodengine/bootstrap:/zpodcore/bootstrap:cached
+      - ./zpodengine/scripts:/zpodengine/scripts:cached
       - zpod_vol_history:/commandhistory
       - ${ZPODCORE_DNS_SERVERS_PATH}:/zpod/dns_servers
       - ${ZPODCORE_DNSMASQ_PATH}:/etc/dnsmasq.d
