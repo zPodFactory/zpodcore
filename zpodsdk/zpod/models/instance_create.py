@@ -16,7 +16,7 @@ class InstanceCreate:
         profile (str):  Example: sddc.
         description (Union[Unset, str]):  Default: ''. Example: Demo zPod.
         domain (Union[Unset, str]):  Default: ''. Example: demo.maindomain.com.
-        enet_project_id (Union[Unset, str]):  Example: advanced_networking.
+        enet_name (Union[Unset, str]):  Example: advanced_networking.
     """
 
     endpoint_id: int
@@ -24,7 +24,7 @@ class InstanceCreate:
     profile: str
     description: Union[Unset, str] = ""
     domain: Union[Unset, str] = ""
-    enet_project_id: Union[Unset, str] = UNSET
+    enet_name: Union[Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         endpoint_id = self.endpoint_id
@@ -32,7 +32,7 @@ class InstanceCreate:
         profile = self.profile
         description = self.description
         domain = self.domain
-        enet_project_id = self.enet_project_id
+        enet_name = self.enet_name
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -46,8 +46,8 @@ class InstanceCreate:
             field_dict["description"] = description
         if domain is not UNSET:
             field_dict["domain"] = domain
-        if enet_project_id is not UNSET:
-            field_dict["enet_project_id"] = enet_project_id
+        if enet_name is not UNSET:
+            field_dict["enet_name"] = enet_name
 
         return field_dict
 
@@ -64,7 +64,7 @@ class InstanceCreate:
 
         domain = d.pop("domain", UNSET)
 
-        enet_project_id = d.pop("enet_project_id", UNSET)
+        enet_name = d.pop("enet_name", UNSET)
 
         instance_create = cls(
             endpoint_id=endpoint_id,
@@ -72,7 +72,7 @@ class InstanceCreate:
             profile=profile,
             description=description,
             domain=domain,
-            enet_project_id=enet_project_id,
+            enet_name=enet_name,
         )
 
         return instance_create

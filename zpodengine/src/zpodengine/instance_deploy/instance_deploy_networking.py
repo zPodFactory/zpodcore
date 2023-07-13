@@ -14,11 +14,11 @@ SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
 @task
-def instance_deploy_networking(instance_id: int, enet_project_id: str | None = None):
+def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
     print("Configure top level networking")
     with InstanceDeployNetworking(
         instance_id=instance_id,
-        enet_project_id=enet_project_id,
+        enet_name=enet_name,
     ) as idn:
         idn()
 
@@ -27,19 +27,19 @@ class InstanceDeployNetworking:
     def __init__(
         self,
         instance_id: int,
-        enet_project_id: str | None = None,
+        enet_name: str | None = None,
     ) -> None:
         self.session = database.get_session_raw()
         self.instance = self.session.get(M.Instance, instance_id)
         self.nsx = NsxClient(self.instance.endpoint)
-        self.enet_project_id = enet_project_id
+        self.enet_name = enet_name
 
         inst_prefix = f"{settings.SITE_ID}-{self.instance.name}"
-        project_prefix = enet_project_id[:-8] if enet_project_id else inst_prefix
+        project_prefix = enet_name[:-8] if enet_name else inst_prefix
 
         orgid = self.nsx.epnet.get("orgid", "default")
         self.tier0_path = f"/infra/tier-0s/{self.nsx.epnet['t0']}"
-        self.project_id = enet_project_id or f"{inst_prefix}-project"
+        self.project_id = enet_name or f"{inst_prefix}-project"
         self.project_path = f"/orgs/{orgid}/projects/{self.project_id}"
         self.tier1_id = f"{project_prefix}-tier1"
         self.mac_discovery_profile_id = f"{project_prefix}-mac-discovery-profile"
@@ -55,7 +55,7 @@ class InstanceDeployNetworking:
         self.close()
 
     def __call__(self):
-        if not self.enet_project_id:
+        if not self.enet_name:
             self.project_create()
         self.t1_create()
         self.t1_attach_edge_cluster()
