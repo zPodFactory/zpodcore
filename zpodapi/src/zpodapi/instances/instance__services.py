@@ -66,9 +66,9 @@ class InstanceService(ServiceBase):
             deployment_name="default",
             run_name=f"Deploy {instance.name}",
             instance_id=instance.id,
-            enet_project_id=(
-                f"{settings.SITE_ID}-{item_in.enet_project_id}-enet-project"
-                if item_in.enet_project_id
+            enet_name=(
+                f"{settings.SITE_ID}-{item_in.enet_name}-enet-project"
+                if item_in.enet_name
                 else None
             ),
             profile=instance.profile,

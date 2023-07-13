@@ -9,9 +9,11 @@ from zpod.models.instance_create import InstanceCreate
 from zpod.models.instance_permission import InstancePermission
 from zpod.models.instance_view import InstanceView
 
+from zpodcli.cmd import instance_component
 from zpodcli.lib import utils, zpod_client
 
 app = typer.Typer(help="Manage zPods Instances")
+app.add_typer(instance_component.app, name="component")
 
 console = Console()
 
@@ -129,7 +131,7 @@ def create(
     domain: str = typer.Option("", "--domain"),
     endpoint: str = typer.Option(..., "--endpoint", "-e"),
     profile: str = typer.Option(..., "--profile", "-p"),
-    enet_project_id: str = typer.Option(None, "--enet"),
+    enet_name: str = typer.Option(None, "--enet"),
 ):
     instance_details = InstanceCreate(
         name=name,
@@ -137,7 +139,7 @@ def create(
         description=description,
         profile=profile,
         endpoint_id=endpoint,
-        enet_project_id=enet_project_id,
+        enet_name=enet_name,
     )
     z = zpod_client.ZpodClient()
     result = z.instances_create.sync_detailed(json_body=instance_details)
