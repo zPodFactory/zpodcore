@@ -283,8 +283,9 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     checksum_str = component.component_download_file_checksum
     expected_checksum = checksum_str.split(":")[1]
     checksum = compute_checksum(component, filename)
-    logger.info(f"Checksum: {checksum}")
+    logger.info(f"File Checksum: {checksum}")
     if checksum != expected_checksum:
+        logger.info(f"Expected Checksum: {expected_checksum}")
         update_db(component.component_uid, ComponentDownloadStatus.FAILED_CHECKSUM)
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
