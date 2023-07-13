@@ -135,18 +135,13 @@ def create_library(library: M.Library):
 
 
 def update_library(library: M.Library, session: object):
+    print(f"Updating Library: {library.name}...")
     local_repo_path = f"/library/{library.name}"
     repo = git.Repo(local_repo_path)
-    local_commit_id = repo.head.commit.hexsha
-    remote_commit_id = repo.remotes.origin.refs.main.commit.hexsha
-    if local_commit_id != remote_commit_id:
-        print(f"Updating Library: {library.name}...")
-        repo.remotes.origin.pull()
-        update_last_modified_date(session, library=library)
-        return True
-
-    print(f"Library: {library.name} is up to date")
-    return False
+    # FIXME: local vs remote commit id check to show potential updates.
+    repo.remotes.origin.pull()
+    update_last_modified_date(session, library=library)
+    return True
 
 
 def delete_library(library: M.Library):
