@@ -79,6 +79,8 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         resource_pool = f"{site_id}-{i.name}"
         zpod_portgroup = f"{site_id}-{i.name}-segment"
 
+        vm_name = f"{zpod_hostname}.{i.domain}"
+
     else:
         print(f"[L2] Deployment for {c.component_name}")
         # This means we deploy the component as a nested L2 VM from the instance
@@ -88,12 +90,16 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         password = i.password
 
         # For now this is hardcoded unless anything changes
-        resource_pool = "Cluster"
+        resource_pool = "Cluster/Resources"
         # For now this is hardcoded unless anything changes
         # (maybe vSAN OSA/ESA support in the future instead of NFS-01)
         datastore = "NFS-01"
         zpod_portgroup = "VM Network"
 
+        vm_name = zpod_hostname
+
+    # Add zbox as this is a mandatory infrastructure component
+    zpod_zbox_ipaddress = MgmtIp.instance(i, "zbox").ip
     url = f"https://{username}:{password}@{hostname}/sdk"
     print(f"Deploying to [https://{username}:XXXXXXXX@{hostname}/sdk]...")
 
@@ -105,6 +111,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         zpod_netprefix=INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN,
         zpod_gateway=component_gateway,
         zpod_dns=zpod_dns,
+        zpod_nfs=zpod_zbox_ipaddress,
         zpod_ntp=zpodfactory_host,
         zpod_domain=i.domain,
         zpod_password=i.password,
@@ -115,7 +122,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     print("govc ovf property options generated file")
     print(govc_spec_render)
 
-    vm_name = f"{zpod_hostname}.{i.domain}"
+    # vm_name = f"{zpod_hostname}.{i.domain}"
 
     options_filename = f"/tmp/{vm_name}.json"
     with open(options_filename, "w") as f:

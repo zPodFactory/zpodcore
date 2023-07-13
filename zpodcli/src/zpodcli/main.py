@@ -10,6 +10,7 @@ from zpodcli.cmd import (
     enet,
     group,
     instance,
+    instance_component,
     library,
     permission,
     profile,

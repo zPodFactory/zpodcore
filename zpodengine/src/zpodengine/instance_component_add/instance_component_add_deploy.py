@@ -87,3 +87,14 @@ def instance_component_add_deploy(*, instance_component_id: int):
             case _:
                 print("--- Normal Component ---")
                 ovf_deployer(instance_component)
+
+                instance_vc = vCenter(
+                    host=f"vcsa.{instance_component.instance.domain}",
+                    user=f"administrator@{instance_component.instance.domain}",
+                    pwd=instance_component.instance.password,
+                )
+
+                print("Start VM")
+                instance_vc.poweron_vm(
+                    vm_name=instance_component.component.component_name
+                )
