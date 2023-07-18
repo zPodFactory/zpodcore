@@ -83,14 +83,13 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                         f"{zpod_hostname}.{i.domain}", component_ipaddress
                     )
 
-                # Check esxi host api
+                # Check esxi host ssl certificate regeneration has been done before continuing
                 cmd = (
-                    f"/zpodengine/scripts/powershell/post-scripts/esxi_check_api.ps1"
-                    f" -zPodHostname {zpod_hostname}.{i.domain}"
-                    f" -zPodPassword {i.password}"
+                    f"/zpodengine/scripts/python/post-scripts/esxi_check_certificate.py"
+                    f" {zpod_hostname}.{i.domain} {zpod_hostname}"
                 )
 
-                cmd_execute(f'pwsh -c "& {cmd}"', debug=True)
+                cmd_execute(f"python {cmd}", debug=True)
 
                 # Configure esxi
                 cmd = (
