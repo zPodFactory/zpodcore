@@ -119,8 +119,7 @@ services:
       - ./zpodengine/bootstrap:/zpodcore/bootstrap:cached
       - ./zpodengine/scripts:/zpodengine/scripts:cached
       - zpod_vol_history:/commandhistory
-      - ${ZPODCORE_DNS_SERVERS_PATH}:/zpod/dns_servers
-      - ${ZPODCORE_DNSMASQ_PATH}:/etc/dnsmasq.d
+      - ${ZPODCORE_DNSMASQ_SERVERS_PATH}:/zpod/dnsmasq_servers
       - ${ZPODCORE_LIBRARY_PATH}:/library
       - ${ZPODCORE_PRODUCTS_PATH}:/products
       - ${ZPODCORE_RESULTS_PATH}:/results

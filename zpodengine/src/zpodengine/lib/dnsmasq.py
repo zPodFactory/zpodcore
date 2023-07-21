@@ -28,7 +28,7 @@ def lock_file(file):
 
 def add(instance_domain, ip):
     print(f"Adding dnsmasq record for: {instance_domain}, {ip}")
-    with lock_file("/zpod/dns_servers/servers.conf") as f:
+    with lock_file("/zpod/dnsmasq_servers/servers.conf") as f:
         lines = set(f.readlines())
         lines.add(f"server=/{instance_domain}/{ip}\n")
         write(f, lines)
@@ -37,7 +37,7 @@ def add(instance_domain, ip):
 def delete(instance_name):
     print(f"Deleting dnsmasq record for: {instance_name}")
     lookfor = f"server=/{instance_name}."
-    with lock_file("/zpod/dns_servers/servers.conf") as f:
+    with lock_file("/zpod/dnsmasq_servers/servers.conf") as f:
         lines = {x for x in f.readlines() if not x.startswith(lookfor)}
         write(f, lines)
 
