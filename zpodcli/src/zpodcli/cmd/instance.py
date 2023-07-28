@@ -29,7 +29,7 @@ def get_status_markdown(status: str):
         case "DELETED":
             return f"[dark_orange3]{status}[/dark_orange3]"
         case "DEPLOY_FAILED" | "DESTROY_FAILED":
-            return f"[red3]{status}[/red3]"
+            return f"[indian_red]{status}[/indian_red]"
         case _:
             return "[royal_blue1]UNKNOWN[/royal_blue1]"
 
@@ -84,7 +84,7 @@ def generate_table(instances: list[InstanceView], action: str = None):
             f"[plum4]{instance.domain}[/plum4]",
             f"[tan]{instance.profile}[/tan]",
             components,
-            instance.endpoint.name,
+            f"[dark_khaki]{instance.endpoint.name}[/dark_khaki]",
             networks,
             owner,
             instance.password,
@@ -95,9 +95,9 @@ def generate_table(instances: list[InstanceView], action: str = None):
 
 
 @app.command(name="list")
-def _list():
+def instance_list():
     """
-    List pods
+    List zPods
     """
     print("Listing zPods")
 
@@ -106,10 +106,13 @@ def _list():
     generate_table(instances, "List")
 
 
-@app.command(no_args_is_help=True)
-def delete(
+@app.command(name="delete", no_args_is_help=True)
+def instance_delete(
     names: List[str] = typer.Option(..., "--name", "-n"),
 ):
+    """
+    Delete a zPod
+    """
     z = zpod_client.ZpodClient()
 
     for name in names:
@@ -121,11 +124,11 @@ def delete(
         else:
             content = json.loads(instance.content.decode())
             error_message = content["detail"]
-            console.print(f"Error: {error_message}", style="red")
+            console.print(f"Error: {error_message}", style="indian_red")
 
 
-@app.command(no_args_is_help=True)
-def create(
+@app.command(name="create", no_args_is_help=True)
+def instance_create(
     name: str = typer.Option(..., "--name", "-n"),
     description: str = typer.Option("", "--description"),
     domain: str = typer.Option("", "--domain"),
@@ -133,6 +136,9 @@ def create(
     profile: str = typer.Option(..., "--profile", "-p"),
     enet_name: str = typer.Option(None, "--enet"),
 ):
+    """
+    Create a zPod
+    """
     instance_details = InstanceCreate(
         name=name,
         domain=domain,

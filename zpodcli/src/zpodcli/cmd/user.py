@@ -5,12 +5,13 @@ from rich import print
 from rich.table import Table
 
 from zpodcli.lib import utils, zpod_client
+from zpodcli.lib.utils import get_boolean_markdown
 
 app = typer.Typer(help="Manage users")
 
 
 @app.command(name="list")
-def _list():
+def user_list():
     """
     List users
     """
@@ -32,12 +33,12 @@ def _list():
 
         for user in users.parsed:
             table.add_row(
-                user.username,
-                user.email,
+                f"{user.username}",
+                f"[sky_blue2]{user.email}[/sky_blue2]",
                 user.description,
-                user.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
-                user.last_connection_date.strftime("%Y-%m-%d %H:%M:%S"),
-                f"[bold][red]{user.superadmin.__str__()}[/bold][/red]",
+                f"[tan]{user.creation_date.strftime('%Y-%m-%d %H:%M:%S')}[/tan]",
+                f"[magenta]{user.last_connection_date.strftime('%Y-%m-%d %H:%M:%S')}[/magenta]",
+                get_boolean_markdown(user.superadmin),
             )
         print(table)
     else:

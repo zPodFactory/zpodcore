@@ -17,9 +17,9 @@ app = typer.Typer(help="Manage profiles")
 
 def generate_table(profiles: list, action: str = None):
     table = Table(
-        "Name",
         "Profile",
-        title=f"{action} Profile",
+        "Components",
+        title=f"{action} Profile ",
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -35,17 +35,22 @@ def generate_table(profiles: list, action: str = None):
             if _ := profile_item.vmem:
                 data_values.append(f"Mem: {_}GB")
 
-            profile_item_txt = profile_item.component_uid
+            profile_item_txt = f"[yellow3]{profile_item.component_uid}[/yellow3]"
             if data_values:
-                profile_item_txt += f" ({', '.join(data_values)})"
+                profile_item_txt += (
+                    f"[light_cyan3] ({', '.join(data_values)})[/light_cyan3]"
+                )
             profile_item_lines.append(profile_item_txt)
 
-        table.add_row(profile.name, "\n".join(profile_item_lines))
+        table.add_row(
+            f"[tan]{profile.name}[/tan]",
+            "\n".join(profile_item_lines),
+        )
     print(table)
 
 
 @app.command(name="list")
-def _list():
+def profile_list():
     """
     List profiles
     """
@@ -58,8 +63,8 @@ def _list():
         utils.handle_response(result)
 
 
-@app.command(no_args_is_help=True)
-def create(
+@app.command(name="create", no_args_is_help=True)
+def profile_create(
     name: str = typer.Option(..., "--name", "-n"),
     profile_file: Path = typer.Option(..., "--profile_file", "-pf"),
 ):
@@ -82,8 +87,8 @@ def create(
         utils.handle_response(result)
 
 
-@app.command(no_args_is_help=True)
-def update(
+@app.command(name="update", no_args_is_help=True)
+def profile_update(
     name: str = typer.Option(..., "--name", "-n"),
     newname: str = typer.Option(None, "--newname"),
     profile_file: Path = typer.Option(None, "--profile_file", "-pf"),

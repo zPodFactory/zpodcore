@@ -4,6 +4,7 @@ from rich.pretty import Pretty
 from rich.table import Table
 
 from zpodcli.lib import zpod_client
+from zpodcli.lib.utils import get_boolean_markdown
 
 app = typer.Typer(help="Manage endpoints")
 
@@ -25,6 +26,7 @@ def generate_table(endpoints: list, action: str = None):
     table.add_column("Description")
     table.add_column("Compute")
     table.add_column("Network")
+    table.add_column("Enabled")
 
     for endpoint in endpoints:
         ep = endpoint.endpoints
@@ -33,17 +35,17 @@ def generate_table(endpoints: list, action: str = None):
 
         table.add_row(
             endpoint.id,
-            endpoint.name,
+            f"[dark_khaki]{endpoint.name}[/dark_khaki]",
             endpoint.description,
             Pretty(epc),
             Pretty(epn),
-            f"{endpoint.enabled.__str__()}",
+            get_boolean_markdown(endpoint.enabled),
         )
     console.print(table)
 
 
 @app.command(name="list")
-def _list():
+def endpoint_list():
     """
     List Endpoints
     """
