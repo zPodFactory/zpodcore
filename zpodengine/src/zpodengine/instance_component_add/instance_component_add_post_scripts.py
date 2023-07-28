@@ -1,5 +1,3 @@
-import time
-
 from prefect import task
 from sqlmodel import select
 
