@@ -14,5 +14,4 @@ def isauthenticated():
 
     # Configuration is done, but we need to check if the token is valid
     # TODO: check if token is valid
-    print("[green]Connected to server.[/green]")
     return True

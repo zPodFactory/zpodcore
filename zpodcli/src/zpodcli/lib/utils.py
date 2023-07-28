@@ -32,5 +32,11 @@ def handle_response(result):
         )
 
 
-def print_errors(txt, color="bright_red"):
+def print_errors(txt, color="indian_red"):
     print(f"[{color}]Error(s) Found:\n  {txt}[/{color}]")
+
+
+def get_boolean_markdown(boolean: bool):
+    if boolean:
+        return f"[dark_sea_green4]{boolean}[/dark_sea_green4]"
+    return f"[indian_red]{boolean}[/indian_red]"

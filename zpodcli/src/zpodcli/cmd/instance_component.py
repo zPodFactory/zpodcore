@@ -45,7 +45,7 @@ def generate_table(
             f"[light_coral]{ic.component.component_name}[/light_coral]",
             f"[cornflower_blue]{ic.component.component_version}[/cornflower_blue]",
             ic.component.component_description,
-            f"[dark_olive_green3]https://{ic.component.component_name}.{instance.domain}[/dark_olive_green3]",
+            f"[sky_blue2]https://{ic.component.component_name}.{instance.domain}[/sky_blue2]",
         )
 
     console.print(table)

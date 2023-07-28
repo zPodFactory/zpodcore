@@ -27,12 +27,16 @@ def generate_table(settings: list, action: str = None):
     table.add_column("Description")
     table.add_column("Value")
     for setting in settings:
-        table.add_row(f"{setting.name}", f"{setting.description}", f"{setting.value}")
+        table.add_row(
+            f"[tan]{setting.name}[/tan]",
+            f"{setting.description}",
+            f"[dark_khaki]{setting.value}[/dark_khaki]",
+        )
     console.print(table)
 
 
 @app.command(name="list")
-def _list():
+def setting_list():
     """
     List Settings
     """
@@ -49,6 +53,9 @@ def update(
     description: Optional[str] = typer.Option(None, "--description", "-d"),
     value: str = typer.Option(..., "--value", "-v"),
 ):
+    """
+    Update Setting
+    """
     z = zpod_client.ZpodClient()
     setting = None
     if description is None:
@@ -65,4 +72,4 @@ def update(
     else:
         content = json.loads(response.content.decode())
         error_message = content["detail"]
-        console.print(f"Error: {error_message}", style="red")
+        console.print(f"Error: {error_message}", style="indian_red")

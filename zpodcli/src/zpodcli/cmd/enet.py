@@ -22,15 +22,12 @@ def generate_table(enets: list, action: str = None):
         header_style="bold cyan",
     )
     for enet in enets:
-        table.add_row(
-            enet.name,
-            enet.project_id
-        )
+        table.add_row(enet.name, enet.project_id)
     console.print(table)
 
 
-@app.command(no_args_is_help=True)
-def list(
+@app.command(name="list", no_args_is_help=True)
+def enet_list(
     endpoint: int = typer.Option(..., "--endpoint", "-e"),
 ):
     """
@@ -41,8 +38,8 @@ def list(
     generate_table(enets, "List")
 
 
-@app.command(no_args_is_help=True)
-def create(
+@app.command(name="create", no_args_is_help=True)
+def enet_create(
     endpoint: int = typer.Option(..., "--endpoint", "-e"),
     name: str = typer.Option(..., "--name", "-n"),
 ):
@@ -54,8 +51,8 @@ def create(
     print(f"ENet [magenta]{name}[/magenta] has been created.")
 
 
-@app.command(no_args_is_help=True)
-def delete(
+@app.command(name="delete", no_args_is_help=True)
+def enet_delete(
     endpoint: int = typer.Option(..., "--endpoint", "-e"),
     name: str = typer.Option(..., "--name", "-n"),
 ):
