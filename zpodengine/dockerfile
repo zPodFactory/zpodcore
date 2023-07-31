@@ -1,12 +1,12 @@
 # Define Versions
-ARG POETRY_VERSION=1.4.2
+ARG POETRY_VERSION=1.5.1
 ARG POETRY_VENV=/opt/venv
-ARG PS_VERSION=7.3.4
-ARG PS_INSTALL_VERSION=7-3-4
+ARG PS_VERSION=7.3.6
+ARG PS_INSTALL_VERSION=7-3-6
 ARG POWERCLI_VERSION=13.1.0.21624340
 ARG POWERNSX_VERSION=3.0.1192
-ARG GOVC_VERSION=0.30.4
-ARG VCC_VERSION=1.1.2
+ARG GOVC_VERSION=0.30.5
+ARG VCC_VERSION=1.1.5
 
 #################################################
 # Base
@@ -60,14 +60,14 @@ RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     && echo "ARCH=$ARCH" \
     && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz
 
-# Download govc
+# Download govc (FIXME: vcc will break on arm64, no binaries built)
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     "linux/amd64")   echo "x86_64";; \
     "linux/arm64")   echo "arm64" ;; \
     *)               echo ""      ;; esac) \
     && echo "ARCH=$ARCH" \
     && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz \
-    && curl -o /usr/local/bin/vcc -L https://cloud.tsugliani.fr/vcc/vcc-${VCC_VERSION}-${ARCH}
+    && curl -o /usr/local/bin/vcc -L https://github.com/vmware-labs/vmware-customer-connect-cli/releases/download/v${VCC_VERSION}/vcc-linux-v${VCC_VERSION}
 
 # Define the folder where we will be installing PowerShell
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
@@ -82,15 +82,6 @@ RUN tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
     && chmod +x /usr/local/bin/govc \
     && chmod +x /usr/local/bin/vcc
-
-# Install ovftool
-# FIXME: Using our Dropbox zPodDocumentation/Binaries Dropbox folder. (OVFTool 4.4.1)
-# COPY ./VMware-ovftool-4.4.1-16812187-lin.aarch64.zip /tmp/ovftool.zip
-# RUN curl -L https://www.dropbox.com/s/rrvhvewwi3zrr4p/VMware-ovftool-4.4.1-16812187-lin.x86_64.bundle?dl=1 -o /tmp/ovftool.bundle
-# RUN sh /tmp/ovftool.bundle --console --eulas-agreed --required
-# RUN rm -f /tmp/ovftool.bundle
-
-
 
 #################################################
 # MAIN
