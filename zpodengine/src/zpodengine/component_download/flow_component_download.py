@@ -267,10 +267,26 @@ def compute_checksum(component: Component, filename: Path) -> str:
     return output.split()[0]
 
 
+def wait_for_file(file_path, retries=10, wait_time=5):
+    for _ in range(retries):
+        if os.path.exists(file_path):
+            print(f"File found at {file_path}")
+            return True
+        else:
+            print(
+                f"File not found at {file_path}. Waiting for {wait_time} seconds before retrying."
+            )
+            time.sleep(wait_time)
+    print(f"File not found at {file_path} after {retries} retries.")
+    return False
+
+
 @task(task_run_name="{component.component_uid}-verify-checksum")
 def verify_checksum(component: Component, filename: Path) -> bool:
     logger = get_run_logger()
-    if not filename.exists():
+
+    file_exists = wait_for_file(filename)
+    if not file_exists:
         logger.info(f"The specified {filename} does not exist")
         raise ValueError(f"{filename} does not exist")
 
