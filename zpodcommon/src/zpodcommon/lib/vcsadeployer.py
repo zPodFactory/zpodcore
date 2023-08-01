@@ -7,6 +7,7 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.lib.commands import cmd_execute
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
 from zpodengine.lib import database
 
@@ -74,16 +75,8 @@ def vcsa_deployer(instance_component: M.InstanceComponent):
     # Fetch component default gw from instance
     component_gateway = MgmtIp.instance(i, "gw").ip
 
-    with database.get_session_ctx() as session:
-        setting_zpodfactory_host = session.exec(
-            select(M.Setting).where(M.Setting.name == "zpodfactory_host")
-        ).one()
-        zpodfactory_host = setting_zpodfactory_host.value
-
-        setting_zpodfactory_ssh_key = session.exec(
-            select(M.Setting).where(M.Setting.name == "zpodfactory_ssh_key")
-        ).one()
-        zpodfactory_ssh_key = setting_zpodfactory_ssh_key.value
+    zpodfactory_host = DBUtils.get_setting_value("zpodfactory_host")
+    zpodfactory_ssh_key = DBUtils.get_setting_value("zpodfactory_ssh_key")
 
     # Specific setting for vcsa, deployed on first mandatory esxi11
     zpod_hostname = "esxi11"

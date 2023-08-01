@@ -15,6 +15,7 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
+from zpodcommon.lib.dbutils import DBUtils
 from zpodengine.lib import database
 
 LIBRARY_PATH = "/library"
@@ -104,22 +105,10 @@ def run_command(cmd: str, cmd_engine: str):
 
 
 def get_customerconnect_credentials() -> Tuple[str, str]:
-    with database.get_session_ctx() as session:
-        zpodfactory_customerconnect_username = session.exec(
-            select(M.Setting).where(
-                M.Setting.name == "zpodfactory_customerconnect_username"
-            )
-        ).one()
-        vcc_username = zpodfactory_customerconnect_username.value
+    vcc_username = DBUtils.get_setting_value("zpodfactory_customerconnect_username")
+    vcc_password = DBUtils.get_setting_value("zpodfactory_customerconnect_password")
 
-        zpodfactory_customerconnect_password = session.exec(
-            select(M.Setting).where(
-                M.Setting.name == "zpodfactory_customerconnect_password"
-            )
-        ).one()
-        vcc_password = zpodfactory_customerconnect_password.value
-
-        return vcc_username, vcc_password
+    return vcc_username, vcc_password
 
 
 @task(
