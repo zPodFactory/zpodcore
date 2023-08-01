@@ -3,6 +3,7 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceStatus
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network import get_instance_all_subnets, get_instance_primary_subnet
 from zpodengine.lib import database
 
@@ -15,12 +16,8 @@ def instance_deploy_prep(instance_id: int):
         instance.status = InstanceStatus.BUILDING
 
         if not instance.domain:
-            setting = session.exec(
-                select(M.Setting).where(
-                    M.Setting.name == "zpodfactory_instances_domain"
-                )
-            ).one()
-            instance.domain = f"{instance.name}.{setting.value}"
+            domain = DBUtils.get_setting_value("zpodfactory_instances_domain")
+            instance.domain = f"{instance.name}.{domain}"
 
         # Fetching main /24 network for Instance
         instance_primary_subnet = get_instance_primary_subnet(

@@ -3,6 +3,7 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.lib.commands import cmd_execute
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network import MgmtIp
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.instance_component_add.instance_component_add_utils import (
@@ -19,10 +20,7 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
         custom_postscripts = instance_component.data.get("postscripts", [])
         print(f"Run Postscripts: {custom_postscripts}")
 
-        setting_zpodfactory_host = session.exec(
-            select(M.Setting).where(M.Setting.name == "zpodfactory_host")
-        ).one()
-        zpodfactory_host = setting_zpodfactory_host.value
+        zpodfactory_host = DBUtils.get_setting_value("zpodfactory_host")
 
         c = instance_component.component
         i = instance_component.instance

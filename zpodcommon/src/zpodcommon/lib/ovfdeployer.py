@@ -6,6 +6,7 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.lib.commands import cmd_execute
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
 from zpodengine import settings
 from zpodengine.lib import database
@@ -43,26 +44,18 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     # Fetch component default gw from instance
     component_gateway = MgmtIp.instance(i, "gw").ip
 
-    with database.get_session_ctx() as session:
-        setting_zpodfactory_host = session.exec(
-            select(M.Setting).where(M.Setting.name == "zpodfactory_host")
-        ).one()
-        zpodfactory_host = setting_zpodfactory_host.value
+    zpodfactory_host = DBUtils.get_setting_value("zpodfactory_host")
+    zpodfactory_ssh_key = DBUtils.get_setting_value("zpodfactory_ssh_key")
 
-        if c.component_name in ["zbox", "vyos"]:
-            # zpodfactory is the main DNS server for every instance and links to zbox/vyos
-            # as DNS servers for their respective subdomain.
-            #
-            # For those 2 components, the DNS Server must be the zpodfactory_host.
-            zpod_dns = zpodfactory_host
-        else:
-            # all other components rely on zbox/vyos as their DNS server.
-            zpod_dns = MgmtIp.instance(i, "zbox").ip
-
-        setting_zpodfactory_ssh_key = session.exec(
-            select(M.Setting).where(M.Setting.name == "zpodfactory_ssh_key")
-        ).one()
-        zpodfactory_ssh_key = setting_zpodfactory_ssh_key.value
+    if c.component_name in ["zbox", "vyos"]:
+        # zpodfactory is the main DNS server for every instance and links to zbox/vyos
+        # as DNS servers for their respective subdomain.
+        #
+        # For those 2 components, the DNS Server must be the zpodfactory_host.
+        zpod_dns = zpodfactory_host
+    else:
+        # all other components rely on zbox/vyos as their DNS server.
+        zpod_dns = MgmtIp.instance(i, "zbox").ip
 
     print(f"Component Nested: {cjson['component_isnested']}")
 
