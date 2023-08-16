@@ -13,7 +13,7 @@ def get_status_markdown(status: str):
     match status:
         case "SCHEDULED":
             return "[royal_blue1]SCHEDULED[/royal_blue1]"
-        case "COMPLETED" | "ACTIVE":
+        case "COMPLETED" | "ACTIVE" | "DOWNLOAD_COMPLETED":
             return f"[dark_sea_green4]{status}[/dark_sea_green4]"
         case "NOT_STARTED" | "INACTIVE":
             return f"[grey63]{status}[/grey63]"
