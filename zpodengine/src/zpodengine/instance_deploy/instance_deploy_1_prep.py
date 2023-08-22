@@ -1,5 +1,4 @@
 from prefect import task
-from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceStatus

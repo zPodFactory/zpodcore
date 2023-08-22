@@ -1,17 +1,17 @@
-from zpodengine.instance_component_add.instance_component_add_deploy import (
-    instance_component_add_deploy,
+from zpodengine.instance_component_add.instance_component_add_1_prep import (
+    instance_component_add_prep,
 )
-from zpodengine.instance_component_add.instance_component_add_finalize import (
-    instance_component_add_finalize,
-)
-from zpodengine.instance_component_add.instance_component_add_post_scripts import (
-    instance_component_add_post_scripts,
-)
-from zpodengine.instance_component_add.instance_component_add_pre_scripts import (
+from zpodengine.instance_component_add.instance_component_add_2_pre_scripts import (
     instance_component_add_pre_scripts,
 )
-from zpodengine.instance_component_add.instance_component_add_prep import (
-    instance_component_add_prep,
+from zpodengine.instance_component_add.instance_component_add_3_deploy import (
+    instance_component_add_deploy,
+)
+from zpodengine.instance_component_add.instance_component_add_4_post_scripts import (
+    instance_component_add_post_scripts,
+)
+from zpodengine.instance_component_add.instance_component_add_5_finalize import (
+    instance_component_add_finalize,
 )
 from zpodengine.lib.options import task_options_setup
 
