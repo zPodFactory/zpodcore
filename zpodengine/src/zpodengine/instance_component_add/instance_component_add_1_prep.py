@@ -10,7 +10,7 @@ from zpodengine.lib import database
 def instance_component_add_prep(
     instance_id: int,
     profile_item: dict,
-):  # sourcery skip: remove-unnecessary-cast
+):
     component_uid = profile_item.pop("component_uid")
     with database.get_session_ctx() as session:
         component = session.exec(

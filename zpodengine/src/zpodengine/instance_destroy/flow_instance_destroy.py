@@ -2,17 +2,17 @@ from prefect import flow
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceStatus
-from zpodengine.instance_destroy.instance_destroy_dnsmasq import (
+from zpodengine.instance_destroy.instance_destroy_1_prep import instance_destroy_prep
+from zpodengine.instance_destroy.instance_destroy_2_dnsmasq import (
     instance_destroy_dnsmasq,
 )
-from zpodengine.instance_destroy.instance_destroy_finalize import (
-    instance_destroy_finalize,
-)
-from zpodengine.instance_destroy.instance_destroy_networking import (
+from zpodengine.instance_destroy.instance_destroy_3_vapp import instance_destroy_vapp
+from zpodengine.instance_destroy.instance_destroy_4_networking import (
     instance_destroy_networking,
 )
-from zpodengine.instance_destroy.instance_destroy_prep import instance_destroy_prep
-from zpodengine.instance_destroy.instance_destroy_vapp import instance_destroy_vapp
+from zpodengine.instance_destroy.instance_destroy_5_finalize import (
+    instance_destroy_finalize,
+)
 from zpodengine.lib import database
 from zpodengine.lib.options import task_options_setup
 

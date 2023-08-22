@@ -1,5 +1,4 @@
 from prefect import task
-from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.lib.commands import cmd_execute
@@ -79,7 +78,8 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                         f"{zpod_hostname}.{i.domain}", component_ipaddress
                     )
 
-                # Check esxi host ssl certificate regeneration has been done before continuing
+                # Check esxi host ssl certificate regeneration has been done before
+                # continuing
                 cmd = (
                     f"/zpodengine/scripts/python/post-scripts/esxi_check_certificate.py"
                     f" {zpod_hostname}.{i.domain} {zpod_hostname}"

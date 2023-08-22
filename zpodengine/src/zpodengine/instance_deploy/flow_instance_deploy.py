@@ -5,16 +5,18 @@ from zpodcommon.enums import InstanceStatus
 from zpodengine.instance_component_add.instance_component_add import (
     instance_component_add,
 )
-from zpodengine.instance_deploy.instance_deploy_dnsmasq import instance_deploy_dnsmasq
-from zpodengine.instance_deploy.instance_deploy_finalize import instance_deploy_finalize
-from zpodengine.instance_deploy.instance_deploy_get_profile import (
-    instance_deploy_get_profile,
-)
-from zpodengine.instance_deploy.instance_deploy_networking import (
+from zpodengine.instance_deploy.instance_deploy_1_prep import instance_deploy_prep
+from zpodengine.instance_deploy.instance_deploy_2_dnsmasq import instance_deploy_dnsmasq
+from zpodengine.instance_deploy.instance_deploy_3_networking import (
     instance_deploy_networking,
 )
-from zpodengine.instance_deploy.instance_deploy_prep import instance_deploy_prep
-from zpodengine.instance_deploy.instance_deploy_vapp import instance_deploy_vapp
+from zpodengine.instance_deploy.instance_deploy_4_vapp import instance_deploy_vapp
+from zpodengine.instance_deploy.instance_deploy_5_get_profile import (
+    instance_deploy_get_profile,
+)
+from zpodengine.instance_deploy.instance_deploy_6_finalize import (
+    instance_deploy_finalize,
+)
 from zpodengine.lib import database
 from zpodengine.lib.options import task_options_setup
 
