@@ -53,6 +53,25 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                     if cur_component.component.component_name == "esxi"
                 ]
 
+                # Fetch vCenter Server Licenses from Settings
+                license_parts = []
+                license_vcenter = DBUtils.get_component_license(c, "vcenter")
+                if license_vcenter is not None:
+                    license_parts.append(f"-license_vcenter {license_vcenter}")
+
+                license_esxi = DBUtils.get_component_license(c, "esxi")
+                if license_esxi is not None:
+                    license_parts.append(f"-license_esxi {license_esxi}")
+
+                license_vsan = DBUtils.get_component_license(c, "vsan")
+                if license_vsan is not None:
+                    license_parts.append(f"-license_vsan {license_vsan}")
+
+                license_tanzu = DBUtils.get_component_license(c, "tanzu")
+
+                if license_tanzu is not None:
+                    license_parts.append(f"-license_tanzu {license_tanzu}")
+
                 # Configure vcsa component
                 cmd = (
                     f"/zpodengine/scripts/powershell/post-scripts/vcsa_configure.ps1"
@@ -60,6 +79,7 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                     f" -zPodUsername administrator@{i.domain}"
                     f" -zPodPassword {i.password}"
                     f" -zPodESXiList {','.join(zpod_esxi_list)}"
+                    " " + " ".join(license_parts)
                 )
                 cmd_execute(f'pwsh -c "& {cmd}"', debug=True)
 

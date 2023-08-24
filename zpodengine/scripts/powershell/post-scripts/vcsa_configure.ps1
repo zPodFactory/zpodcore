@@ -1,8 +1,16 @@
 Param (
-    [String]$zPodHostname = $(throw "-zPodHostname required"),
-    [String]$zPodUsername = $(throw "-zPodUsername required"),
-    [String]$zPodPassword = $(throw "-zPodPassword required"),
-    [String[]]$zPodESXiList = $(throw "-zPodESXiList required")
+  [String]$zPodHostname = $(throw "-zPodHostname required"),
+  [String]$zPodUsername = $(throw "-zPodUsername required"),
+  [String]$zPodPassword = $(throw "-zPodPassword required"),
+  [String[]]$zPodESXiList = $(throw "-zPodESXiList required"),
+  [Parameter(Mandatory=$false)]
+  [String]$license_esxi,
+  [Parameter(Mandatory=$false)]
+  [String]$license_vcenter,
+  [Parameter(Mandatory=$false)]
+  [String]$license_vsan,
+  [Parameter(Mandatory=$false)]
+  [String]$license_tanzu
 )
 
 $PSStyle.OutputRendering = 'PlainText'
@@ -40,7 +48,7 @@ New-AdvancedSetting -Entity "Cluster" -type ClusterHA -Name "das.ignoreInsuffici
 Write-Host "Add Hosts to Cluster..."
 # Loop through ESXi list and add them to Cluster
 foreach ($esxi in $zPodESXiList) {
-    Add-VMHost -Name $esxi -Location "Cluster" -User root -Password $zPodPassword -Force
+  Add-VMHost -Name $esxi -Location "Cluster" -User root -Password $zPodPassword -Force
 }
 
 Write-Host "Set vmk0 as vMotion enabled interface..."
@@ -52,31 +60,38 @@ Get-Cluster "Cluster" | Get-VMhost | %{ $_.ExtensionData.ReconfigureHostForDAS()
 # Disable Coredump warnings
 Get-VMHost | Get-AdvancedSetting -Name UserVars.SuppressCoredumpWarning | Set-AdvancedSetting -Value 1 -Confirm:$false
 
-# Set VMware vSphere Licenses
-# in zPod 2.0 this will be based on the zcli setting f"license_{component_uid}" key/values
 
-# $vcsaLicense = $env:LICENSE_VCSA
-# $esxiLicense = $env:LICENSE_ESXI
-# $vsanLicense = $env:LICENSE_VSAN
-
-# Write-Host "Add & Assign vSphere Licenses..."
-# $si = Get-View $global:DefaultVIServer
+Write-Host "Add & Assign vSphere Licenses..."
+$si = Get-View $global:DefaultVIServer
 
 # Add licenses to vCenter
-# $licmgr = get-view $si.Content.LicenseManager
-# $licmgr.AddLicense($vcsaLicense, $null)
-# $licmgr.AddLicense($esxiLicense, $null)
-# $licmgr.AddLicense($vsanLicense, $null)
+$licmgr = $licmgr = Get-View $si.Content.LicenseManager
+$licmgrassign = Get-View $licmgr.LicenseAssignmentManager
 
-# Assign vCenter License
-# $licmgrassign = Get-View $licmgr.LicenseAssignmentManager
-# $licmgrassign.UpdateAssignedLicense($global:DefaultVIServer.InstanceUuid, $vcsaLicense, $null)
 
-# Assign ESXi License
-# foreach ($esxihost in get-vmhost) {
-#     $esxiview = Get-View $esxihost
-#     $licmgrassign.UpdateAssignedLicense($esxiview.Config.Host.Value, $esxiLicense, $null)
-# }
+if (-not [string]::IsNullOrEmpty($license_vcenter)) {
+  $licmgr.AddLicense($license_vcenter, $null)
+  $licmgrassign.UpdateAssignedLicense($global:DefaultVIServer.InstanceUuid, $license_vcenter, $null)
+}
+
+if (-not [string]::IsNullOrEmpty($license_esxi)) {
+  $licmgr.AddLicense($license_esxi, $null)
+
+  # Assign ESXi License
+  foreach ($esxihost in Get-VMHost) {
+    $esxiview = Get-View $esxihost
+    $licmgrassign.UpdateAssignedLicense($esxiview.Config.Host.Value, $license_esxi, $null)
+  }
+}
+
+if (-not [string]::IsNullOrEmpty($license_vsan)) {
+  $licmgr.AddLicense($license_vsan, $null)
+}
+
+if (-not [string]::IsNullOrEmpty($license_tanzu)) {
+  $licmgr.AddLicense($license_tanzu, $null)
+}
+
 
 # Disable ESXi autocustomization (William Lam templates) (this should not happen but it does ...)
 Get-VMHost | Get-AdvancedSetting -Name UserVars.vGhettoSetup | Set-AdvancedSetting -Value 1 -Confirm:$false
