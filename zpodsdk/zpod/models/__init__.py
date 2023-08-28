@@ -19,8 +19,6 @@ from .endpoints_update import EndpointsUpdate
 from .endpoints_view import EndpointsView
 from .http_validation_error import HTTPValidationError
 from .instance_component_create import InstanceComponentCreate
-from .instance_component_data_create import InstanceComponentDataCreate
-from .instance_component_data_view import InstanceComponentDataView
 from .instance_component_view import InstanceComponentView
 from .instance_create import InstanceCreate
 from .instance_feature_view import InstanceFeatureView
@@ -71,8 +69,6 @@ __all__ = (
     "EndpointViewFull",
     "HTTPValidationError",
     "InstanceComponentCreate",
-    "InstanceComponentDataCreate",
-    "InstanceComponentDataView",
     "InstanceComponentView",
     "InstanceCreate",
     "InstanceFeatureView",

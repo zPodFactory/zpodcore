@@ -12,12 +12,20 @@ from zpodengine.instance_component_add.instance_component_add import (
 def flow_instance_component_add(
     instance_id: int,
     instance_name: str,
-    profile_item: dict,
+    component_uid: str,
+    host_id: str | None = None,
+    hostname: str | None = None,
+    vcpu: int | None = None,
+    vmem: int | None = None,
 ):
     instance_component_add(
         instance_id=instance_id,
         instance_name=instance_name,
-        profile_item=profile_item,
+        component_uid=component_uid,
+        host_id=host_id,
+        hostname=hostname,
+        vcpu=vcpu,
+        vmem=vmem,
     )
 
 
@@ -25,6 +33,7 @@ if __name__ == "__main__":
     print(
         flow_instance_component_add(
             instance_id=1,
-            profile_item=dict(component_uid="cds-10.2"),
+            instance_name="Demo",
+            component_uid="cds-10.2",
         )
     )

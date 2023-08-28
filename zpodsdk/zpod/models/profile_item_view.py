@@ -12,19 +12,22 @@ class ProfileItemView:
     """
     Attributes:
         component_uid (str):  Example: zbox-11.7.
-        last_octet (Union[Unset, int]):  Example: 11.
+        host_id (Union[Unset, int]):  Example: 11.
+        hostname (Union[Unset, str]):  Example: zbox.
         vcpu (Union[Unset, int]):  Example: 4.
         vmem (Union[Unset, int]):  Example: 12.
     """
 
     component_uid: str
-    last_octet: Union[Unset, int] = UNSET
+    host_id: Union[Unset, int] = UNSET
+    hostname: Union[Unset, str] = UNSET
     vcpu: Union[Unset, int] = UNSET
     vmem: Union[Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component_uid = self.component_uid
-        last_octet = self.last_octet
+        host_id = self.host_id
+        hostname = self.hostname
         vcpu = self.vcpu
         vmem = self.vmem
 
@@ -34,8 +37,10 @@ class ProfileItemView:
                 "component_uid": component_uid,
             }
         )
-        if last_octet is not UNSET:
-            field_dict["last_octet"] = last_octet
+        if host_id is not UNSET:
+            field_dict["host_id"] = host_id
+        if hostname is not UNSET:
+            field_dict["hostname"] = hostname
         if vcpu is not UNSET:
             field_dict["vcpu"] = vcpu
         if vmem is not UNSET:
@@ -48,7 +53,9 @@ class ProfileItemView:
         d = src_dict.copy()
         component_uid = d.pop("component_uid")
 
-        last_octet = d.pop("last_octet", UNSET)
+        host_id = d.pop("host_id", UNSET)
+
+        hostname = d.pop("hostname", UNSET)
 
         vcpu = d.pop("vcpu", UNSET)
 
@@ -56,7 +63,8 @@ class ProfileItemView:
 
         profile_item_view = cls(
             component_uid=component_uid,
-            last_octet=last_octet,
+            host_id=host_id,
+            hostname=hostname,
             vcpu=vcpu,
             vmem=vmem,
         )

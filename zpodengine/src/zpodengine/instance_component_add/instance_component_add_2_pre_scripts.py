@@ -10,14 +10,14 @@ from zpodengine.lib import database
 
 @task
 @handle_instance_component_add_failure
-def instance_component_add_pre_scripts(*, instance_component_id: int):
+def instance_component_add_pre_scripts(
+    *,
+    instance_component_id: int,
+):
     with database.get_session_ctx() as session:
         instance_component = session.get(M.InstanceComponent, instance_component_id)
-        custom_prescripts = instance_component.data.get("prescripts", [])
-        print(f"Run Prescripts: {custom_prescripts}")
 
         c = instance_component.component
-        print(c)
 
         match c.component_name:
             case "vcsa":

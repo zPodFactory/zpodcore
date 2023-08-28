@@ -16,14 +16,16 @@ class D:
 
     class profile:
         component_uid = {"example": "zbox-11.7"}
-        last_octet = {"example": 11}
+        host_id = {"example": 11}
+        hostname = {"example": "zbox"}
         vcpu = {"example": 4}
         vmem = {"example": 12}
 
 
 class ProfileItemView(SchemaBase):
     component_uid: str = Field(..., D.profile.component_uid)
-    last_octet: int = Field(None, D.profile.last_octet)
+    host_id: int = Field(None, D.profile.host_id)
+    hostname: str = Field(None, D.profile.hostname)
     vcpu: int = Field(None, D.profile.vcpu)
     vmem: int = Field(None, D.profile.vmem)
 
@@ -38,7 +40,8 @@ class ProfileView(SchemaBase):
 
 class ProfileItemCreate(SchemaBase):
     component_uid: str = Field(..., D.profile.component_uid)
-    last_octet: int | None = Field(None, D.profile.last_octet)
+    host_id: int | None = Field(None, D.profile.host_id)
+    hostname: str | None = Field(None, D.profile.hostname)
     vcpu: int | None = Field(None, D.profile.vcpu)
     vmem: int | None = Field(None, D.profile.vmem)
 
@@ -52,7 +55,8 @@ class ProfileCreate(SchemaBase):
 
 class ProfileItemUpdate(SchemaBase):
     component_uid: str = Field(..., D.profile.component_uid)
-    last_octet: int = Field(None, D.profile.last_octet)
+    host_id: int | None = Field(None, D.profile.host_id)
+    hostname: str | None = Field(None, D.profile.hostname)
     vcpu: int = Field(None, D.profile.vcpu)
     vmem: int = Field(None, D.profile.vmem)
 

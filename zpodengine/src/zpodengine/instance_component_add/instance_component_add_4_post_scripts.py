@@ -3,7 +3,6 @@ from prefect import task
 from zpodcommon import models as M
 from zpodcommon.lib.commands import cmd_execute
 from zpodcommon.lib.dbutils import DBUtils
-from zpodcommon.lib.network import MgmtIp
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.instance_component_add.instance_component_add_utils import (
     handle_instance_component_add_failure,
@@ -16,26 +15,16 @@ from zpodengine.lib import database
 def instance_component_add_post_scripts(*, instance_component_id: int):
     with database.get_session_ctx() as session:
         instance_component = session.get(M.InstanceComponent, instance_component_id)
-        custom_postscripts = instance_component.data.get("postscripts", [])
-        print(f"Run Postscripts: {custom_postscripts}")
 
         zpodfactory_host = DBUtils.get_setting_value("zpodfactory_host")
 
-        c = instance_component.component
-        i = instance_component.instance
-
-        if _ := instance_component.data.get("hostname"):
-            zpod_hostname = _
-        elif _ := instance_component.data.get("last_octet"):
-            zpod_hostname = f"{c.component_name}{_}"
-        else:
-            zpod_hostname = c.component_name
+        component = instance_component.component
+        instance = instance_component.instance
 
         # Specific behavior for critical instance components
-        match c.component_name:
+        match component.component_name:
             case "zbox":
                 print("--- zbox ---")
-
                 # Add static routes on NSX T1 unless using vyos below
 
             case "vyos":
@@ -48,26 +37,26 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
 
                 # Fetch list of esxi components attached to this instance
                 zpod_esxi_list = [
-                    f"esxi{cur_component.data.get('last_octet')}.{i.domain}"
-                    for cur_component in i.components
+                    cur_component.fqdn
+                    for cur_component in instance.components
                     if cur_component.component.component_name == "esxi"
                 ]
 
                 # Fetch vCenter Server Licenses from Settings
                 license_parts = []
-                license_vcenter = DBUtils.get_component_license(c, "vcenter")
+                license_vcenter = DBUtils.get_component_license(component, "vcenter")
                 if license_vcenter is not None:
                     license_parts.append(f"-license_vcenter {license_vcenter}")
 
-                license_esxi = DBUtils.get_component_license(c, "esxi")
+                license_esxi = DBUtils.get_component_license(component, "esxi")
                 if license_esxi is not None:
                     license_parts.append(f"-license_esxi {license_esxi}")
 
-                license_vsan = DBUtils.get_component_license(c, "vsan")
+                license_vsan = DBUtils.get_component_license(component, "vsan")
                 if license_vsan is not None:
                     license_parts.append(f"-license_vsan {license_vsan}")
 
-                license_tanzu = DBUtils.get_component_license(c, "tanzu")
+                license_tanzu = DBUtils.get_component_license(component, "tanzu")
 
                 if license_tanzu is not None:
                     license_parts.append(f"-license_tanzu {license_tanzu}")
@@ -75,9 +64,9 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                 # Configure vcsa component
                 cmd = (
                     f"/zpodengine/scripts/powershell/post-scripts/vcsa_configure.ps1"
-                    f" -zPodHostname {zpod_hostname}.{i.domain}"
-                    f" -zPodUsername administrator@{i.domain}"
-                    f" -zPodPassword {i.password}"
+                    f" -zPodHostname {instance_component.fqdn}"
+                    f" -zPodUsername administrator@{instance.domain}"
+                    f" -zPodPassword {instance.password}"
                     f" -zPodESXiList {','.join(zpod_esxi_list)}"
                     " " + " ".join(license_parts)
                 )
@@ -89,20 +78,16 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                 with vCenter.auth_by_instance(
                     instance=instance_component.instance
                 ) as vc:
-                    component_ipaddress = MgmtIp.instance_component(
-                        instance_component
-                    ).ip
-
-                    print(f"Waiting for VMware Tools IP {component_ipaddress}...")
+                    print(f"Waiting for VMware Tools IP {instance_component.ip}...")
                     vc.wait_for_tools_ip(
-                        f"{zpod_hostname}.{i.domain}", component_ipaddress
+                        f"{instance_component.fqdn}", instance_component.ip
                     )
 
                 # Check esxi host ssl certificate regeneration has been done before
                 # continuing
                 cmd = (
                     f"/zpodengine/scripts/python/post-scripts/esxi_check_certificate.py"
-                    f" {zpod_hostname}.{i.domain} {zpod_hostname}"
+                    f" {instance_component.fqdn} {instance_component.hostname}"
                 )
 
                 cmd_execute(f"python {cmd}", debug=True)
@@ -110,10 +95,10 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
                 # Configure esxi
                 cmd = (
                     f"/zpodengine/scripts/powershell/post-scripts/esxi_configure.ps1"
-                    f" -zPodHostname {zpod_hostname}.{i.domain}"
-                    f" -zBoxHostname zbox.{i.domain}"
-                    f" -zPodFactory {zpodfactory_host}.{i.domain}"
-                    f" -zPodPassword {i.password}"
+                    f" -zPodHostname {instance_component.fqdn}"
+                    f" -zBoxHostname zbox.{instance.domain}"
+                    f" -zPodFactory {zpodfactory_host}.{instance.domain}"
+                    f" -zPodPassword {instance.password}"
                 )
                 cmd_execute(f'pwsh -c "& {cmd}"', debug=True)
 

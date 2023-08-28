@@ -75,7 +75,7 @@ def get_instance_all_subnets(instance_subnet: IPv4Network):
 
 
 class MgmtIp:
-    MGMT_LAST_OCTETS = dict(
+    MGMT_HOST_IDS = dict(
         gw=1,
         zbox=2,
         nsx=5,
@@ -91,35 +91,36 @@ class MgmtIp:
         vyos=0,  # vyos(0) will get the subnet's last ip
     )
 
-    def __init__(self, ipv4network: IPv4Network, last_octet: int):
+    def __init__(self, ipv4network: IPv4Network, host_id: int):
+        # sourcery skip: remove-unnecessary-cast
         self.ipv4network = ipv4network
-        self.ipv4address = list(ipv4network.hosts())[last_octet - 1]
+        self.ipv4address = list(ipv4network.hosts())[int(host_id) - 1]
 
     @classmethod
-    def instance_component(cls, instance_component: M.InstanceComponent):
+    def instance_component(
+        cls,
+        instance_component: M.InstanceComponent,
+        host_id: int | None = None,
+    ):
         """Load from instance_component"""
-        if instance_component.data.get("last_octet"):
-            last_octet = instance_component.data["last_octet"]
-        elif (
-            comp_name := instance_component.component.component_name
-        ) in cls.MGMT_LAST_OCTETS:
-            last_octet = cls.MGMT_LAST_OCTETS[comp_name]
-        else:
-            last_octet = None
-        return cls.instance(instance=instance_component.instance, last_octet=last_octet)
+        return cls.instance(
+            instance=instance_component.instance,
+            component_name=instance_component.component.component_name,
+            host_id=host_id,
+        )
 
     @classmethod
     def instance(
         cls,
         instance: M.Instance,
         component_name: str | None = None,
-        last_octet: int | None = None,
+        host_id: int | None = None,
     ):
         """Load from instance"""
-        if last_octet is None:
-            last_octet = cls.MGMT_LAST_OCTETS[component_name]
+        if host_id is None:
+            host_id = cls.MGMT_HOST_IDS[component_name]
         ipv4network = IPv4Network(instance.networks[0].cidr)
-        return cls(ipv4network=ipv4network, last_octet=last_octet)
+        return cls(ipv4network=ipv4network, host_id=host_id)
 
     @property
     def ip(self):
