@@ -31,7 +31,7 @@ def vcsa_extract_iso(component: M.Component):
         f" -o{path_component}/extracted_iso"
     )
 
-    return cmd_execute(cmd, debug=True)
+    return cmd_execute(cmd)
 
 
 def vcsa_fix_permissions(component: M.Component):
@@ -43,11 +43,11 @@ def vcsa_fix_permissions(component: M.Component):
     # Set execute permissions on ovftool
     path_vcsa_cli = "extracted_iso/vcsa-cli-installer/lin64/vcsa-deploy*"
     cmd_permissions_ovftool = f"chmod +x {path_component}/{path_ovftool}"
-    cmd_execute(cmd_permissions_ovftool, debug=True)
+    cmd_execute(cmd_permissions_ovftool)
 
     # Set execute permissions on vcsa cli installer
     cmd_permissions_vcsa_cli = f"chmod +x {path_component}/{path_vcsa_cli}"
-    cmd_execute(cmd_permissions_vcsa_cli, debug=True)
+    cmd_execute(cmd_permissions_vcsa_cli)
 
 
 def vcsa_deployer(instance_component: M.InstanceComponent):
@@ -129,4 +129,4 @@ def vcsa_deployer(instance_component: M.InstanceComponent):
     print("vcsa deploy command")
     print(cmd)
 
-    cmd_execute(cmd, debug=True)
+    cmd_execute(cmd)

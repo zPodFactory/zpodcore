@@ -113,4 +113,4 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     print("govc deploy command")
     print(cmd)
 
-    cmd_execute(cmd, debug=True)
+    cmd_execute(cmd)
