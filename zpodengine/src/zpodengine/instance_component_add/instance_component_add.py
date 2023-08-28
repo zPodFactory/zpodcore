@@ -20,45 +20,54 @@ def instance_component_add(
     *,
     instance_id: int,
     instance_name: str,
-    profile_item: dict,
+    component_uid: str,
+    host_id: str | None = None,
+    hostname: str | None = None,
+    vcpu: int | None = None,
+    vmem: int | None = None,
     wait_for=None,
-):  # sourcery skip: remove-unnecessary-cast
-    component_uid = profile_item["component_uid"]
+):
     prefix = f"{instance_name} {component_uid}"
     options = task_options_setup(prefix=prefix)
-
-    instance_component_id = instance_component_add_prep.with_options(
+    instance_component = instance_component_add_prep.with_options(
         **options(name="prep"),
     ).submit(
         instance_id=instance_id,
-        profile_item=profile_item,
+        component_uid=component_uid,
+        host_id=host_id,
+        hostname=hostname,
         wait_for=wait_for,
+    )
+    options = task_options_setup(
+        prefix=f"{prefix} ({instance_component.result().hostname})"
     )
 
     pre_scripts = instance_component_add_pre_scripts.with_options(
         **options(name="prescripts"),
     ).submit(
-        instance_component_id=instance_component_id,
-        wait_for=[instance_component_id],
+        instance_component_id=instance_component.result().id,
+        wait_for=[instance_component],
     )
 
     deploy = instance_component_add_deploy.with_options(
         **options(name="deploy"),
     ).submit(
-        instance_component_id=instance_component_id,
+        instance_component_id=instance_component.result().id,
+        vcpu=vcpu,
+        vmem=vmem,
         wait_for=[pre_scripts],
     )
 
     post_scripts = instance_component_add_post_scripts.with_options(
         **options(name="postscripts"),
     ).submit(
-        instance_component_id=instance_component_id,
+        instance_component_id=instance_component.result().id,
         wait_for=[deploy],
     )
 
     return instance_component_add_finalize.with_options(
         **options(name="finalize"),
     ).submit(
-        instance_component_id=instance_component_id,
+        instance_component_id=instance_component.result().id,
         wait_for=[post_scripts],
     )

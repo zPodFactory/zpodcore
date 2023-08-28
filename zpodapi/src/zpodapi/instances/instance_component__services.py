@@ -16,15 +16,15 @@ class InstanceComponentService(ServiceBase):
         component_in: InstanceComponentCreate,
     ):
         zpod_engine = ZpodEngineClient()
-
-        profile_item = dict(component_uid=component_in.component_uid)
-        profile_item |= component_in.data.dict()
-
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_component_add",
             deployment_name="default",
             run_name=(f"{instance.name} adding {component_in.component_uid}"),
             instance_id=instance.id,
             instance_name=instance.name,
-            profile_item=profile_item,
+            component_uid=component_in.component_uid,
+            host_id=component_in.host_id,
+            hostname=component_in.hostname,
+            vcpu=component_in.vcpu,
+            vmem=component_in.vmem,
         )

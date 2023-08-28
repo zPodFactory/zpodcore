@@ -4,31 +4,27 @@ from zpodapi.lib.schema_base import Field, SchemaBase
 
 class D:
     id = {"example": 1}
-    component_uid = {"example": "vcda-4.4.1"}
-
-    class data:
-        last_octet = {"example": 11}
-        vcpu = {"example": 4}
-        vmem = {"example": 16}
-
-
-class InstanceComponentDataView(SchemaBase):
-    last_octet: int | None = Field(None, D.data.last_octet)
-    vcpu: int | None = Field(None, D.data.vcpu)
-    vmem: int | None = Field(None, D.data.vmem)
+    component_uid = {"example": "esxi-8.0u1a"}
+    host_id = {"example": 13}
+    ip = {"example": "10.196.176.13"}
+    hostname = {"example": "esxi13"}
+    fqdn = {"example": "esxi13.demo.zpodfactory.io"}
+    vcpu = {"example": 4}
+    vmem = {"example": 16}
 
 
 class InstanceComponentView(SchemaBase):
     component: ComponentView
-    data: InstanceComponentDataView
-
-
-class InstanceComponentDataCreate(SchemaBase):
-    last_octet: int = Field(None, D.data.last_octet)
-    vcpu: int = Field(None, D.data.vcpu)
-    vmem: int = Field(None, D.data.vmem)
+    ip: str | None = Field(None, D.ip)
+    hostname: str | None = Field(None, D.hostname)
+    fqdn: str | None = Field(None, D.fqdn)
+    vcpu: int | None = Field(None, D.vcpu)
+    vmem: int | None = Field(None, D.vmem)
 
 
 class InstanceComponentCreate(SchemaBase):
     component_uid: str = Field(..., D.component_uid)
-    data: InstanceComponentDataCreate
+    host_id: int | None = Field(None, D.host_id)
+    hostname: str | None = Field(None, D.hostname)
+    vcpu: int | None = Field(None, D.vcpu)
+    vmem: int | None = Field(None, D.vmem)

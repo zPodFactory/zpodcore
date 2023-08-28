@@ -28,8 +28,8 @@ def generate_table(profiles: list, action: str = None):
         profile_item_lines = []
         for profile_item in walk_profile(profile.profile):
             data_values = []
-            if _ := profile_item.last_octet:
-                data_values.append(f"Last Octet: {_}")
+            if _ := profile_item.host_id:
+                data_values.append(f"Host Id: {_}")
             if _ := profile_item.vcpu:
                 data_values.append(f"CPU: {_}")
             if _ := profile_item.vmem:

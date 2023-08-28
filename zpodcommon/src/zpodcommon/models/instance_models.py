@@ -103,10 +103,17 @@ class InstanceComponent(CommonDatesMixin, ModelBase, table=True):
         default=...,
         nullable=False,
     )
-    data: Dict[Any, Any] | None = Field(
-        default={},
-        index=False,
-        sa_column=Column(JSON),
+    ip: str = Field(
+        default=...,
+        nullable=True,
+    )
+    hostname: str = Field(
+        default=...,
+        nullable=True,
+    )
+    fqdn: str = Field(
+        default=...,
+        nullable=True,
     )
 
     instance: "Instance" = Relationship(back_populates="components")

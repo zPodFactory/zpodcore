@@ -12,22 +12,24 @@ from zpodengine.lib import database
 
 @task
 @handle_instance_component_add_failure
-def instance_component_add_deploy(*, instance_component_id: int):
+def instance_component_add_deploy(
+    *,
+    instance_component_id: int,
+    vcpu: int | None = None,
+    vmem: int | None = None,
+):
     print("Deploy OVA")
     with database.get_session_ctx() as session:
         instance_component = session.get(M.InstanceComponent, instance_component_id)
 
-        c = instance_component.component
-        print(c)
+        component = instance_component.component
+        print(component)
 
-        match c.component_name:
+        match component.component_name:
             case "zbox":
                 print("--- zbox ---")
 
                 ovf_deployer(instance_component)
-
-                vm_name = f"{c.component_name}.{instance_component.instance.domain}"
-                print(vm_name)
 
                 with vCenter.auth_by_instance(
                     instance=instance_component.instance
@@ -36,10 +38,13 @@ def instance_component_add_deploy(*, instance_component_id: int):
                     # 100GB = 104,857,600 KB
                     # 1TB = 1,073,741,824 KB
                     print("Add Second Disk")
-                    vc.add_disk_to_vm(vm_name=vm_name, disk_size_in_kb=1073741824)
+                    vc.add_disk_to_vm(
+                        vm_name=instance_component.fqdn,
+                        disk_size_in_kb=1073741824,
+                    )
                     # Power On VM
                     print("PowerOn VM")
-                    vc.poweron_vm(vm_name=vm_name)
+                    vc.poweron_vm(vm_name=instance_component.fqdn)
 
             case "vyos":
                 print("--- vyos ---")
@@ -57,32 +62,19 @@ def instance_component_add_deploy(*, instance_component_id: int):
 
                 ovf_deployer(instance_component)
 
-                vcpu = instance_component.data["vcpu"]
-                vmem = instance_component.data["vmem"]
-
                 print(f"VM resizing to {vcpu} CPUs, and {vmem}GB Memory")
-
-                if "hostname" in instance_component.data:
-                    zpod_hostname = instance_component.data["hostname"]
-                elif "last_octet" in instance_component.data:
-                    zpod_hostname = (
-                        f"{c.component_name}{instance_component.data['last_octet']}"
-                    )
-                else:
-                    zpod_hostname = c.component_name
-
-                vm_name = f"{zpod_hostname}.{instance_component.instance.domain}"
-                print(vm_name)
 
                 with vCenter.auth_by_instance(
                     instance=instance_component.instance
                 ) as vc:
-                    print("Set CPU")
-                    vc.set_vm_vcpu(vm_name=vm_name, vcpu_num=vcpu)
-                    print("Set Memory")
-                    vc.set_vm_vmem(vm_name=vm_name, vmem_gb=vmem)
+                    if vcpu:
+                        print("Set CPU")
+                        vc.set_vm_vcpu(vm_name=instance_component.fqdn, vcpu_num=vcpu)
+                    if vmem:
+                        print("Set Memory")
+                        vc.set_vm_vmem(vm_name=instance_component.fqdn, vmem_gb=vmem)
                     print("Start VM")
-                    vc.poweron_vm(vm_name=vm_name)
+                    vc.poweron_vm(vm_name=instance_component.fqdn)
 
             case _:
                 print("--- Normal Component ---")
@@ -96,5 +88,5 @@ def instance_component_add_deploy(*, instance_component_id: int):
 
                 print("Start VM")
                 instance_vc.poweron_vm(
-                    vm_name=instance_component.component.component_name
+                    vm_name=instance_component.fqdn
                 )

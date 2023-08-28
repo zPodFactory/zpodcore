@@ -96,7 +96,11 @@ def flow_instance_deploy(
                 instance_component_add(
                     instance_id=instance_id,
                     instance_name=instance_name,
-                    profile_item=sub_profile_item,
+                    component_uid=sub_profile_item.get("component_uid"),
+                    host_id=sub_profile_item.get("host_id"),
+                    hostname=sub_profile_item.get("hostname"),
+                    vcpu=sub_profile_item.get("vcpu"),
+                    vmem=sub_profile_item.get("vmem"),
                     wait_for=wait_for,
                 )
                 for sub_profile_item in profile_item
@@ -106,7 +110,11 @@ def flow_instance_deploy(
             last_component_item = instance_component_add(
                 instance_id=instance_id,
                 instance_name=instance_name,
-                profile_item=profile_item,
+                component_uid=profile_item.get("component_uid"),
+                host_id=profile_item.get("host_id"),
+                hostname=profile_item.get("hostname"),
+                vcpu=profile_item.get("vcpu"),
+                vmem=profile_item.get("vmem"),
                 wait_for=wait_for,
             )
         wait_for = [last_component_item]
