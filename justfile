@@ -65,7 +65,7 @@ zpodcore-stop:
 # Update zpodsdk
 zpodsdk-update: zpodapi-generate-openapi
   docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
-  docker run -v "$(pwd)/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh"
+  docker run -v "{{justfile_directory()}}/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh && chown ${UID:-0}:${GID:-0} --recursive /zpodcore/zpodsdk/zpod"
 
 # Build zpodengine image
 zpodengine-build-docker-image *options:
