@@ -23,7 +23,7 @@ alembic-downgrade rev="-1":
 
 # Generate alembic revision
 alembic-revision message='update':
-  docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic revision --autogenerate -m'{{message}}'"
+  docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic revision --autogenerate -m'{{message}}' && chown `id -u`:`id -g` --recursive /zpodcore/scripts/alembic/versions"
 
 # docker prune everything
 docker-fullclean:
@@ -35,7 +35,7 @@ zcli *args:
 
 # Generate coverage docs
 zpodapi-coverage:
-  docker compose exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon"
+  docker compose exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon && chown `id -u`:`id -g` --recursive /zpodcore/tests/cov_html"
 
 # Generate openapi json
 zpodapi-generate-openapi:
