@@ -87,6 +87,4 @@ def instance_component_add_deploy(
                 )
 
                 print("Start VM")
-                instance_vc.poweron_vm(
-                    vm_name=instance_component.fqdn
-                )
+                instance_vc.poweron_vm(vm_name=instance_component.hostname)
