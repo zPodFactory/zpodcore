@@ -55,6 +55,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         site_id = settings.SITE_ID
         resource_pool = f"{site_id}-{instance.name}"
         zpod_portgroup = f"{site_id}-{instance.name}-segment"
+        vm_name = instance_component.fqdn
 
     else:
         print(f"[L2] Deployment for {component.component_name}")
@@ -70,6 +71,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         # (maybe vSAN OSA/ESA support in the future instead of NFS-01)
         datastore = "NFS-01"
         zpod_portgroup = "VM Network"
+        vm_name = instance_component.hostname
 
     # Add zbox as this is a mandatory infrastructure component
     zpod_zbox_ipaddress = MgmtIp.instance(instance, "zbox").ip
@@ -102,7 +104,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
     cmd = (
         "govc import.ova"
         " -k"
-        f" -name={instance_component.fqdn}"
+        f" -name={vm_name}"
         f" -u='{url}'"
         f" -pool={resource_pool}"
         f" -ds={datastore}"
