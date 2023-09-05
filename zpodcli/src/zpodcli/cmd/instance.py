@@ -5,6 +5,7 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from zpod.models.endpoint_view_full import EndpointViewFull
 from zpod.models.instance_create import InstanceCreate
 from zpod.models.instance_permission import InstancePermission
 from zpod.models.instance_view import InstanceView
@@ -44,7 +45,6 @@ def generate_table(instances: list[InstanceView], action: str = None):
         header_style="bold cyan",
     )
     table.add_column("Name")
-    table.add_column("Description")
     table.add_column("Domain")
     table.add_column("Profile")
     table.add_column("Components")
@@ -80,7 +80,6 @@ def generate_table(instances: list[InstanceView], action: str = None):
 
         table.add_row(
             f"[bold]{instance.name}[/bold]",
-            instance.description,
             f"[plum4]{instance.domain}[/plum4]",
             f"[tan]{instance.profile}[/tan]",
             components,
@@ -139,15 +138,26 @@ def instance_create(
     """
     Create a zPod
     """
+    z = zpod_client.ZpodClient()
+
+    endpoints: list[EndpointViewFull] = z.endpoints_get_all.sync()
+    if endpoints is None:
+        print("There is no endpoints available for deployment")
+
+    ep_id = None
+    for ep in endpoints:
+        if ep.name == endpoint:
+            ep_id = ep.id
+
     instance_details = InstanceCreate(
         name=name,
         domain=domain,
         description=description,
         profile=profile,
-        endpoint_id=endpoint,
+        endpoint_id=ep_id,
         enet_name=enet_name,
     )
-    z = zpod_client.ZpodClient()
+
     result = z.instances_create.sync_detailed(json_body=instance_details)
     if result.status_code == 201:
         print(f"Instance [magenta]{name}[/magenta] is being deployed...")
