@@ -56,13 +56,25 @@ def generate_table(components: list, component_uid: str = None, action: str = No
 
 
 @app.command(name="list")
-def component_list():
+def component_list(
+    available: bool = typer.Option(False, "-a", help="Show all library components")
+):
     """
     List components
     """
+
     z = zpod_client.ZpodClient()
     components = z.components_get_all.sync()
-    generate_table(components)
+    # Sort component by unique uid name
+    sorted_components = sorted(components, key=lambda c: c.component_uid)
+
+    # filter only completed/available components
+    filtered_components = []
+    if not available:
+        filtered_components.extend(c for c in sorted_components if c.status == "ACTIVE")
+        sorted_components = filtered_components
+
+    generate_table(sorted_components)
 
 
 @app.command(name="enable", no_args_is_help=True)
@@ -70,6 +82,7 @@ def component_enable(component_uid: str = typer.Option(..., "--uid")):
     """
     Enable a component
     """
+
     z = zpod_client.ZpodClient()
     component = z.components_enable.sync(id=f"uid={component_uid}")
     generate_table(components=[component], component_uid=component_uid, action="Enable")
