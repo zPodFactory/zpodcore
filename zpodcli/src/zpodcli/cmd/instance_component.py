@@ -55,12 +55,16 @@ def instance_component_list(
 
     z = zpod_client.ZpodClient()
     instance = z.instances_get.sync(id=f"name={instance_name}")
+
     if instance.name == instance_name:
         instance_components: List[
             InstanceComponentView
         ] = z.instances_components_get_all.sync(instance.id)
 
-        generate_table(instance, instance_components)
+        # Sort per FQDN
+        sorted_instance_components = sorted(instance_components, key=lambda ic: ic.fqdn)
+
+        generate_table(instance, sorted_instance_components)
 
 
 @app.command(name="add", no_args_is_help=True)
