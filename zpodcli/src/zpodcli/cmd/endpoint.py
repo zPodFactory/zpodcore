@@ -21,7 +21,6 @@ def generate_table(endpoints: list, action: str = None):
         show_header=True,
         header_style="bold cyan",
     )
-    table.add_column("Id")
     table.add_column("Name")
     table.add_column("Description")
     table.add_column("Compute")
@@ -34,7 +33,6 @@ def generate_table(endpoints: list, action: str = None):
         epn = ep.network
 
         table.add_row(
-            endpoint.id,
             f"[dark_khaki]{endpoint.name}[/dark_khaki]",
             endpoint.description,
             Pretty(epc),
