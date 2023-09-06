@@ -6,7 +6,7 @@ definitions:
   work_pools:
     zpodengine_work_pool: &zpodengine_work_pool
       name: zpodengine-pool
-      work_queue_name: normal
+      work_queue_name: default
       job_variables:
         image: '{{ build_image.image }}'
         auto_remove: True
