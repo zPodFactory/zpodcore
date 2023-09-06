@@ -59,7 +59,7 @@ class EndpointENetService(ServiceBase):
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="nsx_project_destroy",
-            deployment_name="default",
+            deployment_name="nsx_project_destroy",
             run_name=f"Destroy ENet.  Endpoint: {endpoint.id}, Project: {project_id}",
             project_id=project_id,
             endpoint_id=endpoint.id,

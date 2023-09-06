@@ -8,10 +8,11 @@ Complete the following steps to set up your development environment:
 
 1. Install Docker and Docker Compose
 
-1. Install pyenv
+1. Install pyenv and add 3.11.2
 
     ```bash
     brew install pyenv
+    pyenv install 3.11.2
     ```
 
 1. Install Poetry:
@@ -20,10 +21,9 @@ Complete the following steps to set up your development environment:
     pip install poetry
     ```
 
-1. Configure Virtual Environment.  In the `/zpodapi` directory, run:
+1. Configure Virtual Environment.  In the `/zpodapi`, `/zpodengine` and `/zpodcli` directories, run:
 
     ```bash
-    pyenv install 3.11.2
     pyenv local 3.11.2
     poetry config virtualenvs.in-project true
     poetry install
@@ -60,8 +60,8 @@ Complete the following steps to set up your development environment:
 
 1. Verify that zpodapi is working by opening a browser and going to `http://localhost:[8000 or ZPODAPI_HOSTPORT]` and `http://localhost:[8000 or ZPODAPI_HOSTPORT]/docs`
 
-1. Build zpodengine container and create Blocks and Deployments
+1. Create Deployments
 
     ```bash
-    just zpodengine-init
+    just zpodengine-deploy-all
     ```
