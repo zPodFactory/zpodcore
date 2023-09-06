@@ -50,7 +50,7 @@ services:
   # Prefect Server API
   zpodengineserver:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineserver
-    image: prefecthq/prefect:2.11.5-python3.11
+    image: prefecthq/prefect:2.12.1-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "server", "start" ]
@@ -68,61 +68,22 @@ services:
     volumes:
       - zpod_vol_prefect:/root/.prefect
 
-  # Prefect Agent
-  zpodengineagent:
-    container_name: ${COMPOSE_PROJECT_NAME}-zpodengineagent
-    image: prefecthq/prefect:2.11.5-python3.11
+  # Prefect Worker
+  zpodengineworker:
+    container_name: ${COMPOSE_PROJECT_NAME}-zpodengineworker
+    build:
+      context: .
+      dockerfile: ./zpodengine/dockerfile-worker
     depends_on:
       - zpodpostgres
-    entrypoint:
-      [
-        "prefect",
-        "agent",
-        "start",
-        "--limit",
-        "1",
-        "-q",
-        "default"
-      ]
+      - zpodengineserver
+    entrypoint: /zpodcore/bootstrap/start_worker.sh
     environment:
-      # Keeping those variables for potential future tuning.
-      - PREFECT_API_DATABASE_TIMEOUT=30
-      - PREFECT_API_DATABASE_CONNECTION_TIMEOUT=15
       - PREFECT_API_URL=http://zpodengineserver:4200/api
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  # Prefect CLI
-  zpodenginecli:
-    container_name: ${COMPOSE_PROJECT_NAME}-zpodenginecli
-    build:
-      context: .
-      dockerfile: ./zpodengine/dockerfile
-      target: dev
-      args:
-        INSTALL_DEV: "${ZPODENGINE_DEV_MODE:-false}"
-    depends_on:
-      - zpodpostgres
-    entrypoint: [ "/bin/bash" ]
-    environment:
-      - HISTFILE=/commandhistory/.zpodenginecli_bash_history
-      - PREFECT_API_URL=http://zpodengineserver:4200/api
-      - PREFECT_LOCAL_STORAGE_PATH=/results
-      - ZPODCORE_PATH=${PWD}
-    env_file:
-      - .env
-    profiles: [ "cli" ]
-    volumes:
-      - ./zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon:cached
-      - ./zpodengine/src/zpodengine:/zpodcore/src/zpodengine:cached
       - ./zpodengine/bootstrap:/zpodcore/bootstrap:cached
-      - ./zpodengine/scripts:/zpodengine/scripts:cached
-      - zpod_vol_history:/commandhistory
-      - ${ZPODCORE_DNSMASQ_SERVERS_PATH}:/zpod/dnsmasq_servers
-      - ${ZPODCORE_LIBRARY_PATH}:/library
-      - ${ZPODCORE_PRODUCTS_PATH}:/products
-      - ${ZPODCORE_RESULTS_PATH}:/results
 
 volumes:
   zpod_vol_history: null

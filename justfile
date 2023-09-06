@@ -25,11 +25,12 @@ alembic-downgrade rev="-1":
 alembic-revision message='update':
   docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic revision --autogenerate -m'{{message}}' && chown `id -u`:`id -g` --recursive /zpodcore/scripts/alembic/versions"
 
-# docker prune everything
+# Docker prune everything
 docker-fullclean:
   docker system prune -af
   docker volume prune -f
 
+# Run zcli command
 zcli *args:
   @poetry -C zpodcli run zcli "$@"
 
@@ -62,28 +63,15 @@ zpodcore-start-background $COLUMNS=rich_cols:
 zpodcore-stop:
   docker compose down
 
+# Deploy all Flows
+zpodengine-deploy-all:
+  just zpodengine-prefect deploy --all
+
+# Manually Run Prefect Command
+zpodengine-prefect *args:
+  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" poetry -C zpodengine run prefect "$@"
+
 # Update zpodsdk
 zpodsdk-update: zpodapi-generate-openapi
   docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
   docker run -v "{{justfile_directory()}}/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh && chown `id -u`:`id -g` --recursive /zpodcore/zpodsdk/zpod"
-
-# Build zpodengine image
-zpodengine-build-docker-image *options:
-  docker build --build-arg INSTALL_DEV=true --tag ${COMPOSE_PROJECT_NAME:-zpodcore}-zpodengine:v1 --target dev --file zpodengine/dockerfile {{options}} .
-
-# Open zpodengine CLI
-zpodengine-cli:
-  docker compose run --rm zpodenginecli
-
-# Deploy zpodengine Blocks
-zpodengine-create-blocks:
-  docker compose run --rm zpodenginecli -c /zpodcore/bootstrap/create_blocks.py
-
-# Deploy zpodengine Flows
-zpodengine-create-deployments:
-  docker compose run --rm zpodenginecli -c /zpodcore/bootstrap/create_deployments.py
-
-# zpodengine initial config
-zpodengine-init:
-  just zpodengine-build-docker-image
-  docker compose run --rm zpodenginecli -c "/zpodcore/bootstrap/create_default_settings.sh && /zpodcore/bootstrap/create_blocks.py && /zpodcore/bootstrap/create_deployments.py"

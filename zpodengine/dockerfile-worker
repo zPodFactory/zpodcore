@@ -1,0 +1,8 @@
+FROM prefecthq/prefect:2.12.1-python3.11
+
+RUN apt-get update \
+    && apt-get install -y \
+    curl \
+    git
+
+RUN pip install git+https://github.com/kvalenti/prefect-docker.git

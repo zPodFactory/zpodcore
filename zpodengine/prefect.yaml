@@ -1,0 +1,82 @@
+name: zpodengine
+prefect-version: 2.12.1
+
+
+definitions:
+  work_pools:
+    zpodengine_work_pool: &zpodengine_work_pool
+      name: zpodengine-pool
+      work_queue_name: normal
+      job_variables:
+        image: '{{ build_image.image }}'
+        auto_remove: True
+        networks: ["{{ compose_project_name.stdout }}_default"]
+        volumes: [
+          "{{ zpodcore_path.stdout }}/zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon",
+          "{{ zpodcore_path.stdout }}/zpodengine/src/zpodengine:/zpodcore/src/zpodengine",
+          "{{ zpodcore_path.stdout }}/zpodengine/scripts:/zpodengine/scripts",
+          "{{ zpodcore_path.stdout }}/.env:/zpodcore/.env",
+          "{{ $ZPODCORE_DNSMASQ_SERVERS_PATH }}:/zpod/dnsmasq_servers",
+          "{{ $ZPODCORE_LIBRARY_PATH }}:/library",
+          "{{ $ZPODCORE_PRODUCTS_PATH }}:/products",
+          "{{ $ZPODCORE_RESULTS_PATH }}:/results"
+        ]
+        environment: {
+          "PREFECT_API_URL":"http://zpodengineserver:4200/api",
+          "PREFECT_LOCAL_STORAGE_PATH":"/results"
+        }
+
+
+build:
+- prefect.deployments.steps.run_shell_script:
+    id: compose_project_name
+    script: bash -c "echo ${COMPOSE_PROJECT_NAME:-zpodcore}"
+    stream_output: true
+    expand_env_vars: true
+- prefect.deployments.steps.run_shell_script:
+    id: zpodcore_path
+    script: bash -c "dirname ${PWD}"
+    expand_env_vars: true
+    stream_output: true
+- prefect_docker.deployments.steps.build_docker_image:
+    id: build_image
+    requires: prefect-docker>=0.3.11
+    image_name: "{{ compose_project_name.stdout }}-zpodengine"
+    tag: v1
+    dockerfile: ./zpodengine/dockerfile
+    push: False
+    path: "{{ zpodcore_path.stdout }}"
+    target: dev
+
+push: {}
+
+pull:
+ - prefect.deployments.steps.set_working_directory:
+     directory: /zpodcore
+
+
+deployments:
+- name: component_download
+  entrypoint: src/zpodengine/component_download/flow_component_download.py:flow_component_download
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: instance_deploy
+  entrypoint: src/zpodengine/instance_deploy/flow_instance_deploy.py:flow_instance_deploy
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: instance_destroy
+  entrypoint: src/zpodengine/instance_destroy/flow_instance_destroy.py:flow_instance_destroy
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: instance_component_add
+  entrypoint: src/zpodengine/instance_component_add/flow_instance_component_add.py:flow_instance_component_add
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: nsx_project_destroy
+  entrypoint: src/zpodengine/nsx_project_destroy/flow_nsx_project_destroy.py:flow_nsx_project_destroy
+  schedule: {}
+  work_pool: *zpodengine_work_pool

@@ -63,7 +63,7 @@ class InstanceService(ServiceBase):
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_deploy",
-            deployment_name="default",
+            deployment_name="instance_deploy",
             run_name=f"Deploy {instance.name}",
             instance_id=instance.id,
             enet_name=(
@@ -97,7 +97,7 @@ class InstanceService(ServiceBase):
         zpod_engine = ZpodEngineClient()
         zpod_engine.create_flow_run_by_name(
             flow_name="instance_destroy",
-            deployment_name="default",
+            deployment_name="instance_destroy",
             run_name=f"Destroy {instance.name}",
             instance_id=instance.id,
             instance_name=instance.name,
