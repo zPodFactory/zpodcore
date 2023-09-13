@@ -1,56 +1,44 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.user_view_full import UserViewFull
-from ...types import UNSET, Response, Unset
+from ...models.user_view_full_plus import UserViewFullPlus
+from ...types import Response
 
 
-class UsersGetAll:
+class UsersResetApiToken:
     def __init__(self, client: Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
-        *,
-        all_: Union[Unset, None, bool] = False,
+        id: str,
     ) -> Dict[str, Any]:
-        url = "{}/users".format(self.client.base_url)
+        url = "{}/users/{id}/reset_api_token".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
-        params: Dict[str, Any] = {}
-        params["all"] = all_
-
-        params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
-
         return {
-            "method": "get",
+            "method": "patch",
             "url": url,
             "headers": headers,
             "cookies": cookies,
             "timeout": self.client.get_timeout(),
             "follow_redirects": self.client.follow_redirects,
-            "params": params,
         }
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
-        if response.status_code == HTTPStatus.OK:
-            response_200 = []
-            _response_200 = response.json()
-            for response_200_item_data in _response_200:
-                response_200_item = UserViewFull.from_dict(response_200_item_data)
+    ) -> Optional[Union[HTTPValidationError, UserViewFullPlus]]:
+        if response.status_code == HTTPStatus.CREATED:
+            response_201 = UserViewFullPlus.from_dict(response.json())
 
-                response_200.append(response_200_item)
-
-            return response_200
+            return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
             response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -62,7 +50,7 @@ class UsersGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFullPlus]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -72,24 +60,23 @@ class UsersGetAll:
 
     def sync_detailed(
         self,
-        *,
-        all_: Union[Unset, None, bool] = False,
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
-        """Get All
+        id: str,
+    ) -> Response[Union[HTTPValidationError, UserViewFullPlus]]:
+        """Reset Api Token
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, UserViewFullPlus]]
         """
 
         kwargs = self._get_kwargs(
-            all_=all_,
+            id=id,
         )
 
         response = httpx.request(
@@ -101,46 +88,44 @@ class UsersGetAll:
 
     def sync(
         self,
-        *,
-        all_: Union[Unset, None, bool] = False,
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
-        """Get All
+        id: str,
+    ) -> Optional[Union[HTTPValidationError, UserViewFullPlus]]:
+        """Reset Api Token
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['UserViewFull']]
+            Union[HTTPValidationError, UserViewFullPlus]
         """
 
         return self.sync_detailed(
-            all_=all_,
+            id=id,
         ).parsed
 
     async def asyncio_detailed(
         self,
-        *,
-        all_: Union[Unset, None, bool] = False,
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
-        """Get All
+        id: str,
+    ) -> Response[Union[HTTPValidationError, UserViewFullPlus]]:
+        """Reset Api Token
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, UserViewFullPlus]]
         """
 
         kwargs = self._get_kwargs(
-            all_=all_,
+            id=id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -150,24 +135,23 @@ class UsersGetAll:
 
     async def asyncio(
         self,
-        *,
-        all_: Union[Unset, None, bool] = False,
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
-        """Get All
+        id: str,
+    ) -> Optional[Union[HTTPValidationError, UserViewFullPlus]]:
+        """Reset Api Token
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['UserViewFull']]
+            Union[HTTPValidationError, UserViewFullPlus]
         """
 
         return (
             await self.asyncio_detailed(
-                all_=all_,
+                id=id,
             )
         ).parsed

@@ -81,7 +81,7 @@ class Crud:
     def get_all_filtered(
         self,
         *,
-        where_extra: list = None,
+        where_extra: list | None = None,
         use_or: bool = False,
         model: SQLModel | None = None,
         **filters: dict[str, Any],

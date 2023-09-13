@@ -7,7 +7,7 @@ from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_create import UserCreate
-from ...models.user_view_full import UserViewFull
+from ...models.user_view_full_plus import UserViewFullPlus
 from ...types import Response
 
 
@@ -39,9 +39,9 @@ class UsersCreate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFullPlus]]:
         if response.status_code == HTTPStatus.CREATED:
-            response_201 = UserViewFull.from_dict(response.json())
+            response_201 = UserViewFullPlus.from_dict(response.json())
 
             return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
@@ -55,7 +55,7 @@ class UsersCreate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFullPlus]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -67,7 +67,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFullPlus]]:
         """Create
 
         Args:
@@ -78,7 +78,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserViewFull]]
+            Response[Union[HTTPValidationError, UserViewFullPlus]]
         """
 
         kwargs = self._get_kwargs(
@@ -96,7 +96,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFullPlus]]:
         """Create
 
         Args:
@@ -107,7 +107,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, UserViewFull]
+            Union[HTTPValidationError, UserViewFullPlus]
         """
 
         return self.sync_detailed(
@@ -118,7 +118,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFullPlus]]:
         """Create
 
         Args:
@@ -129,7 +129,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, UserViewFull]]
+            Response[Union[HTTPValidationError, UserViewFullPlus]]
         """
 
         kwargs = self._get_kwargs(
@@ -145,7 +145,7 @@ class UsersCreate:
         self,
         *,
         json_body: UserCreate,
-    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFullPlus]]:
         """Create
 
         Args:
@@ -156,7 +156,7 @@ class UsersCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, UserViewFull]
+            Union[HTTPValidationError, UserViewFullPlus]
         """
 
         return (
