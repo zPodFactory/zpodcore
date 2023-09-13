@@ -5,6 +5,7 @@ import secrets
 from zpodapi import settings
 from zpodapi.lib import database
 from zpodcommon import models as M
+from zpodcommon.enums import UserStatus
 
 with database.get_session_ctx() as session:
     userCnt = session.query(M.User).count()
@@ -14,10 +15,9 @@ with database.get_session_ctx() as session:
         user = M.User(
             username="superuser",
             email="superuser@zpodfactory.io",
-            api_token=(
-                "supertoken" if settings.DEV_MODE else secrets.token_urlsafe(32)
-            ),
+            api_token=secrets.token_urlsafe(32),
             superadmin=True,
+            status=UserStatus.ACTIVE,
         )
 
         print(

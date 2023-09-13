@@ -38,3 +38,8 @@ class InstanceStatus(str, Enum):
     DEPLOY_FAILED = "DEPLOY_FAILED"
     DESTROY_FAILED = "DESTROY_FAILED"
     PENDING = "PENDING"
+
+
+class UserStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"

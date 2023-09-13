@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 from zpodapi import settings
 from zpodapi.lib.database import get_session  # noqa: F401
 from zpodcommon import models as M
+from zpodcommon.enums import UserStatus
 
 api_key_header = APIKeyHeader(name="access_token", auto_error=False)
 
@@ -16,13 +17,14 @@ def get_current_user_unvalidated(
     session: "GlobalAnnotations.GetSession",
     api_key: Annotated[APIKey, Security(api_key_header)],
 ) -> M.User:
+    where = [M.User.status == UserStatus.ACTIVE]
     if api_key:
-        where = M.User.api_token == api_key
+        where.append(M.User.api_token == api_key)
     elif settings.DEV_AUTOAUTH_USER:
-        where = M.User.id == settings.DEV_AUTOAUTH_USER
+        where.append(M.User.id == settings.DEV_AUTOAUTH_USER)
     else:
-        where = M.User.id == -1
-    return session.exec(select(M.User).where(where)).first()
+        where.append(M.User.id == -1)
+    return session.exec(select(M.User).where(*where)).first()
 
 
 def get_current_user(

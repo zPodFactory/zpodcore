@@ -1,15 +1,16 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
+from ...models.user_view_full import UserViewFull
 from ...types import Response
 
 
-class UsersDelete:
+class UsersActivate:
     def __init__(self, client: Client) -> None:
         self.client = client
 
@@ -17,13 +18,13 @@ class UsersDelete:
         self,
         id: str,
     ) -> Dict[str, Any]:
-        url = "{}/users/{id}".format(self.client.base_url, id=id)
+        url = "{}/users/{id}/activate".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
         return {
-            "method": "delete",
+            "method": "patch",
             "url": url,
             "headers": headers,
             "cookies": cookies,
@@ -33,10 +34,11 @@ class UsersDelete:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        if response.status_code == HTTPStatus.NO_CONTENT:
-            response_204 = cast(Any, None)
-            return response_204
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
+        if response.status_code == HTTPStatus.CREATED:
+            response_201 = UserViewFull.from_dict(response.json())
+
+            return response_201
         if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
             response_422 = HTTPValidationError.from_dict(response.json())
 
@@ -48,7 +50,7 @@ class UsersDelete:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -59,8 +61,8 @@ class UsersDelete:
     def sync_detailed(
         self,
         id: str,
-    ) -> Response[Union[Any, HTTPValidationError]]:
-        """Delete
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
+        """Activate
 
         Args:
             id (str):
@@ -70,7 +72,7 @@ class UsersDelete:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """
 
         kwargs = self._get_kwargs(
@@ -87,8 +89,8 @@ class UsersDelete:
     def sync(
         self,
         id: str,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        """Delete
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
+        """Activate
 
         Args:
             id (str):
@@ -98,7 +100,7 @@ class UsersDelete:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[Any, HTTPValidationError]
+            Union[HTTPValidationError, UserViewFull]
         """
 
         return self.sync_detailed(
@@ -108,8 +110,8 @@ class UsersDelete:
     async def asyncio_detailed(
         self,
         id: str,
-    ) -> Response[Union[Any, HTTPValidationError]]:
-        """Delete
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
+        """Activate
 
         Args:
             id (str):
@@ -119,7 +121,7 @@ class UsersDelete:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """
 
         kwargs = self._get_kwargs(
@@ -134,8 +136,8 @@ class UsersDelete:
     async def asyncio(
         self,
         id: str,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        """Delete
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
+        """Activate
 
         Args:
             id (str):
@@ -145,7 +147,7 @@ class UsersDelete:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[Any, HTTPValidationError]
+            Union[HTTPValidationError, UserViewFull]
         """
 
         return (

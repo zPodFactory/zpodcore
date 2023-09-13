@@ -6,7 +6,13 @@ from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .user__dependencies import UserAnnotations
-from .user__schemas import UserCreate, UserUpdate, UserUpdateAdmin, UserViewFull
+from .user__schemas import (
+    UserCreate,
+    UserUpdate,
+    UserUpdateAdmin,
+    UserViewFull,
+    UserViewFullPlus,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +30,9 @@ router = APIRouter(
 def get_all(
     *,
     user_service: UserAnnotations.UserService,
+    all: bool = False,
 ):
-    return user_service.get_all()
+    return user_service.get_all(all=all)
 
 
 @router.get(
@@ -52,7 +59,7 @@ def get(
 
 @router.post(
     "",
-    response_model=UserViewFull,
+    response_model=UserViewFullPlus,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
@@ -70,7 +77,7 @@ def create(
             status_code=status.HTTP_409_CONFLICT,
             detail="Conflicting record found",
         )
-    return user_service.crud.create(item_in=user_in)
+    return user_service.create(user_in=user_in)
 
 
 @router.patch(
@@ -87,14 +94,43 @@ def update(
     return user_service.update(item=user, item_in=user_in)
 
 
-@router.delete(
-    "/{id}",
-    status_code=status.HTTP_204_NO_CONTENT,
+@router.patch(
+    "/{id}/activate",
+    response_model=UserViewFull,
+    status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
-def delete(
+def activate(
     *,
     user_service: UserAnnotations.UserService,
     user: UserAnnotations.GetUser,
 ):
-    return user_service.crud.delete(item=user)
+    return user_service.activate(item=user)
+
+
+@router.patch(
+    "/{id}/inactivate",
+    response_model=UserViewFull,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
+def inactivate(
+    *,
+    user_service: UserAnnotations.UserService,
+    user: UserAnnotations.GetUser,
+):
+    return user_service.inactivate(item=user)
+
+
+@router.patch(
+    "/{id}/reset_api_token",
+    response_model=UserViewFullPlus,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
+def reset_api_token(
+    *,
+    user_service: UserAnnotations.UserService,
+    user: UserAnnotations.GetUser,
+):
+    return user_service.reset_api_token(item=user)

@@ -57,7 +57,11 @@ class User(CommonDatesMixin, ModelBase, table=True):
         default=False,
         nullable=False,
     )
-
+    status: str = Field(
+        default=...,
+        nullable=False,
+    )
+    
     instance_permissions: List["InstancePermission"] = Relationship(
         back_populates="users",
         sa_relationship_kwargs=dict(

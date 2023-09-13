@@ -6,13 +6,14 @@ from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="UserViewFull")
+T = TypeVar("T", bound="UserViewFullPlus")
 
 
 @attr.s(auto_attribs=True)
-class UserViewFull:
+class UserViewFullPlus:
     """
     Attributes:
+        api_token (str):  Example: BNcsTebGHbIdJjlZ0A2xS0qpSskahVRHO6z61qnRPNw.
         creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
         description (str):  Example: Sample User.
         email (str):  Example: jdoe@example.com.
@@ -23,6 +24,7 @@ class UserViewFull:
         last_connection_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
     """
 
+    api_token: str
     creation_date: datetime.datetime
     description: str
     email: str
@@ -33,6 +35,7 @@ class UserViewFull:
     last_connection_date: Union[Unset, None, datetime.datetime] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
+        api_token = self.api_token
         creation_date = self.creation_date.isoformat()
 
         description = self.description
@@ -52,6 +55,7 @@ class UserViewFull:
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
+                "api_token": api_token,
                 "creation_date": creation_date,
                 "description": description,
                 "email": email,
@@ -69,6 +73,8 @@ class UserViewFull:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
+        api_token = d.pop("api_token")
+
         creation_date = isoparse(d.pop("creation_date"))
 
         description = d.pop("description")
@@ -92,7 +98,8 @@ class UserViewFull:
         else:
             last_connection_date = isoparse(_last_connection_date)
 
-        user_view_full = cls(
+        user_view_full_plus = cls(
+            api_token=api_token,
             creation_date=creation_date,
             description=description,
             email=email,
@@ -103,4 +110,4 @@ class UserViewFull:
             last_connection_date=last_connection_date,
         )
 
-        return user_view_full
+        return user_view_full_plus
