@@ -292,17 +292,24 @@ class ZpodClient:
 
     @property
     @cache
-    def users_activate(self):
-        from zpod.api.users import users_activate
-
-        return users_activate.UsersActivate(self._client)
-
-    @property
-    @cache
     def users_create(self):
         from zpod.api.users import users_create
 
         return users_create.UsersCreate(self._client)
+
+    @property
+    @cache
+    def users_disable(self):
+        from zpod.api.users import users_disable
+
+        return users_disable.UsersDisable(self._client)
+
+    @property
+    @cache
+    def users_enable(self):
+        from zpod.api.users import users_enable
+
+        return users_enable.UsersEnable(self._client)
 
     @property
     @cache
@@ -324,13 +331,6 @@ class ZpodClient:
         from zpod.api.users import users_get_me
 
         return users_get_me.UsersGetMe(self._client)
-
-    @property
-    @cache
-    def users_inactivate(self):
-        from zpod.api.users import users_inactivate
-
-        return users_inactivate.UsersInactivate(self._client)
 
     @property
     @cache

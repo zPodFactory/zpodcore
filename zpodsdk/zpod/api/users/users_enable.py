@@ -10,7 +10,7 @@ from ...models.user_view_full import UserViewFull
 from ...types import Response
 
 
-class UsersActivate:
+class UsersEnable:
     def __init__(self, client: Client) -> None:
         self.client = client
 
@@ -18,7 +18,7 @@ class UsersActivate:
         self,
         id: str,
     ) -> Dict[str, Any]:
-        url = "{}/users/{id}/activate".format(self.client.base_url, id=id)
+        url = "{}/users/{id}/enable".format(self.client.base_url, id=id)
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
@@ -62,7 +62,7 @@ class UsersActivate:
         self,
         id: str,
     ) -> Response[Union[HTTPValidationError, UserViewFull]]:
-        """Activate
+        """Enable
 
         Args:
             id (str):
@@ -90,7 +90,7 @@ class UsersActivate:
         self,
         id: str,
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
-        """Activate
+        """Enable
 
         Args:
             id (str):
@@ -111,7 +111,7 @@ class UsersActivate:
         self,
         id: str,
     ) -> Response[Union[HTTPValidationError, UserViewFull]]:
-        """Activate
+        """Enable
 
         Args:
             id (str):
@@ -137,7 +137,7 @@ class UsersActivate:
         self,
         id: str,
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
-        """Activate
+        """Enable
 
         Args:
             id (str):

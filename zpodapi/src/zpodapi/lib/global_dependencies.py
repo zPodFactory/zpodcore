@@ -17,7 +17,7 @@ def get_current_user_unvalidated(
     session: "GlobalAnnotations.GetSession",
     api_key: Annotated[APIKey, Security(api_key_header)],
 ) -> M.User:
-    where = [M.User.status == UserStatus.ACTIVE]
+    where = [M.User.status == UserStatus.ENABLED]
     if api_key:
         where.append(M.User.api_token == api_key)
     elif settings.DEV_AUTOAUTH_USER:

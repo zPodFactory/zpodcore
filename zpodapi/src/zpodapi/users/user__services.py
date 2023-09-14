@@ -8,7 +8,7 @@ from zpodapi.users.user__schemas import UserUpdate, UserUpdateAdmin
 from zpodcommon import models as M
 from zpodcommon.enums import UserStatus
 
-from .user__schemas import UserUpdateStatus, UserUpdateApiToken
+from .user__schemas import UserUpdateApiToken, UserUpdateStatus
 
 
 class UserService(ServiceBase):
@@ -18,7 +18,7 @@ class UserService(ServiceBase):
         return self.crud.create(
             item_in=user_in,
             extra=dict(
-                status=UserStatus.ACTIVE,
+                status=UserStatus.ENABLED,
                 api_token=generate_api_token(),
             ),
         )
@@ -26,7 +26,7 @@ class UserService(ServiceBase):
     def get_all(self, all: bool = False):
         return self.crud.get_all_filtered(
             id=None if self.is_superadmin else self.current_user.id,
-            where_extra=None if all else [M.User.status == UserStatus.ACTIVE],
+            where_extra=None if all else [M.User.status == UserStatus.ENABLED],
         )
 
     def get(
@@ -56,19 +56,19 @@ class UserService(ServiceBase):
 
         return self.crud.update(item=item, item_in=item_in)
 
-    def activate(self, *, item: M.User):
+    def enable(self, *, item: M.User):
         return self.crud.update(
             item=item,
             item_in=UserUpdateStatus(
-                status=UserStatus.ACTIVE,
+                status=UserStatus.ENABLED,
             ),
         )
 
-    def inactivate(self, *, item: M.User):
+    def disable(self, *, item: M.User):
         return self.crud.update(
             item=item,
             item_in=UserUpdateStatus(
-                status=UserStatus.INACTIVE,
+                status=UserStatus.DISABLED,
             ),
         )
 

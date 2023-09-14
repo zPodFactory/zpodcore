@@ -95,31 +95,31 @@ def update(
 
 
 @router.patch(
-    "/{id}/activate",
+    "/{id}/enable",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
-def activate(
+def enable(
     *,
     user_service: UserAnnotations.UserService,
     user: UserAnnotations.GetUser,
 ):
-    return user_service.activate(item=user)
+    return user_service.enable(item=user)
 
 
 @router.patch(
-    "/{id}/inactivate",
+    "/{id}/disable",
     response_model=UserViewFull,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
-def inactivate(
+def disable(
     *,
     user_service: UserAnnotations.UserService,
     user: UserAnnotations.GetUser,
 ):
-    return user_service.inactivate(item=user)
+    return user_service.disable(item=user)
 
 
 @router.patch(

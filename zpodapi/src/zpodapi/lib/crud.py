@@ -110,10 +110,10 @@ class Crud:
         model: SQLModel | None = None,
     ) -> Result[Any]:
         model = model or self.base_model
-        sel = select(model)
+        stmt = select(model)
         if where:
-            sel = sel.where(*where)
-        return self.session.exec(sel)
+            stmt = stmt.where(*where)
+        return self.session.exec(stmt)
 
     def update(
         self,

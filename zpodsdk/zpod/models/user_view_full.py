@@ -17,7 +17,7 @@ class UserViewFull:
         description (str):  Example: Sample User.
         email (str):  Example: jdoe@example.com.
         id (int):  Example: 1.
-        status (str):  Example: ACTIVE.
+        status (str):  Example: ENABLED.
         superadmin (bool):
         username (str):  Example: jdoe.
         last_connection_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
