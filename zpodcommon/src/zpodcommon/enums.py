@@ -41,5 +41,5 @@ class InstanceStatus(str, Enum):
 
 
 class UserStatus(str, Enum):
-    ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
+    ENABLED = "ENABLED"
+    DISABLED = "DISABLED"

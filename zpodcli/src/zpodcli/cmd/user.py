@@ -29,7 +29,7 @@ def generate_table(users, all=False):
         if all:
             table.add_column("Status")
 
-        for user in users.parsed:
+        for user in sorted(users.parsed, key=lambda c: c.username):
             lcd = (
                 user.last_connection_date.strftime("%Y-%m-%d %H:%M:%S")
                 if user.last_connection_date
@@ -168,8 +168,8 @@ def user_update(
         utils.handle_response(result)
 
 
-@app.command(name="activate", no_args_is_help=True)
-def user_activate(
+@app.command(name="enable", no_args_is_help=True)
+def user_enable(
     username: str = typer.Option(
         ...,
         "--username",
@@ -178,18 +178,18 @@ def user_activate(
     ),
 ):
     """
-    Activate user
+    Enable user
     """
     z = zpod_client.ZpodClient()
-    result = z.users_activate.sync_detailed(id=f"username={username}")
+    result = z.users_enable.sync_detailed(id=f"username={username}")
     if result.status_code == 201:
-        print(f"User [magenta]{username}[/magenta] has been activated.")
+        print(f"User [magenta]{username}[/magenta] has been enabled.")
     else:
         utils.handle_response(result)
 
 
-@app.command(name="inactivate", no_args_is_help=True)
-def user_inactivate(
+@app.command(name="disable", no_args_is_help=True)
+def user_disable(
     username: str = typer.Option(
         ...,
         "--username",
@@ -198,12 +198,12 @@ def user_inactivate(
     ),
 ):
     """
-    Inactivate user
+    Disable user
     """
     z = zpod_client.ZpodClient()
-    result = z.users_inactivate.sync_detailed(id=f"username={username}")
+    result = z.users_disable.sync_detailed(id=f"username={username}")
     if result.status_code == 201:
-        print(f"User [magenta]{username}[/magenta] has been inactivated.")
+        print(f"User [magenta]{username}[/magenta] has been disabled.")
     else:
         utils.handle_response(result)
 

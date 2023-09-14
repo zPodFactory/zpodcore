@@ -17,7 +17,7 @@ with database.get_session_ctx() as session:
             email="superuser@zpodfactory.io",
             api_token=secrets.token_urlsafe(32),
             superadmin=True,
-            status=UserStatus.ACTIVE,
+            status=UserStatus.ENABLED,
         )
 
         print(

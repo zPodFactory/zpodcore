@@ -25,7 +25,7 @@ class D:
     superadmin = {"example": False}
     creation_date = {"example": datetime(2023, 1, 1)}
     last_connection_date = {"example": datetime(2023, 1, 1, 0, 1)}
-    status = {"example": UserStatus.ACTIVE}
+    status = {"example": UserStatus.ENABLED}
     api_token = {"example": "BNcsTebGHbIdJjlZ0A2xS0qpSskahVRHO6z61qnRPNw"}
 
 
