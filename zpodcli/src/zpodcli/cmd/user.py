@@ -117,7 +117,10 @@ def user_add(
     )
 
     if result.status_code == 201:
-        print(f"User [magenta]{username}[/magenta] has been created.")
+        print(
+            f"User [magenta]{username}[/magenta] has been created.\n"
+            f"Token: [tan]{result.parsed.api_token}[/tan]"
+        )
     else:
         utils.handle_response(result)
 
@@ -223,10 +226,9 @@ def user_reset_api_token(
     z = zpod_client.ZpodClient()
     result = z.users_reset_api_token.sync_detailed(id=f"username={username}")
     if result.status_code == 201:
-        api_token = result.parsed.api_token
         print(
             f"User [magenta]{username}[/magenta]'s api_token has been reset "
-            f"to: [tan]{api_token}[/tan]"
+            f"to: [tan]{result.parsed.api_token}[/tan]"
         )
     else:
         utils.handle_response(result)
