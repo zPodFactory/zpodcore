@@ -53,11 +53,11 @@ zpodapi-pytest *args:
 
 # Start Docker Environment
 zpodcore-start $COLUMNS=rich_cols:
-  docker compose up
+  docker compose up --remove-orphans
 
 # Start Docker Environment in background
 zpodcore-start-background $COLUMNS=rich_cols:
-  docker compose up -d
+  docker compose up -d --remove-orphans
 
 # Stop Docker Environment
 zpodcore-stop:
@@ -67,9 +67,14 @@ zpodcore-stop:
 zpodengine-deploy-all:
   just zpodengine-prefect deploy --all
 
+# Manually Run Command
+zpodengine-cmd *args:
+  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" poetry -C zpodengine run "$@"
+
+
 # Manually Run Prefect Command
 zpodengine-prefect *args:
-  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" poetry -C zpodengine run prefect "$@"
+  just zpodengine-cmd prefect "$@"
 
 # Update zpodsdk
 zpodsdk-update: zpodapi-generate-openapi
