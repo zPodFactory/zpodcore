@@ -215,6 +215,62 @@ class ZpodClient:
 
     @property
     @cache
+    def permission_groups_create(self):
+        from zpod.api.permission_groups import permission_groups_create
+
+        return permission_groups_create.PermissionGroupsCreate(self._client)
+
+    @property
+    @cache
+    def permission_groups_delete(self):
+        from zpod.api.permission_groups import permission_groups_delete
+
+        return permission_groups_delete.PermissionGroupsDelete(self._client)
+
+    @property
+    @cache
+    def permission_groups_get(self):
+        from zpod.api.permission_groups import permission_groups_get
+
+        return permission_groups_get.PermissionGroupsGet(self._client)
+
+    @property
+    @cache
+    def permission_groups_get_all(self):
+        from zpod.api.permission_groups import permission_groups_get_all
+
+        return permission_groups_get_all.PermissionGroupsGetAll(self._client)
+
+    @property
+    @cache
+    def permission_groups_update(self):
+        from zpod.api.permission_groups import permission_groups_update
+
+        return permission_groups_update.PermissionGroupsUpdate(self._client)
+
+    @property
+    @cache
+    def permission_groups_users_add(self):
+        from zpod.api.permission_groups import permission_groups_users_add
+
+        return permission_groups_users_add.PermissionGroupsUsersAdd(self._client)
+
+    @property
+    @cache
+    def permission_groups_users_delete(self):
+        from zpod.api.permission_groups import permission_groups_users_delete
+
+        return permission_groups_users_delete.PermissionGroupsUsersDelete(self._client)
+
+    @property
+    @cache
+    def permission_groups_users_get_all(self):
+        from zpod.api.permission_groups import permission_groups_users_get_all
+
+        return permission_groups_users_get_all.PermissionGroupsUsersGetAll(self._client)
+
+    @property
+    @cache
     def profiles_create(self):
         from zpod.api.profiles import profiles_create
 

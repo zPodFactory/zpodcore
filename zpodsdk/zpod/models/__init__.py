@@ -32,6 +32,9 @@ from .instance_view import InstanceView
 from .library_create import LibraryCreate
 from .library_update import LibraryUpdate
 from .library_view import LibraryView
+from .permission_group_create import PermissionGroupCreate
+from .permission_group_update import PermissionGroupUpdate
+from .permission_group_user_add import PermissionGroupUserAdd
 from .permission_group_view import PermissionGroupView
 from .profile_create import ProfileCreate
 from .profile_item_create import ProfileItemCreate
@@ -83,6 +86,9 @@ __all__ = (
     "LibraryCreate",
     "LibraryUpdate",
     "LibraryView",
+    "PermissionGroupCreate",
+    "PermissionGroupUpdate",
+    "PermissionGroupUserAdd",
     "PermissionGroupView",
     "ProfileCreate",
     "ProfileItemCreate",
