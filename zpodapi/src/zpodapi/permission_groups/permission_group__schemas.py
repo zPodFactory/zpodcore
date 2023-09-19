@@ -11,3 +11,15 @@ class PermissionGroupView(SchemaBase):
     id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     users: list[UserView]
+
+
+class PermissionGroupCreate(SchemaBase):
+    name: str = Field(..., D.name)
+
+
+class PermissionGroupUpdate(SchemaBase):
+    name: str = Field(..., D.name)
+
+
+class PermissionGroupUserAdd(SchemaBase):
+    user_id: int
