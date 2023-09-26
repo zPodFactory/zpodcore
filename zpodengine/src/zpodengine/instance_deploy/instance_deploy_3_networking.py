@@ -173,16 +173,20 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                         for x in results
                         if x["entity_type"] == "RealizedLogicalSwitch"
                     )
-                    if rls["state"] == "REALIZED" and rls["runtime_status"] in (
-                        "UP",
-                        "SUCCESS",
+                    if (
+                        rls.get("state") == "REALIZED"
+                        and rls.get("runtime_status") == "SUCCESS"
+                        and rls.get("publish_status") == "SUCCESS"
+                        and rls.get("operational_status") == "STATUS_GREEN"
                     ):
                         print(f"Segment ({segment_id}) is ready for use")
                         break
                     print(
                         f"Segment ({segment_id}) is not ready. "
-                        f"State:{rls['state']}, "
-                        f"Runtime Status:{rls['runtime_status']}"
+                        f"State:{rls.get('state', 'N/a')}, "
+                        f"Runtime Status:{rls.get('runtime_status', 'N/a')}, "
+                        f"Publish Status:{rls.get('publish_status', 'N/a')}, "
+                        f"Operational Status:{rls.get('operational_status', 'N/a')}"
                     )
                 else:
                     print("Status not readable.  Trying again...")
