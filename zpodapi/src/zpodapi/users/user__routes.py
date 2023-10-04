@@ -111,7 +111,7 @@ def enable(
 @router.patch(
     "/{id}/disable",
     response_model=UserViewFull,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_202_ACCEPTED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def disable(

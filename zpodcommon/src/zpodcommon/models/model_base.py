@@ -8,7 +8,7 @@ class ColumnCloningMetaclass(SQLModelMetaclass):
     # Keep sa_column* columns in the proper order
     def __setattr__(cls, name: str, value: Any) -> None:
         if isinstance(value, Column):
-            return super().__setattr__(name, value.copy())
+            return super().__setattr__(name, value._copy())
         return super().__setattr__(name, value)
 
 
