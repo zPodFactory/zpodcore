@@ -50,6 +50,7 @@ def db_seed(session: Session):
         api_token="APITOKEN_SUPERUSER",
         creation_date="2022-01-01T00:00:00",
         superadmin=True,
+        status="ENABLED",
     )
     session.add(superadmin_user)
 
@@ -59,6 +60,7 @@ def db_seed(session: Session):
         api_token="APITOKEN_NORMALUSER",
         creation_date="2022-01-01T00:00:00",
         superadmin=False,
+        status="ENABLED",
     )
     session.add(normal_user)
     session.commit()
