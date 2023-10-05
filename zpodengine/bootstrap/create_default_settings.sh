@@ -7,5 +7,5 @@
 # Create zPod Engine Docker Based Work Pool
 prefect work-pool create -t docker zpodengine-pool
 
-# Set a concurrency limit 'download' tag to 2
-prefect concurrency-limit create download 2
+# Set zpodengine-pool concurrency limit to 8
+prefect work-pool set-concurrency-limit zpodengine-pool 8
