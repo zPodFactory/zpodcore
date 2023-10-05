@@ -163,6 +163,7 @@ SHELL [ "pwsh", "-command" ]
 RUN Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 RUN Install-Module -Scope AllUsers VMware.PowerCLI -RequiredVersion ${POWERCLI_VERSION}
 RUN Install-Module -Scope AllUsers PowerNSX -RequiredVersion ${POWERNSX_VERSION}
+RUN Install-Module -Scope AllUsers Subnet -RequiredVersion 1.0.6
 
 # On by default to suppress nagging. Set to $false if you don't want to help us make PowerCLI better.
 RUN Set-PowerCLIConfiguration -ParticipateInCeip $true -Confirm:$false
