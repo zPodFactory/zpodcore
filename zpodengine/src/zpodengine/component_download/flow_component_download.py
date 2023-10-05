@@ -113,7 +113,6 @@ def get_customerconnect_credentials() -> Tuple[str, str]:
 
 @task(
     task_run_name="{component.component_uid}-download",
-    tags=["download"],
 )
 def download_component(component: Component) -> int:
     logger = get_run_logger()
