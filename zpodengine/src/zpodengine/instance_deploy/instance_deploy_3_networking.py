@@ -132,7 +132,7 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                 ),
             )
 
-            # Attach Mac Discovery Profile to segment
+            # Attach Segment Security Profile to segment
             print(
                 f"Attach Segment Security Profile on {segment_id} "
                 f"to {segment_security_profile_id}"
