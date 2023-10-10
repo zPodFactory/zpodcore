@@ -117,6 +117,39 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                 ),
             )
 
+            # Create Segment Security Profile
+            # - Allow DHCP Server on Segment such as zbox/vyos
+            segment_security_profile_id = f"{project_prefix}-segment-security-profile"
+            print(f"Create Segment Security Profile: {mac_discovery_profile_id}")
+            nsx.patch(
+                url=(
+                    f"{policy_project_path}/infra"
+                    f"/segment-security-profiles/{segment_security_profile_id}"
+                ),
+                json=dict(
+                    id=segment_security_profile_id,
+                    dhcp_server_block_enabled=False,
+                ),
+            )
+
+            # Attach Mac Discovery Profile to segment
+            print(
+                f"Attach Segment Security Profile on {segment_id} "
+                f"to {segment_security_profile_id}"
+            )
+            nsx.patch(
+                url=(
+                    f"{policy_project_path}/infra/segments/{segment_id}"
+                    f"/segment-security-profile-binding-maps/{inst_prefix}-binding-map"
+                ),
+                json=dict(
+                    segment_security_profile_path=(
+                        f"{project_path}"
+                        f"/infra/segment-security-profiles/{segment_security_profile_id}"
+                    )
+                ),
+            )
+
             # Add DFW allow all rule
             dfw_allow_all_url = (
                 f"{policy_project_path}/infra/domains/default"
