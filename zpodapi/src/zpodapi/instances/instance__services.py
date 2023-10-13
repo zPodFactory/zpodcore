@@ -18,7 +18,6 @@ class InstanceService(ServiceBase):
 
     def get_all(self):
         return self.get_instance_records(
-            where_user=True,
             where=[M.Instance.status.not_in([enums.InstanceStatus.DELETED.value])],
         ).all()
 
@@ -34,7 +33,7 @@ class InstanceService(ServiceBase):
             where.append(M.Instance.status.not_in([enums.InstanceStatus.DELETED.value]))
         else:
             return None
-        return self.get_instance_records(where_user=True, where=where).one_or_none()
+        return self.get_instance_records(where=where).one_or_none()
 
     def create(
         self,
@@ -52,7 +51,7 @@ class InstanceService(ServiceBase):
             password=instance__utils.gen_password(),
             permissions=[
                 M.InstancePermission(
-                    permission=enums.InstancePermission.INSTANCE_OWNER,
+                    permission=enums.InstancePermission.OWNER,
                     users=[current_user],
                 )
             ],
@@ -107,66 +106,35 @@ class InstanceService(ServiceBase):
     def get_instance_records(
         self,
         select_fields=M.Instance,
-        where_user=True,
         where=None,
         order_by=M.Instance.name,
     ):
-        stmt = (
-            select(select_fields)
-            .select_from(M.Instance)
-            .distinct()
-            .join(M.InstancePermission)
-            .outerjoin(M.InstancePermissionUserLink, full=True)
-            .outerjoin(M.InstancePermissionGroupLink, full=True)
-            .outerjoin(M.PermissionGroup, full=True)
-            .outerjoin(M.PermissionGroupUserLink, full=True)
-        )
-        if where_user and not self.is_superadmin:
-            stmt = stmt.where(
-                or_(
-                    M.InstancePermissionUserLink.user_id == self.current_user.id,
-                    M.PermissionGroupUserLink.user_id == self.current_user.id,
+        stmt = select(select_fields).select_from(M.Instance)
+        if not self.is_superadmin:
+            stmt = (
+                stmt.join(M.InstancePermission)
+                .outerjoin(M.InstancePermissionUserLink)
+                .outerjoin(M.InstancePermissionGroupLink)
+                .outerjoin(M.PermissionGroup)
+                .outerjoin(M.PermissionGroupUserLink)
+                .where(
+                    or_(
+                        M.InstancePermissionUserLink.user_id == self.current_user.id,
+                        M.PermissionGroupUserLink.user_id == self.current_user.id,
+                    )
                 )
             )
+
         if where:
             stmt = stmt.where(*where)
         if order_by:
             stmt = stmt.order_by(order_by)
         return self.session.exec(stmt)
 
-    def get_user_instance_permissions(self, user_id: int, instance_id: int) -> set[str]:
+    def get_user_instance_permissions(self, instance_id: int) -> set[str]:
         permissions = self.get_instance_records(
             select_fields=M.InstancePermission.permission,
-            where_user=True,
-            where=[M.Instance.id == id],
+            where=[M.Instance.id == instance_id],
             order_by=None,
         ).all()
         return set(permissions)
-
-    def has_permission(self, user_id: int, instance_id: int, permissions: set[str]):
-        user_permissions = self.get_user_instance_permissions(
-            user_id=user_id,
-            instance_id=instance_id,
-        )
-        return user_permissions.intersection(permissions)
-
-    def is_readable(self, user_id: int, instance_id: int):
-        return self.has_permission(
-            user_id=user_id,
-            instance_id=instance_id,
-            permissions={
-                enums.InstancePermission.INSTANCE_OWNER,
-                enums.InstancePermission.INSTANCE_ADMIN,
-                enums.InstancePermission.INSTANCE_READ_ONLY,
-            },
-        )
-
-    def is_admin(self, user_id: int, instance_id: int):
-        return self.has_permission(
-            user_id=user_id,
-            instance_id=instance_id,
-            permissions={
-                enums.InstancePermission.INSTANCE_OWNER,
-                enums.InstancePermission.INSTANCE_ADMIN,
-            },
-        )

@@ -1,4 +1,3 @@
-import json
 from typing import List
 
 import typer
@@ -10,11 +9,12 @@ from zpod.models.instance_create import InstanceCreate
 from zpod.models.instance_permission import InstancePermission
 from zpod.models.instance_view import InstanceView
 
-from zpodcli.cmd import instance_component
-from zpodcli.lib import utils, zpod_client
+from zpodcli.cmd import instance_component, instance_permission
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage zPods Instances")
 app.add_typer(instance_component.app, name="component")
+app.add_typer(instance_permission.app, name="permission")
 
 console = Console()
 
@@ -50,33 +50,29 @@ def generate_table(instances: list[InstanceView], action: str = None):
     table.add_column("Components")
     table.add_column("Endpoint")
     table.add_column("Networks")
-    table.add_column("Owner")
+    table.add_column("Owner(s)")
     table.add_column("Password")
     table.add_column("Status")
 
-    for instance in instances:
+    for instance in sorted(instances, key=lambda x: x.name):
         counts = {}
-
         for component in instance.components:
             component_name = component.component.component_name
-            if component_name in counts:
-                counts[component_name] += 1
-            else:
-                counts[component_name] = 1
+            counts.setdefault(component_name, 0)
+            counts[component_name] += 1
 
         components = "".join(
             f"{value} x [yellow3]{key}[/yellow3]\n" for key, value in counts.items()
         )
-        networks = ""
         networks = "".join(
             f" - [cornflower_blue]{network.cidr}[/cornflower_blue]\n"
             for network in instance.networks
         )
 
-        owner = ""
-        for instance_permission in instance.permissions:
-            if instance_permission.permission == InstancePermission.INSTANCE_OWNER:
-                owner = instance_permission.users[0].username
+        owners = ""
+        for instance_perm in instance.permissions:
+            if instance_perm.permission == InstancePermission.OWNER:
+                owners = "\n".join(sorted(x.username for x in instance_perm.users))
 
         table.add_row(
             f"[bold]{instance.name}[/bold]",
@@ -85,7 +81,7 @@ def generate_table(instances: list[InstanceView], action: str = None):
             components,
             f"[dark_khaki]{instance.endpoint.name}[/dark_khaki]",
             networks,
-            owner,
+            owners,
             instance.password,
             get_status_markdown(instance.status),
         )
@@ -94,39 +90,37 @@ def generate_table(instances: list[InstanceView], action: str = None):
 
 
 @app.command(name="list")
+@unexpected_status_handler
 def instance_list():
     """
     List zPods
     """
     print("Listing zPods")
 
-    z = zpod_client.ZpodClient()
+    z = ZpodClient()
     instances = z.instances_get_all.sync()
     generate_table(instances, "List")
 
 
 @app.command(name="delete", no_args_is_help=True)
+@unexpected_status_handler
 def instance_delete(
     names: List[str] = typer.Option(..., "--name", "-n"),
 ):
     """
     Delete a zPod
     """
-    z = zpod_client.ZpodClient()
+    z = ZpodClient()
 
     for name in names:
-        instance = z.instances_delete.sync_detailed(id=f"name={name}")
-        if instance.status_code == 204:
-            console.print(
-                f"Instance [magenta]{name}[/magenta] has been scheduled for deletion."
-            )
-        else:
-            content = json.loads(instance.content.decode())
-            error_message = content["detail"]
-            console.print(f"Error: {error_message}", style="indian_red")
+        z.instances_delete.sync(id=f"name={name}")
+        console.print(
+            f"Instance [magenta]{name}[/magenta] has been scheduled for deletion."
+        )
 
 
 @app.command(name="create", no_args_is_help=True)
+@unexpected_status_handler
 def instance_create(
     name: str = typer.Option(..., "--name", "-n"),
     description: str = typer.Option("", "--description"),
@@ -138,28 +132,17 @@ def instance_create(
     """
     Create a zPod
     """
-    z = zpod_client.ZpodClient()
+    z = ZpodClient()
 
-    endpoints: list[EndpointViewFull] = z.endpoints_get_all.sync()
-    if endpoints is None:
-        print("There is no endpoints available for deployment")
-
-    ep_id = None
-    for ep in endpoints:
-        if ep.name == endpoint:
-            ep_id = ep.id
-
+    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
     instance_details = InstanceCreate(
         name=name,
         domain=domain,
         description=description,
         profile=profile,
-        endpoint_id=ep_id,
+        endpoint_id=ep.id,
         enet_name=enet_name,
     )
 
-    result = z.instances_create.sync_detailed(json_body=instance_details)
-    if result.status_code == 201:
-        print(f"Instance [magenta]{name}[/magenta] is being deployed...")
-    else:
-        utils.handle_response(result)
+    z.instances_create.sync(json_body=instance_details)
+    print(f"Instance [magenta]{name}[/magenta] is being deployed...")

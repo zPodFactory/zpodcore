@@ -2,12 +2,14 @@ import typer
 from rich import print
 from zpod.models.permission_group_user_add import PermissionGroupUserAdd
 
-from zpodcli.lib import utils, zpod_client
+from zpodcli.lib.utils import exit_with_error
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage Permission Group Users")
 
 
 @app.command(name="add", no_args_is_help=True)
+@unexpected_status_handler
 def permission_group_user_add(
     name: str = typer.Option(..., "--name", "-n"),
     username: str = typer.Option(
@@ -20,22 +22,19 @@ def permission_group_user_add(
     Add User to Permission Group
     """
 
-    z: zpod_client.ZpodClient = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     if not (user := z.users_get.sync(id=f"username={username}")):
-        print(f"User not found: {username}")
-        raise typer.Exit()
+        exit_with_error(f"User not found: {username}")
 
-    result = z.permission_groups_users_add.sync_detailed(
-        id=f"name={name}", json_body=PermissionGroupUserAdd(user_id=user.id)
+    z.permission_groups_users_add.sync(
+        id=f"name={name}",
+        json_body=PermissionGroupUserAdd(user_id=user.id),
     )
-
-    if result.status_code == 201:
-        print(f"User: {username} added.")
-    else:
-        utils.handle_response(result)
+    print(f"User: {username} added.")
 
 
 @app.command(name="remove", no_args_is_help=True)
+@unexpected_status_handler
 def permission_group_user_remove(
     name: str = typer.Option(..., "--name", "-n"),
     username: str = typer.Option(
@@ -47,16 +46,11 @@ def permission_group_user_remove(
     """
     Remove User from Permission Group
     """
-    z: zpod_client.ZpodClient = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     if not (user := z.users_get.sync(id=f"username={username}")):
-        print(f"User not found: {username}")
-        raise typer.Exit()
-    result = z.permission_groups_users_delete.sync_detailed(
+        exit_with_error(f"User not found: {username}")
+    z.permission_groups_users_delete.sync(
         id=f"name={name}",
         user_id=user.id,
     )
-
-    if result.status_code == 204:
-        print(f"User: {username} removed.")
-    else:
-        utils.handle_response(result)
+    print(f"User: {username} removed.")

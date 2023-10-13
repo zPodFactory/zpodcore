@@ -50,7 +50,7 @@ services:
   # Prefect Server API
   zpodengineserver:
     container_name: ${COMPOSE_PROJECT_NAME}-zpodengineserver
-    image: prefecthq/prefect:2.12.1-python3.11
+    image: prefecthq/prefect:2.13.6-python3.11
     depends_on:
       - zpodpostgres
     entrypoint: [ "prefect", "server", "start" ]

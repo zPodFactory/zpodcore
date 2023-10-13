@@ -1,9 +1,11 @@
 from typing import TYPE_CHECKING, List
 
 from sqlmodel import Field, Relationship
+
 from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
+    from .endpoint_models import EndpointPermission
     from .instance_models import InstancePermission
     from .user_models import User
 
@@ -19,10 +21,18 @@ class PermissionGroup(ModelBase, table=True):
     name: str = Field(
         default=...,
         nullable=False,
+        unique=True,
+    )
+
+    endpoint_permissions: List["EndpointPermission"] = Relationship(
+        back_populates="permission_groups",
+        sa_relationship_kwargs=dict(
+            secondary="endpoint_permission_group_link",
+        ),
     )
 
     instance_permissions: List["InstancePermission"] = Relationship(
-        back_populates="groups",
+        back_populates="permission_groups",
         sa_relationship_kwargs=dict(
             secondary="instance_permission_group_link",
         ),

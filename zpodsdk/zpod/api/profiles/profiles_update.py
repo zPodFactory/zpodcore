@@ -45,10 +45,15 @@ class ProfilesUpdate:
             response_201 = ProfileView.from_dict(response.json())
 
             return response_201
-        if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+
+        if (
+            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+            and not self.client.raise_on_unexpected_status
+        ):
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:

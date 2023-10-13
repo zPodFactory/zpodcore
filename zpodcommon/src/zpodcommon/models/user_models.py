@@ -8,6 +8,7 @@ from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
     from .instance_models import InstancePermission
+    from .endpoint_models import EndpointPermission
     from .permission_group_models import PermissionGroup
 
 from .mixins import CommonDatesMixin
@@ -66,6 +67,12 @@ class User(CommonDatesMixin, ModelBase, table=True):
         back_populates="users",
         sa_relationship_kwargs=dict(
             secondary="instance_permission_user_link",
+        ),
+    )
+    endpoint_permissions: List["EndpointPermission"] = Relationship(
+        back_populates="users",
+        sa_relationship_kwargs=dict(
+            secondary="endpoint_permission_user_link",
         ),
     )
     permission_groups: List["PermissionGroup"] = Relationship(

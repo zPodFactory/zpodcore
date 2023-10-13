@@ -41,3 +41,25 @@ class PermissionGroupService(ServiceBase):
                 detail="User not found",
             )
         self.session.commit()
+
+    def get_permission_group_record(self, group_id, groupname):
+        if (group_id and groupname) or (not group_id and not groupname):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Must provide group_id or groupname",
+            )
+        elif group_id and not (group := self.session.get(M.PermissionGroup, group_id)):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Group not found",
+            )
+        elif groupname and not (
+            group := self.crud.select(
+                where=[M.PermissionGroup.name == groupname]
+            ).one_or_none()
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Group not found",
+            )
+        return group

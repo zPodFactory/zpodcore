@@ -31,6 +31,7 @@ docker-fullclean:
   docker volume prune -f
 
 # Run zcli command
+[no-exit-message]
 zcli *args:
   @poetry -C zpodcli run zcli "$@"
 
@@ -65,7 +66,7 @@ zpodcore-stop:
 
 # Deploy all Flows
 zpodengine-deploy-all:
-  just zpodengine-prefect deploy --all
+  just zpodengine-prefect --no-prompt deploy --all
 
 # Manually Run Command
 zpodengine-cmd *args:

@@ -10,7 +10,7 @@ from zpod.models.profile_item_create import ProfileItemCreate
 from zpod.models.profile_item_update import ProfileItemUpdate
 from zpod.models.profile_update import ProfileUpdate
 
-from zpodcli.lib import utils, zpod_client
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage profiles")
 
@@ -50,20 +50,20 @@ def generate_table(profiles: list, action: str = None):
 
 
 @app.command(name="list")
+@unexpected_status_handler
 def profile_list():
     """
     List profiles
     """
-    z = zpod_client.ZpodClient()
-    result = z.profiles_get_all.sync_detailed()
+    z: ZpodClient = ZpodClient()
 
-    if result.status_code == 200:
-        generate_table(result.parsed, "List")
-    else:
-        utils.handle_response(result)
+    result = z.profiles_get_all.sync()
+
+    generate_table(result, "List")
 
 
 @app.command(name="create", no_args_is_help=True)
+@unexpected_status_handler
 def profile_create(
     name: str = typer.Option(..., "--name", "-n"),
     profile_file: Path = typer.Option(..., "--profile_file", "-pf"),
@@ -73,21 +73,20 @@ def profile_create(
     """
     profile_obj = load_profile_file(profile_file)
 
-    z = zpod_client.ZpodClient()
-    result = z.profiles_create.sync_detailed(
+    z: ZpodClient = ZpodClient()
+
+    z.profiles_create.sync(
         json_body=ProfileCreate(
             name=name,
             profile=build_profile(profile_obj),
         )
     )
 
-    if result.status_code == 201:
-        print(f"Profile [magenta]{name}[/magenta] has been created.")
-    else:
-        utils.handle_response(result)
+    print(f"Profile [magenta]{name}[/magenta] has been created.")
 
 
 @app.command(name="update", no_args_is_help=True)
+@unexpected_status_handler
 def profile_update(
     name: str = typer.Option(..., "--name", "-n"),
     newname: str = typer.Option(None, "--newname"),
@@ -104,15 +103,13 @@ def profile_update(
         profile_obj = load_profile_file(profile_file)
         profile_update.profile = build_profile(profile_obj, False)
 
-    z = zpod_client.ZpodClient()
-    result = z.profiles_update.sync_detailed(
+    z: ZpodClient = ZpodClient()
+
+    z.profiles_update.sync(
         id=f"name={name}",
         json_body=profile_update,
     )
-    if result.status_code == 201:
-        print(f"Profile [magenta]{name}[/magenta] has been updated.")
-    else:
-        utils.handle_response(result)
+    print(f"Profile [magenta]{name}[/magenta] has been updated.")
 
 
 def load_profile_file(profile_file):

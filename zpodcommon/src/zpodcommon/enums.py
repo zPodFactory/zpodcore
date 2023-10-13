@@ -17,6 +17,10 @@ class ComponentDownloadStatus(str, Enum):
     SCHEDULED = "SCHEDULED"
 
 
+class EndpointPermission(str, Enum):
+    USER = "USER"
+
+
 class InstanceComponentStatus(str, Enum):
     ACTIVE = "ACTIVE"
     BUILDING = "BUILDING"
@@ -25,9 +29,9 @@ class InstanceComponentStatus(str, Enum):
 
 
 class InstancePermission(str, Enum):
-    INSTANCE_ADMIN = "INSTANCE_ADMIN"
-    INSTANCE_OWNER = "INSTANCE_OWNER"
-    INSTANCE_READ_ONLY = "INSTANCE_READ_ONLY"
+    OWNER = "OWNER"
+    ADMIN = "ADMIN"
+    USER = "USER"
 
 
 class InstanceStatus(str, Enum):

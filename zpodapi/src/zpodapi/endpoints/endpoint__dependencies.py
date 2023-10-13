@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Path
+from fastapi import Depends, HTTPException, Path, status
 
 from zpodapi.lib.global_dependencies import service_init_annotation
 from zpodcommon import models as M
@@ -22,9 +22,12 @@ async def get_endpoint(
         ),
     ],
 ):
-    if endpoint := endpoint_service.crud.get(**EndpointIdType.args(id)):
+    if endpoint := endpoint_service.get(**EndpointIdType.args(id)):
         return endpoint
-    raise HTTPException(status_code=404, detail="Endpoint not found")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Endpoint not found",
+    )
 
 
 class EndpointDepends:

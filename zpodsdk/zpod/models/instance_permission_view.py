@@ -19,26 +19,26 @@ class InstancePermissionView:
     Attributes:
         id (int):  Example: 1.
         permission (InstancePermission): An enumeration.
-        groups (Union[Unset, List['PermissionGroupView']]):
+        permission_groups (Union[Unset, List['PermissionGroupView']]):
         users (Union[Unset, List['UserView']]):
     """
 
     id: int
     permission: InstancePermission
-    groups: Union[Unset, List["PermissionGroupView"]] = UNSET
+    permission_groups: Union[Unset, List["PermissionGroupView"]] = UNSET
     users: Union[Unset, List["UserView"]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
         permission = self.permission.value
 
-        groups: Union[Unset, List[Dict[str, Any]]] = UNSET
-        if not isinstance(self.groups, Unset):
-            groups = []
-            for groups_item_data in self.groups:
-                groups_item = groups_item_data.to_dict()
+        permission_groups: Union[Unset, List[Dict[str, Any]]] = UNSET
+        if not isinstance(self.permission_groups, Unset):
+            permission_groups = []
+            for permission_groups_item_data in self.permission_groups:
+                permission_groups_item = permission_groups_item_data.to_dict()
 
-                groups.append(groups_item)
+                permission_groups.append(permission_groups_item)
 
         users: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.users, Unset):
@@ -55,8 +55,8 @@ class InstancePermissionView:
                 "permission": permission,
             }
         )
-        if groups is not UNSET:
-            field_dict["groups"] = groups
+        if permission_groups is not UNSET:
+            field_dict["permission_groups"] = permission_groups
         if users is not UNSET:
             field_dict["users"] = users
 
@@ -72,12 +72,14 @@ class InstancePermissionView:
 
         permission = InstancePermission(d.pop("permission"))
 
-        groups = []
-        _groups = d.pop("groups", UNSET)
-        for groups_item_data in _groups or []:
-            groups_item = PermissionGroupView.from_dict(groups_item_data)
+        permission_groups = []
+        _permission_groups = d.pop("permission_groups", UNSET)
+        for permission_groups_item_data in _permission_groups or []:
+            permission_groups_item = PermissionGroupView.from_dict(
+                permission_groups_item_data
+            )
 
-            groups.append(groups_item)
+            permission_groups.append(permission_groups_item)
 
         users = []
         _users = d.pop("users", UNSET)
@@ -89,7 +91,7 @@ class InstancePermissionView:
         instance_permission_view = cls(
             id=id,
             permission=permission,
-            groups=groups,
+            permission_groups=permission_groups,
             users=users,
         )
 

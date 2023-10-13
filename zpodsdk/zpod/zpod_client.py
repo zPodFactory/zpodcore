@@ -4,10 +4,16 @@ from zpod import Client
 
 
 class ZpodClient:
-    def __init__(self, base_url, token):
+    def __init__(
+        self,
+        base_url,
+        token,
+        raise_on_unexpected_status=True,
+    ):
         self._client = Client(
             base_url=base_url,
             headers=dict(access_token=token),
+            raise_on_unexpected_status=raise_on_unexpected_status,
         )
 
     @property
@@ -96,6 +102,49 @@ class ZpodClient:
 
     @property
     @cache
+    def endpoints_permissions_get_all(self):
+        from zpod.api.endpoints import endpoints_permissions_get_all
+
+        return endpoints_permissions_get_all.EndpointsPermissionsGetAll(self._client)
+
+    @property
+    @cache
+    def endpoints_permissions_groups_add(self):
+        from zpod.api.endpoints import endpoints_permissions_groups_add
+
+        return endpoints_permissions_groups_add.EndpointsPermissionsGroupsAdd(
+            self._client
+        )
+
+    @property
+    @cache
+    def endpoints_permissions_groups_remove(self):
+        from zpod.api.endpoints import endpoints_permissions_groups_remove
+
+        return endpoints_permissions_groups_remove.EndpointsPermissionsGroupsRemove(
+            self._client
+        )
+
+    @property
+    @cache
+    def endpoints_permissions_users_add(self):
+        from zpod.api.endpoints import endpoints_permissions_users_add
+
+        return endpoints_permissions_users_add.EndpointsPermissionsUsersAdd(
+            self._client
+        )
+
+    @property
+    @cache
+    def endpoints_permissions_users_remove(self):
+        from zpod.api.endpoints import endpoints_permissions_users_remove
+
+        return endpoints_permissions_users_remove.EndpointsPermissionsUsersRemove(
+            self._client
+        )
+
+    @property
+    @cache
     def endpoints_update(self):
         from zpod.api.endpoints import endpoints_update
 
@@ -163,6 +212,49 @@ class ZpodClient:
         from zpod.api.instances import instances_networks_get_all
 
         return instances_networks_get_all.InstancesNetworksGetAll(self._client)
+
+    @property
+    @cache
+    def instances_permissions_get_all(self):
+        from zpod.api.instances import instances_permissions_get_all
+
+        return instances_permissions_get_all.InstancesPermissionsGetAll(self._client)
+
+    @property
+    @cache
+    def instances_permissions_groups_add(self):
+        from zpod.api.instances import instances_permissions_groups_add
+
+        return instances_permissions_groups_add.InstancesPermissionsGroupsAdd(
+            self._client
+        )
+
+    @property
+    @cache
+    def instances_permissions_groups_remove(self):
+        from zpod.api.instances import instances_permissions_groups_remove
+
+        return instances_permissions_groups_remove.InstancesPermissionsGroupsRemove(
+            self._client
+        )
+
+    @property
+    @cache
+    def instances_permissions_users_add(self):
+        from zpod.api.instances import instances_permissions_users_add
+
+        return instances_permissions_users_add.InstancesPermissionsUsersAdd(
+            self._client
+        )
+
+    @property
+    @cache
+    def instances_permissions_users_remove(self):
+        from zpod.api.instances import instances_permissions_users_remove
+
+        return instances_permissions_users_remove.InstancesPermissionsUsersRemove(
+            self._client
+        )
 
     @property
     @cache

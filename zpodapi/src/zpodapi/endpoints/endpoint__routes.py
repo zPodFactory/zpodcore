@@ -21,7 +21,7 @@ def get_all(
     *,
     endpoint_service: EndpointAnnotations.EndpointService,
 ):
-    return endpoint_service.crud.get_all()
+    return endpoint_service.get_all()
 
 
 @router.get(

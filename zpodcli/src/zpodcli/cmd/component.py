@@ -2,7 +2,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from zpodcli.lib import zpod_client
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage components")
 
@@ -20,7 +20,7 @@ def get_status_markdown(status: str):
         case _:
             try:
                 if percentage := int(status):
-                    return f"[deep_sky_blue1]Downloading... ({percentage}%)[/deep_sky_blue1]"
+                    return f"[deep_sky_blue1]Downloading... ({percentage}%)[/deep_sky_blue1]"  # noqa: E501
             except Exception:
                 return f"[indian_red]{status}[/indian_red]"
 
@@ -56,6 +56,7 @@ def generate_table(components: list, component_uid: str = None, action: str = No
 
 
 @app.command(name="list")
+@unexpected_status_handler
 def component_list(
     available: bool = typer.Option(False, "-a", help="Show all library components")
 ):
@@ -63,7 +64,7 @@ def component_list(
     List components
     """
 
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     components = z.components_get_all.sync()
     # Sort component by unique uid name
     sorted_components = sorted(components, key=lambda c: c.component_uid)
@@ -78,34 +79,38 @@ def component_list(
 
 
 @app.command(name="enable", no_args_is_help=True)
+@unexpected_status_handler
 def component_enable(component_uid: str = typer.Option(..., "--uid")):
     """
     Enable a component
     """
 
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     component = z.components_enable.sync(id=f"uid={component_uid}")
     generate_table(components=[component], component_uid=component_uid, action="Enable")
 
 
 @app.command(name="get", no_args_is_help=True)
+@unexpected_status_handler
 def component_get(component_uid: str = typer.Option(..., "--uid")):
     """
     Get specific component information
     """
-    z = zpod_client.ZpodClient()
+
+    z: ZpodClient = ZpodClient()
     component = z.components_get.sync(id=f"uid={component_uid}")
 
     generate_table(components=[component], component_uid=component_uid, action="Get")
 
 
 @app.command(name="disable", no_args_is_help=True)
+@unexpected_status_handler
 def component_disable(component_uid: str = typer.Option(..., "--uid")):
     """
     Disable specific component
     """
 
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     component = z.components_disable.sync(id=f"uid={component_uid}")
     generate_table(
         components=[component], component_uid=component_uid, action="Disable"

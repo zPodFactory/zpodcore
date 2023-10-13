@@ -11,6 +11,10 @@ from .endpoint_enet_view import EndpointENetView
 from .endpoint_network_create import EndpointNetworkCreate
 from .endpoint_network_update import EndpointNetworkUpdate
 from .endpoint_network_view import EndpointNetworkView
+from .endpoint_permission import EndpointPermission
+from .endpoint_permission_group_add_remove import EndpointPermissionGroupAddRemove
+from .endpoint_permission_user_add_remove import EndpointPermissionUserAddRemove
+from .endpoint_permission_view import EndpointPermissionView
 from .endpoint_update import EndpointUpdate
 from .endpoint_view import EndpointView
 from .endpoint_view_full import EndpointViewFull
@@ -25,6 +29,8 @@ from .instance_feature_view import InstanceFeatureView
 from .instance_feature_view_data import InstanceFeatureViewData
 from .instance_network_view import InstanceNetworkView
 from .instance_permission import InstancePermission
+from .instance_permission_group_add_remove import InstancePermissionGroupAddRemove
+from .instance_permission_user_add_remove import InstancePermissionUserAddRemove
 from .instance_permission_view import InstancePermissionView
 from .instance_status import InstanceStatus
 from .instance_update import InstanceUpdate
@@ -65,6 +71,10 @@ __all__ = (
     "EndpointNetworkCreate",
     "EndpointNetworkUpdate",
     "EndpointNetworkView",
+    "EndpointPermission",
+    "EndpointPermissionGroupAddRemove",
+    "EndpointPermissionUserAddRemove",
+    "EndpointPermissionView",
     "EndpointsCreate",
     "EndpointsUpdate",
     "EndpointsView",
@@ -79,6 +89,8 @@ __all__ = (
     "InstanceFeatureViewData",
     "InstanceNetworkView",
     "InstancePermission",
+    "InstancePermissionGroupAddRemove",
+    "InstancePermissionUserAddRemove",
     "InstancePermissionView",
     "InstanceStatus",
     "InstanceUpdate",

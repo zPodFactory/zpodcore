@@ -7,10 +7,16 @@ from functools import cache
 from {package_name} import Client
 
 class {class_name}:
-    def __init__(self, base_url, token):
+    def __init__(
+        self,
+        base_url,
+        token,
+        raise_on_unexpected_status=True,
+    ):
         self._client = Client(
             base_url=base_url,
             headers=dict(access_token=token),
+            raise_on_unexpected_status=raise_on_unexpected_status,
         )
 """
 
