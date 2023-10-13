@@ -1,4 +1,4 @@
-FROM prefecthq/prefect:2.12.1-python3.11
+FROM prefecthq/prefect:2.13.6-python3.11
 
 RUN apt-get update \
     && apt-get install -y \

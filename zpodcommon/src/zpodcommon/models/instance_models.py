@@ -188,7 +188,7 @@ class InstancePermission(ModelBase, table=True):
             secondary="instance_permission_user_link",
         ),
     )
-    groups: List["PermissionGroup"] = Relationship(
+    permission_groups: List["PermissionGroup"] = Relationship(
         back_populates="instance_permissions",
         sa_relationship_kwargs=dict(
             secondary="instance_permission_group_link",

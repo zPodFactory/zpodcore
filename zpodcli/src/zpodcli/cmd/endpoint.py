@@ -3,10 +3,12 @@ from rich.console import Console
 from rich.pretty import Pretty
 from rich.table import Table
 
-from zpodcli.lib import zpod_client
+from zpodcli.cmd import endpoint_permission
 from zpodcli.lib.utils import get_boolean_markdown
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage endpoints")
+app.add_typer(endpoint_permission.app, name="permission")
 
 
 console = Console()
@@ -43,10 +45,11 @@ def generate_table(endpoints: list, action: str = None):
 
 
 @app.command(name="list")
+@unexpected_status_handler
 def endpoint_list():
     """
     List Endpoints
     """
-    z = zpod_client.ZpodClient()
+    z = ZpodClient()
     endpoints = z.endpoints_get_all.sync()
     generate_table(endpoints, "List")

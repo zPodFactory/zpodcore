@@ -8,7 +8,7 @@ from zpod.models.instance_component_create import InstanceComponentCreate
 from zpod.models.instance_component_view import InstanceComponentView
 from zpod.models.instance_view import InstanceView
 
-from zpodcli.lib import zpod_client
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage zPods Instance components", no_args_is_help=True)
 
@@ -45,6 +45,7 @@ def generate_table(
 
 
 @app.command(name="list", no_args_is_help=True)
+@unexpected_status_handler
 def instance_component_list(
     instance_name: str = typer.Option(..., "-i", help="instance name"),
 ):
@@ -53,7 +54,7 @@ def instance_component_list(
     """
     print(f"Listing {instance_name} components")
 
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     instance = z.instances_get.sync(id=f"name={instance_name}")
 
     if instance.name == instance_name:
@@ -68,6 +69,7 @@ def instance_component_list(
 
 
 @app.command(name="add", no_args_is_help=True)
+@unexpected_status_handler
 def instance_component_add(
     instance_name: str = typer.Option(..., "-i", help="instance name"),
     component_uid: str = typer.Option(..., "-c", help="component uid"),
@@ -81,11 +83,10 @@ def instance_component_add(
     """
     print(f"Adding component {component_uid} to instance {instance_name}")
 
-    z = zpod_client.ZpodClient()
-
+    z: ZpodClient = ZpodClient()
     instance = z.instances_get.sync(id=f"name={instance_name}")
 
-    z.instances_components_add.sync_detailed(
+    z.instances_components_add.sync(
         instance.id,
         json_body=InstanceComponentCreate(
             component_uid=component_uid,

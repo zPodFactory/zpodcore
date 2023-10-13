@@ -2,12 +2,17 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 from zpodapi.components import component__routes
-from zpodapi.endpoints import endpoint__routes, endpoint_enet__routes
+from zpodapi.endpoints import (
+    endpoint__routes,
+    endpoint_enet__routes,
+    endpoint_permission__routes,
+)
 from zpodapi.instances import (
     instance__routes,
     instance_component__routes,
     instance_feature__routes,
     instance_network__routes,
+    instance_permission__routes,
 )
 from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.libraries import library__routes
@@ -37,10 +42,12 @@ api.include_router(root__routes.router)
 api.include_router(component__routes.router)
 api.include_router(endpoint__routes.router)
 api.include_router(endpoint_enet__routes.router)
+api.include_router(endpoint_permission__routes.router)
 api.include_router(instance__routes.router)
 api.include_router(instance_component__routes.router)
 api.include_router(instance_feature__routes.router)
 api.include_router(instance_network__routes.router)
+api.include_router(instance_permission__routes.router)
 api.include_router(library__routes.router)
 api.include_router(permission_group__routes.router)
 api.include_router(profile__routes.router)

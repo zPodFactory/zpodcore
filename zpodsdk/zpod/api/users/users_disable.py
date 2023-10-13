@@ -35,14 +35,19 @@ class UsersDisable:
     def _parse_response(
         self, *, response: httpx.Response
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
-        if response.status_code == HTTPStatus.CREATED:
-            response_201 = UserViewFull.from_dict(response.json())
+        if response.status_code == HTTPStatus.ACCEPTED:
+            response_202 = UserViewFull.from_dict(response.json())
 
-            return response_201
-        if response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+            return response_202
+
+        if (
+            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+            and not self.client.raise_on_unexpected_status
+        ):
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:

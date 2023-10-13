@@ -1,5 +1,6 @@
 import secrets
 
+from fastapi import HTTPException, status
 from pydantic import EmailStr
 from sqlmodel import SQLModel
 
@@ -79,6 +80,26 @@ class UserService(ServiceBase):
                 api_token=generate_api_token(),
             ),
         )
+
+    def get_user_record(self, user_id, username):
+        if (user_id and username) or (not user_id and not username):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Must provide user_id or username",
+            )
+        elif user_id and not (user := self.session.get(M.User, user_id)):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="User not found",
+            )
+        elif username and not (
+            user := self.crud.select(where=[M.User.username == username]).one_or_none()
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="User not found",
+            )
+        return user
 
 
 def generate_api_token():

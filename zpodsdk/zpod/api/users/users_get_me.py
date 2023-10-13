@@ -35,6 +35,7 @@ class UsersGetMe:
             response_200 = UserViewFull.from_dict(response.json())
 
             return response_200
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:

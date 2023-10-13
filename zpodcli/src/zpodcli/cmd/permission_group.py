@@ -6,7 +6,7 @@ from zpod.models.permission_group_update import PermissionGroupUpdate
 from zpod.models.permission_group_view import PermissionGroupView
 
 from zpodcli.cmd import permission_group_user
-from zpodcli.lib import utils, zpod_client
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage Permission Groups")
 app.add_typer(permission_group_user.app, name="user", no_args_is_help=True)
@@ -24,7 +24,7 @@ def generate_table(
         header_style="bold cyan",
     )
     for permission_group in permission_groups:
-        users = "\n".join(sorted([x.username for x in permission_group.users]))
+        users = "\n".join(sorted(x.username for x in permission_group.users))
         table.add_row(
             f"[tan]{permission_group.name}[/tan]",
             f"[light_coral]{users}[/light_coral]",
@@ -33,20 +33,18 @@ def generate_table(
 
 
 @app.command(name="list")
+@unexpected_status_handler
 def permission_group_list():
     """
     List Permission Groups
     """
-    z = zpod_client.ZpodClient()
-    result = z.permission_groups_get_all.sync_detailed()
-
-    if result.status_code == 200:
-        generate_table(result.parsed)
-    else:
-        utils.handle_response(result)
+    z: ZpodClient = ZpodClient()
+    result = z.permission_groups_get_all.sync()
+    generate_table(result)
 
 
 @app.command(name="create", no_args_is_help=True)
+@unexpected_status_handler
 def permission_group_create(
     name: str = typer.Option(..., "--name", "-n"),
 ):
@@ -54,20 +52,17 @@ def permission_group_create(
     Create Permission Group
     """
 
-    z: zpod_client.ZpodClient = zpod_client.ZpodClient()
-    result = z.permission_groups_create.sync_detailed(
+    z: ZpodClient = ZpodClient()
+    z.permission_groups_create.sync(
         json_body=PermissionGroupCreate(
             name=name,
         )
     )
-
-    if result.status_code == 201:
-        print(f"Permission Group [magenta]{name}[/magenta] has been created.")
-    else:
-        utils.handle_response(result)
+    print(f"Permission Group [magenta]{name}[/magenta] has been created.")
 
 
 @app.command(name="update", no_args_is_help=True)
+@unexpected_status_handler
 def permission_group_update(
     name: str = typer.Option(..., "--name", "-n"),
     newname: str = typer.Option(..., "--newname"),
@@ -79,32 +74,28 @@ def permission_group_update(
         print("New name is the same as the old name")
         raise typer.Exit()
 
-    z = zpod_client.ZpodClient()
-    result = z.permission_groups_update.sync_detailed(
+    z: ZpodClient = ZpodClient()
+    z.permission_groups_update.sync(
         id=f"name={name}",
         json_body=PermissionGroupUpdate(name=newname),
     )
-    if result.status_code == 204:
-        print(
-            f"Permission Group [magenta]{name}[/magenta] has been "
-            f"renamed to [magenta]{newname}[/magenta]."
-        )
-    else:
-        utils.handle_response(result)
+    print(
+        f"Permission Group [magenta]{name}[/magenta] has been "
+        f"renamed to [magenta]{newname}[/magenta]."
+    )
 
 
 @app.command(name="delete", no_args_is_help=True)
+@unexpected_status_handler
 def permission_group_delete(
     name: str = typer.Option(..., "--name", "-n"),
 ):
     """
     Delete Permission Group
     """
-    z = zpod_client.ZpodClient()
-    result = z.permission_groups_delete.sync_detailed(
+    z: ZpodClient = ZpodClient()
+
+    z.permission_groups_delete.sync(
         id=f"name={name}",
     )
-    if result.status_code == 204:
-        print(f"Permission Group [magenta]{name}[/magenta] has been deleted.")
-    else:
-        utils.handle_response(result)
+    print(f"Permission Group [magenta]{name}[/magenta] has been deleted.")

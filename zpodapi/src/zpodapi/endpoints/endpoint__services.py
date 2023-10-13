@@ -1,6 +1,7 @@
 from rich import print
+from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, or_, select
 
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
@@ -11,6 +12,23 @@ from .endpoint__utils import update_dictionary, zpod_endpoint_check
 
 class EndpointService(ServiceBase):
     base_model: SQLModel = M.Endpoint
+
+    def get_all(self):
+        return self.get_endpoint_records(where=[M.Endpoint.enabled]).all()
+
+    def get(self, *, id=None, name=None, name_insensitive=None):
+        where = []
+        if id:
+            where.append(M.Endpoint.id == id),
+        elif name or name_insensitive:
+            if name:
+                where.append(M.Endpoint.name == name)
+            else:
+                where.append(func.lower(M.Endpoint.name) == name_insensitive.lower())
+            where.append(M.Endpoint.enabled)
+        else:
+            return None
+        return self.get_endpoint_records(where=where).one_or_none()
 
     def update(self, *, item: M.Endpoint, item_in: EndpointUpdate):
         for key, value in item_in.dict(exclude_unset=True).items():
@@ -30,3 +48,39 @@ class EndpointService(ServiceBase):
         # Verify endpoint status
         print(f"Verifying Endpoint {item.name}")
         return zpod_endpoint_check(item)
+
+    def get_endpoint_records(
+        self,
+        select_fields=M.Endpoint,
+        where=None,
+        order_by=M.Endpoint.name,
+    ):
+        stmt = select(select_fields).select_from(M.Endpoint)
+        if not self.is_superadmin:
+            stmt = (
+                stmt.join(M.EndpointPermission)
+                .outerjoin(M.EndpointPermissionUserLink)
+                .outerjoin(M.EndpointPermissionGroupLink)
+                .outerjoin(M.PermissionGroup)
+                .outerjoin(M.PermissionGroupUserLink)
+                .where(
+                    or_(
+                        M.EndpointPermissionUserLink.user_id == self.current_user.id,
+                        M.PermissionGroupUserLink.user_id == self.current_user.id,
+                    )
+                )
+            )
+
+        if where:
+            stmt = stmt.where(*where)
+        if order_by:
+            stmt = stmt.order_by(order_by)
+        return self.session.exec(stmt)
+
+    def get_user_endpoint_permissions(self, endpoint_id: int) -> set[str]:
+        permissions = self.get_endpoint_records(
+            select_fields=M.EndpointPermission.permission,
+            where=[M.Endpoint.id == endpoint_id],
+            order_by=None,
+        ).all()
+        return set(permissions)

@@ -6,8 +6,8 @@ from rich.table import Table
 from zpod.models.library_create import LibraryCreate
 from zpod.models.library_update import LibraryUpdate
 
-from zpodcli.lib import zpod_client
 from zpodcli.lib.utils import get_boolean_markdown
+from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage libraries")
 
@@ -45,16 +45,18 @@ def generate_table(libraries: list, action: str = None):
 
 
 @app.command(name="list")
+@unexpected_status_handler
 def library_list():
     """
     List Libraries
     """
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     libraries = z.libraries_get_all.sync()
     generate_table(libraries=libraries, action="List")
 
 
 @app.command(name="create", no_args_is_help=True)
+@unexpected_status_handler
 def library_create(
     name: str = typer.Option(..., "--name", "-n"),
     git_url: str = typer.Option(ZPOD_LIBRARY_GIT_URL, "--git_url", "-u"),
@@ -63,31 +65,30 @@ def library_create(
     """
     Create Library
     """
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     library_in = LibraryCreate(name=name, description=description, git_url=git_url)
     library = z.libraries_create.sync(json_body=library_in)
     generate_table(libraries=[library], action="Create")
 
 
 @app.command(name="delete", no_args_is_help=True)
+@unexpected_status_handler
 def library_delete(
     name: str = typer.Option(..., "--name", "-n"),
 ):
     """
     Delete Library
     """
-    z = zpod_client.ZpodClient()
-    library = z.libraries_delete.sync(id=f"name={name}")
-    if library is None:
-        console.print(
-            f"Library [magenta]{name}[/magenta] has been deleted successfully",
-            style="green",
-        )
-    else:
-        console.print(f"Error {library}", style="indian_red")
+    z: ZpodClient = ZpodClient()
+    z.libraries_delete.sync(id=f"name={name}")
+    console.print(
+        f"Library [magenta]{name}[/magenta] has been deleted successfully",
+        style="green",
+    )
 
 
 @app.command(name="update", no_args_is_help=True)
+@unexpected_status_handler
 def library_update(
     enabled: Optional[bool] = typer.Option(None, "--enable/--disable"),
     name: str = typer.Option(..., "--name", "-n"),
@@ -97,7 +98,7 @@ def library_update(
     Update Library (Will `git update` the current library repository *ONLY*)
     """
     is_enabled = None
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     if enabled is None:
         library = z.libraries_get.sync(id=f"name={name}")
         is_enabled = library.enabled
@@ -107,35 +108,27 @@ def library_update(
         is_enabled = False
 
     library_in = LibraryUpdate(enabled=is_enabled, description=description)
-    if library := z.libraries_update.sync(json_body=library_in, id=f"name={name}"):
-        generate_table(libraries=[library], action="Enable")
-    else:
-        console.print(f"Error {library}", style="indian_red")
+    z.libraries_update.sync(json_body=library_in, id=f"name={name}")
+    generate_table(libraries=[library], action="Enable")
 
 
 @app.command(name="get", no_args_is_help=True)
+@unexpected_status_handler
 def library_get(name: str = typer.Option(..., "--name", "-n")):
     """
     Get Library
     """
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     library = z.libraries_get.sync(id=f"name={name}")
-    if library is None:
-        console.print(
-            f"Library [magenta]{name}[/magenta] not found", style="indian_red"
-        )
-        return
     generate_table(libraries=[library], action="Get")
 
 
 @app.command(name="resync", no_args_is_help=True)
+@unexpected_status_handler
 def library_resync(name: str = typer.Option(..., "--name", "-n")):
     """
     Resync Libraries (Will refresh *ALL* library components json/metadata)
     """
-    z = zpod_client.ZpodClient()
+    z: ZpodClient = ZpodClient()
     library = z.libraries_resync.sync(id=f"name={name}")
-    if library is None:
-        console.print("Library not found", style="indian_red")
-        return
     generate_table(libraries=[library], action="Sync")
