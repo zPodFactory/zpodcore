@@ -95,26 +95,26 @@ class NsxProjectDestroy:
         print(f"Delete Project: {self.project_id}")
         self.nsx.patch(
             url="/policy/api/v1/org-root",
-            json=dict(
-                resource_type="OrgRoot",
-                children=[
-                    dict(
-                        resource_type="ChildResourceReference",
-                        id="default",
-                        target_type="Org",
-                        children=[
-                            dict(
-                                Project=dict(
-                                    id=self.project_id,
-                                    resource_type="Project",
-                                ),
-                                resource_type="ChildProject",
-                                marked_for_delete=True,
-                            )
+            json={
+                "resource_type": "OrgRoot",
+                "children": [
+                    {
+                        "resource_type": "ChildResourceReference",
+                        "id": "default",
+                        "target_type": "Org",
+                        "children": [
+                            {
+                                "Project": {
+                                    "id": self.project_id,
+                                    "resource_type": "Project",
+                                },
+                                "resource_type": "ChildProject",
+                                "marked_for_delete": True,
+                            }
                         ],
-                    )
+                    }
                 ],
-            ),
+            },
         )
 
 

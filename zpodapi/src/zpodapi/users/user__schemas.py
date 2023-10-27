@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import EmailStr
+from pydantic import EmailStr, constr, validate_email
 from pydantic import Field as PField
-from pydantic import constr, validate_email
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon.enums import UserStatus

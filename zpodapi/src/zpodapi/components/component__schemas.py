@@ -10,10 +10,10 @@ class D:
     component_description = {"example": "VMware Cloud Director Availabilty"}
     library_name = {"example": "main"}
     filename = {
-        "example": "VMware-Cloud-Director-Availability-Provider-4.4.1.4448762-b80bae6591_OVF10.ova"
+        "example": "VMware-Cloud-Director-Availability-Provider-4.4.1.4448762-b80bae6591_OVF10.ova"  # noqa: E501
     }
     jsonfile = {
-        "example": "/library/default/vmware/vmware_cloud_director_availability/4.4.1.json"
+        "example": "/library/default/vmware/vmware_cloud_director_availability/4.4.1.json"  # noqa: E501
     }
     status = {"example": ComponentStatus.ACTIVE}
     download_status = {"example": ComponentDownloadStatus.SCHEDULED}

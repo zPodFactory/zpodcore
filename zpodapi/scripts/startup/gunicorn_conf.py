@@ -36,19 +36,19 @@ keepalive = settings.GUNICORN_KEEP_ALIVE
 
 # For debugging and testing
 logger.info(
-    dict(
-        loglevel=loglevel,
-        workers=workers,
-        bind=bind,
-        graceful_timeout=graceful_timeout,
-        timeout=timeout,
-        keepalive=keepalive,
-        errorlog=errorlog,
-        accesslog=accesslog,
+    {
+        "loglevel": loglevel,
+        "workers": workers,
+        "bind": bind,
+        "graceful_timeout": graceful_timeout,
+        "timeout": timeout,
+        "keepalive": keepalive,
+        "errorlog": errorlog,
+        "accesslog": accesslog,
         # Additional, non-gunicorn variables
-        workers_per_core=settings.GUNICORN_WORKERS_PER_CORE,
-        max_workers=settings.GUNICORN_MAX_WORKERS,
-        env_workers=settings.GUNICORN_WORKERS,
-        cores=multiprocessing.cpu_count(),
-    )
+        "workers_per_core": settings.GUNICORN_WORKERS_PER_CORE,
+        "max_workers": settings.GUNICORN_MAX_WORKERS,
+        "env_workers": settings.GUNICORN_WORKERS,
+        "cores": multiprocessing.cpu_count(),
+    }
 )

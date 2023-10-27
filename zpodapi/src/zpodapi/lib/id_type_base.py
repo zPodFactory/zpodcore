@@ -2,7 +2,7 @@ from typing import Any
 
 
 class IdType(str):
-    fields = dict(id=int)
+    fields = {"id": int}
     arg_mapper = {}
 
     @classmethod

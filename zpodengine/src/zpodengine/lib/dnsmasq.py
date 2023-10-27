@@ -15,7 +15,7 @@ def lock_file(file):
             file_handle = pfile.open("r+")
             fcntl.flock(file_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
             break
-        except IOError:
+        except IOError:  # noqa: UP024
             # File is locked, wait for a while and try again
             time.sleep(0.1)
 

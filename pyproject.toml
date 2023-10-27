@@ -5,10 +5,25 @@ description = ""
 authors = ["Kelby Valenti <kvalenti@vmware.com>", "Timo Sugliani <tsugliani@vmware.com>"]
 readme = "README.md"
 
-[tool.isort]
-profile = "black"
-line_length = 88
-known_first_party = ["zpodapi", "zpodcli", "zpodcommon", "zpodengine", "zpodsdk"]
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "B008",
+]
 
-[tool.black]
-line-length = 88 # override black's default line-length
+[tool.ruff.isort]
+known-first-party = [
+    "zpodapi",
+    "zpodcli",
+    "zpodcommon",
+    "zpodengine",
+    "zpodsdk",
+]

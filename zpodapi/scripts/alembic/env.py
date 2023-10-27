@@ -54,7 +54,7 @@ def order_columns(context, revision, op):
         prefixes=op.prefixes,
         _namespace_metadata=op._namespace_metadata,
         _constraints_included=op._constraints_included,
-        **op.kw
+        **op.kw,
     )
 
 

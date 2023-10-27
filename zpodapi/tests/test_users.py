@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 
 def ignore(data, *keys):
-    if type(data) == list:
+    if isinstance(data, list):
         return [{k: row[k] for k in row if k not in keys} for row in data]
     return {k: data[k] for k in data if k not in keys}
 
@@ -14,23 +14,23 @@ def test_bad_token(client: TestClient):
 
 
 def test_normaluser_create_user(normaluser_client: TestClient):
-    user = dict(
-        username="testuser",
-        email="testuser@zpodfactory.io",
-        description="Description",
-        superadmin=False,
-    )
+    user = {
+        "username": "testuser",
+        "email": "testuser@zpodfactory.io",
+        "description": "Description",
+        "superadmin": False,
+    }
     response = normaluser_client.post("/users", json=user)
     assert response.status_code == 403
 
 
 def test_superadmin_create_user(superadmin_client: TestClient):
-    user = dict(
-        username="testuser",
-        email="testuser@zpodfactory.io",
-        description="Description",
-        superadmin=False,
-    )
+    user = {
+        "username": "testuser",
+        "email": "testuser@zpodfactory.io",
+        "description": "Description",
+        "superadmin": False,
+    }
 
     response = superadmin_client.post("/users", json=user)
     data = response.json()
@@ -54,12 +54,12 @@ def test_superadmin_create_user(superadmin_client: TestClient):
 
 
 def test_superadmin_create_user_with_duplicated_username(superadmin_client: TestClient):
-    user = dict(
-        username="superuser",
-        email="testuser@zpodfactory.io",
-        description="Description",
-        superadmin=False,
-    )
+    user = {
+        "username": "superuser",
+        "email": "testuser@zpodfactory.io",
+        "description": "Description",
+        "superadmin": False,
+    }
 
     response = superadmin_client.post("/users", json=user)
     assert response.status_code == 409
@@ -75,20 +75,20 @@ def test_superadmin_get_users(superadmin_client: TestClient):
         "creation_date",
         "last_connection_date",
     ) == [
-        dict(
-            username="superuser",
-            email="superuser@zpodfactory.io",
-            description="",
-            superadmin=True,
-            status="ENABLED",
-        ),
-        dict(
-            username="normaluser",
-            email="normaluser@zpodfactory.io",
-            description="",
-            superadmin=False,
-            status="ENABLED",
-        ),
+        {
+            "username": "superuser",
+            "email": "superuser@zpodfactory.io",
+            "description": "",
+            "superadmin": True,
+            "status": "ENABLED",
+        },
+        {
+            "username": "normaluser",
+            "email": "normaluser@zpodfactory.io",
+            "description": "",
+            "superadmin": False,
+            "status": "ENABLED",
+        },
     ]
 
 
@@ -97,13 +97,13 @@ def test_normaluser_get_users(normaluser_client: TestClient):
     data = response.json()
     assert response.status_code == 200
     assert ignore(data, "id", "creation_date", "last_connection_date") == [
-        dict(
-            username="normaluser",
-            email="normaluser@zpodfactory.io",
-            description="",
-            superadmin=False,
-            status="ENABLED",
-        ),
+        {
+            "username": "normaluser",
+            "email": "normaluser@zpodfactory.io",
+            "description": "",
+            "superadmin": False,
+            "status": "ENABLED",
+        },
     ]
 
 

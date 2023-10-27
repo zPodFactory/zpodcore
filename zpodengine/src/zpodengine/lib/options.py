@@ -1,5 +1,5 @@
 def task_namer(name):
-    return dict(name=name, task_run_name=name)
+    return {"name": name, "task_run_name": name}
 
 
 def task_options_setup(*, prefix="", **default_kwargs):

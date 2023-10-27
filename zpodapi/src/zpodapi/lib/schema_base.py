@@ -7,38 +7,38 @@ from sqlalchemy import Column
 from sqlmodel import Field as SQLModelField
 from sqlmodel import SQLModel
 
-FIELD_ARGS = dict(
-    default=Undefined,
-    default_factory=None,
-    alias=None,
-    title=None,
-    description=None,
-    exclude=None,
-    include=None,
-    const=None,
-    gt=None,
-    ge=None,
-    lt=None,
-    le=None,
-    multiple_of=None,
-    min_items=None,
-    max_items=None,
-    min_length=None,
-    max_length=None,
-    allow_mutation=True,
-    regex=None,
-    primary_key=False,
-    foreign_key=None,
-    unique=False,
-    nullable=Undefined,
-    index=Undefined,
-    sa_column=Undefined,  # type: ignore
-    sa_column_args=Undefined,
-    sa_column_kwargs=Undefined,
-    schema_extra=None,
-    example=None,
-    hidden=False,
-)
+FIELD_ARGS = {
+    "default": Undefined,
+    "default_factory": None,
+    "alias": None,
+    "title": None,
+    "description": None,
+    "exclude": None,
+    "include": None,
+    "const": None,
+    "gt": None,
+    "ge": None,
+    "lt": None,
+    "le": None,
+    "multiple_of": None,
+    "min_items": None,
+    "max_items": None,
+    "min_length": None,
+    "max_length": None,
+    "allow_mutation": True,
+    "regex": None,
+    "primary_key": False,
+    "foreign_key": None,
+    "unique": False,
+    "nullable": Undefined,
+    "index": Undefined,
+    "sa_column": Undefined,  # type: ignore
+    "sa_column_args": Undefined,
+    "sa_column_kwargs": Undefined,
+    "schema_extra": None,
+    "example": None,
+    "hidden": False,
+}
 
 
 def Field(
@@ -50,7 +50,9 @@ def Field(
     title: Optional[str] = None,
     description: Optional[str] = None,
     exclude: Union[
-        AbstractSet[Union[int, str]], Mapping[Union[int, str], Any], Any
+        AbstractSet[Union[int, str]],
+        Mapping[Union[int, str], Any],
+        Any,
     ] = None,
     include: Union[
         AbstractSet[Union[int, str]], Mapping[Union[int, str], Any], Any

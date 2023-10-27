@@ -53,17 +53,14 @@
             "../zpodengine/src", // Allow vscode to see zpodengine modules
         ],
         "[python]": {
-            "editor.defaultFormatter": "ms-python.python",
+            "editor.defaultFormatter": "charliermarsh.ruff",
+            "editor.formatOnSave": true,
             "editor.codeActionsOnSave": {
                 "source.organizeImports": true
             }
+
         },
         "python.languageServer": "Pylance",
-        "python.linting.enabled": true,
-        "python.linting.flake8Enabled": true,
-        "python.linting.flake8Path": "flake8",
-        "python.formatting.provider": "black",
-        "editor.formatOnSave": true,
         "files.exclude": {
             "**/.DS_Store": true,
             "**/.git": true,
@@ -89,6 +86,7 @@
     },
     "extensions": {
         "recommendations": [
+            "charliermarsh.ruff",
             "ms-python.python",
             "ms-python.vscode-pylance",
             "ms-vscode-remote.remote-ssh",

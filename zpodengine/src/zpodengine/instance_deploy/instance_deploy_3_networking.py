@@ -32,11 +32,15 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                 print(f"Create Project: {project_id}")
                 nsx.patch(
                     url=policy_project_path,
-                    json=dict(
-                        id=project_id,
-                        tier_0s=[tier0_path],
-                        site_infos=[dict(edge_cluster_paths=[nsx.edge_cluster_path()])],
-                    ),
+                    json={
+                        "id": project_id,
+                        "tier_0s": [tier0_path],
+                        "site_infos": [
+                            {
+                                "edge_cluster_paths": [nsx.edge_cluster_path()],
+                            }
+                        ],
+                    },
                 )
 
             # Create T1
@@ -44,17 +48,17 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
             print(f"Create T1: {tier1_id}")
             nsx.patch(
                 url=f"{policy_project_path}/infra/tier-1s/{tier1_id}",
-                json=dict(
-                    arp_limit=5000,
-                    id=tier1_id,
-                    ha_mode="ACTIVE_STANDBY",
-                    route_advertisement_types=[
+                json={
+                    "arp_limit": 5000,
+                    "id": tier1_id,
+                    "ha_mode": "ACTIVE_STANDBY",
+                    "route_advertisement_types": [
                         "TIER1_CONNECTED",
                         "TIER1_IPSEC_LOCAL_ENDPOINT",
                         "TIER1_STATIC_ROUTES",
                     ],
-                    tier0_path=tier0_path,
-                ),
+                    "tier0_path": tier0_path,
+                },
             )
 
             # Attach Edge Cluster to T1
@@ -64,9 +68,9 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                     f"{policy_project_path}/infra/tier-1s/{tier1_id}"
                     f"/locale-services/{project_prefix}-locale-services"
                 ),
-                json=dict(
-                    edge_cluster_path=nsx.edge_cluster_path(),
-                ),
+                json={
+                    "edge_cluster_path": nsx.edge_cluster_path(),
+                },
             )
 
             # Create Segment
@@ -74,15 +78,15 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
             print(f"Create Segment: {segment_id}")
             nsx.patch(
                 url=f"{policy_project_path}/infra/segments/{segment_id}",
-                json=dict(
-                    id=segment_id,
-                    connectivity_path=(f"{project_path}/infra/tier-1s/{tier1_id}"),
-                    subnets=[
-                        dict(gateway_address=MgmtIp.instance(instance, "gw").cidr)
+                json={
+                    "id": segment_id,
+                    "connectivity_path": (f"{project_path}/infra/tier-1s/{tier1_id}"),
+                    "subnets": [
+                        {"gateway_address": MgmtIp.instance(instance, "gw").cidr}
                     ],
-                    transport_zone_path=nsx.transport_zone_path(),
-                    vlan_ids=["0-4094"],
-                ),
+                    "transport_zone_path": nsx.transport_zone_path(),
+                    "vlan_ids": ["0-4094"],
+                },
             )
 
             # Create MAC Discovery Profile
@@ -93,10 +97,10 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                     f"{policy_project_path}/infra"
                     f"/mac-discovery-profiles/{mac_discovery_profile_id}"
                 ),
-                json=dict(
-                    id=mac_discovery_profile_id,
-                    mac_learning_enabled=True,
-                ),
+                json={
+                    "id": mac_discovery_profile_id,
+                    "mac_learning_enabled": True,
+                },
             )
 
             # Attach Mac Discovery Profile to segment
@@ -109,12 +113,12 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                     f"{policy_project_path}/infra/segments/{segment_id}"
                     f"/segment-discovery-profile-binding-maps/{inst_prefix}-binding-map"
                 ),
-                json=dict(
-                    mac_discovery_profile_path=(
+                json={
+                    "mac_discovery_profile_path": (
                         f"{project_path}"
                         f"/infra/mac-discovery-profiles/{mac_discovery_profile_id}"
                     )
-                ),
+                },
             )
 
             # Create Segment Security Profile
@@ -126,10 +130,10 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                     f"{policy_project_path}/infra"
                     f"/segment-security-profiles/{segment_security_profile_id}"
                 ),
-                json=dict(
-                    id=segment_security_profile_id,
-                    dhcp_server_block_enabled=False,
-                ),
+                json={
+                    "id": segment_security_profile_id,
+                    "dhcp_server_block_enabled": False,
+                },
             )
 
             # Attach Segment Security Profile to segment
@@ -142,12 +146,12 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                     f"{policy_project_path}/infra/segments/{segment_id}"
                     f"/segment-security-profile-binding-maps/{inst_prefix}-binding-map"
                 ),
-                json=dict(
-                    segment_security_profile_path=(
+                json={
+                    "segment_security_profile_path": (
                         f"{project_path}"
                         f"/infra/segment-security-profiles/{segment_security_profile_id}"
                     )
-                ),
+                },
             )
 
             # Add DFW allow all rule
@@ -159,17 +163,17 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
             if not nsx.get(url=dfw_allow_all_url).safejson():
                 nsx.patch(
                     url=dfw_allow_all_url,
-                    json=dict(
-                        description="zPod Default Allow All",
-                        display_name="zPod Allow All",
-                        sequence_number=1,
-                        source_groups=["ANY"],
-                        logged=False,
-                        destination_groups=["ANY"],
-                        scope=["ANY"],
-                        action="ALLOW",
-                        services=["ANY"],
-                    ),
+                    json={
+                        "description": "zPod Default Allow All",
+                        "display_name": "zPod Allow All",
+                        "sequence_number": 1,
+                        "source_groups": ["ANY"],
+                        "logged": False,
+                        "destination_groups": ["ANY"],
+                        "scope": ["ANY"],
+                        "action": "ALLOW",
+                        "services": ["ANY"],
+                    },
                 )
 
             # Add Default Static Routes
@@ -180,15 +184,15 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
                         f"{policy_project_path}/infra/tier-1s/{tier1_id}"
                         f"/static-routes/{instance.name}-vlan{id_host}"
                     ),
-                    json=dict(
-                        network=network.cidr,
-                        next_hops=[
-                            dict(
-                                ip_address=MgmtIp.instance(instance, "zbox").ip,
-                                admin_distance=1,
-                            ),
+                    json={
+                        "network": network.cidr,
+                        "next_hops": [
+                            {
+                                "ip_address": MgmtIp.instance(instance, "zbox").ip,
+                                "admin_distance": 1,
+                            },
                         ],
-                    ),
+                    },
                 )
 
             # Wait for segment to realize

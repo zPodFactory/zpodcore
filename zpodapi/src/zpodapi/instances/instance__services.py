@@ -24,7 +24,7 @@ class InstanceService(ServiceBase):
     def get(self, *, id=None, name=None, name_insensitive=None):
         where = []
         if id:
-            where.append(M.Instance.id == id),
+            where.append(M.Instance.id == id)
         elif name or name_insensitive:
             if name:
                 where.append(M.Instance.name == name)
