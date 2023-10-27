@@ -180,7 +180,7 @@ def create_component_dict(
 def is_component_changed(component_dict, component):
     return any(
         component_dict.get(field) != getattr(component, field)
-        for field in component_dict.keys()
+        for field in component_dict
     )
 
 

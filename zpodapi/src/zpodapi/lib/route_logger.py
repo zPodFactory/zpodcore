@@ -22,10 +22,10 @@ class RouteLogger(APIRoute):
                 log_obj(response.body, f"RESPONSE {mp}")
                 return response
             except RequestValidationError as exc:
-                log_obj(dict(detail=exc.errors()), f"RESPONSE {mp}")
+                log_obj({"detail": exc.errors()}, f"RESPONSE {mp}")
                 raise
             except HTTPException as exc:
-                log_obj(dict(detail=exc.detail), f"RESPONSE {mp}")
+                log_obj({"detail": exc.detail}, f"RESPONSE {mp}")
                 raise
 
         return custom_route_handler

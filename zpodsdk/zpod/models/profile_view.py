@@ -1,5 +1,13 @@
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import attr
 from dateutil.parser import isoparse
@@ -84,7 +92,7 @@ class ProfileView:
         for profile_item_data in _profile:
 
             def _parse_profile_item(
-                data: object,
+                data: object
             ) -> Union["ProfileItemView", List["ProfileItemView"]]:
                 try:
                     if not isinstance(data, dict):

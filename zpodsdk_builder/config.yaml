@@ -9,6 +9,5 @@ class_overrides:
 
 post_hooks:
   - python /zpodcore/zpodsdk_builder/build_client.py "zpod"
-  - autoflake -i -r --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports .
-  - isort .
-  - black .
+  - ruff --fix --extend-select "I" .
+  - ruff format .

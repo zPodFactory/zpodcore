@@ -38,6 +38,10 @@ api = FastAPI(
     title="zPod API",
     dependencies=[GlobalDepends.UpdateLastConnectionDate],
 )
+
+# TODO: Remove once this bug is fixed: https://github.com/openapi-generators/openapi-python-client/pull/856
+api.openapi_version = "3.0.3"
+
 api.include_router(root__routes.router)
 api.include_router(component__routes.router)
 api.include_router(endpoint__routes.router)

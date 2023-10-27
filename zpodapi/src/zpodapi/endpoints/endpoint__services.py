@@ -19,7 +19,7 @@ class EndpointService(ServiceBase):
     def get(self, *, id=None, name=None, name_insensitive=None):
         where = []
         if id:
-            where.append(M.Endpoint.id == id),
+            where.append(M.Endpoint.id == id)
         elif name or name_insensitive:
             if name:
                 where.append(M.Endpoint.name == name)

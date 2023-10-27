@@ -73,7 +73,7 @@ def update_db(
 def get_json_from_file(filename: str):
     if not Path(filename).is_file():
         raise ValueError(f"The provided {filename} does not exist")
-    with open(filename, "r") as f:
+    with open(filename) as f:
         return json.load(f)
 
 
@@ -95,7 +95,7 @@ def run_command(cmd: str, cmd_engine: str):
             shell=True,
         )
     else:
-        return subprocess.run(
+        return subprocess.run(  # noqa: UP022
             args=cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -303,7 +303,7 @@ def verify_checksum(component: Component, filename: Path) -> bool:
 
 
 def calculate_percentage(current_size, expected_size):
-    return round((100 * current_size / expected_size))
+    return round(100 * current_size / expected_size)
 
 
 def get_download_paths(component: Component) -> Tuple[str, str]:

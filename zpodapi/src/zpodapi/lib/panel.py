@@ -30,10 +30,10 @@ def log_obj(obj, title):
 
 
 def format_obj(obj):
-    if type(obj) == bytes:
+    if isinstance(obj, bytes):
         obj = obj.decode("utf-8")
 
-    if type(obj) == str:
+    if isinstance(obj, str):
         with contextlib.suppress(json.JSONDecodeError):
             obj = json.loads(obj)
     return obj

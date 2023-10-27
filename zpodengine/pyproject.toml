@@ -19,13 +19,10 @@ pyvmomi = "^8.0.1.0"
 sqlmodel = "0.0.9"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.1.0"
-flake8 = "^6.0.0"
-flake8-bugbear = "^23.1.20"
-isort = "^5.12.0"
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 pytest-xdist = "^3.2.0"
+ruff = "^0.1.1"
 
 [build-system]
 requires = ["poetry-core"]

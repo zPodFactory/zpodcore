@@ -1,4 +1,12 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import attr
 
@@ -62,7 +70,7 @@ class ProfileCreate:
         for profile_item_data in _profile:
 
             def _parse_profile_item(
-                data: object,
+                data: object
             ) -> Union["ProfileItemCreate", List["ProfileItemCreate"]]:
                 try:
                     if not isinstance(data, dict):

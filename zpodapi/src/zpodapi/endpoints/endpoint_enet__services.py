@@ -29,7 +29,7 @@ class EndpointENetService(ServiceBase):
             projects = nsx.get(url="/policy/api/v1/orgs/default/projects").results()
             target_project_id = f"{settings.SITE_ID}-{name}-enet-project"
             return next(
-                (build_enet_dict(x) for x in projects if x["id"] == target_project_id)
+                build_enet_dict(x) for x in projects if x["id"] == target_project_id
             )
 
     def create(
@@ -42,11 +42,11 @@ class EndpointENetService(ServiceBase):
         with NsxClient(endpoint=endpoint) as nsx:
             nsx.patch(
                 url=f"/policy/api/v1/orgs/default/projects/{project_id}",
-                json=dict(
-                    id=project_id,
-                    tier_0s=[f"/infra/tier-0s/{nsx.epnet['t0']}"],
-                    site_infos=[dict(edge_cluster_paths=[nsx.edge_cluster_path()])],
-                ),
+                json={
+                    "id": project_id,
+                    "tier_0s": [f"/infra/tier-0s/{nsx.epnet['t0']}"],
+                    "site_infos": [{"edge_cluster_paths": [nsx.edge_cluster_path()]}],
+                },
             )
 
     def delete(
@@ -67,7 +67,9 @@ class EndpointENetService(ServiceBase):
 
 
 def build_enet_dict(x):
-    return dict(
-        project_id=x["id"],
-        name=x["id"].removeprefix(f"{settings.SITE_ID}-").removesuffix("-enet-project"),
-    )
+    return {
+        "project_id": x["id"],
+        "name": x["id"]
+        .removeprefix(f"{settings.SITE_ID}-")
+        .removesuffix("-enet-project"),
+    }

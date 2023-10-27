@@ -18,10 +18,10 @@ class UserService(ServiceBase):
     def create(self, user_in):
         return self.crud.create(
             item_in=user_in,
-            extra=dict(
-                status=UserStatus.ENABLED,
-                api_token=generate_api_token(),
-            ),
+            extra={
+                "status": UserStatus.ENABLED,
+                "api_token": generate_api_token(),
+            },
         )
 
     def get_all(self, all: bool = False):
