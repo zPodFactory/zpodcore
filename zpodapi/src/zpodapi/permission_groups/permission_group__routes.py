@@ -117,6 +117,7 @@ def users_get_all(
     summary="Permission Group User Add",
     status_code=status.HTTP_201_CREATED,
     response_model=list[UserView],
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def users_add(
     permission_group_service: PermissionGroupAnnotations.PermissionGroupService,
@@ -133,6 +134,7 @@ def users_add(
     "/{id}/users/{user_id}",
     summary="Permission Group User Delete",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def users_delete(
     permission_group_service: PermissionGroupAnnotations.PermissionGroupService,
