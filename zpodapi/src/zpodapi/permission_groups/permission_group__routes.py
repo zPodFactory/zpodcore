@@ -21,7 +21,6 @@ router = APIRouter(
     "",
     summary="Get All",
     response_model=list[PermissionGroupView],
-    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def get_all(
     permission_group_service: PermissionGroupAnnotations.PermissionGroupService,
@@ -33,7 +32,6 @@ def get_all(
     "/{id}",
     summary="Get",
     response_model=PermissionGroupView,
-    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def get(
     permission_group: PermissionGroupAnnotations.GetPermissionGroup,
