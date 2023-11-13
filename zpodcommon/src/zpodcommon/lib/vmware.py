@@ -102,7 +102,13 @@ class vCenter:
         filter_spec = self.create_filter_spec(pc, data, props, type(data[0]))
         options = vmodl.query.PropertyCollector.RetrieveOptions()
         result = pc.RetrievePropertiesEx([filter_spec], options)
+        ret = self.gather_prop_results(result)
+        while result.token:
+            result = pc.ContinueRetrievePropertiesEx(token=result.token)
+            ret.extend(self.gather_prop_results(result))
+        return ret
 
+    def gather_prop_results(self, result):
         ret = []
         for o in result.objects:
             item = {"obj": o.obj}
