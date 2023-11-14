@@ -16,6 +16,7 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[SettingView],
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def get_all(
     *,
@@ -24,7 +25,11 @@ def get_all(
     return setting_service.crud.get_all()
 
 
-@router.get("/{id}", response_model=SettingView)
+@router.get(
+    "/{id}",
+    response_model=SettingView,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
 def get(
     *,
     setting: SettingAnnotations.GetSetting,
