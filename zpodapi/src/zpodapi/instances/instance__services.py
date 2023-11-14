@@ -123,7 +123,7 @@ class InstanceService(ServiceBase):
                         M.PermissionGroupUserLink.user_id == self.current_user.id,
                     )
                 )
-            )
+            ).distinct()
 
         if where:
             stmt = stmt.where(*where)
