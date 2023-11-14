@@ -17,17 +17,17 @@ def generate_table(
 ):
     table = Table(
         "Permission Group",
-        "Users",
+        "Usernames",
         title="Permission Groups",
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
     )
     for permission_group in permission_groups:
-        users = "\n".join(sorted(x.username for x in permission_group.users))
+        usernames = "\n".join(sorted(x.username for x in permission_group.users))
         table.add_row(
             f"[tan]{permission_group.name}[/tan]",
-            f"[light_coral]{users}[/light_coral]",
+            f"[light_coral]{usernames}[/light_coral]",
         )
     print(table)
 
