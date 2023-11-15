@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status
 from zpodapi.lib.global_dependencies import GlobalAnnotations
 from zpodapi.lib.route_logger import RouteLogger
 
-from .instance__dependencies import InstanceAnnotations
+from .instance__dependencies import InstanceAnnotations, InstanceDepends
 from .instance__schemas import InstanceCreate, InstanceUpdate, InstanceView
 
 router = APIRouter(
@@ -37,7 +37,6 @@ def get(
     return instance
 
 
-# TODO: ADD User Permissions to prevent creation
 @router.post(
     "",
     response_model=InstanceView,
@@ -68,6 +67,7 @@ def create(
     response_model=InstanceView,
     status_code=status.HTTP_201_CREATED,
     response_model_exclude_unset=True,
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def update(
     *,
@@ -84,6 +84,7 @@ def update(
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def delete(
     *,

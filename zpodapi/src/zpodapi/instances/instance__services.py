@@ -130,11 +130,3 @@ class InstanceService(ServiceBase):
         if order_by:
             stmt = stmt.order_by(order_by)
         return self.session.exec(stmt)
-
-    def get_user_instance_permissions(self, instance_id: int) -> set[str]:
-        permissions = self.get_instance_records(
-            select_fields=M.InstancePermission.permission,
-            where=[M.Instance.id == instance_id],
-            order_by=None,
-        ).all()
-        return set(permissions)

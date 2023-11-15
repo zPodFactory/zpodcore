@@ -36,10 +36,20 @@ def get_user_instance_permissions(
     instance: "InstanceAnnotations.GetInstance",
     instance_service: "InstanceAnnotations.InstanceService",
 ):
-    return instance_service.get_user_instance_permissions(instance.id)
+    user_id = instance_service.current_user.id
+    user_permissions = set()
+    for permission in instance.permissions:
+        if user_id in [u.id for u in permission.users]:
+            user_permissions.add(permission.permission)
+            continue
+        for pg in permission.permission_groups:
+            if user_id in [u.id for u in pg.users]:
+                user_permissions.add(permission.permission)
+                break
+    return user_permissions
 
 
-def is_instance_admin(
+def instance_maintainer(
     *,
     instance_user_permissions: "InstanceAnnotations.GetUserInstancePermissions",
 ):
@@ -55,7 +65,7 @@ def is_instance_admin(
         )
 
 
-def is_instance_readable(
+def instance_reader(
     *,
     instance_user_permissions: "InstanceAnnotations.GetUserInstancePermissions",
 ):
@@ -73,8 +83,8 @@ def is_instance_readable(
 
 
 class InstanceDepends:
-    IsInstanceAdmin = Depends(is_instance_admin)
-    IsInstanceReadable = Depends(is_instance_readable)
+    InstanceMaintainer = Depends(instance_maintainer)
+    InstanceReader = Depends(instance_reader)
 
 
 class InstanceAnnotations:

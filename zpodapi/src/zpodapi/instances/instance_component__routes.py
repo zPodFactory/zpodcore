@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from .instance__dependencies import InstanceAnnotations
+from .instance__dependencies import InstanceAnnotations, InstanceDepends
 from .instance_component__dependencies import InstanceComponentAnnotations
 from .instance_component__schemas import InstanceComponentCreate, InstanceComponentView
 
@@ -27,6 +27,7 @@ def components_get_all(
     "",
     summary="Instance Component Add",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def components_add(
     *,
