@@ -11,12 +11,16 @@ SEGMENT_MAX_WAIT_FOR_EMPTY = 120
 SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
-@task
+@task(tags=["atomic_operation"])
 def nsx_project_destroy(project_id: str, endpoint_id: int):
     print(f"Destroy NSX Project: {project_id}")
 
     with database.get_session_ctx() as session:
         endpoint = session.get(M.Endpoint, endpoint_id)
+
+        # Destroy Project
+        # This operation does not support concurrent calls.
+        # Adding tags["atomic_operation"] to task will disable concurrency
         with NsxProjectDestroy(project_id=project_id, endpoint=endpoint) as npd:
             npd()
 

@@ -13,7 +13,7 @@ SEGMENT_MAX_WAIT_FOR_REALIZED = 120
 SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
-@task
+@task(tags=["atomic_operation"])
 def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
     with database.get_session_ctx() as session:
         instance = session.get(M.Instance, instance_id)
@@ -27,9 +27,12 @@ def instance_deploy_networking(instance_id: int, enet_name: str | None = None):
             project_path = f"/orgs/{orgid}/projects/{project_id}"
             policy_project_path = f"/policy/api/v1{project_path}"
 
-            # Create Project
             if not enet_name:
                 print(f"Create Project: {project_id}")
+
+                # Create Project
+                # This operation does not support concurrent calls.
+                # Adding tags["atomic_operation"] to task will disable concurrency
                 nsx.patch(
                     url=policy_project_path,
                     json={

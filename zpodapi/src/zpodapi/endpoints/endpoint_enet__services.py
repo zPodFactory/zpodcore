@@ -48,6 +48,8 @@ class EndpointENetService(ServiceBase):
                     "site_infos": [{"edge_cluster_paths": [nsx.edge_cluster_path()]}],
                 },
             )
+            # PS: This operation does not support concurrent calls.
+            # Task in the engine are set with tags["atomic_operation"] to avoid this.
 
     def delete(
         self,
