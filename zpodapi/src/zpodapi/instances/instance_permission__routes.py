@@ -38,7 +38,7 @@ def permissions_get_all(
     summary="Instance Permissions User Add",
     status_code=status.HTTP_201_CREATED,
     response_model=list[UserView],
-    dependencies=[InstanceDepends.IsInstanceAdmin],
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def permissions_users_add(
     instance_permission_service: InstancePermissionAnnotations.InstancePermissionService,  # noqa: E501
@@ -62,7 +62,7 @@ def permissions_users_add(
     "/{permission}/users",
     summary="Instance Permission User Remove",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[InstanceDepends.IsInstanceAdmin],
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def permissions_users_remove(
     instance_permission_service: InstancePermissionAnnotations.InstancePermissionService,  # noqa: E501
@@ -87,7 +87,7 @@ def permissions_users_remove(
     summary="Instance Permissions Group Add",
     status_code=status.HTTP_201_CREATED,
     response_model=list[UserView],
-    dependencies=[InstanceDepends.IsInstanceAdmin],
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def permissions_groups_add(
     instance_permission_service: InstancePermissionAnnotations.InstancePermissionService,  # noqa: E501
@@ -111,7 +111,7 @@ def permissions_groups_add(
     "/{permission}/groups",
     summary="Instance Permission Group Remove",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[InstanceDepends.IsInstanceAdmin],
+    dependencies=[InstanceDepends.InstanceMaintainer],
 )
 def permissions_groups_remove(
     instance_permission_service: InstancePermissionAnnotations.InstancePermissionService,  # noqa: E501
