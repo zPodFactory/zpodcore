@@ -84,6 +84,7 @@ class MgmtIp:
         avi=7,
         vcsa=10,
         hcx=20,
+        vcf=25,
         vrops=30,
         vrli=31,
         vcd=40,
