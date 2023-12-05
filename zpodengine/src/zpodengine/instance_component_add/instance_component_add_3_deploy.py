@@ -50,6 +50,18 @@ def instance_component_add_deploy(
                 print("--- vyos ---")
                 # Add static routes on NSX T1
 
+            case "vcf":
+                print("--- vcf ---")
+
+                ovf_deployer(instance_component)
+
+                with vCenter.auth_by_instance(
+                    instance=instance_component.instance
+                ) as vc:
+                    # Power On VM
+                    print("PowerOn VM")
+                    vc.poweron_vm(vm_name=instance_component.fqdn)
+
             case "vcsa":
                 print("--- vcsa ---")
                 # Prep component ISO to folder
