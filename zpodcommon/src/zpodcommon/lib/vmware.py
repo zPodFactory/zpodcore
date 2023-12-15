@@ -242,6 +242,27 @@ class vCenter:
         task_id = vm.ReconfigVM_Task(spec)
         task.WaitForTask(task_id)
 
+    def set_vm_vdisk(self, vm_name, vdisk_gb, disk_number):
+        vm = self.get_vm(vm_name)
+        disk_label = f"Hard disk {disk_number}"
+        disk_size = int(vdisk_gb) * 1024 * 1024 * 1024
+        disk = None
+        for device in vm.config.hardware.device:
+            if hasattr(device.backing, "fileName"):
+                if device.deviceInfo.label == disk_label:
+                    disk = device
+                    break
+        if disk:
+            if disk.capacityInBytes < disk_size:
+                disk.capacityInBytes = disk_size
+                updated_spec = vim.vm.device.VirtualDeviceSpec(
+                    device=disk,
+                    operation="edit",
+                )
+                spec = vim.vm.ConfigSpec()
+                spec.deviceChange.append(updated_spec)
+                task.WaitForTask(vm.Reconfigure(spec))
+
     def add_disk_to_vm(self, vm_name, disk_size_in_kb):
         #
         # Method to add a disk to a vm_name with specific disk_size_in_kb

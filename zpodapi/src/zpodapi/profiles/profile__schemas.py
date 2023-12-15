@@ -20,6 +20,7 @@ class D:
         hostname = {"example": "zbox"}
         vcpu = {"example": 4}
         vmem = {"example": 12}
+        vdisk = {"example": [40, 800]}
 
 
 class ProfileItemView(SchemaBase):
@@ -28,6 +29,7 @@ class ProfileItemView(SchemaBase):
     hostname: str = Field(None, D.profile.hostname)
     vcpu: int = Field(None, D.profile.vcpu)
     vmem: int = Field(None, D.profile.vmem)
+    vdisks: list[int] = Field(None, D.profile.vdisk)
 
 
 class ProfileView(SchemaBase):
@@ -44,6 +46,7 @@ class ProfileItemCreate(SchemaBase):
     hostname: str | None = Field(None, D.profile.hostname)
     vcpu: int | None = Field(None, D.profile.vcpu)
     vmem: int | None = Field(None, D.profile.vmem)
+    vdisks: list[int] | None = Field(None, D.profile.vdisk)
 
 
 class ProfileCreate(SchemaBase):
@@ -57,8 +60,9 @@ class ProfileItemUpdate(SchemaBase):
     component_uid: str = Field(..., D.profile.component_uid)
     host_id: int | None = Field(None, D.profile.host_id)
     hostname: str | None = Field(None, D.profile.hostname)
-    vcpu: int = Field(None, D.profile.vcpu)
-    vmem: int = Field(None, D.profile.vmem)
+    vcpu: int | None = Field(None, D.profile.vcpu)
+    vmem: int | None = Field(None, D.profile.vmem)
+    vdisks: list[int] | None = Field(None, D.profile.vdisk)
 
 
 class ProfileUpdate(SchemaBase):

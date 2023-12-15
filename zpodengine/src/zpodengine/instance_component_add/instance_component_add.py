@@ -25,6 +25,7 @@ def instance_component_add(
     hostname: str | None = None,
     vcpu: int | None = None,
     vmem: int | None = None,
+    vdisks: list[int] | None = None,
     wait_for=None,
 ):
     prefix = f"{instance_name} {component_uid}"
@@ -55,6 +56,7 @@ def instance_component_add(
         instance_component_id=instance_component.result().id,
         vcpu=vcpu,
         vmem=vmem,
+        vdisks=vdisks,
         wait_for=[pre_scripts],
     )
 

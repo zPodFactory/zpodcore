@@ -17,6 +17,7 @@ def instance_component_add_deploy(
     instance_component_id: int,
     vcpu: int | None = None,
     vmem: int | None = None,
+    vdisks: list[int] | None = None,
 ):
     print("Deploy OVA")
     with database.get_session_ctx() as session:
@@ -85,6 +86,14 @@ def instance_component_add_deploy(
                     if vmem:
                         print("Set Memory")
                         vc.set_vm_vmem(vm_name=instance_component.fqdn, vmem_gb=vmem)
+                    if vdisks:
+                        for disk_number, vdisk_gb in enumerate(vdisks, 2):
+                            print(f"Resize Hard disk {disk_number}")
+                            vc.set_vm_vdisk(
+                                vm_name=instance_component.fqdn,
+                                vdisk_gb=vdisk_gb,
+                                disk_number=disk_number,
+                            )
                     print("Start VM")
                     vc.poweron_vm(vm_name=instance_component.fqdn)
 

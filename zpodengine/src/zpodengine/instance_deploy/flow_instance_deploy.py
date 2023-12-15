@@ -101,6 +101,7 @@ def flow_instance_deploy(
                     hostname=sub_profile_item.get("hostname"),
                     vcpu=sub_profile_item.get("vcpu"),
                     vmem=sub_profile_item.get("vmem"),
+                    vdisks=sub_profile_item.get("vdisks"),
                     wait_for=wait_for,
                 )
                 for sub_profile_item in profile_item
@@ -115,6 +116,7 @@ def flow_instance_deploy(
                 hostname=profile_item.get("hostname"),
                 vcpu=profile_item.get("vcpu"),
                 vmem=profile_item.get("vmem"),
+                vdisks=profile_item.get("vdisks"),
                 wait_for=wait_for,
             )
         wait_for = [last_component_item]
