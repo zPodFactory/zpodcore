@@ -28,13 +28,15 @@ def generate_table(profiles: list, action: str = None):
         profile_item_lines = []
         for profile_item in walk_profile(profile.profile):
             data_values = []
-            if _ := profile_item.host_id:
-                data_values.append(f"Host Id: {_}")
-            if _ := profile_item.vcpu:
-                data_values.append(f"CPU: {_}")
-            if _ := profile_item.vmem:
-                data_values.append(f"Mem: {_}GB")
-
+            if host_id := profile_item.host_id:
+                data_values.append(f"Host Id: {host_id}")
+            if vcpu := profile_item.vcpu:
+                data_values.append(f"CPU: {vcpu}")
+            if vmem := profile_item.vmem:
+                data_values.append(f"Mem: {vmem}GB")
+            if vdisks := profile_item.vdisks:
+                vdisks_txt = ', '.join([f"{vdisk}GB" for vdisk in vdisks])
+                data_values.append(f"Disks: {vdisks_txt}")
             profile_item_txt = f"[yellow3]{profile_item.component_uid}[/yellow3]"
             if data_values:
                 profile_item_txt += (
