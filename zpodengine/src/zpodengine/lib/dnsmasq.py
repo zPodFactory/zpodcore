@@ -31,14 +31,16 @@ def add(instance_domain, ip):
     with lock_file("/zpod/dnsmasq_servers/servers.conf") as f:
         lines = set(f.readlines())
         lines.add(f"server=/{instance_domain}/{ip}\n")
+        inaddr = ".".join(reversed(ip.split(".")[:3]))
+        lines.add(f"server=/{inaddr}.in-addr.arpa/{ip}\n")
         write(f, lines)
 
 
-def delete(instance_name):
-    print(f"Deleting dnsmasq record for: {instance_name}")
-    lookfor = f"server=/{instance_name}."
+def delete(subnet):
+    print(f"Deleting dnsmasq record for subnet: {subnet}")
+    lookfor = f"{subnet}."
     with lock_file("/zpod/dnsmasq_servers/servers.conf") as f:
-        lines = {x for x in f.readlines() if not x.startswith(lookfor)}
+        lines = {x for x in f.readlines() if lookfor not in x}
         write(f, lines)
 
 
