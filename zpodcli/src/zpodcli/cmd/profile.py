@@ -17,51 +17,70 @@ app = typer.Typer(help="Manage profiles")
 
 def generate_table(profiles: list, action: str = None):
     table = Table(
-        "Profile",
+        "Name",
         "Components",
-        title=f"{action} Profile ",
+        title=f"Profile {action}",
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
     )
-    for profile in profiles:
-        profile_item_lines = []
-        for profile_item in walk_profile(profile.profile):
-            data_values = []
-            if host_id := profile_item.host_id:
-                data_values.append(f"Host Id: {host_id}")
-            if vcpu := profile_item.vcpu:
-                data_values.append(f"CPU: {vcpu}")
-            if vmem := profile_item.vmem:
-                data_values.append(f"Mem: {vmem}GB")
-            if vdisks := profile_item.vdisks:
-                vdisks_txt = ', '.join([f"{vdisk}GB" for vdisk in vdisks])
-                data_values.append(f"Disks: {vdisks_txt}")
-            profile_item_txt = f"[yellow3]{profile_item.component_uid}[/yellow3]"
-            if data_values:
-                profile_item_txt += (
-                    f"[light_cyan3] ({', '.join(data_values)})[/light_cyan3]"
-                )
-            profile_item_lines.append(profile_item_txt)
-
+    for profile in sorted(profiles, key=lambda p: p.name):
         table.add_row(
             f"[tan]{profile.name}[/tan]",
-            "\n".join(profile_item_lines),
+            profile_item_output(profile),
         )
-    print(table)
+    return table
+
+
+def profile_item_output(profile):
+    profile_item_lines = []
+    for profile_item in walk_profile(profile.profile):
+        data_values = []
+        if host_id := profile_item.host_id:
+            data_values.append(f"Host Id: {host_id}")
+        if vcpu := profile_item.vcpu:
+            data_values.append(f"CPU: {vcpu}")
+        if vmem := profile_item.vmem:
+            data_values.append(f"Mem: {vmem}GB")
+        if vdisks := profile_item.vdisks:
+            vdisks_txt = ", ".join([f"{vdisk}GB" for vdisk in vdisks])
+            data_values.append(f"Disks: {vdisks_txt}")
+        profile_item_txt = f"[yellow3]{profile_item.component_uid}[/yellow3]"
+        if data_values:
+            profile_item_txt += (
+                f"[light_cyan3] ({', '.join(data_values)})[/light_cyan3]"
+            )
+        profile_item_lines.append(profile_item_txt)
+    return "\n".join(profile_item_lines)
 
 
 @app.command(name="list")
 @unexpected_status_handler
 def profile_list():
     """
-    List profiles
+    Profile List
     """
     z: ZpodClient = ZpodClient()
+    profiles = z.profiles_get_all.sync()
+    print(generate_table(profiles, "List"))
 
-    result = z.profiles_get_all.sync()
 
-    generate_table(result, "List")
+@app.command(name="info", no_args_is_help=True)
+@unexpected_status_handler
+def profile_info(
+    name: str = typer.Option(..., "--name", "-n"),
+    json_: bool = typer.Option(False, "--json", "-j", is_flag=True),
+):
+    """
+    Profile Info
+    """
+    z: ZpodClient = ZpodClient()
+    profile = z.profiles_get.sync(id=f"name={name}")
+
+    if json_:
+        print(json.dumps(profile.to_dict()["profile"]))
+    else:
+        print(generate_table([profile], "Info"))
 
 
 @app.command(name="create", no_args_is_help=True)
@@ -71,7 +90,7 @@ def profile_create(
     profile_file: Path = typer.Option(..., "--profile_file", "-pf"),
 ):
     """
-    Create Profile
+    Profile Create
     """
     profile_obj = load_profile_file(profile_file)
 
@@ -95,7 +114,7 @@ def profile_update(
     profile_file: Path = typer.Option(None, "--profile_file", "-pf"),
 ):
     """
-    Update Profile
+    Profile Update
     """
     profile_update = ProfileUpdate()
     if newname and newname != name:
