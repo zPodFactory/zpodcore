@@ -26,7 +26,7 @@ def generate_table(users, all=False):
     if all:
         table.add_column("Status")
 
-    for user in sorted(users.parsed, key=lambda c: c.username):
+    for user in sorted(users, key=lambda c: c.username):
         lcd = (
             user.last_connection_date.strftime("%Y-%m-%d %H:%M:%S")
             if user.last_connection_date
