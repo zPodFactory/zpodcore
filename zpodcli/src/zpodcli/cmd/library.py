@@ -95,7 +95,7 @@ def library_update(
     description: str = typer.Option(ZPOD_LIBRARY_DESCRIPTION, "--description", "-d"),
 ):
     """
-    Update Library (Will `git update` the current library repository *ONLY*)
+    Update Library Metadata (Description and Enabled/Disabled)
     """
     is_enabled = None
     z: ZpodClient = ZpodClient()
