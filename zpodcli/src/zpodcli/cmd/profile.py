@@ -10,6 +10,7 @@ from zpod.models.profile_item_create import ProfileItemCreate
 from zpod.models.profile_item_update import ProfileItemUpdate
 from zpod.models.profile_update import ProfileUpdate
 
+from zpodcli.lib.utils import exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage profiles")
@@ -87,12 +88,21 @@ def profile_info(
 @unexpected_status_handler
 def profile_create(
     name: str = typer.Option(..., "--name", "-n"),
+    profile: str = typer.Option(None, "--profile", "-p"),
     profile_file: Path = typer.Option(..., "--profile_file", "-pf"),
 ):
     """
     Profile Create
     """
-    profile_obj = load_profile_file(profile_file)
+    if not profile_file and not profile:
+        exit_with_error("Must have either profile file or profile")
+    if profile_file and profile:
+        exit_with_error("Can not have both profile file and profile")
+
+    if profile_file:
+        profile_obj = load_profile_file(profile_file)
+    elif profile:
+        profile_obj = json.loads(profile)
 
     z: ZpodClient = ZpodClient()
 
@@ -111,17 +121,24 @@ def profile_create(
 def profile_update(
     name: str = typer.Option(..., "--name", "-n"),
     newname: str = typer.Option(None, "--newname"),
+    profile: str = typer.Option(None, "--profile", "-p"),
     profile_file: Path = typer.Option(None, "--profile_file", "-pf"),
 ):
     """
     Profile Update
     """
+    if profile_file and profile:
+        exit_with_error("Can not have both profile file and profile")
+
     profile_update = ProfileUpdate()
     if newname and newname != name:
         profile_update.name = newname
 
     if profile_file:
         profile_obj = load_profile_file(profile_file)
+        profile_update.profile = build_profile(profile_obj, False)
+    elif profile:
+        profile_obj = json.loads(profile)
         profile_update.profile = build_profile(profile_obj, False)
 
     z: ZpodClient = ZpodClient()
