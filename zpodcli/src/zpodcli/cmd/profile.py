@@ -150,6 +150,19 @@ def profile_update(
     print(f"Profile [magenta]{name}[/magenta] has been updated.")
 
 
+@app.command(name="delete", no_args_is_help=True)
+@unexpected_status_handler
+def profile_delete(
+    name: str = typer.Option(..., "--name", "-n"),
+):
+    """
+    Profile Delete
+    """
+    z: ZpodClient = ZpodClient()
+    z.profiles_delete.sync(id=f"name={name}")
+    print(f"Profile [magenta]{name}[/magenta] has been deleted successfully")
+
+
 def load_profile_file(profile_file):
     extension = profile_file.suffix
     with profile_file.open() as f:
