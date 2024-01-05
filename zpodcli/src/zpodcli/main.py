@@ -3,6 +3,7 @@ from functools import partial
 import typer
 from rich import print
 
+from zpodcli import __version__
 from zpodcli.cmd import (
     component,
     connect,
@@ -46,7 +47,7 @@ def launch():
 
 @app.command()
 def version():
-    print("0.1.0")
+    print(__version__)
 
 
 if __name__ == "__main__":

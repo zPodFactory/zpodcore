@@ -4,6 +4,7 @@ from functools import wraps
 from zpod import zpod_client
 from zpod.errors import UnexpectedStatus
 
+from zpodcli import __version__
 from zpodcli.lib.config import config
 from zpodcli.lib.utils import exit_with_error
 
@@ -21,8 +22,11 @@ class ZpodClient(zpod_client.ZpodClient):
             base_url = cfg.get("zpod_api_url")
             token = cfg.get("zpod_api_token")
         super().__init__(
-            base_url,
-            token,
+            base_url=base_url,
+            headers={
+                "access_token": token,
+                "version": __version__,
+            },
             raise_on_unexpected_status=raise_on_unexpected_status,
             **args,
         )
@@ -41,6 +45,16 @@ def exit_if_status(status_code, content):
 
         if status_code == 404:
             exit_with_error(content_json.get("detail", "Record not found."))
+        elif status_code == 417:
+            # CLI version doesn't match api version
+            expected_version = content_json["detail"]["expected_version"]
+            provided_version = content_json["detail"]["provided_version"]
+            exit_with_error(
+                f"zpodcli version {expected_version} is required. "
+                f"Current zpodcli version is {provided_version}. "
+                "Run the following command to upgrade your zpodcli to the proper version:\n"  # noqa: E501
+                f"    pip install zpodcli=={expected_version}\n"
+            )
         elif status_code == 422:
             messages = [
                 rf"{error['msg']} \[{', '.join(error['loc'][1:])}]"

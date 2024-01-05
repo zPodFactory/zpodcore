@@ -1,11 +1,12 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
 from ...models.endpoint_view_full import EndpointViewFull
+from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
@@ -32,7 +33,7 @@ class EndpointsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[List["EndpointViewFull"]]:
+    ) -> Optional[Union[HTTPValidationError, List["EndpointViewFull"]]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
@@ -43,6 +44,14 @@ class EndpointsGetAll:
 
             return response_200
 
+        if (
+            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+            and not self.client.raise_on_unexpected_status
+        ):
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -50,7 +59,7 @@ class EndpointsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[List["EndpointViewFull"]]:
+    ) -> Response[Union[HTTPValidationError, List["EndpointViewFull"]]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -60,7 +69,7 @@ class EndpointsGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[List["EndpointViewFull"]]:
+    ) -> Response[Union[HTTPValidationError, List["EndpointViewFull"]]]:
         """Get All
 
         Raises:
@@ -68,7 +77,7 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['EndpointViewFull']]
+            Response[Union[HTTPValidationError, List['EndpointViewFull']]]
         """
 
         kwargs = self._get_kwargs()
@@ -82,7 +91,7 @@ class EndpointsGetAll:
 
     def sync(
         self,
-    ) -> Optional[List["EndpointViewFull"]]:
+    ) -> Optional[Union[HTTPValidationError, List["EndpointViewFull"]]]:
         """Get All
 
         Raises:
@@ -90,14 +99,14 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            List['EndpointViewFull']
+            Union[HTTPValidationError, List['EndpointViewFull']]
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[List["EndpointViewFull"]]:
+    ) -> Response[Union[HTTPValidationError, List["EndpointViewFull"]]]:
         """Get All
 
         Raises:
@@ -105,7 +114,7 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['EndpointViewFull']]
+            Response[Union[HTTPValidationError, List['EndpointViewFull']]]
         """
 
         kwargs = self._get_kwargs()
@@ -117,7 +126,7 @@ class EndpointsGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[List["EndpointViewFull"]]:
+    ) -> Optional[Union[HTTPValidationError, List["EndpointViewFull"]]]:
         """Get All
 
         Raises:
@@ -125,7 +134,7 @@ class EndpointsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            List['EndpointViewFull']
+            Union[HTTPValidationError, List['EndpointViewFull']]
         """
 
         return (await self.asyncio_detailed()).parsed

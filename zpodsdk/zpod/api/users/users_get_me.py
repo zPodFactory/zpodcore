@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
+from ...models.http_validation_error import HTTPValidationError
 from ...models.user_view_full import UserViewFull
 from ...types import Response
 
@@ -30,18 +31,30 @@ class UsersGetMe:
             "follow_redirects": self.client.follow_redirects,
         }
 
-    def _parse_response(self, *, response: httpx.Response) -> Optional[UserViewFull]:
+    def _parse_response(
+        self, *, response: httpx.Response
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = UserViewFull.from_dict(response.json())
 
             return response_200
+
+        if (
+            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+            and not self.client.raise_on_unexpected_status
+        ):
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            return response_422
 
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
             return None
 
-    def _build_response(self, *, response: httpx.Response) -> Response[UserViewFull]:
+    def _build_response(
+        self, *, response: httpx.Response
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -51,7 +64,7 @@ class UsersGetMe:
 
     def sync_detailed(
         self,
-    ) -> Response[UserViewFull]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Get Me
 
         Raises:
@@ -59,7 +72,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserViewFull]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """
 
         kwargs = self._get_kwargs()
@@ -73,7 +86,7 @@ class UsersGetMe:
 
     def sync(
         self,
-    ) -> Optional[UserViewFull]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Get Me
 
         Raises:
@@ -81,14 +94,14 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            UserViewFull
+            Union[HTTPValidationError, UserViewFull]
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[UserViewFull]:
+    ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Get Me
 
         Raises:
@@ -96,7 +109,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[UserViewFull]
+            Response[Union[HTTPValidationError, UserViewFull]]
         """
 
         kwargs = self._get_kwargs()
@@ -108,7 +121,7 @@ class UsersGetMe:
 
     async def asyncio(
         self,
-    ) -> Optional[UserViewFull]:
+    ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Get Me
 
         Raises:
@@ -116,7 +129,7 @@ class UsersGetMe:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            UserViewFull
+            Union[HTTPValidationError, UserViewFull]
         """
 
         return (await self.asyncio_detailed()).parsed

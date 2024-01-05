@@ -5,6 +5,9 @@ __pycache__/
 .pytest_cache/
 .python-version
 
+# Dist
+**/dist/**
+
 # VS Code
 **/.vscode/*
 **/zpodcore.code-workspace

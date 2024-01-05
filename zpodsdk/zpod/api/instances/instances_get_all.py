@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
+from ...models.http_validation_error import HTTPValidationError
 from ...models.instance_view import InstanceView
 from ...types import Response
 
@@ -32,7 +33,7 @@ class InstancesGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[List["InstanceView"]]:
+    ) -> Optional[Union[HTTPValidationError, List["InstanceView"]]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
@@ -43,6 +44,14 @@ class InstancesGetAll:
 
             return response_200
 
+        if (
+            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+            and not self.client.raise_on_unexpected_status
+        ):
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -50,7 +59,7 @@ class InstancesGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[List["InstanceView"]]:
+    ) -> Response[Union[HTTPValidationError, List["InstanceView"]]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -60,7 +69,7 @@ class InstancesGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[List["InstanceView"]]:
+    ) -> Response[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Raises:
@@ -68,7 +77,7 @@ class InstancesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['InstanceView']]
+            Response[Union[HTTPValidationError, List['InstanceView']]]
         """
 
         kwargs = self._get_kwargs()
@@ -82,7 +91,7 @@ class InstancesGetAll:
 
     def sync(
         self,
-    ) -> Optional[List["InstanceView"]]:
+    ) -> Optional[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Raises:
@@ -90,14 +99,14 @@ class InstancesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            List['InstanceView']
+            Union[HTTPValidationError, List['InstanceView']]
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[List["InstanceView"]]:
+    ) -> Response[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Raises:
@@ -105,7 +114,7 @@ class InstancesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['InstanceView']]
+            Response[Union[HTTPValidationError, List['InstanceView']]]
         """
 
         kwargs = self._get_kwargs()
@@ -117,7 +126,7 @@ class InstancesGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[List["InstanceView"]]:
+    ) -> Optional[Union[HTTPValidationError, List["InstanceView"]]]:
         """Get All
 
         Raises:
@@ -125,7 +134,7 @@ class InstancesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            List['InstanceView']
+            Union[HTTPValidationError, List['InstanceView']]
         """
 
         return (await self.asyncio_detailed()).parsed

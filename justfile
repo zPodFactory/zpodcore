@@ -35,6 +35,25 @@ docker-fullclean:
 zcli *args:
   @poetry -C zpodcli run zcli "$@"
 
+zpod-publish:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  cd {{justfile_directory()}}/zpodsdk
+  poetry build
+  poetry publish
+
+  cd {{justfile_directory()}}/zpodcli
+  sed -i'' -e 's/zpodsdk = {/#zpodsdk = {/' pyproject.toml
+  sed -i'' -e 's/#zpodsdk = "/zpodsdk = "/' pyproject.toml
+  poetry build
+  poetry publish
+  sed -i'' -e 's/#zpodsdk = {/zpodsdk = {/' pyproject.toml
+  sed -i'' -e 's/zpodsdk = "/#zpodsdk = "/' pyproject.toml
+
+zpod-version version:
+  poetry version {{version}}
+
 # Generate coverage docs
 zpodapi-coverage:
   docker compose exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon && chown `id -u`:`id -g` --recursive /zpodcore/tests/cov_html"

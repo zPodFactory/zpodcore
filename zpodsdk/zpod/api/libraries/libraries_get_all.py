@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
 
 from ... import errors
 from ...client import Client
+from ...models.http_validation_error import HTTPValidationError
 from ...models.library_view import LibraryView
 from ...types import Response
 
@@ -32,7 +33,7 @@ class LibrariesGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[List["LibraryView"]]:
+    ) -> Optional[Union[HTTPValidationError, List["LibraryView"]]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
@@ -43,6 +44,14 @@ class LibrariesGetAll:
 
             return response_200
 
+        if (
+            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+            and not self.client.raise_on_unexpected_status
+        ):
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -50,7 +59,7 @@ class LibrariesGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[List["LibraryView"]]:
+    ) -> Response[Union[HTTPValidationError, List["LibraryView"]]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -60,7 +69,7 @@ class LibrariesGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[List["LibraryView"]]:
+    ) -> Response[Union[HTTPValidationError, List["LibraryView"]]]:
         """Get All
 
         Raises:
@@ -68,7 +77,7 @@ class LibrariesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['LibraryView']]
+            Response[Union[HTTPValidationError, List['LibraryView']]]
         """
 
         kwargs = self._get_kwargs()
@@ -82,7 +91,7 @@ class LibrariesGetAll:
 
     def sync(
         self,
-    ) -> Optional[List["LibraryView"]]:
+    ) -> Optional[Union[HTTPValidationError, List["LibraryView"]]]:
         """Get All
 
         Raises:
@@ -90,14 +99,14 @@ class LibrariesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            List['LibraryView']
+            Union[HTTPValidationError, List['LibraryView']]
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[List["LibraryView"]]:
+    ) -> Response[Union[HTTPValidationError, List["LibraryView"]]]:
         """Get All
 
         Raises:
@@ -105,7 +114,7 @@ class LibrariesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[List['LibraryView']]
+            Response[Union[HTTPValidationError, List['LibraryView']]]
         """
 
         kwargs = self._get_kwargs()
@@ -117,7 +126,7 @@ class LibrariesGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[List["LibraryView"]]:
+    ) -> Optional[Union[HTTPValidationError, List["LibraryView"]]]:
         """Get All
 
         Raises:
@@ -125,7 +134,7 @@ class LibrariesGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            List['LibraryView']
+            Union[HTTPValidationError, List['LibraryView']]
         """
 
         return (await self.asyncio_detailed()).parsed

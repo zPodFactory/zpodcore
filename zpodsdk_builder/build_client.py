@@ -10,19 +10,19 @@ class {class_name}:
     def __init__(
         self,
         base_url,
-        token,
+        headers,
         raise_on_unexpected_status=True,
     ):
         self._client = Client(
             base_url=base_url,
-            headers=dict(access_token=token),
+            headers=headers,
             raise_on_unexpected_status=raise_on_unexpected_status,
         )
 """
 
 METHOD_TEMPLATE = """\
     @property
-    @cache
+    @cache  # noqa: B019
     def {module_name}(self):
         from {package_name}.api.{tag_name} import {module_name}
 
