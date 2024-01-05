@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zpodcore"
-version = "0.1.0"
+version = "0.2.3"
 description = ""
 authors = ["Kelby Valenti <kelby.valenti@gmail.com>", "Timo Sugliani <timo.sugliani@gmail.com>"]
 readme = "README.md"
@@ -27,3 +27,31 @@ known-first-party = [
     "zpodengine",
     "zpodsdk",
 ]
+
+[[tool.poetry_bumpversion.replacements]]
+files = [
+    "zpodapi/src/zpodapi/__init__.py",
+    "zpodcli/src/zpodcli/__init__.py",
+    "zpodengine/src/zpodengine/__init__.py",
+    "zpodsdk/zpod/__init__.py"
+]
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.poetry_bumpversion.replacements]]
+files = [
+    "zpodapi/pyproject.toml",
+    "zpodcli/pyproject.toml",
+    "zpodengine/pyproject.toml",
+    "zpodsdk/pyproject.toml",
+    "zpodsdk_builder/pyproject.toml"
+]
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.poetry_bumpversion.replacements]]
+files = [
+    "zpodcli/pyproject.toml"
+]
+search = 'zpodsdk = "{current_version}"'
+replace = 'zpodsdk = "{new_version}"'

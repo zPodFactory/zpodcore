@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
+from zpodapi import __version__
 from zpodapi.components import component__routes
 from zpodapi.endpoints import (
     endpoint__routes,
@@ -36,7 +37,11 @@ def simplify_operation_ids(api: FastAPI) -> None:
 
 api = FastAPI(
     title="zPod API",
-    dependencies=[GlobalDepends.UpdateLastConnectionDate],
+    dependencies=[
+        GlobalDepends.ValidateVersion,
+        GlobalDepends.UpdateLastConnectionDate,
+    ],
+    version=__version__,
 )
 
 # TODO: Remove once this bug is fixed: https://github.com/openapi-generators/openapi-python-client/pull/856

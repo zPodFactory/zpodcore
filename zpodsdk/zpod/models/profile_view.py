@@ -92,7 +92,7 @@ class ProfileView:
         for profile_item_data in _profile:
 
             def _parse_profile_item(
-                data: object
+                data: object,
             ) -> Union["ProfileItemView", List["ProfileItemView"]]:
                 try:
                     if not isinstance(data, dict):

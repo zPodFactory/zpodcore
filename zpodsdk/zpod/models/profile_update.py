@@ -77,7 +77,7 @@ class ProfileUpdate:
         for profile_item_data in _profile or []:
 
             def _parse_profile_item(
-                data: object
+                data: object,
             ) -> Union["ProfileItemUpdate", List["ProfileItemUpdate"]]:
                 try:
                     if not isinstance(data, dict):

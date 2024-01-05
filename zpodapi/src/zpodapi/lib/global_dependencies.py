@@ -1,11 +1,11 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Security, status
+from fastapi import Depends, Header, HTTPException, Security, status
 from fastapi.security.api_key import APIKey, APIKeyHeader
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from zpodapi import settings
+from zpodapi import __version__, settings
 from zpodapi.lib.database import get_session  # noqa: F401
 from zpodcommon import models as M
 from zpodcommon.enums import UserStatus
@@ -73,9 +73,26 @@ def service_init_annotation(service):
     return Annotated[service, Depends(inner)]
 
 
+def validate_version(
+    version: Annotated[str | None, Header(include_in_schema=False)] = None,
+):
+    # If the version header is included, validate that it matches
+    # the current version.  If not, return 417 error.
+    if version and version != __version__:
+        raise HTTPException(
+            status_code=status.HTTP_417_EXPECTATION_FAILED,
+            detail={
+                "message": "Invalid version",
+                "provided_version": version,
+                "expected_version": __version__,
+            },
+        )
+
+
 class GlobalDepends:
     UpdateLastConnectionDate = Depends(update_last_connection_date)
     OnlySuperAdmin = Depends(only_superadmin)
+    ValidateVersion = Depends(validate_version)
 
 
 class GlobalAnnotations:
