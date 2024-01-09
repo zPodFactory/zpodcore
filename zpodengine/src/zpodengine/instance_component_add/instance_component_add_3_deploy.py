@@ -32,7 +32,7 @@ def instance_component_add_deploy(
 
                 ovf_deployer(instance_component)
 
-                with vCenter.auth_by_instance(
+                with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
                     # Add second disk for NFS filer to VM
@@ -56,7 +56,7 @@ def instance_component_add_deploy(
 
                 ovf_deployer(instance_component)
 
-                with vCenter.auth_by_instance(
+                with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
                     # Power On VM
@@ -77,7 +77,7 @@ def instance_component_add_deploy(
 
                 print(f"VM resizing to {vcpu} CPUs, and {vmem}GB Memory")
 
-                with vCenter.auth_by_instance(
+                with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
                     if vcpu:
