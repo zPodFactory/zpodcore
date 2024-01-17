@@ -74,7 +74,7 @@ class InstancesNetworksGetAll:
         self,
         id: str,
     ) -> Response[Union[HTTPValidationError, List["InstanceNetworkView"]]]:
-        """Instance Networks Get All
+        """Instance Network Get All
 
         Args:
             id (str):
@@ -102,7 +102,7 @@ class InstancesNetworksGetAll:
         self,
         id: str,
     ) -> Optional[Union[HTTPValidationError, List["InstanceNetworkView"]]]:
-        """Instance Networks Get All
+        """Instance Network Get All
 
         Args:
             id (str):
@@ -123,7 +123,7 @@ class InstancesNetworksGetAll:
         self,
         id: str,
     ) -> Response[Union[HTTPValidationError, List["InstanceNetworkView"]]]:
-        """Instance Networks Get All
+        """Instance Network Get All
 
         Args:
             id (str):
@@ -149,7 +149,7 @@ class InstancesNetworksGetAll:
         self,
         id: str,
     ) -> Optional[Union[HTTPValidationError, List["InstanceNetworkView"]]]:
-        """Instance Networks Get All
+        """Instance Network Get All
 
         Args:
             id (str):

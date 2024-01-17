@@ -166,10 +166,24 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def instances_components_get(self):
+        from zpod.api.instances import instances_components_get
+
+        return instances_components_get.InstancesComponentsGet(self._client)
+
+    @property
+    @cache  # noqa: B019
     def instances_components_get_all(self):
         from zpod.api.instances import instances_components_get_all
 
         return instances_components_get_all.InstancesComponentsGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def instances_components_remove(self):
+        from zpod.api.instances import instances_components_remove
+
+        return instances_components_remove.InstancesComponentsRemove(self._client)
 
     @property
     @cache  # noqa: B019

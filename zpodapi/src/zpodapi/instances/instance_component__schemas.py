@@ -11,6 +11,7 @@ class D:
     fqdn = {"example": "esxi13.demo.zpodfactory.io"}
     vcpu = {"example": 4}
     vmem = {"example": 16}
+    status = {"example": "ACTIVE"}
 
 
 class InstanceComponentView(SchemaBase):
@@ -20,6 +21,7 @@ class InstanceComponentView(SchemaBase):
     fqdn: str | None = Field(None, D.fqdn)
     vcpu: int | None = Field(None, D.vcpu)
     vmem: int | None = Field(None, D.vmem)
+    status: str = Field(None, D.status)
 
 
 class InstanceComponentCreate(SchemaBase):

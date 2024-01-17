@@ -67,22 +67,26 @@ class vCenter:
         return ret
 
     def get_obj(self, vimtype, attr, value, root=None, props=None):
-        objs = self.get_obj_list([vimtype], root=root)
-        return next(
-            (
-                oprops if props else oprops["obj"]
-                for oprops in self.get_props(
-                    data=objs, props=self.joinitems(attr, props)
-                )
-                if oprops[attr] == value
-            ),
-            None,
-        )
+        objs = self.get_obj_list(vimtype, root=root)
+        info = [
+            oprops if props else oprops["obj"]
+            for oprops in self.get_props(data=objs, props=self.joinitems(attr, props))
+            if oprops[attr] == value
+        ]
+        li = len(info)
+        if li == 1:
+            return info[0]
+        elif li == 0:
+            return None
+        raise Exception("Multiple results found when there should only be one")
 
     def get_obj_list(self, vimtype, root=None, props=None):
         if root is None:
             root = self.si.content.rootFolder
-        container = self.si.content.viewManager.CreateContainerView(root, vimtype, True)
+
+        container = self.si.content.viewManager.CreateContainerView(
+            root, [vimtype], True
+        )
         view = container.view
         container.Destroy()
         return self.get_props(data=view, props=props) if props else view
@@ -96,7 +100,7 @@ class vCenter:
     def get_props(self, data, props):
         if not data:
             return []
-        if type(props) != list:
+        if not isinstance(props, list):
             props = [props]
 
         pc = self.si.content.propertyCollector
@@ -125,6 +129,18 @@ class vCenter:
             if isinstance(child, vim.Folder):
                 if result := self.find_folder(name, child):
                     return result
+
+    def get_vapps(self, root=None, props=None):
+        return self.get_obj_list(vim.VirtualApp, root=root, props=props)
+
+    def get_vapp(self, name, root=None, props=None):
+        return self.get_obj(vim.VirtualApp, "name", name, root=root, props=props)
+
+    def get_vms(self, root=None, props=None):
+        return self.get_obj_list(vim.VirtualMachine, root=root, props=props)
+
+    def get_vm(self, name, root=None, props=None):
+        return self.get_obj(vim.VirtualMachine, "name", name, root=root, props=props)
 
     def create_allocation_object(self, resSpec, value):
         result = vim.ResourceAllocationInfo()
@@ -181,44 +197,77 @@ class vCenter:
             task_id = vapp.Destroy_Task()
             task.WaitForTask(task_id)
 
-    def poweroff_vapp(self, vapp_name):
-        if vapp := self.get_vapp(vapp_name):
-            if vapp.summary.vAppState != "stopped":
-                # Wait for vApp PowerOff operation to complete
-                task_id = vapp.PowerOffVApp_Task(True)
-                task.WaitForTask(task_id)
+    def delete_vm_from_vapp(self, vapp_name: str, vm_name: str):
+        print("Delete VM from vApp")
+        if vapp := self.get_vapp(name=vapp_name):
+            # Verify vm is in vapp
+            if vm := self.get_vm(name=vm_name, root=vapp):
+                self.delete_vm(vm)
+            else:
+                print(
+                    f"VM: {vm_name} not found in "
+                    f"vApp: {vapp_name} on vCenter: ({self.host})"
+                )
+        else:
+            print(f"vApp: {vapp_name} not found in vCenter ({self.host}): {vapp_name}")
 
-    def poweron_vapp(self, vapp_name):
-        if vapp := self.get_vapp(vapp_name):
-            if vapp.summary.vAppState != "started":
-                # We don't need to wait here
-                # That means an instance was explictly powered off by a user
-                # restart will go through all vms in that vApp anyway.
-                vapp.PowerOnVApp_Task(True)
+    def delete_vm_nested(self, domain_name: str, vm_name: str):
+        print("Delete NESTED VM")
+        if vm := self.get_vm(name=vm_name):
+            esxi_hostname = vm.runtime.host.name
+            # Validate that the host name running the vm
+            # contains the specified domain name (Verify
+            # that we are on the correct vCenter)
+            if esxi_hostname.endswith(f".{domain_name}"):
+                self.delete_vm(vm)
+            else:
+                print(
+                    f"Domain Name: {domain_name} not found "
+                    f"in esxi hostname {esxi_hostname}"
+                )
+        else:
+            print(f"VM not found in vCenter ({self.host}): {vm_name}")
 
-    def get_vapps(self, props=None):
-        return self.get_obj_list([vim.VirtualApp], props=props)
+    def delete_vm(self, vm: vim.VirtualMachine):
+        # Make sure vm is powered off
+        self.poweroff_vm(vm=vm)
 
-    def get_vapp(self, name, props=None):
-        return self.get_obj(vim.VirtualApp, "name", name, props=props)
+        print(f"Deleting vm: {vm.name}")
 
-    def get_vms(self, props=None):
-        return self.get_obj_list([vim.VirtualMachine], props=props)
+        # Delete the VM
+        task_id = vm.Destroy_Task()
 
-    def get_vm(self, name, props=None):
-        return self.get_obj(vim.VirtualMachine, "name", name, props=props)
+        # Wait for vm Destroy operation to complete
+        task.WaitForTask(task_id)
 
-    def poweron_vm(self, vm_name):
-        vm = self.get_vm(vm_name)
+    def poweroff_vm(self, vm: vim.VirtualMachine):
+        if vm.runtime.powerState != "poweredOff":
+            print(f"Powering off vm: {vm.name}")
+            task_id = vm.PowerOffVM_Task()
+            task.WaitForTask(task_id)
+
+    def poweron_vm(self, vm: vim.VirtualMachine):
         task_id = vm.PowerOnVM_Task()
         task.WaitForTask(task_id)
 
-    def set_vm_vcpu(self, vm_name, vcpu_num):
+    def poweroff_vapp(self, vapp: vim.VirtualApp):
+        if vapp and vapp.summary.vAppState != "stopped":
+            # Wait for vApp PowerOff operation to complete
+            task_id = vapp.PowerOffVApp_Task(True)
+            task.WaitForTask(task_id)
+
+    def poweron_vapp(self, vapp: vim.VirtualApp):
+        if vapp and vapp.summary.vAppState != "started":
+            # We don't need to wait here
+            # That means an instance was explictly powered off by a user
+            # restart will go through all vms in that vApp anyway.
+            vapp.PowerOnVApp_Task(True)
+
+    def set_vm_vcpu(self, vm: vim.VirtualMachine, vcpu_num: int):
         # sourcery skip: class-extract-method
         # Fetch VM
         # For this example:
         # zbox.{instance_name}.{domain}
-        vm = self.get_vm(vm_name)
         spec = vim.vm.ConfigSpec()
         spec.cpuAllocation = vim.ResourceAllocationInfo()
         spec.cpuAllocation.shares = vim.SharesInfo()
@@ -230,8 +279,7 @@ class vCenter:
         task_id = vm.ReconfigVM_Task(spec)
         task.WaitForTask(task_id)
 
-    def set_vm_vmem(self, vm_name, vmem_gb):
-        vm = self.get_vm(vm_name)
+    def set_vm_vmem(self, vm: vim.VirtualMachine, vmem_gb: int):
         spec = vim.vm.ConfigSpec()
         spec.memoryMB = vmem_gb * 1024
         spec.memoryAllocation = vim.ResourceAllocationInfo()
@@ -243,8 +291,7 @@ class vCenter:
         task_id = vm.ReconfigVM_Task(spec)
         task.WaitForTask(task_id)
 
-    def set_vm_vdisk(self, vm_name, vdisk_gb, disk_number):
-        vm = self.get_vm(vm_name)
+    def set_vm_vdisk(self, vm: vim.VirtualMachine, vdisk_gb: int, disk_number: int):
         disk_label = f"Hard disk {disk_number}"
         disk_size = int(vdisk_gb) * 1024 * 1024 * 1024
         disk = None
@@ -264,15 +311,10 @@ class vCenter:
                 spec.deviceChange.append(updated_spec)
                 task.WaitForTask(vm.Reconfigure(spec))
 
-    def add_disk_to_vm(self, vm_name, disk_size_in_kb):
+    def add_disk_to_vm(self, vm: vim.VirtualMachine, disk_size_in_kb: int):
         #
-        # Method to add a disk to a vm_name with specific disk_size_in_kb
+        # Method to add a disk to a vm with specific disk_size_in_kb
         #
-
-        # Fetch VM
-        # For this example:
-        # zbox.{instance_name}.{domain}
-        vm = self.get_vm(vm_name)
 
         #
         # Prepare spec for second disk

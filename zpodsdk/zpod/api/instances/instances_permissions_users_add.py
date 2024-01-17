@@ -87,7 +87,7 @@ class InstancesPermissionsUsersAdd:
         *,
         json_body: InstancePermissionUserAddRemove,
     ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
-        """Instance Permissions User Add
+        """Instance Permission User Add
 
         Args:
             id (str):
@@ -122,7 +122,7 @@ class InstancesPermissionsUsersAdd:
         *,
         json_body: InstancePermissionUserAddRemove,
     ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
-        """Instance Permissions User Add
+        """Instance Permission User Add
 
         Args:
             id (str):
@@ -150,7 +150,7 @@ class InstancesPermissionsUsersAdd:
         *,
         json_body: InstancePermissionUserAddRemove,
     ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
-        """Instance Permissions User Add
+        """Instance Permission User Add
 
         Args:
             id (str):
@@ -183,7 +183,7 @@ class InstancesPermissionsUsersAdd:
         *,
         json_body: InstancePermissionUserAddRemove,
     ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
-        """Instance Permissions User Add
+        """Instance Permission User Add
 
         Args:
             id (str):

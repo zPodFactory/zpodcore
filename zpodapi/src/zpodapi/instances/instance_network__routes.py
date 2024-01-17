@@ -11,7 +11,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    summary="Instance Networks Get All",
+    summary="Instance Network Get All",
     response_model=list[InstanceNetworkView],
 )
 def networks_get_all(

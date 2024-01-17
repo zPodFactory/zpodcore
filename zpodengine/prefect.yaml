@@ -61,6 +61,16 @@ deployments:
   schedule: {}
   work_pool: *zpodengine_work_pool
 
+- name: instance_component_add
+  entrypoint: src/zpodengine/instance_component_add/flow_instance_component_add.py:flow_instance_component_add
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: instance_component_remove
+  entrypoint: src/zpodengine/instance_component_remove/flow_instance_component_remove.py:flow_instance_component_remove
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
 - name: instance_deploy
   entrypoint: src/zpodengine/instance_deploy/flow_instance_deploy.py:flow_instance_deploy
   schedule: {}
@@ -68,11 +78,6 @@ deployments:
 
 - name: instance_destroy
   entrypoint: src/zpodengine/instance_destroy/flow_instance_destroy.py:flow_instance_destroy
-  schedule: {}
-  work_pool: *zpodengine_work_pool
-
-- name: instance_component_add
-  entrypoint: src/zpodengine/instance_component_add/flow_instance_component_add.py:flow_instance_component_add
   schedule: {}
   work_pool: *zpodengine_work_pool
 

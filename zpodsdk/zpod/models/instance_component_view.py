@@ -19,6 +19,7 @@ class InstanceComponentView:
         fqdn (Union[Unset, str]):  Example: esxi13.demo.zpodfactory.io.
         hostname (Union[Unset, str]):  Example: esxi13.
         ip (Union[Unset, str]):  Example: 10.196.176.13.
+        status (Union[Unset, str]):  Example: ACTIVE.
         vcpu (Union[Unset, int]):  Example: 4.
         vmem (Union[Unset, int]):  Example: 16.
     """
@@ -27,6 +28,7 @@ class InstanceComponentView:
     fqdn: Union[Unset, str] = UNSET
     hostname: Union[Unset, str] = UNSET
     ip: Union[Unset, str] = UNSET
+    status: Union[Unset, str] = UNSET
     vcpu: Union[Unset, int] = UNSET
     vmem: Union[Unset, int] = UNSET
 
@@ -36,6 +38,7 @@ class InstanceComponentView:
         fqdn = self.fqdn
         hostname = self.hostname
         ip = self.ip
+        status = self.status
         vcpu = self.vcpu
         vmem = self.vmem
 
@@ -51,6 +54,8 @@ class InstanceComponentView:
             field_dict["hostname"] = hostname
         if ip is not UNSET:
             field_dict["ip"] = ip
+        if status is not UNSET:
+            field_dict["status"] = status
         if vcpu is not UNSET:
             field_dict["vcpu"] = vcpu
         if vmem is not UNSET:
@@ -71,6 +76,8 @@ class InstanceComponentView:
 
         ip = d.pop("ip", UNSET)
 
+        status = d.pop("status", UNSET)
+
         vcpu = d.pop("vcpu", UNSET)
 
         vmem = d.pop("vmem", UNSET)
@@ -80,6 +87,7 @@ class InstanceComponentView:
             fqdn=fqdn,
             hostname=hostname,
             ip=ip,
+            status=status,
             vcpu=vcpu,
             vmem=vmem,
         )
