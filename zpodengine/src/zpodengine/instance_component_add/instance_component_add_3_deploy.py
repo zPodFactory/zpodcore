@@ -35,17 +35,15 @@ def instance_component_add_deploy(
                 with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
+                    vm = vc.get_vm(name=instance_component.fqdn)
                     # Add second disk for NFS filer to VM
                     # 100GB = 104,857,600 KB
                     # 1TB = 1,073,741,824 KB
                     print("Add Second Disk")
-                    vc.add_disk_to_vm(
-                        vm_name=instance_component.fqdn,
-                        disk_size_in_kb=1073741824,
-                    )
+                    vc.add_disk_to_vm(vm=vm, disk_size_in_kb=1073741824)
                     # Power On VM
                     print("PowerOn VM")
-                    vc.poweron_vm(vm_name=instance_component.fqdn)
+                    vc.poweron_vm(vm)
 
             case "vyos":
                 print("--- vyos ---")
@@ -59,9 +57,10 @@ def instance_component_add_deploy(
                 with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
+                    vm = vc.get_vm(name=instance_component.fqdn)
                     # Power On VM
                     print("PowerOn VM")
-                    vc.poweron_vm(vm_name=instance_component.fqdn)
+                    vc.poweron_vm(vm)
 
             case "vcsa":
                 print("--- vcsa ---")
@@ -80,32 +79,33 @@ def instance_component_add_deploy(
                 with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
+                    vm = vc.get_vm(name=instance_component.fqdn)
                     if vcpu:
                         print("Set CPU")
-                        vc.set_vm_vcpu(vm_name=instance_component.fqdn, vcpu_num=vcpu)
+                        vc.set_vm_vcpu(vm=vm, vcpu_num=vcpu)
                     if vmem:
                         print("Set Memory")
-                        vc.set_vm_vmem(vm_name=instance_component.fqdn, vmem_gb=vmem)
+                        vc.set_vm_vmem(vm=vm, vmem_gb=vmem)
                     if vdisks:
                         for disk_number, vdisk_gb in enumerate(vdisks, 2):
                             print(f"Resize Hard disk {disk_number}")
                             vc.set_vm_vdisk(
-                                vm_name=instance_component.fqdn,
+                                vm=vm,
                                 vdisk_gb=vdisk_gb,
                                 disk_number=disk_number,
                             )
                     print("Start VM")
-                    vc.poweron_vm(vm_name=instance_component.fqdn)
+                    vc.poweron_vm(vm)
 
             case _:
-                print("--- Normal Component ---")
-                ovf_deployer(instance_component)
-
-                instance_vc = vCenter(
+                with vCenter(
                     host=f"vcsa.{instance_component.instance.domain}",
                     user=f"administrator@{instance_component.instance.domain}",
                     pwd=instance_component.instance.password,
-                )
+                ) as vc:
+                    print("--- Normal Component ---")
+                    ovf_deployer(instance_component)
 
-                print("Start VM")
-                instance_vc.poweron_vm(vm_name=instance_component.hostname)
+                    vm = vc.get_vm(name=instance_component.hostname)
+                    print("Start VM")
+                    vc.poweron_vm(vm)

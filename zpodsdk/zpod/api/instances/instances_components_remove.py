@@ -1,30 +1,32 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 import httpx
 
 from ... import errors
 from ...client import Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.instance_permission_view import InstancePermissionView
 from ...types import Response
 
 
-class InstancesPermissionsGetAll:
+class InstancesComponentsRemove:
     def __init__(self, client: Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
+        component_id: str,
     ) -> Dict[str, Any]:
-        url = "{}/instances/{id}/permissions".format(self.client.base_url, id=id)
+        url = "{}/instances/{id}/components/{component_id}".format(
+            self.client.base_url, id=id, component_id=component_id
+        )
 
         headers: Dict[str, str] = self.client.get_headers()
         cookies: Dict[str, Any] = self.client.get_cookies()
 
         return {
-            "method": "get",
+            "method": "delete",
             "url": url,
             "headers": headers,
             "cookies": cookies,
@@ -34,18 +36,10 @@ class InstancesPermissionsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["InstancePermissionView"]]]:
-        if response.status_code == HTTPStatus.OK:
-            response_200 = []
-            _response_200 = response.json()
-            for response_200_item_data in _response_200:
-                response_200_item = InstancePermissionView.from_dict(
-                    response_200_item_data
-                )
-
-                response_200.append(response_200_item)
-
-            return response_200
+    ) -> Optional[Union[Any, HTTPValidationError]]:
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            response_204 = cast(Any, None)
+            return response_204
 
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
@@ -62,7 +56,7 @@ class InstancesPermissionsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["InstancePermissionView"]]]:
+    ) -> Response[Union[Any, HTTPValidationError]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -73,22 +67,25 @@ class InstancesPermissionsGetAll:
     def sync_detailed(
         self,
         id: str,
-    ) -> Response[Union[HTTPValidationError, List["InstancePermissionView"]]]:
-        """Instance Permission Get All
+        component_id: str,
+    ) -> Response[Union[Any, HTTPValidationError]]:
+        """Instance Component Remove
 
         Args:
             id (str):
+            component_id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['InstancePermissionView']]]
+            Response[Union[Any, HTTPValidationError]]
         """
 
         kwargs = self._get_kwargs(
             id=id,
+            component_id=component_id,
         )
 
         response = httpx.request(
@@ -101,43 +98,49 @@ class InstancesPermissionsGetAll:
     def sync(
         self,
         id: str,
-    ) -> Optional[Union[HTTPValidationError, List["InstancePermissionView"]]]:
-        """Instance Permission Get All
+        component_id: str,
+    ) -> Optional[Union[Any, HTTPValidationError]]:
+        """Instance Component Remove
 
         Args:
             id (str):
+            component_id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['InstancePermissionView']]
+            Union[Any, HTTPValidationError]
         """
 
         return self.sync_detailed(
             id=id,
+            component_id=component_id,
         ).parsed
 
     async def asyncio_detailed(
         self,
         id: str,
-    ) -> Response[Union[HTTPValidationError, List["InstancePermissionView"]]]:
-        """Instance Permission Get All
+        component_id: str,
+    ) -> Response[Union[Any, HTTPValidationError]]:
+        """Instance Component Remove
 
         Args:
             id (str):
+            component_id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['InstancePermissionView']]]
+            Response[Union[Any, HTTPValidationError]]
         """
 
         kwargs = self._get_kwargs(
             id=id,
+            component_id=component_id,
         )
 
         async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
@@ -148,22 +151,25 @@ class InstancesPermissionsGetAll:
     async def asyncio(
         self,
         id: str,
-    ) -> Optional[Union[HTTPValidationError, List["InstancePermissionView"]]]:
-        """Instance Permission Get All
+        component_id: str,
+    ) -> Optional[Union[Any, HTTPValidationError]]:
+        """Instance Component Remove
 
         Args:
             id (str):
+            component_id (str):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['InstancePermissionView']]
+            Union[Any, HTTPValidationError]
         """
 
         return (
             await self.asyncio_detailed(
                 id=id,
+                component_id=component_id,
             )
         ).parsed

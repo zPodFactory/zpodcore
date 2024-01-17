@@ -23,7 +23,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    summary="Instance Permissions Get All",
+    summary="Instance Permission Get All",
     response_model=list[InstancePermissionView],
 )
 def permissions_get_all(
@@ -35,7 +35,7 @@ def permissions_get_all(
 
 @router.post(
     "/{permission}/users",
-    summary="Instance Permissions User Add",
+    summary="Instance Permission User Add",
     status_code=status.HTTP_201_CREATED,
     response_model=list[UserView],
     dependencies=[InstanceDepends.InstanceMaintainer],
@@ -84,7 +84,7 @@ def permissions_users_remove(
 
 @router.post(
     "/{permission}/groups",
-    summary="Instance Permissions Group Add",
+    summary="Instance Permission Group Add",
     status_code=status.HTTP_201_CREATED,
     response_model=list[UserView],
     dependencies=[InstanceDepends.InstanceMaintainer],

@@ -23,6 +23,20 @@ def components_get_all(
     return instance.components
 
 
+@router.get(
+    "/{component_id}",
+    summary="Instance Component Get",
+    response_model=InstanceComponentView,
+    response_model_exclude_unset=True,
+)
+def components_get(
+    *,
+    instance: InstanceAnnotations.GetInstance,
+    instance_component: InstanceComponentAnnotations.GetInstanceComponent,
+):
+    return instance_component
+
+
 @router.post(
     "",
     summary="Instance Component Add",
@@ -41,18 +55,15 @@ def components_add(
     )
 
 
-# @router.delete(
-#     "/{component_uid}",
-#     summary="Instance Component Delete",
-#     status_code=status.HTTP_204_NO_CONTENT,
-# )
-# def components_delete(
-#     *,
-#     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
-#     instance: InstanceComponentAnnotations.GetInstance,
-#     component_uid: str,
-# ):
-#     instance_component = instance_component_service.crud.get(
-#         id=instance.id, component_uid=component_uid
-#     )
-#     instance_component_service.crud.delete(item=instance_component)
+@router.delete(
+    "/{component_id}",
+    summary="Instance Component Remove",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def components_remove(
+    *,
+    instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
+    instance: InstanceAnnotations.GetInstance,
+    instance_component: InstanceComponentAnnotations.GetInstanceComponent,
+):
+    return instance_component_service.remove(instance_component=instance_component)
