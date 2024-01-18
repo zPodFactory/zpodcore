@@ -24,13 +24,14 @@ def get_certificate(hostname, port=443):
     return OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, pem_cert)
 
 
-def wait_for_cn_with_value(hostname, value):
+# Match for both hostname & FQDN in CN
+def wait_for_cn_with_value(hostname, desired_cn):
     while True:
         cert = get_certificate(hostname)
         cn = cert.get_subject().commonName
-        print(f"Checking if CN:{cn} matches {value}...")
-        if cn == value:
-            print("Certificate matches, exiting !")
+        print(f"Checking if {desired_cn} in CN:{cn}...")
+        if desired_cn in cn:
+            print("Certificate CN has been updated to include hostname, exiting !")
             exit(0)
         print("Sleeping 5s...")
         time.sleep(5)
