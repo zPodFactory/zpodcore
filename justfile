@@ -25,11 +25,6 @@ alembic-downgrade rev="-1":
 alembic-revision message='update':
   docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic revision --autogenerate -m'{{message}}' && chown `id -u`:`id -g` --recursive /zpodcore/scripts/alembic/versions"
 
-# Docker prune everything
-docker-fullclean:
-  docker system prune -af
-  docker volume prune -f
-
 # Run zcli command
 [no-exit-message]
 zcli *args:
