@@ -38,6 +38,11 @@ def get_user_instance_permissions(
 ):
     user_id = instance_service.current_user.id
     user_permissions = set()
+
+    # Add ADMIN, if superadmin
+    if instance_service.current_user.superadmin:
+        user_permissions.add(InstancePermission.ADMIN)
+
     for permission in instance.permissions:
         if user_id in [u.id for u in permission.users]:
             user_permissions.add(permission.permission)
