@@ -129,6 +129,7 @@ def download_component(component: Component) -> int:
         f" -v {shlex.quote(component.component_download_version)}"
         f" -f {shlex.quote(component.component_download_file)}"
         f" -o {shlex.quote(PRODUCTS_PATH)}"
+        f" -t {shlex.quote(component.component_download_file)}" if component.component_download_type else ""
     )
     wget_cmd = f"wget {component.component_dl_url} -P {PRODUCTS_PATH}"
 

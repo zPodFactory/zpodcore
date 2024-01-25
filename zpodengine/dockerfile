@@ -6,11 +6,11 @@ ARG PS_INSTALL_VERSION=7-3-6
 ARG POWERCLI_VERSION=13.1.0.21624340
 ARG POWERNSX_VERSION=3.0.1192
 ARG GOVC_VERSION=0.30.5
-ARG VCC_VERSION=1.1.5
+ARG VCC_VERSION=1.2.0-beta
 
 #################################################
 # Base
-FROM python:3.11.2-slim as base
+FROM python:3.11.7-slim-bookworm as base
 
 ARG POETRY_VENV
 
