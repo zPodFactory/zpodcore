@@ -89,7 +89,7 @@ def profile_info(
 def profile_create(
     name: str = typer.Option(..., "--name", "-n"),
     profile: str = typer.Option(None, "--profile", "-p"),
-    profile_file: Path = typer.Option(..., "--profile_file", "-pf"),
+    profile_file: Path = typer.Option(None, "--profile_file", "-pf"),
 ):
     """
     Profile Create

@@ -75,7 +75,7 @@ def instance_component_add_post_scripts(*, instance_component_id: int):
             case "esxi":
                 print("--- esxi ---")
 
-                with vCenter.auth_by_instance(
+                with vCenter.auth_by_instance_endpoint(
                     instance=instance_component.instance
                 ) as vc:
                     print(f"Waiting for VMware Tools IP {instance_component.ip}...")

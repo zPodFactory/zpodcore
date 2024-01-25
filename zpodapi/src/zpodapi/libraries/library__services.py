@@ -61,7 +61,10 @@ class LibraryService(ServiceBase):
         if not update_library(library=library, session=self.session):
             return library
 
-        db_components = self.crud.get_all(M.Component)
+        print(f"Resyncing Library: {library.name}...")
+        db_components = self.crud.get_all_filtered(
+            model=M.Component, where_extra=[M.Component.library_name == library.name]
+        )
         component_jsonfiles = list_jsonfiles(f"/library/{library.name}")
         git_components = []
 
