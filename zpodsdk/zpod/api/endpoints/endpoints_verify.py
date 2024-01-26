@@ -1,43 +1,37 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
 class EndpointsVerify:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
     ) -> Dict[str, Any]:
-        url = "{}/endpoints/{id}/verify".format(self.client.base_url, id=id)
-
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "put",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
+            "url": "/endpoints/{id}/verify".format(
+                id=id,
+            ),
         }
+
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
     ) -> Optional[Union[Any, HTTPValidationError]]:
         if response.status_code == HTTPStatus.CREATED:
-            response_201 = cast(Any, response.json())
+            response_201 = response.json()
             return response_201
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -45,7 +39,6 @@ class EndpointsVerify:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -82,8 +75,7 @@ class EndpointsVerify:
             id=id,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -131,8 +123,7 @@ class EndpointsVerify:
             id=id,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 

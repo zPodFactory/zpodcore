@@ -11,7 +11,7 @@ from zpodengine.lib import database
 def instance_component_add_prep(
     instance_id: int,
     component_uid: str,
-    host_id: str | None = None,
+    host_id: int | None = None,
     hostname: str | None = None,
 ):
     with database.get_session_ctx() as session:

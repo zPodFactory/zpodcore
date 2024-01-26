@@ -21,7 +21,7 @@ def instance_component_add(
     instance_id: int,
     instance_name: str,
     component_uid: str,
-    host_id: str | None = None,
+    host_id: int | None = None,
     hostname: str | None = None,
     vcpu: int | None = None,
     vmem: int | None = None,

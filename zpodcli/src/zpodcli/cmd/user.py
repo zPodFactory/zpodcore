@@ -103,7 +103,7 @@ def user_add(
     """
     z: ZpodClient = ZpodClient()
     result = z.users_create.sync(
-        json_body=UserCreate(
+        body=UserCreate(
             username=username,
             email=email,
             description=description,
@@ -151,7 +151,7 @@ def user_update(
     z: ZpodClient = ZpodClient()
     z.users_update.sync(
         id=f"username={username}",
-        json_body=UserUpdateAdmin(
+        body=UserUpdateAdmin(
             description=description,
             ssh_key=ssh_key,
             superadmin=superadmin,

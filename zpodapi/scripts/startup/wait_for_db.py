@@ -1,5 +1,6 @@
 import logging
 
+from sqlmodel import text
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
 from zpodapi.lib import database
@@ -20,7 +21,7 @@ wait_seconds = 1
 def init() -> None:
     try:
         with database.get_session_ctx() as session:
-            session.execute("SELECT 1")
+            session.exec(text("SELECT 1"))
     except Exception as e:
         logger.error(e)
         raise e

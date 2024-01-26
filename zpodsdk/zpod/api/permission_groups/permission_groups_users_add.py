@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.permission_group_user_add import PermissionGroupUserAdd
 from ...models.user_view import UserView
@@ -12,31 +12,31 @@ from ...types import Response
 
 
 class PermissionGroupsUsersAdd:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
         *,
-        json_body: PermissionGroupUserAdd,
+        body: PermissionGroupUserAdd,
     ) -> Dict[str, Any]:
-        url = "{}/permission_groups/{id}/users".format(self.client.base_url, id=id)
+        headers: Dict[str, Any] = {}
 
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        json_json_body = json_body.to_dict()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
-            "json": json_json_body,
+            "url": "/permission_groups/{id}/users".format(
+                id=id,
+            ),
         }
+
+        _body = body.to_dict()
+
+        _kwargs["json"] = _body
+        headers["Content-Type"] = "application/json"
+
+        _kwargs["headers"] = headers
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -50,7 +50,6 @@ class PermissionGroupsUsersAdd:
                 response_201.append(response_201_item)
 
             return response_201
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -58,7 +57,6 @@ class PermissionGroupsUsersAdd:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -78,13 +76,13 @@ class PermissionGroupsUsersAdd:
         self,
         id: str,
         *,
-        json_body: PermissionGroupUserAdd,
+        body: PermissionGroupUserAdd,
     ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
         """Permission Group User Add
 
         Args:
             id (str):
-            json_body (PermissionGroupUserAdd):
+            body (PermissionGroupUserAdd):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -96,11 +94,10 @@ class PermissionGroupsUsersAdd:
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
+            body=body,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -110,13 +107,13 @@ class PermissionGroupsUsersAdd:
         self,
         id: str,
         *,
-        json_body: PermissionGroupUserAdd,
+        body: PermissionGroupUserAdd,
     ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
         """Permission Group User Add
 
         Args:
             id (str):
-            json_body (PermissionGroupUserAdd):
+            body (PermissionGroupUserAdd):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -128,20 +125,20 @@ class PermissionGroupsUsersAdd:
 
         return self.sync_detailed(
             id=id,
-            json_body=json_body,
+            body=body,
         ).parsed
 
     async def asyncio_detailed(
         self,
         id: str,
         *,
-        json_body: PermissionGroupUserAdd,
+        body: PermissionGroupUserAdd,
     ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
         """Permission Group User Add
 
         Args:
             id (str):
-            json_body (PermissionGroupUserAdd):
+            body (PermissionGroupUserAdd):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -153,11 +150,10 @@ class PermissionGroupsUsersAdd:
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
+            body=body,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 
@@ -165,13 +161,13 @@ class PermissionGroupsUsersAdd:
         self,
         id: str,
         *,
-        json_body: PermissionGroupUserAdd,
+        body: PermissionGroupUserAdd,
     ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
         """Permission Group User Add
 
         Args:
             id (str):
-            json_body (PermissionGroupUserAdd):
+            body (PermissionGroupUserAdd):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -184,6 +180,6 @@ class PermissionGroupsUsersAdd:
         return (
             await self.asyncio_detailed(
                 id=id,
-                json_body=json_body,
+                body=body,
             )
         ).parsed

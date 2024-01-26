@@ -1,5 +1,3 @@
-from typing import Optional
-
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -67,7 +65,7 @@ def library_create(
     """
     z: ZpodClient = ZpodClient()
     library_in = LibraryCreate(name=name, description=description, git_url=git_url)
-    library = z.libraries_create.sync(json_body=library_in)
+    library = z.libraries_create.sync(body=library_in)
     generate_table(libraries=[library], action="Create")
 
 
@@ -90,7 +88,7 @@ def library_delete(
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def library_update(
-    enabled: Optional[bool] = typer.Option(None, "--enable/--disable"),
+    enabled: bool | None = typer.Option(None, "--enable/--disable"),
     name: str = typer.Option(..., "--name", "-n"),
     description: str = typer.Option(ZPOD_LIBRARY_DESCRIPTION, "--description", "-d"),
 ):
@@ -108,7 +106,7 @@ def library_update(
         is_enabled = False
 
     library_in = LibraryUpdate(enabled=is_enabled, description=description)
-    z.libraries_update.sync(json_body=library_in, id=f"name={name}")
+    z.libraries_update.sync(body=library_in, id=f"name={name}")
     generate_table(libraries=[library], action="Enable")
 
 

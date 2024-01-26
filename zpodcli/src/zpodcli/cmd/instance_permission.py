@@ -127,13 +127,13 @@ def instance_permission_add(
         z.instances_permissions_users_add.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionUserAddRemove(username=username),
+            body=InstancePermissionUserAddRemove(username=username),
         )
     if groupname:
         z.instances_permissions_groups_add.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionGroupAddRemove(groupname=groupname),
+            body=InstancePermissionGroupAddRemove(groupname=groupname),
         )
     generate_table(z, instance)
 
@@ -180,12 +180,12 @@ def instance_permission_remove(
         z.instances_permissions_users_remove.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionUserAddRemove(username=username),
+            body=InstancePermissionUserAddRemove(username=username),
         )
     if groupname:
         z.instances_permissions_groups_remove.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionGroupAddRemove(groupname=groupname),
+            body=InstancePermissionGroupAddRemove(groupname=groupname),
         )
     generate_table(z, instance)

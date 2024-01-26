@@ -1,22 +1,22 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, Dict, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="InstanceCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstanceCreate:
     """
     Attributes:
-        endpoint_id (int):  Example: 1.
-        name (str):  Example: demo.
-        profile (str):  Example: sddc.
-        description (Union[Unset, str]):  Default: ''. Example: Demo zPod.
-        domain (Union[Unset, str]):  Default: ''. Example: demo.maindomain.com.
-        enet_name (Union[Unset, str]):  Example: advanced_networking.
+        endpoint_id (int):
+        name (str):
+        profile (str):
+        description (Union[Unset, str]):  Default: ''.
+        domain (Union[Unset, str]):  Default: ''.
+        enet_name (Union[None, Unset, str]):
     """
 
     endpoint_id: int
@@ -24,15 +24,24 @@ class InstanceCreate:
     profile: str
     description: Union[Unset, str] = ""
     domain: Union[Unset, str] = ""
-    enet_name: Union[Unset, str] = UNSET
+    enet_name: Union[None, Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         endpoint_id = self.endpoint_id
+
         name = self.name
+
         profile = self.profile
+
         description = self.description
+
         domain = self.domain
-        enet_name = self.enet_name
+
+        enet_name: Union[None, Unset, str]
+        if isinstance(self.enet_name, Unset):
+            enet_name = UNSET
+        else:
+            enet_name = self.enet_name
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -64,7 +73,14 @@ class InstanceCreate:
 
         domain = d.pop("domain", UNSET)
 
-        enet_name = d.pop("enet_name", UNSET)
+        def _parse_enet_name(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        enet_name = _parse_enet_name(d.pop("enet_name", UNSET))
 
         instance_create = cls(
             endpoint_id=endpoint_id,

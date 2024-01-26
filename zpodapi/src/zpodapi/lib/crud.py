@@ -2,7 +2,6 @@ from typing import Any
 
 from sqlalchemy import func
 from sqlmodel import Session, SQLModel, or_, select
-from sqlmodel.engine.result import Result
 
 
 class Crud:
@@ -21,7 +20,7 @@ class Crud:
         **filters: dict,
     ):
         model = model_ or self.base_model
-        model_keys = set(self.base_model.__fields__.keys())
+        model_keys = set(self.base_model.model_fields.keys())
 
         ret = []
         for column, value in filters.items():
@@ -46,7 +45,7 @@ class Crud:
     ):
         model = model or self.base_model
         extra = extra or {}
-        item = model(**item_in.dict(), **extra)
+        item = model(**item_in.model_dump(), **extra)
         return self.save(item=item)
 
     def delete(
@@ -108,7 +107,7 @@ class Crud:
         *,
         where: list | None = None,
         model: SQLModel | None = None,
-    ) -> Result[Any]:
+    ):
         model = model or self.base_model
         stmt = select(model)
         if where:
@@ -122,7 +121,7 @@ class Crud:
         item_in: SQLModel,
         remove_id=True,
     ):
-        data = item_in.dict(exclude_unset=True)
+        data = item_in.model_dump(exclude_unset=True)
         if remove_id:
             data.pop("id", None)
         for key, value in data.items():

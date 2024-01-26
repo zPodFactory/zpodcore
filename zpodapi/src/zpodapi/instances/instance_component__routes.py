@@ -63,7 +63,6 @@ def components_add(
 def components_remove(
     *,
     instance_component_service: InstanceComponentAnnotations.InstanceComponentService,
-    instance: InstanceAnnotations.GetInstance,
     instance_component: InstanceComponentAnnotations.GetInstanceComponent,
 ):
     return instance_component_service.remove(instance_component=instance_component)

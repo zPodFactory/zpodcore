@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
@@ -11,36 +11,61 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="InstanceComponentView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstanceComponentView:
     """
     Attributes:
         component (ComponentView):
-        fqdn (Union[Unset, str]):  Example: esxi13.demo.zpodfactory.io.
-        hostname (Union[Unset, str]):  Example: esxi13.
-        ip (Union[Unset, str]):  Example: 10.196.176.13.
-        status (Union[Unset, str]):  Example: ACTIVE.
-        vcpu (Union[Unset, int]):  Example: 4.
-        vmem (Union[Unset, int]):  Example: 16.
+        fqdn (Union[None, Unset, str]):
+        hostname (Union[None, Unset, str]):
+        ip (Union[None, Unset, str]):
+        status (Union[Unset, str]):
+        vcpu (Union[None, Unset, int]):
+        vmem (Union[None, Unset, int]):
     """
 
     component: "ComponentView"
-    fqdn: Union[Unset, str] = UNSET
-    hostname: Union[Unset, str] = UNSET
-    ip: Union[Unset, str] = UNSET
+    fqdn: Union[None, Unset, str] = UNSET
+    hostname: Union[None, Unset, str] = UNSET
+    ip: Union[None, Unset, str] = UNSET
     status: Union[Unset, str] = UNSET
-    vcpu: Union[Unset, int] = UNSET
-    vmem: Union[Unset, int] = UNSET
+    vcpu: Union[None, Unset, int] = UNSET
+    vmem: Union[None, Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component = self.component.to_dict()
 
-        fqdn = self.fqdn
-        hostname = self.hostname
-        ip = self.ip
+        fqdn: Union[None, Unset, str]
+        if isinstance(self.fqdn, Unset):
+            fqdn = UNSET
+        else:
+            fqdn = self.fqdn
+
+        hostname: Union[None, Unset, str]
+        if isinstance(self.hostname, Unset):
+            hostname = UNSET
+        else:
+            hostname = self.hostname
+
+        ip: Union[None, Unset, str]
+        if isinstance(self.ip, Unset):
+            ip = UNSET
+        else:
+            ip = self.ip
+
         status = self.status
-        vcpu = self.vcpu
-        vmem = self.vmem
+
+        vcpu: Union[None, Unset, int]
+        if isinstance(self.vcpu, Unset):
+            vcpu = UNSET
+        else:
+            vcpu = self.vcpu
+
+        vmem: Union[None, Unset, int]
+        if isinstance(self.vmem, Unset):
+            vmem = UNSET
+        else:
+            vmem = self.vmem
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -70,17 +95,52 @@ class InstanceComponentView:
         d = src_dict.copy()
         component = ComponentView.from_dict(d.pop("component"))
 
-        fqdn = d.pop("fqdn", UNSET)
+        def _parse_fqdn(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
 
-        hostname = d.pop("hostname", UNSET)
+        fqdn = _parse_fqdn(d.pop("fqdn", UNSET))
 
-        ip = d.pop("ip", UNSET)
+        def _parse_hostname(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        hostname = _parse_hostname(d.pop("hostname", UNSET))
+
+        def _parse_ip(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        ip = _parse_ip(d.pop("ip", UNSET))
 
         status = d.pop("status", UNSET)
 
-        vcpu = d.pop("vcpu", UNSET)
+        def _parse_vcpu(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
 
-        vmem = d.pop("vmem", UNSET)
+        vcpu = _parse_vcpu(d.pop("vcpu", UNSET))
+
+        def _parse_vmem(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        vmem = _parse_vmem(d.pop("vmem", UNSET))
 
         instance_component_view = cls(
             component=component,

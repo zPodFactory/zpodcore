@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
     from ..models.instance_feature_view_data import InstanceFeatureViewData
@@ -9,12 +9,12 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="InstanceFeatureView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstanceFeatureView:
     """
     Attributes:
-        data (InstanceFeatureViewData):  Example: {'feature':'one'}.
-        id (int):  Example: 1.
+        data (InstanceFeatureViewData):
+        id (int):
     """
 
     data: "InstanceFeatureViewData"

@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, List
 
 from sqlmodel import JSON, Column, Field, Relationship
 
-from zpodcommon import enums
 from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
@@ -35,7 +34,7 @@ class EndpointPermission(ModelBase, table=True):
         primary_key=True,
         nullable=False,
     )
-    permission: enums.EndpointPermission = Field(
+    permission: str = Field(
         default=...,
         nullable=False,
     )
@@ -48,15 +47,15 @@ class EndpointPermission(ModelBase, table=True):
     endpoint: "Endpoint" = Relationship(back_populates="permissions")
     users: List["User"] = Relationship(
         back_populates="endpoint_permissions",
-        sa_relationship_kwargs=dict(
-            secondary="endpoint_permission_user_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "endpoint_permission_user_link",
+        },
     )
     permission_groups: List["PermissionGroup"] = Relationship(
         back_populates="endpoint_permissions",
-        sa_relationship_kwargs=dict(
-            secondary="endpoint_permission_group_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "endpoint_permission_group_link",
+        },
     )
 
 

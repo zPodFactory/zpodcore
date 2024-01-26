@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
-from ..models.endpoint_permission import EndpointPermission
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -13,31 +12,31 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="EndpointPermissionView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointPermissionView:
     """
     Attributes:
-        id (int):  Example: 1.
-        permission (EndpointPermission): An enumeration.
+        id (int):
+        permission (Literal['USER']):
         permission_groups (Union[Unset, List['PermissionGroupView']]):
         users (Union[Unset, List['UserView']]):
     """
 
     id: int
-    permission: EndpointPermission
+    permission: Literal["USER"]
     permission_groups: Union[Unset, List["PermissionGroupView"]] = UNSET
     users: Union[Unset, List["UserView"]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
-        permission = self.permission.value
+
+        permission = self.permission
 
         permission_groups: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.permission_groups, Unset):
             permission_groups = []
             for permission_groups_item_data in self.permission_groups:
                 permission_groups_item = permission_groups_item_data.to_dict()
-
                 permission_groups.append(permission_groups_item)
 
         users: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -45,7 +44,6 @@ class EndpointPermissionView:
             users = []
             for users_item_data in self.users:
                 users_item = users_item_data.to_dict()
-
                 users.append(users_item)
 
         field_dict: Dict[str, Any] = {}
@@ -70,7 +68,7 @@ class EndpointPermissionView:
         d = src_dict.copy()
         id = d.pop("id")
 
-        permission = EndpointPermission(d.pop("permission"))
+        permission = d.pop("permission")
 
         permission_groups = []
         _permission_groups = d.pop("permission_groups", UNSET)

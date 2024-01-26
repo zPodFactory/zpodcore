@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
     from ..models.endpoint_compute_view import EndpointComputeView
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="EndpointsView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointsView:
     """
     Attributes:

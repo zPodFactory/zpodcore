@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
     from ..models.user_view import UserView
@@ -9,12 +9,12 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="PermissionGroupView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class PermissionGroupView:
     """
     Attributes:
-        id (int):  Example: 1.
-        name (str):  Example: Team.
+        id (int):
+        name (str):
         users (List['UserView']):
     """
 
@@ -24,11 +24,12 @@ class PermissionGroupView:
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
+
         name = self.name
+
         users = []
         for users_item_data in self.users:
             users_item = users_item_data.to_dict()
-
             users.append(users_item)
 
         field_dict: Dict[str, Any] = {}

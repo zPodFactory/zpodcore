@@ -3,28 +3,26 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Path
 
 from zpodapi.lib.global_dependencies import service_init_annotation
+from zpodapi.lib.id_types import IdNameType
 from zpodcommon import models as M
 
 from .permission_group__services import PermissionGroupService
-from .permission_group__types import PermissionGroupIdType
 
 
 def get_permission_group(
     *,
     permission_group_service: "PermissionGroupAnnotations.PermissionGroupService",
     id: Annotated[
-        PermissionGroupIdType,
+        IdNameType,
         Path(
-            examples={
+            openapi_examples={
                 "id": {"value": "1"},
                 "name": {"value": "name=admins"},
             },
         ),
     ],
 ):
-    if permission_group := permission_group_service.crud.get(
-        **PermissionGroupIdType.args(id)
-    ):
+    if permission_group := permission_group_service.crud.get(**id):
         return permission_group
     raise HTTPException(status_code=404, detail="Permission Group not found")
 

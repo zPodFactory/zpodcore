@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
     from ..models.endpoints_create import EndpointsCreate
@@ -9,14 +9,14 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="EndpointCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointCreate:
     """
     Attributes:
-        description (str):  Example: current testing env.
-        enabled (bool):  Example: True.
+        description (str):
+        enabled (bool):
         endpoints (EndpointsCreate):
-        name (str):  Example: mylab.
+        name (str):
     """
 
     description: str
@@ -26,7 +26,9 @@ class EndpointCreate:
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
+
         enabled = self.enabled
+
         endpoints = self.endpoints.to_dict()
 
         name = self.name

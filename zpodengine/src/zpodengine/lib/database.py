@@ -12,7 +12,7 @@ from zpodengine import settings
 logger = logging.getLogger(__name__)
 
 engine = create_engine(
-    settings.POSTGRES_DSN,
+    settings.POSTGRES_DSN.unicode_string(),
     echo=settings.ECHO_SQL,
     echo_pool=settings.ECHO_POOL,
 )

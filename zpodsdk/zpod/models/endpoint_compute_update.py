@@ -1,26 +1,35 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, Dict, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="EndpointComputeUpdate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointComputeUpdate:
     """
     Attributes:
-        password (Union[Unset, str]):  Example: my-password.
-        username (Union[Unset, str]):  Example: my-username.
+        password (Union[None, Unset, str]):
+        username (Union[None, Unset, str]):
     """
 
-    password: Union[Unset, str] = UNSET
-    username: Union[Unset, str] = UNSET
+    password: Union[None, Unset, str] = UNSET
+    username: Union[None, Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        password = self.password
-        username = self.username
+        password: Union[None, Unset, str]
+        if isinstance(self.password, Unset):
+            password = UNSET
+        else:
+            password = self.password
+
+        username: Union[None, Unset, str]
+        if isinstance(self.username, Unset):
+            username = UNSET
+        else:
+            username = self.username
 
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
@@ -34,9 +43,24 @@ class EndpointComputeUpdate:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        password = d.pop("password", UNSET)
 
-        username = d.pop("username", UNSET)
+        def _parse_password(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        password = _parse_password(d.pop("password", UNSET))
+
+        def _parse_username(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        username = _parse_username(d.pop("username", UNSET))
 
         endpoint_compute_update = cls(
             password=password,

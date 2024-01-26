@@ -2,16 +2,17 @@
 
 import secrets
 
+from sqlmodel import func, select
+
 from zpodapi import settings
 from zpodapi.lib import database
 from zpodcommon import models as M
 from zpodcommon.enums import UserStatus
 
 with database.get_session_ctx() as session:
-    userCnt = session.query(M.User).count()
+    userCnt = session.exec(select(func.count(M.User.id))).one()
     if not userCnt:
         # Create a super user with very simple api token for quick tests
-
         user = M.User(
             username="superuser",
             email="superuser@zpodfactory.io",

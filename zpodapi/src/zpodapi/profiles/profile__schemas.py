@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List
 
-from pydantic import constr
+from pydantic import StringConstraints
+from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 
@@ -25,15 +26,15 @@ class D:
 
 class ProfileItemView(SchemaBase):
     component_uid: str = Field(..., D.profile.component_uid)
-    host_id: int = Field(None, D.profile.host_id)
-    hostname: str = Field(None, D.profile.hostname)
-    vcpu: int = Field(None, D.profile.vcpu)
-    vmem: int = Field(None, D.profile.vmem)
-    vdisks: list[int] = Field(None, D.profile.vdisk)
+    host_id: int | None = Field(None, D.profile.host_id)
+    hostname: str | None = Field(None, D.profile.hostname)
+    vcpu: int | None = Field(None, D.profile.vcpu)
+    vmem: int | None = Field(None, D.profile.vmem)
+    vdisks: list[int] | None = Field(None, D.profile.vdisk)
 
 
 class ProfileView(SchemaBase):
-    id: str = Field(..., D.id)
+    id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     profile: List[ProfileItemView | List[ProfileItemView]]
     creation_date: datetime = Field(..., D.creation_date)
@@ -50,9 +51,7 @@ class ProfileItemCreate(SchemaBase):
 
 
 class ProfileCreate(SchemaBase):
-    # NOTE: constr(to_lower) doesn't work with regex defined.
-    # lower() is currently handled in route.
-    name: constr(to_lower=True) = Field(..., D.name)
+    name: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.name)
     profile: List[ProfileItemCreate | List[ProfileItemCreate]]
 
 
@@ -66,7 +65,5 @@ class ProfileItemUpdate(SchemaBase):
 
 
 class ProfileUpdate(SchemaBase):
-    # NOTE: constr(to_lower) doesn't work with regex defined.
-    # lower() is currently handled in route.
-    name: constr(to_lower=True) | None = Field(None, D.name)
+    name: Annotated[str, StringConstraints(to_lower=True)] | None = Field(None, D.name)
     profile: List[ProfileItemUpdate | List[ProfileItemUpdate]] | None = None

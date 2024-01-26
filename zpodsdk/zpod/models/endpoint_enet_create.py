@@ -1,15 +1,15 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="EndpointENetCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointENetCreate:
     """
     Attributes:
-        name (str):  Example: demo.
+        name (str):
     """
 
     name: str

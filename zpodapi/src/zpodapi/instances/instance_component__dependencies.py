@@ -3,19 +3,28 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Path, status
 
 from zpodapi.lib.global_dependencies import service_init_annotation
+from zpodapi.lib.id_types import IdValidator
 from zpodcommon import models as M
 
+from .instance__dependencies import InstanceAnnotations
 from .instance_component__services import InstanceComponentService
-from .instance_component__types import InstanceComponentIdType
+
+IdHostnameType = Annotated[
+    str,
+    IdValidator(
+        fields={"id": int, "hostname": str},
+    ),
+]
 
 
 def get_instance_component(
     *,
     instance_component_service: "InstanceComponentAnnotations.InstanceComponentService",
+    instance: InstanceAnnotations.GetInstance,
     component_id: Annotated[
-        InstanceComponentIdType,
+        IdHostnameType,
         Path(
-            examples={
+            openapi_examples={
                 "id": {"value": "1"},
                 "hostname": {"value": "hostname=esxi11"},
             },
@@ -23,7 +32,8 @@ def get_instance_component(
     ],
 ):
     if instance_component := instance_component_service.crud.get(
-        **InstanceComponentIdType.args(component_id)
+        **component_id,
+        where_extra=[M.InstanceComponent.instance_id == instance.id],
     ):
         return instance_component
     raise HTTPException(

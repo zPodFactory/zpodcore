@@ -28,7 +28,7 @@ def permission_group_user_add(
 
     z.permission_groups_users_add.sync(
         id=f"name={name}",
-        json_body=PermissionGroupUserAdd(user_id=user.id),
+        body=PermissionGroupUserAdd(user_id=user.id),
     )
     print(f"User: {username} added.")
 

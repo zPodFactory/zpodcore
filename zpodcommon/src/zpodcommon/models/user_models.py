@@ -2,13 +2,13 @@ from datetime import datetime
 from typing import TYPE_CHECKING, List
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship
+from sqlmodel import AutoString, Field, Relationship
 
 from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
-    from .instance_models import InstancePermission
     from .endpoint_models import EndpointPermission
+    from .instance_models import InstancePermission
     from .permission_group_models import PermissionGroup
 
 from .mixins import CommonDatesMixin
@@ -33,6 +33,7 @@ class User(CommonDatesMixin, ModelBase, table=True):
         unique=True,
         index=True,
         nullable=False,
+        sa_type=AutoString,
     )
     description: str = Field(
         default="",
@@ -48,11 +49,12 @@ class User(CommonDatesMixin, ModelBase, table=True):
         nullable=False,
     )
     creation_date: datetime = Field(
-        sa_column_kwargs=dict(default=datetime.utcnow),
+        sa_column_kwargs={"default": datetime.utcnow},
         nullable=False,
     )
     last_connection_date: datetime = Field(
         default=None,
+        nullable=True,
     )
     superadmin: bool = Field(
         default=False,
@@ -65,19 +67,19 @@ class User(CommonDatesMixin, ModelBase, table=True):
 
     instance_permissions: List["InstancePermission"] = Relationship(
         back_populates="users",
-        sa_relationship_kwargs=dict(
-            secondary="instance_permission_user_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "instance_permission_user_link",
+        },
     )
     endpoint_permissions: List["EndpointPermission"] = Relationship(
         back_populates="users",
-        sa_relationship_kwargs=dict(
-            secondary="endpoint_permission_user_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "endpoint_permission_user_link",
+        },
     )
     permission_groups: List["PermissionGroup"] = Relationship(
         back_populates="users",
-        sa_relationship_kwargs=dict(
-            secondary="permission_group_user_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "permission_group_user_link",
+        },
     )

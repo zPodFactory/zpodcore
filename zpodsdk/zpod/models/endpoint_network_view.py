@@ -1,23 +1,24 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 T = TypeVar("T", bound="EndpointNetworkView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointNetworkView:
     """
     Attributes:
-        driver (str):  Example: nsxt.
-        edgecluster (str):  Example: my-edgecluster.
-        hostname (str):  Example: my-nsxt-manager.com.
-        macdiscoveryprofile (str):  Example: my-macdiscoveryprofile.
-        name (str):  Example: main.
-        networks (str):  Example: 10.196.64.0/18.
-        t0 (str):  Example: my-t0.
-        transportzone (str):  Example: my-transportzone.
-        username (str):  Example: my-username.
+        driver (str):
+        edgecluster (str):
+        hostname (str):
+        macdiscoveryprofile (str):
+        name (str):
+        networks (str):
+        t0 (str):
+        transportzone (str):
+        username (str):
     """
 
     driver: str
@@ -29,17 +30,25 @@ class EndpointNetworkView:
     t0: str
     transportzone: str
     username: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         driver = self.driver
+
         edgecluster = self.edgecluster
+
         hostname = self.hostname
+
         macdiscoveryprofile = self.macdiscoveryprofile
+
         name = self.name
+
         networks = self.networks
+
         t0 = self.t0
+
         transportzone = self.transportzone
+
         username = self.username
 
         field_dict: Dict[str, Any] = {}

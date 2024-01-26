@@ -54,7 +54,7 @@ def permission_group_create(
 
     z: ZpodClient = ZpodClient()
     z.permission_groups_create.sync(
-        json_body=PermissionGroupCreate(
+        body=PermissionGroupCreate(
             name=name,
         )
     )
@@ -77,7 +77,7 @@ def permission_group_update(
     z: ZpodClient = ZpodClient()
     z.permission_groups_update.sync(
         id=f"name={name}",
-        json_body=PermissionGroupUpdate(name=newname),
+        body=PermissionGroupUpdate(name=newname),
     )
     print(
         f"Permission Group [magenta]{name}[/magenta] has been "

@@ -1,17 +1,17 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="UserView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class UserView:
     """
     Attributes:
-        email (str):  Example: jdoe@example.com.
-        id (int):  Example: 1.
-        username (str):  Example: jdoe.
+        email (str):
+        id (int):
+        username (str):
     """
 
     email: str
@@ -20,7 +20,9 @@ class UserView:
 
     def to_dict(self) -> Dict[str, Any]:
         email = self.email
+
         id = self.id
+
         username = self.username
 
         field_dict: Dict[str, Any] = {}
