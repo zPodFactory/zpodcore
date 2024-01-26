@@ -37,7 +37,7 @@ def get(
 
 @router.post(
     "",
-    response_model=EndpointCreate,
+    response_model=EndpointViewFull,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )

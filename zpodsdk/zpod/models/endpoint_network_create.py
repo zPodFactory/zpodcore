@@ -1,24 +1,24 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="EndpointNetworkCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointNetworkCreate:
     """
     Attributes:
-        driver (str):  Example: nsxt.
-        edgecluster (str):  Example: my-edgecluster.
-        hostname (str):  Example: my-nsxt-manager.com.
-        macdiscoveryprofile (str):  Example: my-macdiscoveryprofile.
-        name (str):  Example: main.
-        networks (str):  Example: 10.196.64.0/18.
-        password (str):  Example: my-password.
-        t0 (str):  Example: my-t0.
-        transportzone (str):  Example: my-transportzone.
-        username (str):  Example: my-username.
+        driver (str):
+        edgecluster (str):
+        hostname (str):
+        macdiscoveryprofile (str):
+        name (str):
+        networks (str):
+        password (str):
+        t0 (str):
+        transportzone (str):
+        username (str):
     """
 
     driver: str
@@ -34,14 +34,23 @@ class EndpointNetworkCreate:
 
     def to_dict(self) -> Dict[str, Any]:
         driver = self.driver
+
         edgecluster = self.edgecluster
+
         hostname = self.hostname
+
         macdiscoveryprofile = self.macdiscoveryprofile
+
         name = self.name
+
         networks = self.networks
+
         password = self.password
+
         t0 = self.t0
+
         transportzone = self.transportzone
+
         username = self.username
 
         field_dict: Dict[str, Any] = {}

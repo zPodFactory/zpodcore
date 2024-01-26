@@ -1,6 +1,5 @@
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
-from pydantic.error_wrappers import ErrorWrapper
 from sqlmodel import Session, SQLModel
 
 from zpodapi.lib.crud import Crud
@@ -21,6 +20,6 @@ class ServiceBase:
         if type(item_in) == schema:
             return item_in
         try:
-            return schema(**item_in.dict(exclude_unset=True))
+            return schema(**item_in.model_dump(exclude_unset=True))
         except ValidationError as e:
-            raise RequestValidationError(errors=[ErrorWrapper(e, ("body"))]) from e
+            raise RequestValidationError(e.errors()) from e

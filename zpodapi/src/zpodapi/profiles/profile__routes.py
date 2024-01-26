@@ -47,14 +47,13 @@ def create(
     profile_in: ProfileCreate,
     force=False,
 ):
-    profile_in.name = profile_in.name.lower()
     if profile_service.crud.get_all_filtered(name=profile_in.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Conflicting record found",
         )
     if not force:
-        profile_service.validate_profile(profile_obj=profile_in.dict()["profile"])
+        profile_service.validate_profile(profile_obj=profile_in.model_dump()["profile"])
     return profile_service.crud.create(item_in=profile_in)
 
 
@@ -71,7 +70,6 @@ def update(
     profile_in: ProfileUpdate,
 ):
     if profile_in.name:
-        profile_in.name = profile_in.name.lower()
         if profile_service.crud.get_all_filtered(name=profile_in.name):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -79,7 +77,7 @@ def update(
             )
 
     if profile_in.profile:
-        profile_service.validate_profile(profile_obj=profile_in.dict()["profile"])
+        profile_service.validate_profile(profile_obj=profile_in.model_dump()["profile"])
 
     return profile_service.crud.update(item=profile, item_in=profile_in)
 

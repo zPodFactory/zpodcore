@@ -54,7 +54,7 @@ def enet_create(
     z = ZpodClient()
 
     ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
-    z.endpoints_enet_create.sync(id=ep.id, json_body=EndpointENetCreate(name=name))
+    z.endpoints_enet_create.sync(id=ep.id, body=EndpointENetCreate(name=name))
     print(f"ENet [magenta]{name}[/magenta] has been created.")
 
 

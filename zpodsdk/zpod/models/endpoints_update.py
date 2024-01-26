@@ -1,8 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union, cast
 
-import attr
-
-from ..types import UNSET, Unset
+from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
     from ..models.endpoint_compute_update import EndpointComputeUpdate
@@ -12,32 +10,40 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="EndpointsUpdate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointsUpdate:
     """
     Attributes:
-        compute (Union[Unset, EndpointComputeUpdate]):
-        network (Union[Unset, EndpointNetworkUpdate]):
+        compute (Union['EndpointComputeUpdate', None]):
+        network (Union['EndpointNetworkUpdate', None]):
     """
 
-    compute: Union[Unset, "EndpointComputeUpdate"] = UNSET
-    network: Union[Unset, "EndpointNetworkUpdate"] = UNSET
+    compute: Union["EndpointComputeUpdate", None]
+    network: Union["EndpointNetworkUpdate", None]
 
     def to_dict(self) -> Dict[str, Any]:
-        compute: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.compute, Unset):
-            compute = self.compute.to_dict()
+        from ..models.endpoint_compute_update import EndpointComputeUpdate
+        from ..models.endpoint_network_update import EndpointNetworkUpdate
 
-        network: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.network, Unset):
+        compute: Union[Dict[str, Any], None]
+        if isinstance(self.compute, EndpointComputeUpdate):
+            compute = self.compute.to_dict()
+        else:
+            compute = self.compute
+
+        network: Union[Dict[str, Any], None]
+        if isinstance(self.network, EndpointNetworkUpdate):
             network = self.network.to_dict()
+        else:
+            network = self.network
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update({})
-        if compute is not UNSET:
-            field_dict["compute"] = compute
-        if network is not UNSET:
-            field_dict["network"] = network
+        field_dict.update(
+            {
+                "compute": compute,
+                "network": network,
+            }
+        )
 
         return field_dict
 
@@ -47,19 +53,36 @@ class EndpointsUpdate:
         from ..models.endpoint_network_update import EndpointNetworkUpdate
 
         d = src_dict.copy()
-        _compute = d.pop("compute", UNSET)
-        compute: Union[Unset, EndpointComputeUpdate]
-        if isinstance(_compute, Unset):
-            compute = UNSET
-        else:
-            compute = EndpointComputeUpdate.from_dict(_compute)
 
-        _network = d.pop("network", UNSET)
-        network: Union[Unset, EndpointNetworkUpdate]
-        if isinstance(_network, Unset):
-            network = UNSET
-        else:
-            network = EndpointNetworkUpdate.from_dict(_network)
+        def _parse_compute(data: object) -> Union["EndpointComputeUpdate", None]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                compute_type_0 = EndpointComputeUpdate.from_dict(data)
+
+                return compute_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["EndpointComputeUpdate", None], data)
+
+        compute = _parse_compute(d.pop("compute"))
+
+        def _parse_network(data: object) -> Union["EndpointNetworkUpdate", None]:
+            if data is None:
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                network_type_0 = EndpointNetworkUpdate.from_dict(data)
+
+                return network_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["EndpointNetworkUpdate", None], data)
+
+        network = _parse_network(d.pop("network"))
 
         endpoints_update = cls(
             compute=compute,

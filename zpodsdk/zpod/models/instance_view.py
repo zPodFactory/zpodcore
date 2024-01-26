@@ -1,7 +1,7 @@
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 from dateutil.parser import isoparse
 
 from ..models.instance_status import InstanceStatus
@@ -18,20 +18,20 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="InstanceView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstanceView:
     """
     Attributes:
-        creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        description (str):  Example: Demo zPod.
-        domain (str):  Example: demo.maindomain.com.
+        creation_date (datetime.datetime):
+        description (str):
+        domain (str):
         endpoint (EndpointView):
-        id (int):  Example: 1.
-        last_modified_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        name (str):  Example: demo.
-        password (str):  Example: yZnqji!a4xbo.
-        profile (str):  Example: sddc.
-        status (InstanceStatus): An enumeration.
+        id (int):
+        last_modified_date (datetime.datetime):
+        name (str):
+        password (str):
+        profile (str):
+        status (InstanceStatus):
         components (Union[Unset, List['InstanceComponentView']]):
         features (Union[Unset, List['InstanceFeatureView']]):
         networks (Union[Unset, List['InstanceNetworkView']]):
@@ -57,15 +57,21 @@ class InstanceView:
         creation_date = self.creation_date.isoformat()
 
         description = self.description
+
         domain = self.domain
+
         endpoint = self.endpoint.to_dict()
 
         id = self.id
+
         last_modified_date = self.last_modified_date.isoformat()
 
         name = self.name
+
         password = self.password
+
         profile = self.profile
+
         status = self.status.value
 
         components: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -73,7 +79,6 @@ class InstanceView:
             components = []
             for components_item_data in self.components:
                 components_item = components_item_data.to_dict()
-
                 components.append(components_item)
 
         features: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -81,7 +86,6 @@ class InstanceView:
             features = []
             for features_item_data in self.features:
                 features_item = features_item_data.to_dict()
-
                 features.append(features_item)
 
         networks: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -89,7 +93,6 @@ class InstanceView:
             networks = []
             for networks_item_data in self.networks:
                 networks_item = networks_item_data.to_dict()
-
                 networks.append(networks_item)
 
         permissions: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -97,7 +100,6 @@ class InstanceView:
             permissions = []
             for permissions_item_data in self.permissions:
                 permissions_item = permissions_item_data.to_dict()
-
                 permissions.append(permissions_item)
 
         field_dict: Dict[str, Any] = {}

@@ -1,11 +1,10 @@
 from functools import partial
 from typing import AbstractSet, Any, Dict, Mapping, Optional, Sequence, Union
 
-from pydantic.fields import Undefined, UndefinedType
-from pydantic.typing import NoArgAnyCallable
-from sqlalchemy import Column
+from pydantic import ConfigDict
 from sqlmodel import Field as SQLModelField
 from sqlmodel import SQLModel
+from sqlmodel.main import NoArgAnyCallable, Type, Undefined, UndefinedType
 
 FIELD_ARGS = {
     "default": Undefined,
@@ -37,7 +36,6 @@ FIELD_ARGS = {
     "sa_column_kwargs": Undefined,
     "schema_extra": None,
     "example": None,
-    "hidden": False,
 }
 
 
@@ -63,23 +61,27 @@ def Field(
     lt: Optional[float] = None,
     le: Optional[float] = None,
     multiple_of: Optional[float] = None,
+    max_digits: Optional[int] = None,
+    decimal_places: Optional[int] = None,
     min_items: Optional[int] = None,
     max_items: Optional[int] = None,
+    unique_items: Optional[bool] = None,
     min_length: Optional[int] = None,
     max_length: Optional[int] = None,
     allow_mutation: bool = True,
     regex: Optional[str] = None,
-    primary_key: bool = False,
-    foreign_key: Optional[Any] = None,
-    unique: bool = False,
+    discriminator: Optional[str] = None,
+    repr: bool = True,
+    primary_key: Union[bool, UndefinedType] = Undefined,
+    foreign_key: Any = Undefined,
+    unique: Union[bool, UndefinedType] = Undefined,
     nullable: Union[bool, UndefinedType] = Undefined,
     index: Union[bool, UndefinedType] = Undefined,
-    sa_column: Union[Column, UndefinedType] = Undefined,  # type: ignore
+    sa_type: Union[Type[Any], UndefinedType] = Undefined,
     sa_column_args: Union[Sequence[Any], UndefinedType] = Undefined,
     sa_column_kwargs: Union[Mapping[str, Any], UndefinedType] = Undefined,
     schema_extra: Optional[Dict[str, Any]] = None,
     example: Optional[str] = None,
-    hidden: bool = False,
 ) -> Any:
     schema_extra = schema_extra or {}
     ind_args = {k: v for k, v in locals().items() if v is not FIELD_ARGS.get(k)}
@@ -91,25 +93,15 @@ def Field(
             raise KeyError(f"Invalid key in default_args: {k}")
 
     all_args = FIELD_ARGS | default_args | ind_args
-    for k in ("example", "hidden"):
-        if all_args.get(k):
-            all_args["schema_extra"][k] = all_args[k]
-    del all_args["example"], all_args["hidden"]
+    if all_args.get("example"):
+        all_args["schema_extra"]["example"] = all_args["example"]
+    del all_args["example"]
 
     return SQLModelField(**all_args)
 
 
 class SchemaBase(SQLModel):
-    class Config:
-        extra = "forbid"
-
-        @staticmethod
-        def schema_extra(schema: dict, _):
-            schema["properties"] = {
-                k: v
-                for k, v in schema.get("properties", {}).items()
-                if not v.get("hidden", False)
-            }
+    model_config = ConfigDict(extra="forbid")
 
 
 Req = partial(Field, default=...)

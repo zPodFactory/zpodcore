@@ -144,5 +144,5 @@ def instance_create(
         enet_name=enet_name,
     )
 
-    z.instances_create.sync(json_body=instance_details)
+    z.instances_create.sync(body=instance_details)
     print(f"Instance [magenta]{name}[/magenta] is being deployed...")

@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Tuple
 from urllib.parse import urlparse
 
 from prefect import flow, get_run_logger, task
@@ -27,17 +27,17 @@ POWERS = {"KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5}
 class Component(BaseModel):
     component_name: str
     component_version: str
-    component_type: Optional[str]
-    component_description: Optional[str]
-    component_url: Optional[str]
+    component_type: str | None = None
+    component_description: str | None = None
+    component_url: str | None = None
     component_download_engine: str
-    component_download_product: Optional[str]
-    component_download_subproduct: Optional[str]
-    component_download_version: Optional[str]
-    component_download_file: Optional[str]
-    component_download_file_checksum: Optional[str]  # "sha265:checksum"
+    component_download_product: str | None = None
+    component_download_subproduct: str | None = None
+    component_download_version: str | None = None
+    component_download_file: str | None = None
+    component_download_file_checksum: str | None = None  # "sha265:checksum"
     component_download_file_size: str
-    component_isnested: Optional[bool]
+    component_isnested: bool | None = None
     component_dst_path: Path | None = None
     component_dl_path: Path | None = None
     component_dl_url: str | None = None
@@ -224,7 +224,7 @@ def get_component(request: dict, uid: str):
     return component
 
 
-def get_file_size(component: Component) -> Union[int, None]:
+def get_file_size(component: Component) -> int | None:
     tmp_dl_path = f"{component.component_dl_path}.tmp"
     if component.component_dl_path.is_file():
         return component.component_dl_path.stat().st_size

@@ -22,6 +22,5 @@ class Profile(CommonDatesMixin, ModelBase, table=True):
     )
     profile: List = Field(
         default=[],
-        index=False,
-        sa_column=Column(JSON, nullable=False),
+        sa_column=Column(JSON, nullable=False,index=False),
     )

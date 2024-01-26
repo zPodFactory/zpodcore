@@ -107,7 +107,7 @@ def profile_create(
     z: ZpodClient = ZpodClient()
 
     z.profiles_create.sync(
-        json_body=ProfileCreate(
+        body=ProfileCreate(
             name=name,
             profile=build_profile(profile_obj),
         )
@@ -145,7 +145,7 @@ def profile_update(
 
     z.profiles_update.sync(
         id=f"name={name}",
-        json_body=profile_update,
+        body=profile_update,
     )
     print(f"Profile [magenta]{name}[/magenta] has been updated.")
 

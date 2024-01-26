@@ -1,16 +1,16 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="EndpointENetView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointENetView:
     """
     Attributes:
-        name (str):  Example: demo.
-        project_id (str):  Example: zpod-demo-enet-project.
+        name (str):
+        project_id (str):
     """
 
     name: str
@@ -18,6 +18,7 @@ class EndpointENetView:
 
     def to_dict(self) -> Dict[str, Any]:
         name = self.name
+
         project_id = self.project_id
 
         field_dict: Dict[str, Any] = {}

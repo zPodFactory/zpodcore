@@ -1,11 +1,12 @@
 from typing import Any, Dict, List, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 T = TypeVar("T", bound="ValidationError")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ValidationError:
     """
     Attributes:
@@ -17,18 +18,17 @@ class ValidationError:
     loc: List[Union[int, str]]
     msg: str
     type: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         loc = []
         for loc_item_data in self.loc:
             loc_item: Union[int, str]
-
             loc_item = loc_item_data
-
             loc.append(loc_item)
 
         msg = self.msg
+
         type = self.type
 
         field_dict: Dict[str, Any] = {}

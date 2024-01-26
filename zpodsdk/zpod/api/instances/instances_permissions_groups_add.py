@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.instance_permission import InstancePermission
 from ...models.instance_permission_group_add_remove import (
@@ -15,7 +15,7 @@ from ...types import Response
 
 
 class InstancesPermissionsGroupsAdd:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
@@ -23,26 +23,25 @@ class InstancesPermissionsGroupsAdd:
         id: str,
         permission: InstancePermission,
         *,
-        json_body: InstancePermissionGroupAddRemove,
+        body: InstancePermissionGroupAddRemove,
     ) -> Dict[str, Any]:
-        url = "{}/instances/{id}/permissions/{permission}/groups".format(
-            self.client.base_url, id=id, permission=permission
-        )
+        headers: Dict[str, Any] = {}
 
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        json_json_body = json_body.to_dict()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
-            "json": json_json_body,
+            "url": "/instances/{id}/permissions/{permission}/groups".format(
+                id=id,
+                permission=permission,
+            ),
         }
+
+        _body = body.to_dict()
+
+        _kwargs["json"] = _body
+        headers["Content-Type"] = "application/json"
+
+        _kwargs["headers"] = headers
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -56,7 +55,6 @@ class InstancesPermissionsGroupsAdd:
                 response_201.append(response_201_item)
 
             return response_201
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -64,7 +62,6 @@ class InstancesPermissionsGroupsAdd:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -85,14 +82,14 @@ class InstancesPermissionsGroupsAdd:
         id: str,
         permission: InstancePermission,
         *,
-        json_body: InstancePermissionGroupAddRemove,
+        body: InstancePermissionGroupAddRemove,
     ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
         """Instance Permission Group Add
 
         Args:
             id (str):
-            permission (InstancePermission): An enumeration.
-            json_body (InstancePermissionGroupAddRemove):
+            permission (InstancePermission):
+            body (InstancePermissionGroupAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -105,11 +102,10 @@ class InstancesPermissionsGroupsAdd:
         kwargs = self._get_kwargs(
             id=id,
             permission=permission,
-            json_body=json_body,
+            body=body,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -120,14 +116,14 @@ class InstancesPermissionsGroupsAdd:
         id: str,
         permission: InstancePermission,
         *,
-        json_body: InstancePermissionGroupAddRemove,
+        body: InstancePermissionGroupAddRemove,
     ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
         """Instance Permission Group Add
 
         Args:
             id (str):
-            permission (InstancePermission): An enumeration.
-            json_body (InstancePermissionGroupAddRemove):
+            permission (InstancePermission):
+            body (InstancePermissionGroupAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -140,7 +136,7 @@ class InstancesPermissionsGroupsAdd:
         return self.sync_detailed(
             id=id,
             permission=permission,
-            json_body=json_body,
+            body=body,
         ).parsed
 
     async def asyncio_detailed(
@@ -148,14 +144,14 @@ class InstancesPermissionsGroupsAdd:
         id: str,
         permission: InstancePermission,
         *,
-        json_body: InstancePermissionGroupAddRemove,
+        body: InstancePermissionGroupAddRemove,
     ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
         """Instance Permission Group Add
 
         Args:
             id (str):
-            permission (InstancePermission): An enumeration.
-            json_body (InstancePermissionGroupAddRemove):
+            permission (InstancePermission):
+            body (InstancePermissionGroupAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -168,11 +164,10 @@ class InstancesPermissionsGroupsAdd:
         kwargs = self._get_kwargs(
             id=id,
             permission=permission,
-            json_body=json_body,
+            body=body,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 
@@ -181,14 +176,14 @@ class InstancesPermissionsGroupsAdd:
         id: str,
         permission: InstancePermission,
         *,
-        json_body: InstancePermissionGroupAddRemove,
+        body: InstancePermissionGroupAddRemove,
     ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
         """Instance Permission Group Add
 
         Args:
             id (str):
-            permission (InstancePermission): An enumeration.
-            json_body (InstancePermissionGroupAddRemove):
+            permission (InstancePermission):
+            body (InstancePermissionGroupAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -202,6 +197,6 @@ class InstancesPermissionsGroupsAdd:
             await self.asyncio_detailed(
                 id=id,
                 permission=permission,
-                json_body=json_body,
+                body=body,
             )
         ).parsed

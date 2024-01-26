@@ -1,21 +1,21 @@
 from typing import Any, Dict, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="UserCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class UserCreate:
     """
     Attributes:
-        email (str):  Example: jdoe@example.com.
-        username (str):  Example: jdoe.
-        description (Union[Unset, str]):  Default: ''. Example: Sample User.
-        ssh_key (Union[Unset, str]):  Default: ''. Example: <key>.
-        superadmin (Union[Unset, bool]):
+        email (str):
+        username (str):
+        description (Union[Unset, str]):  Default: ''.
+        ssh_key (Union[Unset, str]):  Default: ''.
+        superadmin (Union[Unset, bool]):  Default: False.
     """
 
     email: str
@@ -26,9 +26,13 @@ class UserCreate:
 
     def to_dict(self) -> Dict[str, Any]:
         email = self.email
+
         username = self.username
+
         description = self.description
+
         ssh_key = self.ssh_key
+
         superadmin = self.superadmin
 
         field_dict: Dict[str, Any] = {}

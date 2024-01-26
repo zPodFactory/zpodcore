@@ -1,11 +1,10 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Literal, Optional, Union, cast
 
 import httpx
 
 from ... import errors
-from ...client import Client
-from ...models.endpoint_permission import EndpointPermission
+from ...client import AuthenticatedClient, Client
 from ...models.endpoint_permission_user_add_remove import (
     EndpointPermissionUserAddRemove,
 )
@@ -14,34 +13,33 @@ from ...types import Response
 
 
 class EndpointsPermissionsUsersRemove:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
-        permission: EndpointPermission,
+        permission: Literal["USER"],
         *,
-        json_body: EndpointPermissionUserAddRemove,
+        body: EndpointPermissionUserAddRemove,
     ) -> Dict[str, Any]:
-        url = "{}/endpoints/{id}/permissions/{permission}/users".format(
-            self.client.base_url, id=id, permission=permission
-        )
+        headers: Dict[str, Any] = {}
 
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        json_json_body = json_body.to_dict()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "delete",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
-            "json": json_json_body,
+            "url": "/endpoints/{id}/permissions/{permission}/users".format(
+                id=id,
+                permission=permission,
+            ),
         }
+
+        _body = body.to_dict()
+
+        _kwargs["json"] = _body
+        headers["Content-Type"] = "application/json"
+
+        _kwargs["headers"] = headers
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -49,7 +47,6 @@ class EndpointsPermissionsUsersRemove:
         if response.status_code == HTTPStatus.NO_CONTENT:
             response_204 = cast(Any, None)
             return response_204
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -57,7 +54,6 @@ class EndpointsPermissionsUsersRemove:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -76,16 +72,16 @@ class EndpointsPermissionsUsersRemove:
     def sync_detailed(
         self,
         id: str,
-        permission: EndpointPermission,
+        permission: Literal["USER"],
         *,
-        json_body: EndpointPermissionUserAddRemove,
+        body: EndpointPermissionUserAddRemove,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Endpoint Permission User Remove
 
         Args:
             id (str):
-            permission (EndpointPermission): An enumeration.
-            json_body (EndpointPermissionUserAddRemove):
+            permission (Literal['USER']):
+            body (EndpointPermissionUserAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -98,11 +94,10 @@ class EndpointsPermissionsUsersRemove:
         kwargs = self._get_kwargs(
             id=id,
             permission=permission,
-            json_body=json_body,
+            body=body,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -111,16 +106,16 @@ class EndpointsPermissionsUsersRemove:
     def sync(
         self,
         id: str,
-        permission: EndpointPermission,
+        permission: Literal["USER"],
         *,
-        json_body: EndpointPermissionUserAddRemove,
+        body: EndpointPermissionUserAddRemove,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Endpoint Permission User Remove
 
         Args:
             id (str):
-            permission (EndpointPermission): An enumeration.
-            json_body (EndpointPermissionUserAddRemove):
+            permission (Literal['USER']):
+            body (EndpointPermissionUserAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -133,22 +128,22 @@ class EndpointsPermissionsUsersRemove:
         return self.sync_detailed(
             id=id,
             permission=permission,
-            json_body=json_body,
+            body=body,
         ).parsed
 
     async def asyncio_detailed(
         self,
         id: str,
-        permission: EndpointPermission,
+        permission: Literal["USER"],
         *,
-        json_body: EndpointPermissionUserAddRemove,
+        body: EndpointPermissionUserAddRemove,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Endpoint Permission User Remove
 
         Args:
             id (str):
-            permission (EndpointPermission): An enumeration.
-            json_body (EndpointPermissionUserAddRemove):
+            permission (Literal['USER']):
+            body (EndpointPermissionUserAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -161,27 +156,26 @@ class EndpointsPermissionsUsersRemove:
         kwargs = self._get_kwargs(
             id=id,
             permission=permission,
-            json_body=json_body,
+            body=body,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 
     async def asyncio(
         self,
         id: str,
-        permission: EndpointPermission,
+        permission: Literal["USER"],
         *,
-        json_body: EndpointPermissionUserAddRemove,
+        body: EndpointPermissionUserAddRemove,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Endpoint Permission User Remove
 
         Args:
             id (str):
-            permission (EndpointPermission): An enumeration.
-            json_body (EndpointPermissionUserAddRemove):
+            permission (Literal['USER']):
+            body (EndpointPermissionUserAddRemove):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -195,6 +189,6 @@ class EndpointsPermissionsUsersRemove:
             await self.asyncio_detailed(
                 id=id,
                 permission=permission,
-                json_body=json_body,
+                body=body,
             )
         ).parsed

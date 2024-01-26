@@ -1,42 +1,34 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
 class RootRoot:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
     ) -> Dict[str, Any]:
-        url = "{}/".format(self.client.base_url)
-
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
+            "url": "/",
         }
+
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
     ) -> Optional[Union[Any, HTTPValidationError]]:
         if response.status_code == HTTPStatus.OK:
-            response_200 = cast(Any, response.json())
+            response_200 = response.json()
             return response_200
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -44,7 +36,6 @@ class RootRoot:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -75,8 +66,7 @@ class RootRoot:
 
         kwargs = self._get_kwargs()
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -112,8 +102,7 @@ class RootRoot:
 
         kwargs = self._get_kwargs()
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 

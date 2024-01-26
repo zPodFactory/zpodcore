@@ -1,4 +1,5 @@
-from pydantic import constr
+from pydantic import StringConstraints
+from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 
@@ -9,9 +10,7 @@ class D:
 
 
 class EndpointENetCreate(SchemaBase):
-    # NOTE: constr(to_lower) doesn't work with regex defined.  lower() is currently
-    # handled in route.
-    name: constr(to_lower=True) = Field(..., D.name)
+    name: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.name)
 
 
 class EndpointENetView(SchemaBase):

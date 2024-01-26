@@ -8,11 +8,11 @@ Complete the following steps to set up your development environment:
 
 1. Install Docker and Docker Compose
 
-1. Install pyenv and add 3.11.2
+1. Install pyenv and add 3.12.1
 
     ```bash
     brew install pyenv
-    pyenv install 3.11.2
+    pyenv install 3.12.1
     ```
 
 1. Install Poetry:
@@ -24,7 +24,7 @@ Complete the following steps to set up your development environment:
 1. Configure Virtual Environment.  In the `/zpodapi`, `/zpodengine` and `/zpodcli` directories, run:
 
     ```bash
-    pyenv local 3.11.2
+    pyenv local 3.12.1
     poetry config virtualenvs.in-project true
     poetry install
     ```

@@ -1,25 +1,25 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="EndpointComputeCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointComputeCreate:
     """
     Attributes:
-        contentlibrary (str):  Example: my-contentlibrary.
-        datacenter (str):  Example: my-datacenter.
-        driver (str):  Example: vc.
-        hostname (str):  Example: my-vcenter.com.
-        name (str):  Example: main.
-        password (str):  Example: my-password.
-        resource_pool (str):  Example: my-cluster.
-        storage_datastore (str):  Example: my-datastore.
-        storage_policy (str):  Example: my-storage-policy.
-        username (str):  Example: my-username.
-        vmfolder (str):  Example: my-vmfolder.
+        contentlibrary (str):
+        datacenter (str):
+        driver (str):
+        hostname (str):
+        name (str):
+        password (str):
+        resource_pool (str):
+        storage_datastore (str):
+        storage_policy (str):
+        username (str):
+        vmfolder (str):
     """
 
     contentlibrary: str
@@ -36,15 +36,25 @@ class EndpointComputeCreate:
 
     def to_dict(self) -> Dict[str, Any]:
         contentlibrary = self.contentlibrary
+
         datacenter = self.datacenter
+
         driver = self.driver
+
         hostname = self.hostname
+
         name = self.name
+
         password = self.password
+
         resource_pool = self.resource_pool
+
         storage_datastore = self.storage_datastore
+
         storage_policy = self.storage_policy
+
         username = self.username
+
         vmfolder = self.vmfolder
 
         field_dict: Dict[str, Any] = {}

@@ -1,26 +1,26 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, Dict, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ComponentViewFull")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ComponentViewFull:
     """
     Attributes:
-        component_description (str):  Example: VMware Cloud Director Availabilty.
-        component_name (str):  Example: vcda.
-        component_uid (str):  Example: vcda-4.4.1.
-        component_version (str):  Example: 4.4.1.
-        filename (str):  Example: VMware-Cloud-Director-Availability-Provider-4.4.1.4448762-b80bae6591_OVF10.ova.
-        id (str):  Example: 1.
-        jsonfile (str):  Example: /library/default/vmware/vmware_cloud_director_availability/4.4.1.json.
-        library_name (str):  Example: main.
-        status (str):  Example: ACTIVE.
-        download_status (Union[Unset, str]):  Example: SCHEDULED.
+        component_description (str):
+        component_name (str):
+        component_uid (str):
+        component_version (str):
+        filename (str):
+        id (int):
+        jsonfile (str):
+        library_name (str):
+        status (str):
+        download_status (Union[None, Unset, str]):
     """
 
     component_description: str
@@ -28,23 +28,36 @@ class ComponentViewFull:
     component_uid: str
     component_version: str
     filename: str
-    id: str
+    id: int
     jsonfile: str
     library_name: str
     status: str
-    download_status: Union[Unset, str] = UNSET
+    download_status: Union[None, Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component_description = self.component_description
+
         component_name = self.component_name
+
         component_uid = self.component_uid
+
         component_version = self.component_version
+
         filename = self.filename
+
         id = self.id
+
         jsonfile = self.jsonfile
+
         library_name = self.library_name
+
         status = self.status
-        download_status = self.download_status
+
+        download_status: Union[None, Unset, str]
+        if isinstance(self.download_status, Unset):
+            download_status = UNSET
+        else:
+            download_status = self.download_status
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -86,7 +99,14 @@ class ComponentViewFull:
 
         status = d.pop("status")
 
-        download_status = d.pop("download_status", UNSET)
+        def _parse_download_status(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        download_status = _parse_download_status(d.pop("download_status", UNSET))
 
         component_view_full = cls(
             component_description=component_description,

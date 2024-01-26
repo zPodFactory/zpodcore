@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
@@ -48,7 +50,7 @@ def db_seed(session: Session):
         username="superuser",
         email="superuser@zpodfactory.io",
         api_token="APITOKEN_SUPERUSER",
-        creation_date="2022-01-01T00:00:00",
+        creation_date=datetime(2022, 1, 1, 0, 0, 0),
         superadmin=True,
         status="ENABLED",
     )
@@ -58,7 +60,7 @@ def db_seed(session: Session):
         username="normaluser",
         email="normaluser@zpodfactory.io",
         api_token="APITOKEN_NORMALUSER",
-        creation_date="2022-01-01T00:00:00",
+        creation_date=datetime(2022, 1, 1, 0, 0, 0),
         superadmin=False,
         status="ENABLED",
     )

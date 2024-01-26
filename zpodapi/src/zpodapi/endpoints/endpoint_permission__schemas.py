@@ -22,10 +22,10 @@ class EndpointPermissionView(SchemaBase):
 
 
 class EndpointPermissionUserAddRemove(SchemaBase):
-    user_id: int = Field(None, D.user_id)
-    username: str = Field(None, D.username)
+    user_id: int | None = Field(None, D.user_id)
+    username: str | None = Field(None, D.username)
 
 
 class EndpointPermissionGroupAddRemove(SchemaBase):
-    group_id: int = Field(None, D.group_id)
-    groupname: str = Field(None, D.groupname)
+    group_id: int | None = Field(None, D.group_id)
+    groupname: str | None = Field(None, D.groupname)

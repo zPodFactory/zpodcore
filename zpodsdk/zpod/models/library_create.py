@@ -1,17 +1,17 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="LibraryCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class LibraryCreate:
     """
     Attributes:
-        description (str):  Example: Default zPodFactory library.
-        git_url (str):  Example: https://github.com/zpodfactory/zpodlibrary.
-        name (str):  Example: default.
+        description (str):
+        git_url (str):
+        name (str):
     """
 
     description: str
@@ -20,7 +20,9 @@ class LibraryCreate:
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
+
         git_url = self.git_url
+
         name = self.name
 
         field_dict: Dict[str, Any] = {}

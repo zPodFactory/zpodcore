@@ -1,29 +1,32 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="EndpointView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointView:
     """
     Attributes:
-        description (str):  Example: current testing env.
-        enabled (bool):  Example: True.
-        id (str):  Example: 1.
-        name (str):  Example: mylab.
+        description (str):
+        enabled (bool):
+        id (int):
+        name (str):
     """
 
     description: str
     enabled: bool
-    id: str
+    id: int
     name: str
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
+
         enabled = self.enabled
+
         id = self.id
+
         name = self.name
 
         field_dict: Dict[str, Any] = {}

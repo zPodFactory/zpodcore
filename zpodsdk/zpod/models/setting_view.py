@@ -1,29 +1,32 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="SettingView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class SettingView:
     """
     Attributes:
-        description (str):  Example: default domain for every instances (zpodfactory.io).
-        id (str):  Example: 1.
-        name (str):  Example: domain.
-        value (str):  Example: zpodfactory.io.
+        description (str):
+        id (int):
+        name (str):
+        value (str):
     """
 
     description: str
-    id: str
+    id: int
     name: str
     value: str
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
+
         id = self.id
+
         name = self.name
+
         value = self.value
 
         field_dict: Dict[str, Any] = {}

@@ -9,7 +9,7 @@ from typing import (
     Union,
 )
 
-import attr
+from attrs import define as _attrs_define
 from dateutil.parser import isoparse
 
 if TYPE_CHECKING:
@@ -19,19 +19,19 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ProfileView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ProfileView:
     """
     Attributes:
-        creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        id (str):  Example: 1.
-        last_modified_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        name (str):  Example: sddc.
+        creation_date (datetime.datetime):
+        id (int):
+        last_modified_date (datetime.datetime):
+        name (str):
         profile (List[Union['ProfileItemView', List['ProfileItemView']]]):
     """
 
     creation_date: datetime.datetime
-    id: str
+    id: int
     last_modified_date: datetime.datetime
     name: str
     profile: List[Union["ProfileItemView", List["ProfileItemView"]]]
@@ -42,21 +42,20 @@ class ProfileView:
         creation_date = self.creation_date.isoformat()
 
         id = self.id
+
         last_modified_date = self.last_modified_date.isoformat()
 
         name = self.name
+
         profile = []
         for profile_item_data in self.profile:
             profile_item: Union[Dict[str, Any], List[Dict[str, Any]]]
-
             if isinstance(profile_item_data, ProfileItemView):
                 profile_item = profile_item_data.to_dict()
-
             else:
                 profile_item = []
                 for profile_item_type_1_item_data in profile_item_data:
                     profile_item_type_1_item = profile_item_type_1_item_data.to_dict()
-
                     profile_item.append(profile_item_type_1_item)
 
             profile.append(profile_item)

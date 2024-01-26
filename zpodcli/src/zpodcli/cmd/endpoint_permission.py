@@ -110,13 +110,13 @@ def endpoint_permission_add(
         z.endpoints_permissions_users_add.sync(
             id=endpoint.id,
             permission=EndpointPermission.USER.value,
-            json_body=EndpointPermissionUserAddRemove(username=username),
+            body=EndpointPermissionUserAddRemove(username=username),
         )
     else:
         z.endpoints_permissions_groups_add.sync(
             id=endpoint.id,
             permission=EndpointPermission.USER.value,
-            json_body=EndpointPermissionGroupAddRemove(groupname=groupname),
+            body=EndpointPermissionGroupAddRemove(groupname=groupname),
         )
     generate_table(z, endpoint)
 
@@ -157,12 +157,12 @@ def endpoint_permission_remove(
         z.endpoints_permissions_users_remove.sync(
             id=endpoint.id,
             permission=EndpointPermission.USER.value,
-            json_body=EndpointPermissionUserAddRemove(username=username),
+            body=EndpointPermissionUserAddRemove(username=username),
         )
     else:
         z.endpoints_permissions_groups_remove.sync(
             id=endpoint.id,
             permission=EndpointPermission.USER.value,
-            json_body=EndpointPermissionGroupAddRemove(groupname=groupname),
+            body=EndpointPermissionGroupAddRemove(groupname=groupname),
         )
     generate_table(z, endpoint)

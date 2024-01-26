@@ -1,35 +1,55 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, Dict, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="InstanceComponentCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstanceComponentCreate:
     """
     Attributes:
-        component_uid (str):  Example: esxi-8.0u1a.
-        host_id (Union[Unset, int]):  Example: 13.
-        hostname (Union[Unset, str]):  Example: esxi13.
-        vcpu (Union[Unset, int]):  Example: 4.
-        vmem (Union[Unset, int]):  Example: 16.
+        component_uid (str):
+        host_id (Union[None, Unset, int]):
+        hostname (Union[None, Unset, str]):
+        vcpu (Union[None, Unset, int]):
+        vmem (Union[None, Unset, int]):
     """
 
     component_uid: str
-    host_id: Union[Unset, int] = UNSET
-    hostname: Union[Unset, str] = UNSET
-    vcpu: Union[Unset, int] = UNSET
-    vmem: Union[Unset, int] = UNSET
+    host_id: Union[None, Unset, int] = UNSET
+    hostname: Union[None, Unset, str] = UNSET
+    vcpu: Union[None, Unset, int] = UNSET
+    vmem: Union[None, Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component_uid = self.component_uid
-        host_id = self.host_id
-        hostname = self.hostname
-        vcpu = self.vcpu
-        vmem = self.vmem
+
+        host_id: Union[None, Unset, int]
+        if isinstance(self.host_id, Unset):
+            host_id = UNSET
+        else:
+            host_id = self.host_id
+
+        hostname: Union[None, Unset, str]
+        if isinstance(self.hostname, Unset):
+            hostname = UNSET
+        else:
+            hostname = self.hostname
+
+        vcpu: Union[None, Unset, int]
+        if isinstance(self.vcpu, Unset):
+            vcpu = UNSET
+        else:
+            vcpu = self.vcpu
+
+        vmem: Union[None, Unset, int]
+        if isinstance(self.vmem, Unset):
+            vmem = UNSET
+        else:
+            vmem = self.vmem
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -53,13 +73,41 @@ class InstanceComponentCreate:
         d = src_dict.copy()
         component_uid = d.pop("component_uid")
 
-        host_id = d.pop("host_id", UNSET)
+        def _parse_host_id(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
 
-        hostname = d.pop("hostname", UNSET)
+        host_id = _parse_host_id(d.pop("host_id", UNSET))
 
-        vcpu = d.pop("vcpu", UNSET)
+        def _parse_hostname(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
 
-        vmem = d.pop("vmem", UNSET)
+        hostname = _parse_hostname(d.pop("hostname", UNSET))
+
+        def _parse_vcpu(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        vcpu = _parse_vcpu(d.pop("vcpu", UNSET))
+
+        def _parse_vmem(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        vmem = _parse_vmem(d.pop("vmem", UNSET))
 
         instance_component_create = cls(
             component_uid=component_uid,

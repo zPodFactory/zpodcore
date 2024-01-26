@@ -1,17 +1,17 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="SettingCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class SettingCreate:
     """
     Attributes:
-        description (str):  Example: default domain for every instances (zpodfactory.io).
-        name (str):  Example: default.
-        value (str):  Example: zpodfactory.io.
+        description (str):
+        name (str):
+        value (str):
     """
 
     description: str
@@ -20,7 +20,9 @@ class SettingCreate:
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
+
         name = self.name
+
         value = self.value
 
         field_dict: Dict[str, Any] = {}

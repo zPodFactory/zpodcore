@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_update import UserUpdate
 from ...models.user_update_admin import UserUpdateAdmin
@@ -13,37 +13,35 @@ from ...types import Response
 
 
 class UsersUpdate:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
         *,
-        json_body: Union["UserUpdate", "UserUpdateAdmin"],
+        body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Dict[str, Any]:
-        url = "{}/users/{id}".format(self.client.base_url, id=id)
+        headers: Dict[str, Any] = {}
 
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        json_json_body: Dict[str, Any]
-
-        if isinstance(json_body, UserUpdateAdmin):
-            json_json_body = json_body.to_dict()
-
-        else:
-            json_json_body = json_body.to_dict()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "patch",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
-            "json": json_json_body,
+            "url": "/users/{id}".format(
+                id=id,
+            ),
         }
+
+        _body: Dict[str, Any]
+        if isinstance(body, UserUpdateAdmin):
+            _body = body.to_dict()
+        else:
+            _body = body.to_dict()
+
+        _kwargs["json"] = _body
+        headers["Content-Type"] = "application/json"
+
+        _kwargs["headers"] = headers
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -52,7 +50,6 @@ class UsersUpdate:
             response_201 = UserViewFull.from_dict(response.json())
 
             return response_201
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -60,7 +57,6 @@ class UsersUpdate:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -80,13 +76,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: Union["UserUpdate", "UserUpdateAdmin"],
+        body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
+            body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -98,11 +94,10 @@ class UsersUpdate:
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
+            body=body,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -112,13 +107,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: Union["UserUpdate", "UserUpdateAdmin"],
+        body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
+            body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -130,20 +125,20 @@ class UsersUpdate:
 
         return self.sync_detailed(
             id=id,
-            json_body=json_body,
+            body=body,
         ).parsed
 
     async def asyncio_detailed(
         self,
         id: str,
         *,
-        json_body: Union["UserUpdate", "UserUpdateAdmin"],
+        body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Response[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
+            body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -155,11 +150,10 @@ class UsersUpdate:
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
+            body=body,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 
@@ -167,13 +161,13 @@ class UsersUpdate:
         self,
         id: str,
         *,
-        json_body: Union["UserUpdate", "UserUpdateAdmin"],
+        body: Union["UserUpdate", "UserUpdateAdmin"],
     ) -> Optional[Union[HTTPValidationError, UserViewFull]]:
         """Update
 
         Args:
             id (str):
-            json_body (Union['UserUpdate', 'UserUpdateAdmin']):
+            body (Union['UserUpdate', 'UserUpdateAdmin']):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -186,6 +180,6 @@ class UsersUpdate:
         return (
             await self.asyncio_detailed(
                 id=id,
-                json_body=json_body,
+                body=body,
             )
         ).parsed
