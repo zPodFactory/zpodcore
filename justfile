@@ -87,6 +87,21 @@ zpodengine-cmd *args:
   @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" poetry -C zpodengine run "$@"
 
 
+zpodengine-run *args="bash":
+  @docker run \
+    --volume {{justfile_directory()}}/zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon \
+    --volume {{justfile_directory()}}/zpodengine/src/zpodengine:/zpodcore/src/zpodengine \
+    --volume {{justfile_directory()}}/zpodengine/scripts:/zpodengine/scripts \
+    --volume {{justfile_directory()}}/.env:/zpodcore/.env \
+    --volume $ZPODCORE_DNSMASQ_SERVERS_PATH:/zpod/dnsmasq_servers \
+    --volume $ZPODCORE_LIBRARY_PATH:/library \
+    --volume $ZPODCORE_PRODUCTS_PATH:/products \
+    --volume $ZPODCORE_RESULTS_PATH:/results \
+    --network "${COMPOSE_PROJECT_NAME:-zpodcore}_default" \
+    --env PREFECT_API_URL="http://zpodengineserver:4200/api" \
+    --env PREFECT_LOCAL_STORAGE_PATH="/results" \
+    --rm -it ${COMPOSE_PROJECT_NAME:-zpodcore}-zpodengine:v1 bash
+
 # Manually Run Prefect Command
 zpodengine-prefect *args:
   just zpodengine-cmd prefect "$@"
