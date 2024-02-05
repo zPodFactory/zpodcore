@@ -1,6 +1,7 @@
 import typer
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
@@ -58,7 +59,10 @@ def generate_table(components: list, component_uid: str = None, action: str = No
 @app.command(name="list")
 @unexpected_status_handler
 def component_list(
-    available: bool = typer.Option(False, "-a", help="Show all library components")
+    available: Annotated[
+        bool,
+        typer.Option("-a", help="Show all library components"),
+    ] = False,
 ):
     """
     List components
@@ -80,7 +84,12 @@ def component_list(
 
 @app.command(name="enable", no_args_is_help=True)
 @unexpected_status_handler
-def component_enable(component_uid: str = typer.Option(..., "--uid")):
+def component_enable(
+    component_uid: Annotated[
+        str,
+        typer.Option("--uid"),
+    ],
+):
     """
     Enable a component
     """
@@ -92,7 +101,12 @@ def component_enable(component_uid: str = typer.Option(..., "--uid")):
 
 @app.command(name="get", no_args_is_help=True)
 @unexpected_status_handler
-def component_get(component_uid: str = typer.Option(..., "--uid")):
+def component_get(
+    component_uid: Annotated[
+        str,
+        typer.Option("--uid"),
+    ],
+):
     """
     Get specific component information
     """
@@ -105,7 +119,12 @@ def component_get(component_uid: str = typer.Option(..., "--uid")):
 
 @app.command(name="disable", no_args_is_help=True)
 @unexpected_status_handler
-def component_disable(component_uid: str = typer.Option(..., "--uid")):
+def component_disable(
+    component_uid: Annotated[
+        str,
+        typer.Option("--uid"),
+    ],
+):
     """
     Disable specific component
     """

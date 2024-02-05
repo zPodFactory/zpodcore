@@ -2,6 +2,7 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.endpoint_enet_create import EndpointENetCreate
 from zpod.models.endpoint_view_full import EndpointViewFull
 
@@ -30,7 +31,10 @@ def generate_table(enets: list, action: str = None):
 @app.command(name="list", no_args_is_help=True)
 @unexpected_status_handler
 def enet_list(
-    endpoint: str = typer.Option(..., "--endpoint", "-e"),
+    endpoint: Annotated[
+        str,
+        typer.Option("--endpoint", "-e"),
+    ],
 ):
     """
     List ENets
@@ -45,8 +49,14 @@ def enet_list(
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def enet_create(
-    endpoint: str = typer.Option(..., "--endpoint", "-e"),
-    name: str = typer.Option(..., "--name", "-n"),
+    endpoint: Annotated[
+        str,
+        typer.Option("--endpoint", "-e"),
+    ],
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Create ENet
@@ -61,8 +71,14 @@ def enet_create(
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def enet_delete(
-    endpoint: str = typer.Option(..., "--endpoint", "-e"),
-    name: str = typer.Option(..., "--name", "-n"),
+    endpoint: Annotated[
+        str,
+        typer.Option("--endpoint", "-e"),
+    ],
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Delete ENet

@@ -1,7 +1,10 @@
+from typing import Optional
+
 import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.setting_update import SettingUpdate
 
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
@@ -44,9 +47,18 @@ def setting_list():
 @app.command(no_args_is_help=True)
 @unexpected_status_handler
 def update(
-    name: str = typer.Option(..., "--name", "-n"),
-    description: str | None = typer.Option(None, "--description", "-d"),
-    value: str = typer.Option(..., "--value", "-v"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    value: Annotated[
+        str,
+        typer.Option("--value", "-v"),
+    ],
+    description: Annotated[
+        Optional[str],
+        typer.Option("--description", "-d"),
+    ] = None,
 ):
     """
     Update Setting

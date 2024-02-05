@@ -1,6 +1,9 @@
+from typing import Optional
+
 import typer
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.library_create import LibraryCreate
 from zpod.models.library_update import LibraryUpdate
 
@@ -56,9 +59,17 @@ def library_list():
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def library_create(
-    name: str = typer.Option(..., "--name", "-n"),
-    git_url: str = typer.Option(ZPOD_LIBRARY_GIT_URL, "--git_url", "-u"),
-    description: str = typer.Option(ZPOD_LIBRARY_DESCRIPTION, "--description", "-d"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    git_url: Annotated[
+        str,
+        typer.Option("--git_url", "-u"),
+    ] = ZPOD_LIBRARY_GIT_URL,
+    description: Annotated[
+        str, typer.Option("--description", "-d")
+    ] = ZPOD_LIBRARY_DESCRIPTION,
 ):
     """
     Create Library
@@ -72,7 +83,10 @@ def library_create(
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def library_delete(
-    name: str = typer.Option(..., "--name", "-n"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Delete Library
@@ -88,9 +102,19 @@ def library_delete(
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def library_update(
-    enabled: bool | None = typer.Option(None, "--enable/--disable"),
-    name: str = typer.Option(..., "--name", "-n"),
-    description: str = typer.Option(ZPOD_LIBRARY_DESCRIPTION, "--description", "-d"),
+    *,
+    enabled: Annotated[
+        Optional[bool],
+        typer.Option("--enable/--disable"),
+    ] = None,
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    description: Annotated[
+        str,
+        typer.Option("--description", "-d"),
+    ] = ZPOD_LIBRARY_DESCRIPTION,
 ):
     """
     Update Library Metadata (Description and Enabled/Disabled)
@@ -112,7 +136,12 @@ def library_update(
 
 @app.command(name="get", no_args_is_help=True)
 @unexpected_status_handler
-def library_get(name: str = typer.Option(..., "--name", "-n")):
+def library_get(
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+):
     """
     Get Library
     """
@@ -123,7 +152,12 @@ def library_get(name: str = typer.Option(..., "--name", "-n")):
 
 @app.command(name="resync", no_args_is_help=True)
 @unexpected_status_handler
-def library_resync(name: str = typer.Option(..., "--name", "-n")):
+def library_resync(
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+):
     """
     Resync Libraries (Will refresh *ALL* library components json/metadata)
     """

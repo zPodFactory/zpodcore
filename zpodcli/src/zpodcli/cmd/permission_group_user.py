@@ -1,5 +1,6 @@
 import typer
 from rich import print
+from typing_extensions import Annotated
 from zpod.models.permission_group_user_add import PermissionGroupUserAdd
 
 from zpodcli.lib.utils import exit_with_error
@@ -11,12 +12,14 @@ app = typer.Typer(help="Manage Permission Group Users")
 @app.command(name="add", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_user_add(
-    name: str = typer.Option(..., "--name", "-n"),
-    username: str = typer.Option(
-        ...,
-        "-u",
-        help="username to add",
-    ),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    username: Annotated[
+        str,
+        typer.Option("-u", help="username to add"),
+    ],
 ):
     """
     Add User to Permission Group
@@ -36,12 +39,14 @@ def permission_group_user_add(
 @app.command(name="remove", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_user_remove(
-    name: str = typer.Option(..., "--name", "-n"),
-    username: str = typer.Option(
-        ...,
-        "-u",
-        help="username to remove",
-    ),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    username: Annotated[
+        str,
+        typer.Option("-u", help="username to remove"),
+    ],
 ):
     """
     Remove User from Permission Group
