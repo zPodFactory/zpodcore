@@ -1,10 +1,12 @@
 import json
 from pathlib import Path
+from typing import Optional
 
 import typer
 import yaml
 from rich import print
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.profile_create import ProfileCreate
 from zpod.models.profile_item_create import ProfileItemCreate
 from zpod.models.profile_item_update import ProfileItemUpdate
@@ -69,8 +71,14 @@ def profile_list():
 @app.command(name="info", no_args_is_help=True)
 @unexpected_status_handler
 def profile_info(
-    name: str = typer.Option(..., "--name", "-n"),
-    json_: bool = typer.Option(False, "--json", "-j", is_flag=True),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    json_: Annotated[
+        bool,
+        typer.Option("--json", "-j", is_flag=True),
+    ] = False,
 ):
     """
     Profile Info
@@ -87,9 +95,18 @@ def profile_info(
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def profile_create(
-    name: str = typer.Option(..., "--name", "-n"),
-    profile: str = typer.Option(None, "--profile", "-p"),
-    profile_file: Path = typer.Option(None, "--profile_file", "-pf"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    profile: Annotated[
+        Optional[str],
+        typer.Option("--profile", "-p"),
+    ] = None,
+    profile_file: Annotated[
+        Optional[Path],
+        typer.Option("--profile_file", "-pf"),
+    ] = None,
 ):
     """
     Profile Create
@@ -119,10 +136,22 @@ def profile_create(
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def profile_update(
-    name: str = typer.Option(..., "--name", "-n"),
-    newname: str = typer.Option(None, "--newname"),
-    profile: str = typer.Option(None, "--profile", "-p"),
-    profile_file: Path = typer.Option(None, "--profile_file", "-pf"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    newname: Annotated[
+        Optional[str],
+        typer.Option("--newname"),
+    ] = None,
+    profile: Annotated[
+        Optional[str],
+        typer.Option("--profile", "-p"),
+    ] = None,
+    profile_file: Annotated[
+        Optional[Path],
+        typer.Option("--profile_file", "-pf"),
+    ] = None,
 ):
     """
     Profile Update
@@ -153,7 +182,10 @@ def profile_update(
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def profile_delete(
-    name: str = typer.Option(..., "--name", "-n"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Profile Delete

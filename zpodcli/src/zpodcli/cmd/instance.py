@@ -4,6 +4,7 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.endpoint_view_full import EndpointViewFull
 from zpod.models.instance_create import InstanceCreate
 from zpod.models.instance_permission import InstancePermission
@@ -105,7 +106,10 @@ def instance_list():
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def instance_delete(
-    names: List[str] = typer.Option(..., "--name", "-n"),
+    names: Annotated[
+        List[str],
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Delete a zPod
@@ -122,12 +126,31 @@ def instance_delete(
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def instance_create(
-    name: str = typer.Option(..., "--name", "-n"),
-    description: str = typer.Option("", "--description"),
-    domain: str = typer.Option("", "--domain"),
-    endpoint: str = typer.Option(..., "--endpoint", "-e"),
-    profile: str = typer.Option(..., "--profile", "-p"),
-    enet_name: str = typer.Option(None, "--enet"),
+    *,
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    description: Annotated[
+        str,
+        typer.Option("--description"),
+    ] = "",
+    domain: Annotated[
+        str,
+        typer.Option("--domain"),
+    ] = "",
+    endpoint: Annotated[
+        str,
+        typer.Option("--endpoint", "-e"),
+    ],
+    profile: Annotated[
+        str,
+        typer.Option("--profile", "-p"),
+    ],
+    enet_name: Annotated[
+        str,
+        typer.Option("--enet"),
+    ] = None,
 ):
     """
     Create a zPod

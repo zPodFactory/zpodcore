@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.endpoint_permission_group_add_remove import (
     EndpointPermissionGroupAddRemove,
 )
@@ -63,7 +64,10 @@ def generate_table(
 @app.command(name="list", no_args_is_help=True)
 @unexpected_status_handler
 def endpoint_permission_list(
-    endpoint_name: str = typer.Option(..., "-e", help="endpoint name"),
+    endpoint_name: Annotated[
+        str,
+        typer.Option("-e", help="endpoint name"),
+    ],
 ):
     """
     List endpoint permission
@@ -78,21 +82,18 @@ def endpoint_permission_list(
 @unexpected_status_handler
 def endpoint_permission_add(
     *,
-    endpoint_name: str = typer.Option(
-        ...,
-        "-e",
-        help="endpoint name",
-    ),
-    username: str = typer.Option(
-        None,
-        "-u",
-        help="username to add",
-    ),
-    groupname: str = typer.Option(
-        None,
-        "-g",
-        help="group to add",
-    ),
+    endpoint_name: Annotated[
+        str,
+        typer.Option("-e", help="endpoint name"),
+    ],
+    username: Annotated[
+        Optional[str],
+        typer.Option("-u", help="username to add"),
+    ] = None,
+    groupname: Annotated[
+        Optional[str],
+        typer.Option("-g", help="group to add"),
+    ] = None,
 ):
     """
     Add permission to endpoint
@@ -125,21 +126,18 @@ def endpoint_permission_add(
 @unexpected_status_handler
 def endpoint_permission_remove(
     *,
-    endpoint_name: str = typer.Option(
-        ...,
-        "-e",
-        help="endpoint name",
-    ),
-    username: str = typer.Option(
-        None,
-        "-u",
-        help="username to remove",
-    ),
-    groupname: str = typer.Option(
-        None,
-        "-g",
-        help="group to remove",
-    ),
+    endpoint_name: Annotated[
+        str,
+        typer.Option("-e", help="endpoint name"),
+    ],
+    username: Annotated[
+        Optional[str],
+        typer.Option("-u", help="username to remove"),
+    ] = None,
+    groupname: Annotated[
+        Optional[str],
+        typer.Option("-g", help="group to remove"),
+    ] = None,
 ):
     """
     Remove permission from endpoint
