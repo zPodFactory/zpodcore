@@ -1,3 +1,5 @@
+from pydantic import ConfigDict
+
 from zpodapi.lib.schema_base import Field, SchemaBase
 
 
@@ -35,8 +37,7 @@ class D:
 
 
 class EndpointComputeView(SchemaBase):
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
     name: str = Field(..., D.compute.name)
     driver: str = Field(..., D.compute.driver)
@@ -51,8 +52,7 @@ class EndpointComputeView(SchemaBase):
 
 
 class EndpointNetworkView(SchemaBase):
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
     name: str = Field(..., D.network.name)
     driver: str = Field(..., D.network.driver)
@@ -71,7 +71,7 @@ class EndpointsView(SchemaBase):
 
 
 class EndpointView(SchemaBase):
-    id: str = Field(..., D.id)
+    id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
     enabled: bool = Field(..., D.enabled)
@@ -137,5 +137,5 @@ class EndpointsUpdate(SchemaBase):
 
 class EndpointUpdate(SchemaBase):
     description: str | None = Field(None, D.description)
-    endpoints: EndpointsUpdate = {}
+    endpoints: EndpointsUpdate
     enabled: bool | None = Field(None, D.enabled)

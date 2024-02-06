@@ -1,32 +1,36 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="ComponentView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ComponentView:
     """
     Attributes:
-        component_description (str):  Example: VMware Cloud Director Availabilty.
-        component_name (str):  Example: vcda.
-        component_uid (str):  Example: vcda-4.4.1.
-        component_version (str):  Example: 4.4.1.
-        id (str):  Example: 1.
+        component_description (str):
+        component_name (str):
+        component_uid (str):
+        component_version (str):
+        id (int):
     """
 
     component_description: str
     component_name: str
     component_uid: str
     component_version: str
-    id: str
+    id: int
 
     def to_dict(self) -> Dict[str, Any]:
         component_description = self.component_description
+
         component_name = self.component_name
+
         component_uid = self.component_uid
+
         component_version = self.component_version
+
         id = self.id
 
         field_dict: Dict[str, Any] = {}

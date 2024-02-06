@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.instance_update import InstanceUpdate
 from ...models.instance_view import InstanceView
@@ -12,31 +12,31 @@ from ...types import Response
 
 
 class InstancesUpdate:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
         *,
-        json_body: InstanceUpdate,
+        body: InstanceUpdate,
     ) -> Dict[str, Any]:
-        url = "{}/instances/{id}".format(self.client.base_url, id=id)
+        headers: Dict[str, Any] = {}
 
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        json_json_body = json_body.to_dict()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "patch",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
-            "json": json_json_body,
+            "url": "/instances/{id}".format(
+                id=id,
+            ),
         }
+
+        _body = body.to_dict()
+
+        _kwargs["json"] = _body
+        headers["Content-Type"] = "application/json"
+
+        _kwargs["headers"] = headers
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -45,7 +45,6 @@ class InstancesUpdate:
             response_201 = InstanceView.from_dict(response.json())
 
             return response_201
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -53,7 +52,6 @@ class InstancesUpdate:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -73,13 +71,13 @@ class InstancesUpdate:
         self,
         id: str,
         *,
-        json_body: InstanceUpdate,
+        body: InstanceUpdate,
     ) -> Response[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
             id (str):
-            json_body (InstanceUpdate):
+            body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -91,11 +89,10 @@ class InstancesUpdate:
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
+            body=body,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -105,13 +102,13 @@ class InstancesUpdate:
         self,
         id: str,
         *,
-        json_body: InstanceUpdate,
+        body: InstanceUpdate,
     ) -> Optional[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
             id (str):
-            json_body (InstanceUpdate):
+            body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -123,20 +120,20 @@ class InstancesUpdate:
 
         return self.sync_detailed(
             id=id,
-            json_body=json_body,
+            body=body,
         ).parsed
 
     async def asyncio_detailed(
         self,
         id: str,
         *,
-        json_body: InstanceUpdate,
+        body: InstanceUpdate,
     ) -> Response[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
             id (str):
-            json_body (InstanceUpdate):
+            body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -148,11 +145,10 @@ class InstancesUpdate:
 
         kwargs = self._get_kwargs(
             id=id,
-            json_body=json_body,
+            body=body,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 
@@ -160,13 +156,13 @@ class InstancesUpdate:
         self,
         id: str,
         *,
-        json_body: InstanceUpdate,
+        body: InstanceUpdate,
     ) -> Optional[Union[HTTPValidationError, InstanceView]]:
         """Update
 
         Args:
             id (str):
-            json_body (InstanceUpdate):
+            body (InstanceUpdate):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -179,6 +175,6 @@ class InstancesUpdate:
         return (
             await self.asyncio_detailed(
                 id=id,
-                json_body=json_body,
+                body=body,
             )
         ).parsed

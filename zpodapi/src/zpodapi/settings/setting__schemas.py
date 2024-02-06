@@ -1,4 +1,5 @@
-from pydantic import constr
+from pydantic import StringConstraints
+from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 
@@ -11,7 +12,9 @@ class D:
 
 
 class SettingCreate(SchemaBase):
-    name: constr(to_lower=True) = Field(..., example="default")
+    name: Annotated[str, StringConstraints(to_lower=True)] = Field(
+        ..., example="default"
+    )
     description: str = Field(..., D.description)
     value: str = Field(..., D.value)
 
@@ -22,7 +25,7 @@ class SettingUpdate(SchemaBase):
 
 
 class SettingView(SchemaBase):
-    id: str = Field(..., D.id)
+    id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
     value: str = Field(..., D.value)

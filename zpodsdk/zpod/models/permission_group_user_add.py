@@ -1,11 +1,11 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="PermissionGroupUserAdd")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class PermissionGroupUserAdd:
     """
     Attributes:

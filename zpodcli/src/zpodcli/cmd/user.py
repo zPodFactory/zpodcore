@@ -1,6 +1,7 @@
 import typer
 from rich import print
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.user_create import UserCreate
 from zpod.models.user_update_admin import UserUpdateAdmin
 
@@ -51,11 +52,10 @@ def generate_table(users, all=False):
 @app.command(name="list")
 @unexpected_status_handler
 def user_list(
-    all: bool = typer.Option(
-        False,
-        "--all",
-        help="Show all Users",
-    ),
+    all: Annotated[
+        bool,
+        typer.Option("--all", help="Show all Users"),
+    ] = False,
 ):
     """
     List users
@@ -68,42 +68,33 @@ def user_list(
 @app.command(name="add", no_args_is_help=True)
 @unexpected_status_handler
 def user_add(
-    username: str = typer.Option(
-        ...,
-        "--username",
-        "-u",
-        help="Username",
-    ),
-    email: str = typer.Option(
-        ...,
-        "--email",
-        "-e",
-        help="Email",
-    ),
-    description: str = typer.Option(
-        "",
-        "--description",
-        "-d",
-        help="Description",
-    ),
-    ssh_key: str = typer.Option(
-        "",
-        "--ssh_key",
-        "-s",
-        help="SSH Key",
-    ),
-    superadmin: bool = typer.Option(
-        False,
-        "--superadmin",
-        help="Superadmin",
-    ),
+    username: Annotated[
+        str,
+        typer.Option("--username", "-u", help="Username"),
+    ],
+    email: Annotated[
+        str,
+        typer.Option("--email", "-e", help="Email"),
+    ],
+    description: Annotated[
+        str,
+        typer.Option("--description", "-d", help="Description"),
+    ] = "",
+    ssh_key: Annotated[
+        str,
+        typer.Option("--ssh_key", "-s", help="SSH Key"),
+    ] = "",
+    superadmin: Annotated[
+        bool,
+        typer.Option("--superadmin", help="Superadmin"),
+    ] = False,
 ):
     """
     Add user
     """
     z: ZpodClient = ZpodClient()
     result = z.users_create.sync(
-        json_body=UserCreate(
+        body=UserCreate(
             username=username,
             email=email,
             description=description,
@@ -121,29 +112,22 @@ def user_add(
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def user_update(
-    username: str = typer.Option(
-        ...,
-        "--username",
-        "-u",
-        help="Username",
-    ),
-    description: str = typer.Option(
-        "",
-        "--description",
-        "-d",
-        help="Description",
-    ),
-    ssh_key: str = typer.Option(
-        "",
-        "--ssh_key",
-        "-s",
-        help="SSH Key",
-    ),
-    superadmin: bool = typer.Option(
-        False,
-        "--superadmin",
-        help="Superadmin",
-    ),
+    username: Annotated[
+        str,
+        typer.Option("--username", "-u", help="Username"),
+    ],
+    description: Annotated[
+        str,
+        typer.Option("--description", "-d", help="Description"),
+    ] = "",
+    ssh_key: Annotated[
+        str,
+        typer.Option("--ssh_key", "-s", help="SSH Key"),
+    ] = "",
+    superadmin: Annotated[
+        bool,
+        typer.Option("--superadmin", help="Superadmin"),
+    ] = False,
 ):
     """
     Update user
@@ -151,7 +135,7 @@ def user_update(
     z: ZpodClient = ZpodClient()
     z.users_update.sync(
         id=f"username={username}",
-        json_body=UserUpdateAdmin(
+        body=UserUpdateAdmin(
             description=description,
             ssh_key=ssh_key,
             superadmin=superadmin,
@@ -163,12 +147,10 @@ def user_update(
 @app.command(name="enable", no_args_is_help=True)
 @unexpected_status_handler
 def user_enable(
-    username: str = typer.Option(
-        ...,
-        "--username",
-        "-u",
-        help="Username",
-    ),
+    username: Annotated[
+        str,
+        typer.Option("--username", "-u", help="Username"),
+    ],
 ):
     """
     Enable user
@@ -181,12 +163,10 @@ def user_enable(
 @app.command(name="disable", no_args_is_help=True)
 @unexpected_status_handler
 def user_disable(
-    username: str = typer.Option(
-        ...,
-        "--username",
-        "-u",
-        help="Username",
-    ),
+    username: Annotated[
+        str,
+        typer.Option("--username", "-u", help="Username"),
+    ],
 ):
     """
     Disable user
@@ -199,12 +179,10 @@ def user_disable(
 @app.command(name="reset_api_token", no_args_is_help=True)
 @unexpected_status_handler
 def user_reset_api_token(
-    username: str = typer.Option(
-        ...,
-        "--username",
-        "-u",
-        help="Username",
-    ),
+    username: Annotated[
+        str,
+        typer.Option("--username", "-u", help="Username"),
+    ],
 ):
     """
     Reset user api_token

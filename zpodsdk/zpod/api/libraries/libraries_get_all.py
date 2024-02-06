@@ -4,32 +4,25 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.library_view import LibraryView
 from ...types import Response
 
 
 class LibrariesGetAll:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
     ) -> Dict[str, Any]:
-        url = "{}/libraries".format(self.client.base_url)
-
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
+            "url": "/libraries",
         }
+
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -43,7 +36,6 @@ class LibrariesGetAll:
                 response_200.append(response_200_item)
 
             return response_200
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -51,7 +43,6 @@ class LibrariesGetAll:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -82,8 +73,7 @@ class LibrariesGetAll:
 
         kwargs = self._get_kwargs()
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -119,8 +109,7 @@ class LibrariesGetAll:
 
         kwargs = self._get_kwargs()
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 

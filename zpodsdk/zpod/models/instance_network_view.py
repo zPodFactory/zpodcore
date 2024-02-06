@@ -1,16 +1,16 @@
 from typing import Any, Dict, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
 
 T = TypeVar("T", bound="InstanceNetworkView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstanceNetworkView:
     """
     Attributes:
-        cidr (str):  Example: 192.168.0.0/24.
-        id (int):  Example: 1.
+        cidr (str):
+        id (int):
     """
 
     cidr: str
@@ -18,6 +18,7 @@ class InstanceNetworkView:
 
     def to_dict(self) -> Dict[str, Any]:
         cidr = self.cidr
+
         id = self.id
 
         field_dict: Dict[str, Any] = {}

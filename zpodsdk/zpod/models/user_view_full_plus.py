@@ -1,7 +1,14 @@
 import datetime
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import (
+    Any,
+    Dict,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
-import attr
+from attrs import define as _attrs_define
 from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
@@ -9,19 +16,19 @@ from ..types import UNSET, Unset
 T = TypeVar("T", bound="UserViewFullPlus")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class UserViewFullPlus:
     """
     Attributes:
-        api_token (str):  Example: BNcsTebGHbIdJjlZ0A2xS0qpSskahVRHO6z61qnRPNw.
-        creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        description (str):  Example: Sample User.
-        email (str):  Example: jdoe@example.com.
-        id (int):  Example: 1.
-        status (str):  Example: ENABLED.
+        api_token (str):
+        creation_date (datetime.datetime):
+        description (str):
+        email (str):
+        id (int):
+        status (str):
         superadmin (bool):
-        username (str):  Example: jdoe.
-        last_connection_date (Union[Unset, None, datetime.datetime]):  Example: 2023-01-01T00:01:00.
+        username (str):
+        last_connection_date (Union[None, Unset, datetime.datetime]):  Example: 2023-01-01T00:01:00.
     """
 
     api_token: str
@@ -32,25 +39,32 @@ class UserViewFullPlus:
     status: str
     superadmin: bool
     username: str
-    last_connection_date: Union[Unset, None, datetime.datetime] = UNSET
+    last_connection_date: Union[None, Unset, datetime.datetime] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         api_token = self.api_token
+
         creation_date = self.creation_date.isoformat()
 
         description = self.description
+
         email = self.email
+
         id = self.id
+
         status = self.status
+
         superadmin = self.superadmin
+
         username = self.username
-        last_connection_date: Union[Unset, None, str] = UNSET
-        if not isinstance(self.last_connection_date, Unset):
-            last_connection_date = (
-                self.last_connection_date.isoformat()
-                if self.last_connection_date
-                else None
-            )
+
+        last_connection_date: Union[None, Unset, str]
+        if isinstance(self.last_connection_date, Unset):
+            last_connection_date = UNSET
+        elif isinstance(self.last_connection_date, datetime.datetime):
+            last_connection_date = self.last_connection_date.isoformat()
+        else:
+            last_connection_date = self.last_connection_date
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -89,14 +103,26 @@ class UserViewFullPlus:
 
         username = d.pop("username")
 
-        _last_connection_date = d.pop("last_connection_date", UNSET)
-        last_connection_date: Union[Unset, None, datetime.datetime]
-        if _last_connection_date is None:
-            last_connection_date = None
-        elif isinstance(_last_connection_date, Unset):
-            last_connection_date = UNSET
-        else:
-            last_connection_date = isoparse(_last_connection_date)
+        def _parse_last_connection_date(
+            data: object,
+        ) -> Union[None, Unset, datetime.datetime]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                last_connection_date_type_0 = isoparse(data)
+
+                return last_connection_date_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[None, Unset, datetime.datetime], data)
+
+        last_connection_date = _parse_last_connection_date(
+            d.pop("last_connection_date", UNSET)
+        )
 
         user_view_full_plus = cls(
             api_token=api_token,

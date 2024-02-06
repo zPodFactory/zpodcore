@@ -1,11 +1,11 @@
-ARG POETRY_VERSION=1.3.2
 ARG POETRY_VENV=/opt/venv
+ARG POETRY_VERSION=1.7.1
 
 
 
 ######################################
 # BASE
-FROM python:3.11.2-slim as base
+FROM python:3.12.1-slim-bookworm as base
 
 ARG POETRY_VENV
 

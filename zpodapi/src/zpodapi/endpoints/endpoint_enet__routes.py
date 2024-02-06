@@ -46,7 +46,7 @@ def enet_create(
     enet_service: EndpointENetAnnotations.EndpointENetService,
     enet_in: EndpointENetCreate,
 ):
-    enet_service.create(endpoint=endpoint, name=enet_in.name.lower())
+    enet_service.create(endpoint=endpoint, name=enet_in.name)
 
 
 @router.delete(

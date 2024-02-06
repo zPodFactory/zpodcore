@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from pydantic import constr
+from pydantic import StringConstraints
+from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon import enums
@@ -29,12 +30,12 @@ class D:
 
 
 class InstanceCreate(SchemaBase):
-    name: constr(to_lower=True) = Field(..., D.name)
+    name: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.name)
     description: str = Field("", D.description)
     domain: str = Field("", D.domain)
     endpoint_id: int = Field(..., D.endpoint_id)
     profile: str = Field(..., D.profile)
-    enet_name: str = Field(None, D.enet_name)
+    enet_name: str | None = Field(None, D.enet_name)
 
 
 class InstanceUpdate(SchemaBase):

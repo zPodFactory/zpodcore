@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
 
-from pydantic import EmailStr, constr, validate_email
+from pydantic import EmailStr, StringConstraints, validate_email
 from pydantic import Field as PField
+from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon.enums import UserStatus
@@ -29,7 +29,7 @@ class D:
 
 
 class UserCreate(SchemaBase):
-    username: constr(to_lower=True) = Field(..., D.username)
+    username: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.username)
     email: EmailStrLower = Field(..., D.email)
     description: str = Field("", D.description)
     ssh_key: str = Field("", D.ssh_key)
@@ -66,7 +66,7 @@ class UserViewFull(UserView):
     # Had to use a Pydantic Field instead, because of
     # https://github.com/openapi-generators/openapi-python-client/issues/698 and because
     # sqlmodel intercepts the "nullable" argument
-    last_connection_date: Optional[datetime] = PField(
+    last_connection_date: datetime | None = PField(
         None,
         **D.last_connection_date,
         nullable=True,

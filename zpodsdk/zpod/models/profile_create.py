@@ -8,7 +8,7 @@ from typing import (
     Union,
 )
 
-import attr
+from attrs import define as _attrs_define
 
 if TYPE_CHECKING:
     from ..models.profile_item_create import ProfileItemCreate
@@ -17,11 +17,11 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="ProfileCreate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class ProfileCreate:
     """
     Attributes:
-        name (str):  Example: sddc.
+        name (str):
         profile (List[Union['ProfileItemCreate', List['ProfileItemCreate']]]):
     """
 
@@ -32,18 +32,16 @@ class ProfileCreate:
         from ..models.profile_item_create import ProfileItemCreate
 
         name = self.name
+
         profile = []
         for profile_item_data in self.profile:
             profile_item: Union[Dict[str, Any], List[Dict[str, Any]]]
-
             if isinstance(profile_item_data, ProfileItemCreate):
                 profile_item = profile_item_data.to_dict()
-
             else:
                 profile_item = []
                 for profile_item_type_1_item_data in profile_item_data:
                     profile_item_type_1_item = profile_item_type_1_item_data.to_dict()
-
                     profile_item.append(profile_item_type_1_item)
 
             profile.append(profile_item)

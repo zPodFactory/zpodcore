@@ -1,6 +1,7 @@
 import typer
 from rich import print
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.permission_group_create import PermissionGroupCreate
 from zpod.models.permission_group_update import PermissionGroupUpdate
 from zpod.models.permission_group_view import PermissionGroupView
@@ -46,7 +47,10 @@ def permission_group_list():
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_create(
-    name: str = typer.Option(..., "--name", "-n"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Create Permission Group
@@ -54,7 +58,7 @@ def permission_group_create(
 
     z: ZpodClient = ZpodClient()
     z.permission_groups_create.sync(
-        json_body=PermissionGroupCreate(
+        body=PermissionGroupCreate(
             name=name,
         )
     )
@@ -64,8 +68,14 @@ def permission_group_create(
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_update(
-    name: str = typer.Option(..., "--name", "-n"),
-    newname: str = typer.Option(..., "--newname"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    newname: Annotated[
+        str,
+        typer.Option("--newname"),
+    ],
 ):
     """
     Update Permission Group
@@ -77,7 +87,7 @@ def permission_group_update(
     z: ZpodClient = ZpodClient()
     z.permission_groups_update.sync(
         id=f"name={name}",
-        json_body=PermissionGroupUpdate(name=newname),
+        body=PermissionGroupUpdate(name=newname),
     )
     print(
         f"Permission Group [magenta]{name}[/magenta] has been "
@@ -88,7 +98,10 @@ def permission_group_update(
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_delete(
-    name: str = typer.Option(..., "--name", "-n"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
 ):
     """
     Delete Permission Group

@@ -1,24 +1,25 @@
 from typing import Any, Dict, List, Type, TypeVar
 
-import attr
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
 
 T = TypeVar("T", bound="EndpointComputeView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointComputeView:
     """
     Attributes:
-        contentlibrary (str):  Example: my-contentlibrary.
-        datacenter (str):  Example: my-datacenter.
-        driver (str):  Example: vc.
-        hostname (str):  Example: my-vcenter.com.
-        name (str):  Example: main.
-        resource_pool (str):  Example: my-cluster.
-        storage_datastore (str):  Example: my-datastore.
-        storage_policy (str):  Example: my-storage-policy.
-        username (str):  Example: my-username.
-        vmfolder (str):  Example: my-vmfolder.
+        contentlibrary (str):
+        datacenter (str):
+        driver (str):
+        hostname (str):
+        name (str):
+        resource_pool (str):
+        storage_datastore (str):
+        storage_policy (str):
+        username (str):
+        vmfolder (str):
     """
 
     contentlibrary: str
@@ -31,18 +32,27 @@ class EndpointComputeView:
     storage_policy: str
     username: str
     vmfolder: str
-    additional_properties: Dict[str, Any] = attr.ib(init=False, factory=dict)
+    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         contentlibrary = self.contentlibrary
+
         datacenter = self.datacenter
+
         driver = self.driver
+
         hostname = self.hostname
+
         name = self.name
+
         resource_pool = self.resource_pool
+
         storage_datastore = self.storage_datastore
+
         storage_policy = self.storage_policy
+
         username = self.username
+
         vmfolder = self.vmfolder
 
         field_dict: Dict[str, Any] = {}

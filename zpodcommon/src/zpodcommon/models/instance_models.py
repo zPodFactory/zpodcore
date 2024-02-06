@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 from sqlmodel import JSON, Column, Field, Relationship
 
-from zpodcommon import enums
 from zpodcommon.models.model_base import ModelBase
 
 from .mixins import CommonDatesMixin
@@ -135,8 +134,7 @@ class InstanceFeature(ModelBase, table=True):
     )
     data: Dict[Any, Any] | None = Field(
         default={},
-        index=False,
-        sa_column=Column(JSON),
+        sa_column=Column(JSON, index=False),
     )
 
     instance: "Instance" = Relationship(back_populates="features")
@@ -176,7 +174,7 @@ class InstancePermission(ModelBase, table=True):
         nullable=False,
         foreign_key="instances.id",
     )
-    permission: enums.InstancePermission = Field(
+    permission: str = Field(
         default=...,
         nullable=False,
     )
@@ -184,15 +182,15 @@ class InstancePermission(ModelBase, table=True):
     instance: "Instance" = Relationship(back_populates="permissions")
     users: List["User"] = Relationship(
         back_populates="instance_permissions",
-        sa_relationship_kwargs=dict(
-            secondary="instance_permission_user_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "instance_permission_user_link",
+        },
     )
     permission_groups: List["PermissionGroup"] = Relationship(
         back_populates="instance_permissions",
-        sa_relationship_kwargs=dict(
-            secondary="instance_permission_group_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "instance_permission_group_link",
+        },
     )
 
 

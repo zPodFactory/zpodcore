@@ -20,7 +20,7 @@ class D:
 
 
 class ComponentView(SchemaBase):
-    id: str = Field(..., D.id)
+    id: int = Field(..., D.id)
     component_uid: str = Field(..., D.component_uid)
     component_name: str = Field(..., D.component_name)
     component_version: str = Field(..., D.component_version)

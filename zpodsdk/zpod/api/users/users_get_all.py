@@ -4,40 +4,34 @@ from typing import Any, Dict, List, Optional, Union
 import httpx
 
 from ... import errors
-from ...client import Client
+from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
 from ...models.user_view_full import UserViewFull
 from ...types import UNSET, Response, Unset
 
 
 class UsersGetAll:
-    def __init__(self, client: Client) -> None:
+    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         *,
-        all_: Union[Unset, None, bool] = False,
+        all_: Union[Unset, bool] = False,
     ) -> Dict[str, Any]:
-        url = "{}/users".format(self.client.base_url)
-
-        headers: Dict[str, str] = self.client.get_headers()
-        cookies: Dict[str, Any] = self.client.get_cookies()
-
         params: Dict[str, Any] = {}
+
         params["all"] = all_
 
         params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-        return {
+        _kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": url,
-            "headers": headers,
-            "cookies": cookies,
-            "timeout": self.client.get_timeout(),
-            "follow_redirects": self.client.follow_redirects,
+            "url": "/users",
             "params": params,
         }
+
+        return _kwargs
 
     def _parse_response(
         self, *, response: httpx.Response
@@ -51,7 +45,6 @@ class UsersGetAll:
                 response_200.append(response_200_item)
 
             return response_200
-
         if (
             response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
             and not self.client.raise_on_unexpected_status
@@ -59,7 +52,6 @@ class UsersGetAll:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
-
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -78,12 +70,12 @@ class UsersGetAll:
     def sync_detailed(
         self,
         *,
-        all_: Union[Unset, None, bool] = False,
+        all_: Union[Unset, bool] = False,
     ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
         """Get All
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            all_ (Union[Unset, bool]):  Default: False.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -97,8 +89,7 @@ class UsersGetAll:
             all_=all_,
         )
 
-        response = httpx.request(
-            verify=self.client.verify_ssl,
+        response = self.client.get_httpx_client().request(
             **kwargs,
         )
 
@@ -107,12 +98,12 @@ class UsersGetAll:
     def sync(
         self,
         *,
-        all_: Union[Unset, None, bool] = False,
+        all_: Union[Unset, bool] = False,
     ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
         """Get All
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            all_ (Union[Unset, bool]):  Default: False.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -129,12 +120,12 @@ class UsersGetAll:
     async def asyncio_detailed(
         self,
         *,
-        all_: Union[Unset, None, bool] = False,
+        all_: Union[Unset, bool] = False,
     ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
         """Get All
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            all_ (Union[Unset, bool]):  Default: False.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -148,20 +139,19 @@ class UsersGetAll:
             all_=all_,
         )
 
-        async with httpx.AsyncClient(verify=self.client.verify_ssl) as _client:
-            response = await _client.request(**kwargs)
+        response = await self.client.get_async_httpx_client().request(**kwargs)
 
         return self._build_response(response=response)
 
     async def asyncio(
         self,
         *,
-        all_: Union[Unset, None, bool] = False,
+        all_: Union[Unset, bool] = False,
     ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
         """Get All
 
         Args:
-            all_ (Union[Unset, None, bool]):
+            all_ (Union[Unset, bool]):  Default: False.
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

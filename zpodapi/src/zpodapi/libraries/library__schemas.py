@@ -25,7 +25,7 @@ class LibraryUpdate(SchemaBase):
 
 
 class LibraryView(SchemaBase):
-    id: str = Field(..., D.id)
+    id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
     git_url: str = Field(..., D.git_url)

@@ -3,26 +3,26 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Path, status
 
 from zpodapi.lib.global_dependencies import service_init_annotation
+from zpodapi.lib.id_types import IdNameType
 from zpodcommon import models as M
 
 from .endpoint__services import EndpointService
-from .endpoint__types import EndpointIdType
 
 
 async def get_endpoint(
     *,
     endpoint_service: "EndpointAnnotations.EndpointService",
     id: Annotated[
-        EndpointIdType,
+        IdNameType,
         Path(
-            examples={
+            openapi_examples={
                 "id": {"value": "1"},
                 "name": {"value": "name=main"},
             },
         ),
     ],
 ):
-    if endpoint := endpoint_service.get(**EndpointIdType.args(id)):
+    if endpoint := endpoint_service.get(**id):
         return endpoint
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,

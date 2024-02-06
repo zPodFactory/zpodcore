@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union, cast
 
-import attr
+from attrs import define as _attrs_define
 
 from ..types import UNSET, Unset
 
@@ -11,34 +11,44 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="EndpointUpdate")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class EndpointUpdate:
     """
     Attributes:
-        description (Union[Unset, str]):  Example: current testing env.
-        enabled (Union[Unset, bool]):  Example: True.
-        endpoints (Union[Unset, EndpointsUpdate]):
+        endpoints (EndpointsUpdate):
+        description (Union[None, Unset, str]):
+        enabled (Union[None, Unset, bool]):
     """
 
-    description: Union[Unset, str] = UNSET
-    enabled: Union[Unset, bool] = UNSET
-    endpoints: Union[Unset, "EndpointsUpdate"] = UNSET
+    endpoints: "EndpointsUpdate"
+    description: Union[None, Unset, str] = UNSET
+    enabled: Union[None, Unset, bool] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        description = self.description
-        enabled = self.enabled
-        endpoints: Union[Unset, Dict[str, Any]] = UNSET
-        if not isinstance(self.endpoints, Unset):
-            endpoints = self.endpoints.to_dict()
+        endpoints = self.endpoints.to_dict()
+
+        description: Union[None, Unset, str]
+        if isinstance(self.description, Unset):
+            description = UNSET
+        else:
+            description = self.description
+
+        enabled: Union[None, Unset, bool]
+        if isinstance(self.enabled, Unset):
+            enabled = UNSET
+        else:
+            enabled = self.enabled
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update({})
+        field_dict.update(
+            {
+                "endpoints": endpoints,
+            }
+        )
         if description is not UNSET:
             field_dict["description"] = description
         if enabled is not UNSET:
             field_dict["enabled"] = enabled
-        if endpoints is not UNSET:
-            field_dict["endpoints"] = endpoints
 
         return field_dict
 
@@ -47,21 +57,30 @@ class EndpointUpdate:
         from ..models.endpoints_update import EndpointsUpdate
 
         d = src_dict.copy()
-        description = d.pop("description", UNSET)
+        endpoints = EndpointsUpdate.from_dict(d.pop("endpoints"))
 
-        enabled = d.pop("enabled", UNSET)
+        def _parse_description(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
 
-        _endpoints = d.pop("endpoints", UNSET)
-        endpoints: Union[Unset, EndpointsUpdate]
-        if isinstance(_endpoints, Unset):
-            endpoints = UNSET
-        else:
-            endpoints = EndpointsUpdate.from_dict(_endpoints)
+        description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_enabled(data: object) -> Union[None, Unset, bool]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, bool], data)
+
+        enabled = _parse_enabled(d.pop("enabled", UNSET))
 
         endpoint_update = cls(
+            endpoints=endpoints,
             description=description,
             enabled=enabled,
-            endpoints=endpoints,
         )
 
         return endpoint_update

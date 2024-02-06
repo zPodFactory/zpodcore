@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-import attr
+from attrs import define as _attrs_define
 
 from ..models.instance_permission import InstancePermission
 from ..types import UNSET, Unset
@@ -13,12 +13,12 @@ if TYPE_CHECKING:
 T = TypeVar("T", bound="InstancePermissionView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class InstancePermissionView:
     """
     Attributes:
-        id (int):  Example: 1.
-        permission (InstancePermission): An enumeration.
+        id (int):
+        permission (InstancePermission):
         permission_groups (Union[Unset, List['PermissionGroupView']]):
         users (Union[Unset, List['UserView']]):
     """
@@ -30,6 +30,7 @@ class InstancePermissionView:
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
+
         permission = self.permission.value
 
         permission_groups: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -37,7 +38,6 @@ class InstancePermissionView:
             permission_groups = []
             for permission_groups_item_data in self.permission_groups:
                 permission_groups_item = permission_groups_item_data.to_dict()
-
                 permission_groups.append(permission_groups_item)
 
         users: Union[Unset, List[Dict[str, Any]]] = UNSET
@@ -45,7 +45,6 @@ class InstancePermissionView:
             users = []
             for users_item_data in self.users:
                 users_item = users_item_data.to_dict()
-
                 users.append(users_item)
 
         field_dict: Dict[str, Any] = {}

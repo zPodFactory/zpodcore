@@ -4,6 +4,7 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.setting_update import SettingUpdate
 
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
@@ -13,11 +14,9 @@ app = typer.Typer(help="Manage Settings")
 console = Console()
 
 
-def generate_table(settings: list, action: str = None):
-    title = f"{action} Library"
-
+def generate_table(settings: list):
     table = Table(
-        title=title,
+        title="Settings",
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -40,19 +39,26 @@ def setting_list():
     """
     List Settings
     """
-    print("Listing Settings")
-
     z: ZpodClient = ZpodClient()
     settings = z.settings_get_all.sync()
-    generate_table(settings=settings, action="List")
+    generate_table(settings=settings)
 
 
 @app.command(no_args_is_help=True)
 @unexpected_status_handler
 def update(
-    name: str = typer.Option(..., "--name", "-n"),
-    description: Optional[str] = typer.Option(None, "--description", "-d"),
-    value: str = typer.Option(..., "--value", "-v"),
+    name: Annotated[
+        str,
+        typer.Option("--name", "-n"),
+    ],
+    value: Annotated[
+        str,
+        typer.Option("--value", "-v"),
+    ],
+    description: Annotated[
+        Optional[str],
+        typer.Option("--description", "-d"),
+    ] = None,
 ):
     """
     Update Setting
@@ -64,7 +70,7 @@ def update(
     else:
         setting = SettingUpdate(description=description, value=value)
 
-    z.settings_update.sync(json_body=setting, id=f"name={name}")
+    z.settings_update.sync(body=setting, id=f"name={name}")
     console.print(
         f"Setting [magenta]{name}[/magenta] has been modified to "
         f"[yellow]{value}[/yellow]."

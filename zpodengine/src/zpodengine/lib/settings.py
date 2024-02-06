@@ -1,16 +1,18 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseSettings, Field, PostgresDsn
+from pydantic import Field, PostgresDsn
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _Debug = Literal["debug"]
 
 
 class Settings(BaseSettings):
-    class Config:
-        env_prefix = "ZPODENGINE_"
-        env_file = Path(__file__).parents[3] / ".env"
-        frozen = True
+    model_config = SettingsConfigDict(
+        env_prefix="ZPODENGINE_",
+        env_file=Path(__file__).parents[3] / ".env",
+        frozen=True,
+    )
 
     DEV_MODE: bool = False
 
@@ -19,11 +21,17 @@ class Settings(BaseSettings):
 
     POSTGRES_DSN: PostgresDsn = Field(
         "postgresql://postgres:password@zpodpostgres/postgres",
-        env="ZPODCORE_POSTGRES_DSN",
+        alias="ZPODCORE_POSTGRES_DSN",
     )
-    POSTGRES_PASSWORD: str = Field("password", env="ZPODCORE_POSTGRES_PASSWORD")
+    POSTGRES_PASSWORD: str = Field(
+        "password",
+        alias="ZPODCORE_POSTGRES_PASSWORD",
+    )
 
-    SITE_ID: str = Field("zpod", env="ZPODCORE_SITE_ID")
+    SITE_ID: str = Field(
+        "zpod",
+        alias="ZPODCORE_SITE_ID",
+    )
 
 
 settings = Settings()

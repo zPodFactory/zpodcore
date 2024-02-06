@@ -128,7 +128,7 @@ def instance_component_add(
 
     z.instances_components_add.sync(
         instance.id,
-        json_body=InstanceComponentCreate(
+        body=InstanceComponentCreate(
             component_uid=component_uid,
             host_id=host_id,
             hostname=hostname,

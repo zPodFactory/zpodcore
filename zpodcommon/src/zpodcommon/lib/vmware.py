@@ -356,11 +356,11 @@ class vCenter:
 
     def wait_for_tools(self, vm_name, timeout=120):
         tools_running = False
-        start_at = datetime.datetime.now()
+        start_at = datetime.datetime.now(datetime.UTC)
         timeout = datetime.timedelta(seconds=timeout)
 
         print("Waiting for VMware Tools...")
-        while start_at + timeout > datetime.datetime.now():
+        while start_at + timeout > datetime.datetime.now(datetime.UTC):
             vm = self.get_vm(vm_name)
 
             if vm.guest.toolsRunningStatus == "guestToolsRunning":
@@ -373,7 +373,7 @@ class vCenter:
             return False
 
     def wait_for_tools_ip(self, vm_name, ipaddress, timeout=120):
-        start_at = datetime.datetime.now()
+        start_at = datetime.datetime.now(datetime.UTC)
         timeout = datetime.timedelta(seconds=timeout)
 
         # We first need to wait for vmware tools to be ready
@@ -382,7 +382,7 @@ class vCenter:
             return False
 
         print("Waiting for VMware Tools IP...")
-        while start_at + timeout > datetime.datetime.now():
+        while start_at + timeout > datetime.datetime.now(datetime.UTC):
             vm = self.get_vm(vm_name)
 
             if vm.guest.ipAddress == ipaddress:

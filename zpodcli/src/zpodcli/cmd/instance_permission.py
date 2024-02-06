@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import typer
 from rich import print
 from rich.console import Console
 from rich.table import Table
+from typing_extensions import Annotated
 from zpod.models.instance_permission_group_add_remove import (
     InstancePermissionGroupAddRemove,
 )
@@ -73,7 +74,10 @@ def generate_table(
 @app.command(name="list", no_args_is_help=True)
 @unexpected_status_handler
 def instance_permission_list(
-    instance_name: str = typer.Option(..., "-i", help="instance name"),
+    instance_name: Annotated[
+        str,
+        typer.Option("-i", help="instance name"),
+    ],
 ):
     """
     List instance permission
@@ -89,27 +93,22 @@ def instance_permission_list(
 @unexpected_status_handler
 def instance_permission_add(
     *,
-    instance_name: str = typer.Option(
-        ...,
-        "-i",
-        help="instance name",
-    ),
-    permission: InstancePermission = typer.Option(
-        ...,
-        "-p",
-        help="permission",
-        case_sensitive=False,
-    ),
-    username: str = typer.Option(
-        None,
-        "-u",
-        help="username to add",
-    ),
-    groupname: str = typer.Option(
-        None,
-        "-g",
-        help="group to add",
-    ),
+    instance_name: Annotated[
+        str,
+        typer.Option("-i", help="instance name"),
+    ],
+    permission: Annotated[
+        InstancePermission,
+        typer.Option("-p", help="permission", case_sensitive=False),
+    ],
+    username: Annotated[
+        Optional[str],
+        typer.Option("-u", help="username to add"),
+    ] = None,
+    groupname: Annotated[
+        Optional[str],
+        typer.Option("-g", help="group to add"),
+    ] = None,
 ):
     """
     Add permission to instance
@@ -127,13 +126,13 @@ def instance_permission_add(
         z.instances_permissions_users_add.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionUserAddRemove(username=username),
+            body=InstancePermissionUserAddRemove(username=username),
         )
     if groupname:
         z.instances_permissions_groups_add.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionGroupAddRemove(groupname=groupname),
+            body=InstancePermissionGroupAddRemove(groupname=groupname),
         )
     generate_table(z, instance)
 
@@ -142,27 +141,22 @@ def instance_permission_add(
 @unexpected_status_handler
 def instance_permission_remove(
     *,
-    instance_name: str = typer.Option(
-        ...,
-        "-i",
-        help="instance name",
-    ),
-    permission: InstancePermission = typer.Option(
-        ...,
-        "-p",
-        help="permission",
-        case_sensitive=False,
-    ),
-    username: str = typer.Option(
-        None,
-        "-u",
-        help="username to remove",
-    ),
-    groupname: str = typer.Option(
-        None,
-        "-g",
-        help="group to remove",
-    ),
+    instance_name: Annotated[
+        str,
+        typer.Option("-i", help="instance name"),
+    ],
+    permission: Annotated[
+        InstancePermission,
+        typer.Option("-p", help="permission", case_sensitive=False),
+    ],
+    username: Annotated[
+        Optional[str],
+        typer.Option("-u", help="username to remove"),
+    ] = None,
+    groupname: Annotated[
+        Optional[str],
+        typer.Option("-g", help="group to remove"),
+    ] = None,
 ):
     """
     Remove permission from instance
@@ -180,12 +174,12 @@ def instance_permission_remove(
         z.instances_permissions_users_remove.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionUserAddRemove(username=username),
+            body=InstancePermissionUserAddRemove(username=username),
         )
     if groupname:
         z.instances_permissions_groups_remove.sync(
             id=instance.id,
             permission=permission.value,
-            json_body=InstancePermissionGroupAddRemove(groupname=groupname),
+            body=InstancePermissionGroupAddRemove(groupname=groupname),
         )
     generate_table(z, instance)

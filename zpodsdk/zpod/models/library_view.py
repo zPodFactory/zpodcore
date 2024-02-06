@@ -1,7 +1,14 @@
 import datetime
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import (
+    Any,
+    Dict,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
-import attr
+from attrs import define as _attrs_define
 from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
@@ -9,38 +16,47 @@ from ..types import UNSET, Unset
 T = TypeVar("T", bound="LibraryView")
 
 
-@attr.s(auto_attribs=True)
+@_attrs_define
 class LibraryView:
     """
     Attributes:
-        creation_date (datetime.datetime):  Example: 2023-01-01T00:00:00.
-        description (str):  Example: Default zPodFactory library.
-        enabled (bool):  Example: True.
-        git_url (str):  Example: https://github.com/zpodfactory/zpodlibrary.
-        id (str):  Example: 1.
-        name (str):  Example: default.
-        last_modified_date (Union[Unset, datetime.datetime]):  Example: 2023-01-01T00:01:00.
+        creation_date (datetime.datetime):
+        description (str):
+        enabled (bool):
+        git_url (str):
+        id (int):
+        name (str):
+        last_modified_date (Union[None, Unset, datetime.datetime]):
     """
 
     creation_date: datetime.datetime
     description: str
     enabled: bool
     git_url: str
-    id: str
+    id: int
     name: str
-    last_modified_date: Union[Unset, datetime.datetime] = UNSET
+    last_modified_date: Union[None, Unset, datetime.datetime] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         creation_date = self.creation_date.isoformat()
 
         description = self.description
+
         enabled = self.enabled
+
         git_url = self.git_url
+
         id = self.id
+
         name = self.name
-        last_modified_date: Union[Unset, str] = UNSET
-        if not isinstance(self.last_modified_date, Unset):
+
+        last_modified_date: Union[None, Unset, str]
+        if isinstance(self.last_modified_date, Unset):
+            last_modified_date = UNSET
+        elif isinstance(self.last_modified_date, datetime.datetime):
             last_modified_date = self.last_modified_date.isoformat()
+        else:
+            last_modified_date = self.last_modified_date
 
         field_dict: Dict[str, Any] = {}
         field_dict.update(
@@ -73,12 +89,26 @@ class LibraryView:
 
         name = d.pop("name")
 
-        _last_modified_date = d.pop("last_modified_date", UNSET)
-        last_modified_date: Union[Unset, datetime.datetime]
-        if isinstance(_last_modified_date, Unset):
-            last_modified_date = UNSET
-        else:
-            last_modified_date = isoparse(_last_modified_date)
+        def _parse_last_modified_date(
+            data: object,
+        ) -> Union[None, Unset, datetime.datetime]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                last_modified_date_type_0 = isoparse(data)
+
+                return last_modified_date_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[None, Unset, datetime.datetime], data)
+
+        last_modified_date = _parse_last_modified_date(
+            d.pop("last_modified_date", UNSET)
+        )
 
         library_view = cls(
             creation_date=creation_date,
