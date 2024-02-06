@@ -1,13 +1,13 @@
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.ovfdeployer import ovf_deployer
-from zpodcommon.lib.vcsadeployer import vcsa_deployer
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.instance_component_add.instance_component_add_utils import (
     handle_instance_component_add_failure,
 )
 from zpodengine.lib import database
+from zpodengine.lib.ovfdeployer import ovf_deployer
+from zpodengine.lib.vcsadeployer import vcsa_deployer
 
 
 @task

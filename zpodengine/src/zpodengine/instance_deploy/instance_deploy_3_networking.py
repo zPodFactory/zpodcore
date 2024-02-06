@@ -4,10 +4,10 @@ from datetime import datetime
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.network import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine import settings
 from zpodengine.lib import database
+from zpodengine.lib.network import MgmtIp
 
 SEGMENT_MAX_WAIT_FOR_REALIZED = 120
 SEGMENT_WAIT_BETWEEN_TRIES = 5

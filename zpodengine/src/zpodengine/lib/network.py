@@ -3,6 +3,8 @@ import ipaddress
 import random
 import socket
 import struct
+import time
+from datetime import datetime
 from ipaddress import IPv4Network
 
 from zpodcommon import models as M
@@ -75,22 +77,22 @@ def get_instance_all_subnets(instance_subnet: IPv4Network):
 
 
 class MgmtIp:
-    MGMT_HOST_IDS = dict(
-        gw=1,
-        zbox=2,
-        nsx=5,
-        nsxt=5,
-        nsxv=6,
-        avi=7,
-        vcsa=10,
-        hcx=20,
-        vcf=25,
-        vrops=30,
-        vrli=31,
-        vcd=40,
-        vcda=41,
-        vyos=0,  # vyos(0) will get the subnet's last ip
-    )
+    MGMT_HOST_IDS = {
+        "gw": 1,
+        "zbox": 2,
+        "nsx": 5,
+        "nsxt": 5,
+        "nsxv": 6,
+        "avi": 7,
+        "vcsa": 10,
+        "hcx": 20,
+        "vcf": 25,
+        "vrops": 30,
+        "vrli": 31,
+        "vcd": 40,
+        "vcda": 41,
+        "vyos": 0,  # vyos(0) will get the subnet's last ip
+    }
 
     def __init__(self, ipv4network: IPv4Network, host_id: int):
         # sourcery skip: remove-unnecessary-cast
@@ -160,3 +162,34 @@ def get_host_ip_address(interface_name):
     except Exception as e:
         print(f"Error fetching IP address for {interface_name}: {e}")
         return None
+
+
+def wait_for_segment_to_be_evacuted(
+    nsx,
+    segment,
+    SEGMENT_MAX_WAIT_FOR_EMPTY=120,
+    SEGMENT_WAIT_BETWEEN_TRIES=5,
+    use_policy=False,
+):
+    """Waits for the segment to have no ports/interfaces"""
+
+    path = f"/v1{segment['path']}/ports"
+    if use_policy:
+        path = f"/policy/api{path}"
+
+    start = datetime.now()
+    while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_EMPTY:
+        ports = nsx.get(path).safejson()
+        if ports["result_count"] == 0:
+            print(
+                f"Segment ({segment['display_name']}) has no ports / "
+                "interfaces attached. Continuing."
+            )
+            break
+        print(
+            f"Segment ({segment['display_name']}) has ports / "
+            "interfaces attached. Waiting..."
+        )
+        time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
+    else:
+        raise ValueError("Failed: Segment has connected ports / interfaces.")
