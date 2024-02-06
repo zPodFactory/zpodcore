@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import urlparse
 
+import requests
 from prefect import flow, get_run_logger, task
 from pydantic import BaseModel
 from sqlmodel import select
@@ -35,6 +36,7 @@ class Component(BaseModel):
     component_download_subproduct: Optional[str]
     component_download_version: Optional[str]
     component_download_file: Optional[str]
+    component_download_type: Optional[str]
     component_download_file_checksum: Optional[str]  # "sha265:checksum"
     component_download_file_size: str
     component_isnested: Optional[bool]
@@ -85,9 +87,10 @@ def get_component_json(uid: str):
     return get_json_from_file(component.jsonfile)
 
 
-# FIXME: do we need to different ways to launch vcc or wget ?
+# I could not use subprocess.run for both types of commands
+# hence the need to use popen and run
 def run_command(cmd: str, cmd_engine: str):
-    if cmd_engine == "cc":
+    if cmd_engine == "customerconnect":
         return subprocess.Popen(
             args=cmd,
             stdout=subprocess.PIPE,
@@ -95,13 +98,23 @@ def run_command(cmd: str, cmd_engine: str):
             shell=True,
         )
     else:
-        return subprocess.run(  # noqa: UP022
-            args=cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-            check=True,
-        )
+        try:
+            status = subprocess.run(
+                args=cmd,
+                capture_output=True,
+                shell=True,
+                check=True,
+            )
+            return status
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+
+        # return subprocess.run(
+        #     args=cmd,
+        #     capture_output=True,
+        #     shell=True,
+        #     check=True,
+        # )
 
 
 def get_customerconnect_credentials() -> Tuple[str, str]:
@@ -111,37 +124,144 @@ def get_customerconnect_credentials() -> Tuple[str, str]:
     return vcc_username, vcc_password
 
 
+def get_avi_pulse_releases(component):
+    response = requests.get(component.component_url)
+    major_versions = response.json().get("result").get("major_version")
+    releases = [
+        {
+            "id": release.get("system_list")[0].get("id"),
+            "name": release.get("major_name"),
+        }
+        for release in major_versions
+    ]
+    return releases
+
+
+def get_avi_pulse_release_id(component):
+    releases = get_avi_pulse_releases(component)
+    for release in releases:
+        if release.get("name") == component.component_version:
+            return release.get("id")
+    return None
+
+
+def get_avi_pulse_files(component, release_id):
+    url = f"{component.component_url}/{release_id}"
+    response = requests.get(url, headers={"Accept": "application/json"})
+    downloads = response.json().get("result").get("software_detail_list")
+    release_files = [
+        download.get("ecosystem_software_list")
+        for download in downloads
+        if download.get("ecosystem_name") == "VMware"
+    ]
+    return release_files[0]
+
+
+def get_avi_pulse_file_id(avi_pulse_files):
+    for file in avi_pulse_files:
+        if "SHA1" not in file.get("software_name").split(" "):
+            return file.get("software_id")
+
+
+def get_avi_pulse_file_dowload_url(component, release_id, release_file_id):
+    url = f"{component.component_url}/downloads/{release_id}/{release_file_id}"
+    response = requests.get(url)
+    return {
+        "url": response.json().get("url"),
+        "filename": response.json().get("filename"),
+    }
+
+
+def get_avi_pulse_file_download_cmd(component):
+    release_id = get_avi_pulse_release_id(component)
+    release_files = get_avi_pulse_files(component, release_id)
+    release_file_id = get_avi_pulse_file_id(release_files)
+    release_file_url = get_avi_pulse_file_dowload_url(
+        component, release_id, release_file_id
+    )
+    return (
+        "wget "
+        "--no-check-certificate "
+        f" {shlex.quote(release_file_url['url'])}"
+        f" -O {shlex.quote(PRODUCTS_PATH)}/{shlex.quote(release_file_url['filename'])}"
+        # f" -P {shlex.quote(PRODUCTS_PATH)}"
+        f" -q"
+    )
+
+
+def generate_download_command(component: Component):
+    print(
+        "Generating download command for component:"
+        f" {component.component_name}-{component.component_version}"
+    )
+
+    if component.component_download_engine == "https":
+        return f"wget {shlex.quote(component.component_dl_url)} -P {shlex.quote(PRODUCTS_PATH)}"
+
+    elif component.component_download_engine == "avipulse":
+        try:
+            return get_avi_pulse_file_download_cmd(component)
+        except Exception as e:
+            print("Failed to generate avipulse download command:", e)
+            raise ValueError("Error generating avipulse download command")
+
+    elif component.component_download_engine == "customerconnect":
+        try:
+            vcc_username, vcc_password = get_customerconnect_credentials()
+            return (
+                "vcc download"
+                " -a"
+                f" --user {shlex.quote(vcc_username)}"
+                f" --pass {shlex.quote(vcc_password)}"
+                f" -p {shlex.quote(component.component_download_product)}"
+                f" -s {shlex.quote(component.component_download_subproduct)}"
+                f" -v {shlex.quote(component.component_download_version)}"
+                f" -f {shlex.quote(component.component_download_file)}"
+                f" -o {shlex.quote(PRODUCTS_PATH)}"
+                f" -t {shlex.quote(component.component_download_type)}"
+                if component.component_download_type
+                else ""
+            )
+        except Exception as e:
+            print("Failed to retrieve customerconnect credentials:", e)
+            raise ValueError("Error retrieving customerconnect credentials")
+
+    else:
+        raise ValueError(
+            f"Unsupported download engine: {component.component_download_engine}"
+        )
+
+
 @task(
     task_run_name="{component.component_uid}-download",
 )
 def download_component(component: Component) -> int:
     logger = get_run_logger()
-
-    vcc_username, vcc_password = get_customerconnect_credentials()
-
-    cc_cmd = (
-        "vcc download"
-        " -a"
-        f" --user {shlex.quote(vcc_username)}"
-        f" --pass {shlex.quote(vcc_password)}"
-        f" -p {shlex.quote(component.component_download_product)}"
-        f" -s {shlex.quote(component.component_download_subproduct)}"
-        f" -v {shlex.quote(component.component_download_version)}"
-        f" -f {shlex.quote(component.component_download_file)}"
-        f" -o {shlex.quote(PRODUCTS_PATH)}"
-        f" -t {shlex.quote(component.component_download_file)}" if component.component_download_type else ""
+    https_cmd = (
+        generate_download_command(component)
+        if component.component_download_engine in ["https", "avipulse"]
+        else ""
     )
-    wget_cmd = f"wget {component.component_dl_url} -P {PRODUCTS_PATH}"
+    customer_connect_cmd = (
+        generate_download_command(component)
+        if component.component_download_engine == "customerconnect"
+        else ""
+    )
+    cmd = (
+        https_cmd
+        if component.component_download_engine in {"https", "avipulse"}
+        else customer_connect_cmd
+    )
 
-    cmd = wget_cmd if component.component_download_engine == "https" else cc_cmd
-
-    # FIXME: why are we changing "https" & "customerconnect" to "wget" & "cc" ?
-    cmd_engine = "wget" if component.component_download_engine == "https" else "cc"
-
-    hidden_pass_cmd = cc_cmd = re.sub(r"(--pass\s+)(\S+)", r"\1" + "********", cc_cmd)
+    hidden_pass_cmd = customer_connect_cmd = re.sub(
+        r"(--pass\s+)(\S+)", r"\1" + "********", customer_connect_cmd
+    )
     print_cmd = (
-        wget_cmd if component.component_download_engine == "https" else hidden_pass_cmd
+        https_cmd
+        if component.component_download_engine in ["https", "avipulse"]
+        else hidden_pass_cmd
     )
+    print("Printing....", print_cmd)
     prev_download = Path(PRODUCTS_PATH) / component.component_download_file
 
     try:
@@ -156,16 +276,23 @@ def download_component(component: Component) -> int:
         )
         logger.info(f"Executing download command {print_cmd}")
 
-        process = run_command(cmd=cmd, cmd_engine=cmd_engine)
+        process = run_command(cmd=cmd, cmd_engine=component.component_download_engine)
 
-        while cmd_engine == "cc" and process.poll() is None:
+        while (
+            component.component_download_engine == "customerconnect"
+            and process.poll() is None
+        ):
             process.stdout.readline()
 
-        return_code = process.wait() if cmd_engine == "cc" else process.returncode
+        return_code = (
+            process.wait()
+            if component.component_download_engine == "customerconnect"
+            else process.returncode
+        )
         if return_code != 0:
             msg = (
                 process.stderr.read().decode().strip()
-                if cmd_engine == "cc"
+                if component.component_download_engine == "customerconnect"
                 else process.stdout.decode()
             )
             logger.info(f"stderr: {msg}")
@@ -314,6 +441,8 @@ def get_download_paths(component: Component) -> Tuple[str, str]:
 
 
 def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=30):
+    print("Download Path", dl_path)
+    print(tmp_dl_path)
     logger = get_run_logger()
     start_time = time.time()
     # logger.info("Tracking dowloading process")
@@ -335,7 +464,7 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=
             raise RuntimeError(f"VMware Customer Connect error: {c.download_status} !")
 
         if elapsed_time > timeout:
-            logger.info("Timeout, waiting for file to track")
+            logger.info(f"Timeout, waiting for file to track { dl_path} {tmp_dl_path}")
             return "Timeout"
 
         time.sleep(1)
