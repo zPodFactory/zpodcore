@@ -5,9 +5,9 @@ from jinja2 import Template
 from rich import print as pprint
 
 from zpodcommon import models as M
-from zpodcommon.lib.commands import cmd_execute
-from zpodcommon.lib.dbutils import DBUtils
-from zpodcommon.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
+from zpodengine.lib.commands import cmd_execute
+from zpodengine.lib.dbutils import DBUtils
+from zpodengine.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
 
 
 def vcsa_extract_iso(component: M.Component):

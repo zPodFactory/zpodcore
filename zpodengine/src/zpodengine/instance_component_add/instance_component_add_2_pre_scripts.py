@@ -1,11 +1,11 @@
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.lib.vcsadeployer import vcsa_extract_iso, vcsa_fix_permissions
 from zpodengine.instance_component_add.instance_component_add_utils import (
     handle_instance_component_add_failure,
 )
 from zpodengine.lib import database
+from zpodengine.lib.vcsadeployer import vcsa_extract_iso, vcsa_fix_permissions
 
 
 @task

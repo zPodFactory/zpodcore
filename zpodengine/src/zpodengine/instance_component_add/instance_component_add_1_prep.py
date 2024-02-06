@@ -3,8 +3,8 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus, InstanceComponentStatus
-from zpodcommon.lib.network import MgmtIp
 from zpodengine.lib import database
+from zpodengine.lib.network import MgmtIp
 
 
 @task(persist_result=True)

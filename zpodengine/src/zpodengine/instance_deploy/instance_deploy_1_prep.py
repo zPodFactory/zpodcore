@@ -2,9 +2,9 @@ from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.enums import InstanceStatus
-from zpodcommon.lib.dbutils import DBUtils
-from zpodcommon.lib.network import get_instance_all_subnets, get_instance_primary_subnet
 from zpodengine.lib import database
+from zpodengine.lib.dbutils import DBUtils
+from zpodengine.lib.network import get_instance_all_subnets, get_instance_primary_subnet
 
 
 @task
