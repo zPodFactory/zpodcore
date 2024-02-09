@@ -1,17 +1,17 @@
-import time
-from datetime import datetime
-
 from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine.lib import database
+from zpodengine.lib.network import fmt, wait_for_segment_to_be_evacuted
 
 SEGMENT_MAX_WAIT_FOR_EMPTY = 120
 SEGMENT_WAIT_BETWEEN_TRIES = 5
 
 
 @task(tags=["atomic_operation"])
+# This operation does not support concurrent calls.
+# Adding tags["atomic_operation"] to task will disable concurrency
 def nsx_project_destroy(project_id: str, endpoint_id: int):
     print(f"Destroy NSX Project: {project_id}")
 
@@ -19,14 +19,12 @@ def nsx_project_destroy(project_id: str, endpoint_id: int):
         endpoint = session.get(M.Endpoint, endpoint_id)
 
         # Destroy Project
-        # This operation does not support concurrent calls.
-        # Adding tags["atomic_operation"] to task will disable concurrency
         with NsxProjectDestroy(project_id=project_id, endpoint=endpoint) as npd:
-            npd()
+            npd.destroy()
 
 
 class NsxProjectDestroy:
-    def __init__(self, project_id: str, endpoint: int, orgid="default") -> None:
+    def __init__(self, project_id: str, endpoint: M.Endpoint, orgid="default") -> None:
         self.nsx = NsxClient(endpoint)
         self.project_id = project_id
         self.project_path = f"/orgs/{orgid}/projects/{project_id}"
@@ -37,10 +35,10 @@ class NsxProjectDestroy:
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         self.nsx.close()
 
-    def __call__(self):
+    def destroy(self):
         segments = self.instance_project_segments()
         for segment in segments:
-            self.wait_for_segment_to_be_evacuted(segment)
+            wait_for_segment_to_be_evacuted(self.nsx, segment)
 
         # TODO: Remove when bug is fixed -
         # https://bugzilla.eng.vmware.com/show_bug.cgi?id=3218007
@@ -63,24 +61,6 @@ class NsxProjectDestroy:
             .safejson()
             .get("results", [])
         )
-
-    def wait_for_segment_to_be_evacuted(self, segment):
-        start = datetime.now()
-        while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_EMPTY:
-            ports = self.nsx.get(f"/policy/api/v1{segment['path']}/ports").safejson()
-            if ports["result_count"] == 0:
-                print(
-                    f"Segment ({segment['display_name']}) has no ports/"
-                    "interfaces attached. Continuing."
-                )
-                break
-            print(
-                f"Segment ({segment['display_name']}) has ports/"
-                "interfaces attached. Waiting..."
-            )
-            time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
-        else:
-            raise ValueError("Failed: Segment has connected ports / interfaces.")
 
     def delete_segment_binding_map(self, segment):
         print(f"Gathering Segment: {segment['id']} Binding Map")
@@ -120,10 +100,6 @@ class NsxProjectDestroy:
                 ],
             },
         )
-
-
-def fmt(txt):
-    return txt.replace("/", "\\/")
 
 
 if __name__ == "__main__":

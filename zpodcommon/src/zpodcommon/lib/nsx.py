@@ -103,10 +103,10 @@ class NsxClient(httpx.Client):
         return super().__init__(
             auth=Auth(
                 url=(f"{nsx_url}/api/session/create"),
-                data=dict(
-                    j_username=self.epnet["username"],
-                    j_password=self.epnet["password"],
-                ),
+                data={
+                    "j_username": self.epnet["username"],
+                    "j_password": self.epnet["password"],
+                },
                 timeout=httpx.Timeout(30.0, connect=60.0),
                 verify=verify,
             ),

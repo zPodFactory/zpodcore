@@ -164,18 +164,19 @@ def get_host_ip_address(interface_name):
         return None
 
 
+def fmt(txt):
+    return txt.replace("/", "\\/")
+
+
 def wait_for_segment_to_be_evacuted(
     nsx,
     segment,
     SEGMENT_MAX_WAIT_FOR_EMPTY=120,
     SEGMENT_WAIT_BETWEEN_TRIES=5,
-    use_policy=False,
 ):
     """Waits for the segment to have no ports/interfaces"""
 
-    path = f"/v1{segment['path']}/ports"
-    if use_policy:
-        path = f"/policy/api{path}"
+    path = f"/policy/api/v1{segment['path']}/ports"
 
     start = datetime.now()
     while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_EMPTY:
@@ -193,3 +194,40 @@ def wait_for_segment_to_be_evacuted(
         time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
     else:
         raise ValueError("Failed: Segment has connected ports / interfaces.")
+
+
+def wait_for_segment_to_realize(
+    nsx: NsxClient,
+    path: str,
+    segment_id: str,
+    SEGMENT_MAX_WAIT_FOR_REALIZED=120,
+    SEGMENT_WAIT_BETWEEN_TRIES=5,
+):
+    # Wait for segment to realize
+    print("Wait for segment to realize")
+    start = datetime.now()
+    while (datetime.now() - start).seconds < SEGMENT_MAX_WAIT_FOR_REALIZED:
+        if results := nsx.get(path).results():
+            rls = next(
+                x for x in results if x["entity_type"] == "RealizedLogicalSwitch"
+            )
+            if (
+                rls.get("state") == "REALIZED"
+                and rls.get("runtime_status") == "SUCCESS"
+                and rls.get("publish_status") == "SUCCESS"
+                and rls.get("operational_status") == "STATUS_GREEN"
+            ):
+                print(f"Segment ({segment_id}) is ready for use")
+                break
+            print(
+                f"Segment ({segment_id}) is not ready. "
+                f"State:{rls.get('state', 'N/a')}, "
+                f"Runtime Status:{rls.get('runtime_status', 'N/a')}, "
+                f"Publish Status:{rls.get('publish_status', 'N/a')}, "
+                f"Operational Status:{rls.get('operational_status', 'N/a')}"
+            )
+        else:
+            print("Status not readable.  Trying again...")
+        time.sleep(SEGMENT_WAIT_BETWEEN_TRIES)
+    else:
+        raise ValueError("Failed: Segment is not realized.")

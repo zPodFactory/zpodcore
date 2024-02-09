@@ -87,6 +87,7 @@ def flow_instance_deploy(
     )
 
     # Deploy profile components
+    last_component_item = None
     wait_for = [profile_obj]
     for profile_item in profile_obj:
         print(profile_item)
