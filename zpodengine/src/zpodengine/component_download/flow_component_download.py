@@ -38,6 +38,7 @@ class Component(BaseModel):
     component_download_file: str | None = None
     component_download_file_checksum: str | None = None  # "sha265:checksum"
     component_download_file_size: str
+    component_download_type: str | None = None
     component_isnested: bool | None = None
     component_dst_path: Path | None = None
     component_dl_path: Path | None = None
@@ -97,23 +98,12 @@ def run_command(cmd: str, cmd_engine: str):
             shell=True,
         )
     else:
-        try:
-            status = subprocess.run(
-                args=cmd,
-                capture_output=True,
-                shell=True,
-                check=True,
-            )
-            return status
-        except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
-
-        # return subprocess.run(
-        #     args=cmd,
-        #     capture_output=True,
-        #     shell=True,
-        #     check=True,
-        # )
+        return subprocess.run(
+            args=cmd,
+            capture_output=True,
+            shell=True,
+            check=True,
+        )
 
 
 def get_customerconnect_credentials() -> Tuple[str, str]:
@@ -207,6 +197,12 @@ def generate_download_command(component: Component):
     elif component.component_download_engine == "customerconnect":
         try:
             vcc_username, vcc_password = get_customerconnect_credentials()
+            download_type_arg = (
+                f" -t {shlex.quote(component.component_download_type)}"
+                if component.component_download_type
+                else ""
+            )
+            print("Download", download_type_arg)
             return (
                 "vcc download"
                 " -a"
@@ -217,9 +213,7 @@ def generate_download_command(component: Component):
                 f" -v {shlex.quote(component.component_download_version)}"
                 f" -f {shlex.quote(component.component_download_file)}"
                 f" -o {shlex.quote(PRODUCTS_PATH)}"
-                f" -t {shlex.quote(component.component_download_type)}"
-                if component.component_download_type
-                else ""
+                f"{download_type_arg}"
             )
         except Exception as e:
             print("Failed to retrieve customerconnect credentials:", e)
