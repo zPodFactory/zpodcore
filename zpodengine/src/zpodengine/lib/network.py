@@ -33,6 +33,7 @@ def get_instance_primary_subnet(endpoint: str):
             IPv4Network(subnet["network"])
             for segment in segments
             for subnet in segment.get("subnets", [])
+            if subnet.get("network")
         ]
 
         # Get all possible subnets
