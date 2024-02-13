@@ -202,7 +202,6 @@ def generate_download_command(component: Component):
                 if component.component_download_type
                 else ""
             )
-            print("Download", download_type_arg)
             return (
                 "vcc download"
                 " -a"
@@ -434,8 +433,6 @@ def get_download_paths(component: Component) -> Tuple[str, str]:
 
 
 def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=30):
-    print("Download Path", dl_path)
-    print(tmp_dl_path)
     logger = get_run_logger()
     start_time = time.time()
     # logger.info("Tracking dowloading process")
