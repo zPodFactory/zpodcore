@@ -152,7 +152,7 @@ def get_avi_pulse_file_id(avi_pulse_files):
             return file.get("software_id")
 
 
-def get_avi_pulse_file_dowload_url(component, release_id, release_file_id):
+def get_avi_pulse_file_download_url(component, release_id, release_file_id):
     url = f"{component.component_url}/downloads/{release_id}/{release_file_id}"
     response = requests.get(url)
     return {
@@ -165,7 +165,7 @@ def get_avi_pulse_file_download_cmd(component):
     release_id = get_avi_pulse_release_id(component)
     release_files = get_avi_pulse_files(component, release_id)
     release_file_id = get_avi_pulse_file_id(release_files)
-    release_file_url = get_avi_pulse_file_dowload_url(
+    release_file_url = get_avi_pulse_file_download_url(
         component, release_id, release_file_id
     )
     return (
@@ -435,7 +435,7 @@ def get_download_paths(component: Component) -> Tuple[str, str]:
 def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=30):
     logger = get_run_logger()
     start_time = time.time()
-    # logger.info("Tracking dowloading process")
+    # logger.info("Tracking downloading process")
     while not Path(dl_path).exists() and not Path(tmp_dl_path).exists():
         elapsed_time = time.time() - start_time
 
