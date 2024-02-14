@@ -1,7 +1,14 @@
-from pydantic import StringConstraints
+from pydantic import AfterValidator, StringConstraints, ValidationInfo
 from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
+
+
+def hide_sensitive(v: str, info: ValidationInfo):
+    name = info.data["name"]
+    if "password" in name or "ssh_key" in name:
+        return "********"
+    return v
 
 
 class D:
@@ -28,4 +35,4 @@ class SettingView(SchemaBase):
     id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
-    value: str = Field(..., D.value)
+    value: Annotated[str, AfterValidator(hide_sensitive)] = Field(..., D.value)
