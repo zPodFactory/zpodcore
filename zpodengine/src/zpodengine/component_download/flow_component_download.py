@@ -114,8 +114,8 @@ def get_customerconnect_credentials() -> Tuple[str, str]:
 
 
 def get_avi_pulse_releases(component):
-    response = requests.get(component.component_url)
-    major_versions = response.json().get("result").get("major_version")
+    response = requests.get(component.component_url).json()
+    major_versions = response["result"].get("major_version", {})
     releases = [
         {
             "id": release.get("system_list")[0].get("id"),
@@ -154,10 +154,10 @@ def get_avi_pulse_file_id(avi_pulse_files):
 
 def get_avi_pulse_file_download_url(component, release_id, release_file_id):
     url = f"{component.component_url}/downloads/{release_id}/{release_file_id}"
-    response = requests.get(url)
+    response = requests.get(url).json()
     return {
-        "url": response.json().get("url"),
-        "filename": response.json().get("filename"),
+        "url": response.get("url"),
+        "filename": response.get("filename"),
     }
 
 
@@ -169,11 +169,10 @@ def get_avi_pulse_file_download_cmd(component):
         component, release_id, release_file_id
     )
     return (
-        "wget "
-        "--no-check-certificate "
+        "wget"
+        " --no-check-certificate"
         f" {shlex.quote(release_file_url['url'])}"
         f" -O {shlex.quote(PRODUCTS_PATH)}/{shlex.quote(release_file_url['filename'])}"
-        # f" -P {shlex.quote(PRODUCTS_PATH)}"
         f" -q"
     )
 
@@ -245,7 +244,7 @@ def download_component(component: Component) -> int:
         else customer_connect_cmd
     )
 
-    hidden_pass_cmd = customer_connect_cmd = re.sub(
+    hidden_pass_cmd = re.sub(
         r"(--pass\s+)(\S+)", r"\1" + "********", customer_connect_cmd
     )
     print_cmd = (
