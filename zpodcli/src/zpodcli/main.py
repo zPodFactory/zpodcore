@@ -23,7 +23,11 @@ app = typer.Typer(no_args_is_help=True)
 
 def launch():
     # top level commands
-    app.command()(connect.connect)
+    app.add_typer(
+        connect.app,
+        name="connect",
+        no_args_is_help=True,
+    )
 
     # own level commands
     authed_typer = partial(
@@ -45,7 +49,7 @@ def launch():
     app()
 
 
-@app.command()
+@app.command(help="Display Version")
 def version():
     print(__version__)
 

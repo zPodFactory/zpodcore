@@ -15,7 +15,7 @@ from zpod.models.profile_update import ProfileUpdate
 from zpodcli.lib.utils import exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
-app = typer.Typer(help="Manage profiles")
+app = typer.Typer(help="Manage Profiles")
 
 
 def generate_table(profiles: list, action: str = None):

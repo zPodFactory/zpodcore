@@ -5,7 +5,7 @@ from typing_extensions import Annotated
 
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
-app = typer.Typer(help="Manage components")
+app = typer.Typer(help="Manage Components")
 
 console = Console()
 
@@ -65,7 +65,7 @@ def component_list(
     ] = False,
 ):
     """
-    List components
+    List Components
     """
 
     z: ZpodClient = ZpodClient()
@@ -91,7 +91,7 @@ def component_enable(
     ],
 ):
     """
-    Enable a component
+    Enable Component
     """
 
     z: ZpodClient = ZpodClient()
@@ -108,7 +108,7 @@ def component_get(
     ],
 ):
     """
-    Get specific component information
+    Get Specific Component Information
     """
 
     z: ZpodClient = ZpodClient()
@@ -126,7 +126,7 @@ def component_disable(
     ],
 ):
     """
-    Disable specific component
+    Disable Specific Component
     """
 
     z: ZpodClient = ZpodClient()

@@ -8,7 +8,7 @@ from zpod.models.user_update_admin import UserUpdateAdmin
 from zpodcli.lib.utils import get_boolean_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
-app = typer.Typer(help="Manage users")
+app = typer.Typer(help="Manage Users")
 
 
 def generate_table(users, all=False):
@@ -58,7 +58,7 @@ def user_list(
     ] = False,
 ):
     """
-    List users
+    List Users
     """
     z: ZpodClient = ZpodClient()
     users = z.users_get_all.sync(all_=all)
@@ -90,7 +90,7 @@ def user_add(
     ] = False,
 ):
     """
-    Add user
+    Add User
     """
     z: ZpodClient = ZpodClient()
     result = z.users_create.sync(
@@ -130,7 +130,7 @@ def user_update(
     ] = False,
 ):
     """
-    Update user
+    Update User
     """
     z: ZpodClient = ZpodClient()
     z.users_update.sync(
@@ -153,7 +153,7 @@ def user_enable(
     ],
 ):
     """
-    Enable user
+    Enable User
     """
     z: ZpodClient = ZpodClient()
     z.users_enable.sync(id=f"username={username}")
@@ -169,7 +169,7 @@ def user_disable(
     ],
 ):
     """
-    Disable user
+    Disable User
     """
     z: ZpodClient = ZpodClient()
     z.users_disable.sync(id=f"username={username}")
@@ -185,7 +185,7 @@ def user_reset_api_token(
     ],
 ):
     """
-    Reset user api_token
+    Reset User api_token
     """
     z: ZpodClient = ZpodClient()
     result = z.users_reset_api_token.sync(id=f"username={username}")
