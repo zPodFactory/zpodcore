@@ -81,17 +81,16 @@ class MgmtIp:
     MGMT_HOST_IDS = {
         "gw": 1,
         "zbox": 2,
-        "nsx": 5,
-        "nsxt": 5,
-        "nsxv": 6,
-        "avi": 7,
+        "nsxv": 9,
         "vcsa": 10,
-        "hcx": 20,
+        "nsx": 20,
+        "nsxt": 20,
         "vcf": 25,
         "vrops": 30,
         "vrli": 31,
         "vcd": 40,
         "vcda": 41,
+        "hcx": 45,
         "vyos": 0,  # vyos(0) will get the subnet's last ip
     }
 
