@@ -4,7 +4,10 @@ from typing_extensions import Annotated
 
 from zpodcli.lib.config import config
 
+app = typer.Typer(help="Manage zPod Manager Connection")
 
+
+@app.callback(invoke_without_command=True)
 def connect(
     server: Annotated[
         str,

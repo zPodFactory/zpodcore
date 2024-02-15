@@ -12,7 +12,7 @@ from zpod.models.instance_view import InstanceView
 from zpodcli.lib.utils import confirm
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
-app = typer.Typer(help="Manage zPods Instance components", no_args_is_help=True)
+app = typer.Typer(help="Manage zPod Instance Components", no_args_is_help=True)
 
 console = Console()
 

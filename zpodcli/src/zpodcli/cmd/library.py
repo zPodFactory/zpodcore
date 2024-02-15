@@ -10,7 +10,7 @@ from zpod.models.library_update import LibraryUpdate
 from zpodcli.lib.utils import get_boolean_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
-app = typer.Typer(help="Manage libraries")
+app = typer.Typer(help="Manage Libraries")
 
 console = Console()
 

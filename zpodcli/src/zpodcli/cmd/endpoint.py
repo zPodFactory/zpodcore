@@ -7,7 +7,7 @@ from zpodcli.cmd import endpoint_permission
 from zpodcli.lib.utils import get_boolean_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
-app = typer.Typer(help="Manage endpoints")
+app = typer.Typer(help="Manage Endpoints")
 app.add_typer(endpoint_permission.app, name="permission")
 
 
