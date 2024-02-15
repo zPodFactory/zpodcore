@@ -30,16 +30,17 @@ def validate_profile(session: Session, profile_obj: list):
     )
 
     # Validate
+    errors = []
     for component_uid in component_uids:
         # Validate that component_uid is in db
         if component_uid not in components:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid component_uid: {component_uid}",
-            )
+            errors.append(f"Invalid component_uid: {component_uid}")
         # Validate that component is active
-        if components.get(component_uid) != ComponentStatus.ACTIVE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"component_uid: {component_uid} is not ACTIVE",
-            )
+        elif components.get(component_uid) != ComponentStatus.ACTIVE:
+            errors.append(f"Component is not ACTIVE: {component_uid}")
+
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="\n  ".join(errors),
+        )
