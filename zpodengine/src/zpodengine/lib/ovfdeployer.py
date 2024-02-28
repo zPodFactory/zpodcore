@@ -49,6 +49,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         hostname = epc["hostname"]
         username = epc["username"]
         password = epc["password"]
+        datacenter = epc["datacenter"]
         datastore = epc["storage_datastore"]
         # FIXME: we might want this in a zcli setting key/value ?
         # if set, then set prefix, else default to normal one.
@@ -67,6 +68,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
 
         # For now this is hardcoded unless anything changes
         resource_pool = "Cluster/Resources"
+        datacenter = "Datacenter"
         # For now this is hardcoded unless anything changes
         # (maybe vSAN OSA/ESA support in the future instead of NFS-01)
         datastore = "NFS-01"
@@ -110,6 +112,7 @@ def ovf_deployer(instance_component: M.InstanceComponent):
         f" -ds={datastore}"
         " -json=true"  # this avoids prefect crashing on the live output
         f" -options={options_filename}"
+        f" -dc={datacenter}"
         f" /products/{component.component_name}/{component.component_version}/{component.filename}"  # noqa: E501 B950
     )
     print("govc deploy command")
