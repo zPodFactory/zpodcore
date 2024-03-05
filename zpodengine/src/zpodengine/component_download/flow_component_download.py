@@ -88,8 +88,11 @@ def get_component_json(uid: str):
 
 
 # I could not use subprocess.run for both types of commands
-# hence the need to use popen and run
+# This is due to the fact that I needed to capture download progress when 
+# using vcc command and wget isn't could not run wget with Popen either.
 def run_command(cmd: str, cmd_engine: str):
+    if not cmd:
+        raise ValueError("No command specified")
     if cmd_engine == "customerconnect":
         return subprocess.Popen(
             args=cmd,
@@ -109,25 +112,30 @@ def run_command(cmd: str, cmd_engine: str):
 def get_customerconnect_credentials() -> Tuple[str, str]:
     vcc_username = DBUtils.get_setting_value("zpodfactory_customerconnect_username")
     vcc_password = DBUtils.get_setting_value("zpodfactory_customerconnect_password")
-
     return vcc_username, vcc_password
 
 
 def get_avi_pulse_releases(component):
-    response = requests.get(component.component_url).json()
-    major_versions = response["result"].get("major_version", {})
-    releases = [
-        {
-            "id": release.get("system_list")[0].get("id"),
-            "name": release.get("major_name"),
-        }
-        for release in major_versions
-    ]
+    response = requests.get(component.component_url)
+    response.raise_for_status()
+    response_data = response.json()
+    major_versions = response_data.get("result", {}).get("major_version", [])
+    releases = []
+    for release in major_versions:
+        system_list = release.get("system_list", [])
+        if system_list:
+            release_info = {
+                "id": system_list[0]["id"],
+                "name": release["major_name"],
+            }
+            releases.append(release_info)
     return releases
 
 
 def get_avi_pulse_release_id(component):
     releases = get_avi_pulse_releases(component)
+    if not releases:
+        raise ValueError("No releases found")
     for release in releases:
         if release.get("name") == component.component_version:
             return release.get("id")
@@ -163,18 +171,24 @@ def get_avi_pulse_file_download_url(component, release_id, release_file_id):
 
 def get_avi_pulse_file_download_cmd(component):
     release_id = get_avi_pulse_release_id(component)
-    release_files = get_avi_pulse_files(component, release_id)
-    release_file_id = get_avi_pulse_file_id(release_files)
-    release_file_url = get_avi_pulse_file_download_url(
-        component, release_id, release_file_id
-    )
-    return (
-        "wget"
-        " --no-check-certificate"
-        f" {shlex.quote(release_file_url['url'])}"
-        f" -O {shlex.quote(PRODUCTS_PATH)}/{shlex.quote(release_file_url['filename'])}"
-        f" -q"
-    )
+    if release_id:
+        release_files = get_avi_pulse_files(component, release_id)
+        release_file_id = get_avi_pulse_file_id(release_files)
+        release_file_url = get_avi_pulse_file_download_url(
+            component, release_id, release_file_id
+        )
+        return (
+            "wget"
+            " --no-check-certificate"
+            f" {shlex.quote(release_file_url['url'])}"
+            " -O"
+            f" {shlex.quote(PRODUCTS_PATH)}/{shlex.quote(release_file_url['filename'])}"
+            " -q"
+        )
+    else:
+        raise ValueError(
+            f"An error occured, check {component.component_version} for typo"
+        )
 
 
 def generate_download_command(component: Component):
@@ -184,14 +198,17 @@ def generate_download_command(component: Component):
     )
 
     if component.component_download_engine == "https":
-        return f"wget {shlex.quote(component.component_dl_url)} -P {shlex.quote(PRODUCTS_PATH)}"
+        return (
+            f"wget {shlex.quote(component.component_dl_url)}"
+            f" -P {shlex.quote(PRODUCTS_PATH)}"
+        )
 
     elif component.component_download_engine == "avipulse":
         try:
             return get_avi_pulse_file_download_cmd(component)
         except Exception as e:
             print("Failed to generate avipulse download command:", e)
-            raise ValueError("Error generating avipulse download command")
+            raise ValueError("Error generating avipulse download command") from e
 
     elif component.component_download_engine == "customerconnect":
         try:
@@ -215,7 +232,7 @@ def generate_download_command(component: Component):
             )
         except Exception as e:
             print("Failed to retrieve customerconnect credentials:", e)
-            raise ValueError("Error retrieving customerconnect credentials")
+            raise ValueError("Error retrieving customerconnect credentials") from e
 
     else:
         raise ValueError(
