@@ -30,10 +30,23 @@ alembic-revision message='update':
 zcli *args:
   @poetry -C zpodcli run zcli "$@"
 
-zpod-publish:
+zpod-release version:
   #!/usr/bin/env bash
   set -euo pipefail
 
+  cd {{justfile_directory()}}
+  if [[ `git status --porcelain` ]]; then
+    # Dirty repo
+    echo 'Uncommited changes in repo.  Commit or remove changes before creating release.'
+    exit
+  fi
+
+  # Clean repo, so do the release
+  poetry version {{version}}
+  newversion=$(poetry version -s)
+  git commit -am"Version v${newversion}"
+  git push
+  gh release create v${newversion} --generate-notes
   cd {{justfile_directory()}}/zpodsdk
   poetry build
   poetry publish
@@ -46,8 +59,24 @@ zpod-publish:
   sed -i'' -e 's/#zpodsdk = {/zpodsdk = {/' pyproject.toml
   sed -i'' -e 's/zpodsdk = "/#zpodsdk = "/' pyproject.toml
 
-zpod-version version:
-  poetry version {{version}}
+zpod-update version:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  if [[ `git status --porcelain` ]]; then
+    echo 'Uncommited changes in repo.  Commit or remove changes before updating.'
+    exit
+  fi
+
+  cd {{justfile_directory()}}
+  cd /home/kvalenti/dev/zpodcore
+
+  git fetch origin tag v{{version}} --no-tags
+  git checkout tags/v{{version}}
+  docker compose build
+  docker compose down
+  docker compose up -d
+  just zpodengine-deploy-all
 
 # Generate coverage docs
 zpodapi-coverage:
