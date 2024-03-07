@@ -69,8 +69,6 @@ zpod-update version:
   fi
 
   cd {{justfile_directory()}}
-  cd /home/kvalenti/dev/zpodcore
-
   git fetch origin tag v{{version}} --no-tags
   git checkout tags/v{{version}}
   docker compose build
