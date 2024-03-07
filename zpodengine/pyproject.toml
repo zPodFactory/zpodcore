@@ -6,24 +6,24 @@ authors = ["Kelby Valenti <kvalenti@vmware.com>", "Timo Sugliani <tsugliani@vmwa
 readme = "README.md"
 
 [tool.poetry.dependencies]
-email-validator = "2.1.0.post1"
+email-validator = "2.1.1"
 ipython = "^8.11.0"
 jinja2 = "^3.1.2"
-prefect = "2.14.17"
-prefect-docker = {git = "https://github.com/kvalenti/prefect-docker.git", rev = "865b2aada11a92cfbda79ed73f746faee65bd70d"}
+prefect = "2.16.2"
+prefect-docker = "0.4.5"
 psycopg2 = "2.9.9"
 pydantic-settings = "^2.1.0"
 pyopenssl = "^24.0.0"
 python = "3.12.1"
 python-dotenv = "1.0.1"
 pyvmomi = "^8.0.1.0"
-sqlmodel = "0.0.14"
+sqlmodel = "0.0.16"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
-pytest-cov = "^4.0.0"
-pytest-xdist = "^3.2.0"
-ruff = "^0.1.1"
+pytest = "^8"
+pytest-cov = "^4.0"
+pytest-xdist = "^3.2"
+ruff = "^0.3"
 
 [build-system]
 requires = ["poetry-core"]
