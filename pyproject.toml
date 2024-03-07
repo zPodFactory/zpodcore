@@ -19,7 +19,7 @@ ignore = [
     "B008",
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = [
     "zpodapi",
     "zpodcli",
