@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zpodapi"
-version = "0.2.12"
+version = "0.3.0"
 description = ""
 authors = ["Kelby Valenti <kvalenti@vmware.com>", "Timo Sugliani <tsugliani@vmware.com>"]
 readme = "README.md"
