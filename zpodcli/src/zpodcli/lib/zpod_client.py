@@ -5,7 +5,7 @@ from zpod import zpod_client
 from zpod.errors import UnexpectedStatus
 
 from zpodcli import __version__
-from zpodcli.lib.config import config
+from zpodcli.lib.factory_config import FactoryConfig
 from zpodcli.lib.utils import exit_with_error
 
 
@@ -18,9 +18,9 @@ class ZpodClient(zpod_client.ZpodClient):
         **args,
     ):
         if not base_url and not token:
-            cfg = config()
-            base_url = cfg.get("zpod_api_url")
-            token = cfg.get("zpod_api_token")
+            fc = FactoryConfig()
+            base_url = fc.factory["zpod_api_url"]
+            token = fc.factory["zpod_api_token"]
         super().__init__(
             base_url=base_url,
             headers={
