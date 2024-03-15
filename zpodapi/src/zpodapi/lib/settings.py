@@ -12,6 +12,7 @@ class Settings(BaseSettings):
         env_prefix="ZPODAPI_",
         env_file=Path(__file__).parents[1] / ".env",
         frozen=True,
+        extra="ignore",
     )
 
     API_USERNAME: str | None = None
