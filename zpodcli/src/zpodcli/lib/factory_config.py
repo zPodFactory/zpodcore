@@ -36,6 +36,9 @@ class FactoryConfig:
         changed = False
         hasactive = False
         factory_names = self.config.sections()
+        if not factory_names:
+            return
+
         for factory_name in factory_names:
             factory = self.config[factory_name]
             if "active" not in factory:
