@@ -12,6 +12,7 @@ class Settings(BaseSettings):
         env_prefix="ZPODENGINE_",
         env_file=Path(__file__).parents[3] / ".env",
         frozen=True,
+        extra='ignore'
     )
 
     DEV_MODE: bool = False
