@@ -12,12 +12,14 @@ console = Console()
 
 def get_status_markdown(status: str):
     match status:
-        case "SCHEDULED":
-            return "[royal_blue1]SCHEDULED[/royal_blue1]"
-        case "COMPLETED" | "ACTIVE" | "DOWNLOAD_COMPLETED":
-            return f"[dark_sea_green4]{status}[/dark_sea_green4]"
         case "NOT_STARTED" | "INACTIVE":
             return f"[grey63]{status}[/grey63]"
+        case "SCHEDULED":
+            return "[royal_blue1]SCHEDULED[/royal_blue1]"
+        case "VERIFYING_CHECKSUM":
+            return "[deep_sky_blue1]Verifying Checksum...[/deep_sky_blue1]"
+        case "COMPLETED" | "ACTIVE" | "DOWNLOAD_COMPLETED":
+            return f"[dark_sea_green4]{status}[/dark_sea_green4]"
         case _:
             try:
                 if percentage := int(status):
@@ -76,7 +78,15 @@ def component_list(
     # filter only completed/available components
     filtered_components = []
     if not available:
-        filtered_components.extend(c for c in sorted_components if c.status == "ACTIVE")
+        filtered_components.extend(
+            c
+            for c in sorted_components
+            if c.download_status == "SCHEDULED"
+            or c.download_status.isdigit()  # Download percentage value
+            or c.download_status == "VERIFYING_CHECKSUM"
+            or c.status == "ACTIVE"
+        )
+
         sorted_components = filtered_components
 
     generate_table(sorted_components)
