@@ -88,7 +88,7 @@ def get_component_json(uid: str):
 
 
 # I could not use subprocess.run for both types of commands
-# This is due to the fact that I needed to capture download progress when 
+# This is due to the fact that I needed to capture download progress when
 # using vcc command and wget isn't could not run wget with Popen either.
 def run_command(cmd: str, cmd_engine: str):
     if not cmd:
@@ -421,6 +421,10 @@ def verify_checksum(component: Component, filename: Path) -> bool:
         return
 
     logger.info(f"Verifying {component.component_uid} checksum ...")
+
+    # Set download status to VERIFYING_CHECKSUM, as this takes a while for large OVAs.
+    update_db(component.component_uid, ComponentDownloadStatus.VERIFYING_CHECKSUM)
+
     checksum_str = component.component_download_file_checksum
     expected_checksum = checksum_str.split(":")[1]
     checksum = compute_checksum(component, filename)
@@ -481,7 +485,9 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=
 
     progress = calculate_percentage(downloaded_size, file_size)
 
-    return f"{progress}" if progress < 100 else "DOWNLOAD_COMPLETED"
+    return (
+        f"{progress}" if progress < 100 else ComponentDownloadStatus.DOWNLOAD_COMPLETED
+    )
 
 
 @task(task_run_name="{component.component_uid}-update-download-progress")
@@ -506,7 +512,7 @@ def update_download_progress(component):  # sourcery skip: raise-specific-error
             f"Download progress for component {component.component_uid}: {progress}%"
         )
 
-        if progress == "DOWNLOAD_COMPLETED":
+        if progress == ComponentDownloadStatus.DOWNLOAD_COMPLETED:
             logger.info(
                 f"Download progress for component {component.component_uid}: 100%"
             )
