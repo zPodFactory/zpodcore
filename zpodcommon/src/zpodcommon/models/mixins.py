@@ -5,13 +5,13 @@ from sqlmodel import Field, SQLModel
 
 class CommonDatesMixin(SQLModel):
     creation_date: datetime = Field(
-        sa_column_kwargs=dict(default=datetime.utcnow),
+        sa_column_kwargs={"default": datetime.utcnow},
         nullable=False,
     )
     last_modified_date: datetime = Field(
-        sa_column_kwargs=dict(
-            default=datetime.utcnow,
-            onupdate=datetime.utcnow,
-        ),
+        sa_column_kwargs={
+            "default": datetime.utcnow,
+            "onupdate": datetime.utcnow,
+        },
         nullable=False,
     )

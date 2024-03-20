@@ -136,4 +136,4 @@ zpodengine-prefect *args:
 # Update zpodsdk
 zpodsdk-update: zpodapi-generate-openapi
   docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
-  docker run -v "{{justfile_directory()}}/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh && chown `id -u`:`id -g` --recursive /zpodcore/zpodsdk/zpod"
+  docker run -v "{{justfile_directory()}}/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh && chown `id -u`:`id -g` --recursive /zpodcore/zpodsdk/src/zpodsdk"

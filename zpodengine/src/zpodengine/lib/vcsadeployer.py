@@ -7,7 +7,7 @@ from rich import print as pprint
 from zpodcommon import models as M
 from zpodengine.lib.commands import cmd_execute
 from zpodengine.lib.dbutils import DBUtils
-from zpodengine.lib.network import INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
+from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
 
 
 def vcsa_extract_iso(component: M.Component):
@@ -50,9 +50,9 @@ def vcsa_fix_permissions(component: M.Component):
     cmd_execute(cmd_permissions_vcsa_cli)
 
 
-def vcsa_deployer(instance_component: M.InstanceComponent):
-    component = instance_component.component
-    instance = instance_component.instance
+def vcsa_deployer(zpod_component: M.ZpodComponent):
+    component = zpod_component.component
+    zpod = zpod_component.zpod
 
     print("Deploying vCenter Server")
 
@@ -65,13 +65,13 @@ def vcsa_deployer(instance_component: M.InstanceComponent):
     # Load vcsa deploy spec
     vcsa_spec = cjson["component_deploy_vcsa_spec"]
 
-    # Fetch component IP address from instance
-    component_ipaddress = MgmtIp.instance_component(instance_component).ip
+    # Fetch component IP address from zpod
+    component_ipaddress = MgmtIp.zpod_component(zpod_component).ip
 
-    zpod_netmask = MgmtIp.instance(instance, "gw").netmask
+    zpod_netmask = MgmtIp.zpod(zpod, "gw").netmask
 
-    # Fetch component default gw from instance
-    component_gateway = MgmtIp.instance(instance, "gw").ip
+    # Fetch component default gw from zpod
+    component_gateway = MgmtIp.zpod(zpod, "gw").ip
 
     zpodfactory_host = DBUtils.get_setting_value("zpodfactory_host")
     zpodfactory_ssh_key = DBUtils.get_setting_value("zpodfactory_ssh_key")
@@ -93,12 +93,12 @@ def vcsa_deployer(instance_component: M.InstanceComponent):
         zpod_hostname=zpod_hostname,
         zpod_ipaddress=component_ipaddress,
         zpod_netmask=zpod_netmask,
-        zpod_netprefix=INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN,
+        zpod_netprefix=ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,
         zpod_gateway=component_gateway,
         zpod_dns=zpod_dns,
         zpod_ntp=zpodfactory_host,
-        zpod_domain=instance.domain,
-        zpod_password=instance.password,
+        zpod_domain=zpod.domain,
+        zpod_password=zpod.password,
         zpod_datastore=datastore,
         zpod_sshkey=zpodfactory_ssh_key,
         zpod_portgroup=zpod_portgroup,
@@ -107,7 +107,7 @@ def vcsa_deployer(instance_component: M.InstanceComponent):
     print("vcsa spec options generated file")
     pprint(vcsa_spec_render)
 
-    vm_name = f"vcsa.{instance.domain}"
+    vm_name = f"vcsa.{zpod.domain}"
 
     options_filename = f"/tmp/{vm_name}.json"
     with open(options_filename, "w") as f:

@@ -13,8 +13,8 @@ from zpodcommon.lib.nsx import NsxClient
 #
 # Defaults
 #
-INSTANCE_PUBLIC_NETWORK_PREFIXLEN = 24
-INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
+ZPOD_PUBLIC_NETWORK_PREFIXLEN = 24
+ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
 
 
 #
@@ -23,7 +23,7 @@ INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
 #
 
 
-def get_instance_primary_subnet(endpoint: str):
+def get_zpod_primary_subnet(endpoint: str):
     endpoint_network = ipaddress.ip_network(endpoint.endpoints["network"]["networks"])
     with NsxClient(endpoint=endpoint) as nsx:
         segments = nsx.search(resource_type="Segment")
@@ -38,7 +38,7 @@ def get_instance_primary_subnet(endpoint: str):
 
         # Get all possible subnets
         possible_subnets = list(
-            endpoint_network.subnets(new_prefix=INSTANCE_PUBLIC_NETWORK_PREFIXLEN)
+            endpoint_network.subnets(new_prefix=ZPOD_PUBLIC_NETWORK_PREFIXLEN)
         )
 
         # Randomize possible subnet list
@@ -55,14 +55,14 @@ def get_instance_primary_subnet(endpoint: str):
 
 #
 # All networks from the main network
-# This is to provide VLAN support in every Instance for ease of use
+# This is to provide VLAN support in every zPod for ease of use
 # and better UX when simulating on-prem env.
 # We defaulted each of them to a /26 network
-# This means we will have 4 x /26 usable in the Instance
+# This means we will have 4 x /26 usable in the zPod
 # The first /26 will be managed by the Native VDS/NSX-T Segment
 # The last 3 x /26 will be managed by zbox/vyos through guest VLANs
 # Example:
-# instance_subnet = 10.96.50.0/24
+# zpod_subnet = 10.96.50.0/24
 # provides:
 # - 10.96.50.0/26   [VDS/NSX-T on vlan 0(native no taggging)]
 # - 10.96.50.64/26  [zbox/vyos on vlan 64]
@@ -71,10 +71,8 @@ def get_instance_primary_subnet(endpoint: str):
 #
 
 
-def get_instance_all_subnets(instance_subnet: IPv4Network):
-    return list(
-        instance_subnet.subnets(new_prefix=INSTANCE_PUBLIC_SUB_NETWORKS_PREFIXLEN)
-    )
+def get_zpod_all_subnets(zpod_subnet: IPv4Network):
+    return list(zpod_subnet.subnets(new_prefix=ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN))
 
 
 class MgmtIp:
@@ -100,29 +98,29 @@ class MgmtIp:
         self.ipv4address = list(ipv4network.hosts())[int(host_id) - 1]
 
     @classmethod
-    def instance_component(
+    def zpod_component(
         cls,
-        instance_component: M.InstanceComponent,
+        zpod_component: M.ZpodComponent,
         host_id: int | None = None,
     ):
-        """Load from instance_component"""
-        return cls.instance(
-            instance=instance_component.instance,
-            component_name=instance_component.component.component_name,
+        """Load from zpod_component"""
+        return cls.zpod(
+            zpod=zpod_component.zpod,
+            component_name=zpod_component.component.component_name,
             host_id=host_id,
         )
 
     @classmethod
-    def instance(
+    def zpod(
         cls,
-        instance: M.Instance,
+        zpod: M.Zpod,
         component_name: str | None = None,
         host_id: int | None = None,
     ):
-        """Load from instance"""
+        """Load from zpod"""
         if host_id is None:
             host_id = cls.MGMT_HOST_IDS[component_name]
-        ipv4network = IPv4Network(instance.networks[0].cidr)
+        ipv4network = IPv4Network(zpod.networks[0].cidr)
         return cls(ipv4network=ipv4network, host_id=host_id)
 
     @property
@@ -144,7 +142,7 @@ class MgmtIp:
 
 #
 # Fetch Host IP address
-# This will be used for sending this ip to Instances/components with:
+# This will be used for sending this ip to zpods/components with:
 #  - Shared ISO Read Only Datastore
 #  - NTP server for all zPods
 #  - xyz new things

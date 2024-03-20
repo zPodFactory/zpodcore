@@ -8,13 +8,6 @@ from zpodapi.endpoints import (
     endpoint_enet__routes,
     endpoint_permission__routes,
 )
-from zpodapi.instances import (
-    instance__routes,
-    instance_component__routes,
-    instance_feature__routes,
-    instance_network__routes,
-    instance_permission__routes,
-)
 from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.libraries import library__routes
 from zpodapi.permission_groups import permission_group__routes
@@ -22,6 +15,13 @@ from zpodapi.profiles import profile__routes
 from zpodapi.root import root__routes
 from zpodapi.settings import setting__routes
 from zpodapi.users import user__routes
+from zpodapi.zpods import (
+    zpod__routes,
+    zpod_component__routes,
+    zpod_feature__routes,
+    zpod_network__routes,
+    zpod_permission__routes,
+)
 
 
 def simplify_operation_ids(api: FastAPI) -> None:
@@ -49,11 +49,11 @@ api.include_router(component__routes.router)
 api.include_router(endpoint__routes.router)
 api.include_router(endpoint_enet__routes.router)
 api.include_router(endpoint_permission__routes.router)
-api.include_router(instance__routes.router)
-api.include_router(instance_component__routes.router)
-api.include_router(instance_feature__routes.router)
-api.include_router(instance_network__routes.router)
-api.include_router(instance_permission__routes.router)
+api.include_router(zpod__routes.router)
+api.include_router(zpod_component__routes.router)
+api.include_router(zpod_feature__routes.router)
+api.include_router(zpod_network__routes.router)
+api.include_router(zpod_permission__routes.router)
 api.include_router(library__routes.router)
 api.include_router(permission_group__routes.router)
 api.include_router(profile__routes.router)
