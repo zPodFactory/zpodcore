@@ -70,7 +70,7 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                     f" -zPodESXiList {','.join(zpod_esxi_list)}"
                     " " + " ".join(license_parts)
                 )
-                cmd_execute(f'pwsh -c "& {cmd}"')
+                cmd_execute(f'pwsh -c "& {cmd}"').check_returncode()
 
             case "esxi":
                 print("--- esxi ---")
@@ -86,7 +86,7 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                     f" {zpod_component.fqdn} {zpod_component.hostname}"
                 )
 
-                cmd_execute(f"python {cmd}")
+                cmd_execute(f"python {cmd}").check_returncode()
 
                 # Configure esxi
                 cmd = (
@@ -96,7 +96,7 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                     f" -zPodFactory {zpodfactory_host}.{zpod.domain}"
                     f" -zPodPassword {zpod.password}"
                 )
-                cmd_execute(f'pwsh -c "& {cmd}"')
+                cmd_execute(f'pwsh -c "& {cmd}"').check_returncode()
 
             case _:
                 print("Normal component, nothing to do here yet...")
