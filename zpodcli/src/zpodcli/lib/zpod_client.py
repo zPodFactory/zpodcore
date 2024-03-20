@@ -1,12 +1,11 @@
 import json
 from functools import wraps
 
-from zpod import zpod_client
-from zpod.errors import UnexpectedStatus
-
 from zpodcli import __version__
 from zpodcli.lib.factory_config import FactoryConfig
 from zpodcli.lib.utils import exit_with_error
+from zpodsdk import zpod_client
+from zpodsdk.errors import UnexpectedStatus
 
 
 class ZpodClient(zpod_client.ZpodClient):

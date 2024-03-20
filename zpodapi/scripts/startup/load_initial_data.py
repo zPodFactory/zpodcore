@@ -55,7 +55,7 @@ with database.get_session_ctx() as session:
         session.add(setting_debug)
 
         setting_domain = M.Setting(
-            name="zpodfactory_instances_domain",
+            name="zpodfactory_default_domain",
             description="Default domain for all zPods",
             value="zpodfactory.io",
         )

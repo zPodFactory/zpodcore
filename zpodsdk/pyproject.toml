@@ -7,7 +7,7 @@ authors = []
 
 readme = "README.md"
 packages = [
-    {include = "zpod"},
+    {include = "zpodsdk", from = "src"},
 ]
 include = ["CHANGELOG.md", "zpod/py.typed"]
 

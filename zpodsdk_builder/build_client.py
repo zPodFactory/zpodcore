@@ -72,5 +72,5 @@ if __name__ == "__main__":
         class_name = "".join([*map(str.title, sections), "Client"])
 
     output = build(package_name=package_name, class_name=class_name)
-    with open(f"{package_name}/{package_name}_client.py", "w+") as f:
+    with open("zpodsdk/zpod_client.py", "w+") as f:
         f.write(output)

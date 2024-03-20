@@ -1,8 +1,8 @@
 {
   "component_download": "src/zpodengine/component_download/flow_component_download.py:flow_component_download",
-  "instance_component_add": "src/zpodengine/instance_component_add/flow_instance_component_add.py:flow_instance_component_add",
-  "instance_component_remove": "src/zpodengine/instance_component_remove/flow_instance_component_remove.py:flow_instance_component_remove",
-  "instance_deploy": "src/zpodengine/instance_deploy/flow_instance_deploy.py:flow_instance_deploy",
-  "instance_destroy": "src/zpodengine/instance_destroy/flow_instance_destroy.py:flow_instance_destroy",
-  "nsx_project_destroy": "src/zpodengine/nsx_project_destroy/flow_nsx_project_destroy.py:flow_nsx_project_destroy"
+  "nsx_project_destroy": "src/zpodengine/nsx_project_destroy/flow_nsx_project_destroy.py:flow_nsx_project_destroy",
+  "zpod_component_add": "src/zpodengine/zpod_component_add/flow_zpod_component_add.py:flow_zpod_component_add",
+  "zpod_component_remove": "src/zpodengine/zpod_component_remove/flow_zpod_component_remove.py:flow_zpod_component_remove",
+  "zpod_deploy": "src/zpodengine/zpod_deploy/flow_zpod_deploy.py:flow_zpod_deploy",
+  "zpod_destroy": "src/zpodengine/zpod_destroy/flow_zpod_destroy.py:flow_zpod_destroy"
 }

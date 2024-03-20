@@ -13,8 +13,8 @@ def hide_sensitive(v: str, info: ValidationInfo):
 
 class D:
     id = {"example": 1}
-    name = {"example": "domain"}
-    description = {"example": "default domain for every instances (zpodfactory.io)"}
+    name = {"example": "zpodfactory_default_domain"}
+    description = {"example": "default domain for every zpod (zpodfactory.io)"}
     value = {"example": "zpodfactory.io"}
 
 

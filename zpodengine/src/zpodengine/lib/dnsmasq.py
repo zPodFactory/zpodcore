@@ -26,11 +26,11 @@ def lock_file(file):
         file_handle.close()
 
 
-def add(instance_domain, ip):
-    print(f"Adding dnsmasq record for: {instance_domain}, {ip}")
+def add(zpod_domain, ip):
+    print(f"Adding dnsmasq record for: {zpod_domain}, {ip}")
     with lock_file("/zpod/dnsmasq_servers/servers.conf") as f:
         lines = set(f.readlines())
-        lines.add(f"server=/{instance_domain}/{ip}\n")
+        lines.add(f"server=/{zpod_domain}/{ip}\n")
         inaddr = ".".join(reversed(ip.split(".")[:3]))
         lines.add(f"server=/{inaddr}.in-addr.arpa/{ip}\n")
         write(f, lines)

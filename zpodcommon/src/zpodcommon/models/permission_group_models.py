@@ -6,8 +6,8 @@ from zpodcommon.models.model_base import ModelBase
 
 if TYPE_CHECKING:
     from .endpoint_models import EndpointPermission
-    from .instance_models import InstancePermission
     from .user_models import User
+    from .zpod_models import ZpodPermission
 
 
 class PermissionGroup(ModelBase, table=True):
@@ -26,22 +26,22 @@ class PermissionGroup(ModelBase, table=True):
 
     endpoint_permissions: List["EndpointPermission"] = Relationship(
         back_populates="permission_groups",
-        sa_relationship_kwargs=dict(
-            secondary="endpoint_permission_group_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "endpoint_permission_group_link",
+        },
     )
 
-    instance_permissions: List["InstancePermission"] = Relationship(
+    zpod_permissions: List["ZpodPermission"] = Relationship(
         back_populates="permission_groups",
-        sa_relationship_kwargs=dict(
-            secondary="instance_permission_group_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "zpod_permission_group_link",
+        },
     )
     users: List["User"] = Relationship(
         back_populates="permission_groups",
-        sa_relationship_kwargs=dict(
-            secondary="permission_group_user_link",
-        ),
+        sa_relationship_kwargs={
+            "secondary": "permission_group_user_link",
+        },
     )
 
 

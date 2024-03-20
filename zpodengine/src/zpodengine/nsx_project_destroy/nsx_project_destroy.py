@@ -36,7 +36,7 @@ class NsxProjectDestroy:
         self.nsx.close()
 
     def destroy(self):
-        segments = self.instance_project_segments()
+        segments = self.zpod_project_segments()
         for segment in segments:
             wait_for_segment_to_be_evacuted(self.nsx, segment)
 
@@ -48,7 +48,7 @@ class NsxProjectDestroy:
 
         self.delete_project()
 
-    def instance_project_segments(self):
+    def zpod_project_segments(self):
         return self.nsx.search(
             resource_type="Segment",
             parent_path=fmt(f"{self.project_path}/infra"),

@@ -259,7 +259,7 @@ class vCenter:
     def poweron_vapp(self, vapp: vim.VirtualApp):
         if vapp and vapp.summary.vAppState != "started":
             # We don't need to wait here
-            # That means an instance was explictly powered off by a user
+            # That means zpod was explictly powered off by a user
             # restart will go through all vms in that vApp anyway.
             vapp.PowerOnVApp_Task(True)
 
@@ -415,30 +415,30 @@ class vCenter:
             )
 
     @classmethod
-    def auth_by_instance_endpoint(
+    def auth_by_zpod_endpoint(
         cls,
-        instance: M.Instance | None = None,
-        instance_id: int | None = None,
+        zpod: M.Zpod | None = None,
+        zpod_id: int | None = None,
         **kwargs,
     ):
-        with database.get_session_ctx() if instance_id else nullcontext() as session:
-            if instance_id:
-                instance = session.get(M.Instance, instance_id)
-            return cls.auth_by_endpoint(endpoint=instance.endpoint, **kwargs)
+        with database.get_session_ctx() if zpod_id else nullcontext() as session:
+            if zpod_id:
+                zpod = session.get(M.Zpod, zpod_id)
+            return cls.auth_by_endpoint(endpoint=zpod.endpoint, **kwargs)
 
     @classmethod
-    def auth_by_instance(
+    def auth_by_zpod(
         cls,
-        instance: M.Instance | None = None,
-        instance_id: int | None = None,
+        zpod: M.Zpod | None = None,
+        zpod_id: int | None = None,
         **kwargs,
     ):
-        with database.get_session_ctx() if instance_id else nullcontext() as session:
-            if instance_id:
-                instance = session.get(M.Instance, instance_id)
+        with database.get_session_ctx() if zpod_id else nullcontext() as session:
+            if zpod_id:
+                zpod = session.get(M.Zpod, zpod_id)
             return cls(
-                host=f"vcsa.{instance.domain}",
-                user=f"administrator@{instance.domain}",
-                pwd=instance.password,
+                host=f"vcsa.{zpod.domain}",
+                user=f"administrator@{zpod.domain}",
+                pwd=zpod.password,
                 **kwargs,
             )

@@ -123,8 +123,8 @@ class NsxClient(httpx.Client):
             return cls(endpoint, **kwargs)
 
     @classmethod
-    def auth_by_instance(cls, instance: M.Instance, **kwargs):
-        return cls(instance.endpoint, **kwargs)
+    def auth_by_zpod(cls, zpod: M.Zpod, **kwargs):
+        return cls(zpod.endpoint, **kwargs)
 
     def search_one(self, **terms):
         if data := self.search(**terms):

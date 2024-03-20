@@ -23,20 +23,25 @@ class EndpointPermission(str, Enum):
     USER = "USER"
 
 
-class InstanceComponentStatus(str, Enum):
+class UserStatus(str, Enum):
+    ENABLED = "ENABLED"
+    DISABLED = "DISABLED"
+
+
+class ZpodComponentStatus(str, Enum):
     ACTIVE = "ACTIVE"
     BUILDING = "BUILDING"
     ADD_FAILED = "ADD_FAILED"
     DELETE_FAILED = "DELETE_FAILED"
 
 
-class InstancePermission(str, Enum):
+class ZpodPermission(str, Enum):
     OWNER = "OWNER"
     ADMIN = "ADMIN"
     USER = "USER"
 
 
-class InstanceStatus(str, Enum):
+class ZpodStatus(str, Enum):
     ACTIVE = "ACTIVE"
     BUILDING = "BUILDING"
     DELETED = "DELETED"
@@ -44,8 +49,3 @@ class InstanceStatus(str, Enum):
     DEPLOY_FAILED = "DEPLOY_FAILED"
     DESTROY_FAILED = "DESTROY_FAILED"
     PENDING = "PENDING"
-
-
-class UserStatus(str, Enum):
-    ENABLED = "ENABLED"
-    DISABLED = "DISABLED"
