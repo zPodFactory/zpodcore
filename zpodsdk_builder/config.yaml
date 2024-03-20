@@ -9,5 +9,5 @@ class_overrides:
 
 post_hooks:
   - python /zpodcore/zpodsdk_builder/build_client.py "zpodsdk" --class_name ZpodClient
-  - ruff --fix --extend-select "I" .
-  - ruff format .
+  - ruff check --no-cache --fix --extend-select "I" .
+  - ruff format --no-cache .
