@@ -58,11 +58,9 @@ def factory_list():
 @app.command(name="add", no_args_is_help=True)
 def factory_add(
     *,
-    name: Annotated[
+    factory_name: Annotated[
         str,
-        typer.Option(
-            "--name",
-            "-n",
+        typer.Argument(
             help="Factory name",
             show_default=False,
             callback=validate_name,
@@ -100,19 +98,19 @@ def factory_add(
     Add Factory
     """
 
-    print(f"Adding Factory: {name}")
+    print(f"Adding Factory: {factory_name}")
 
     fc = FactoryConfig()
     factory_names = fc.config.sections()
-    if name in factory_names:
-        exit_with_error(f"Duplicate factory name found: {name}")
+    if factory_name in factory_names:
+        exit_with_error(f"Duplicate factory name found: {factory_name}")
 
-    fc.config.add_section(name)
-    factory = fc.config[name]
+    fc.config.add_section(factory_name)
+    factory = fc.config[factory_name]
     factory["zpod_api_url"] = server
     factory["zpod_api_token"] = token
     if setactive or len(factory_names) == 1:
-        fc.setactive(name)
+        fc.setactive(factory_name)
     else:
         factory["active"] = "False"
     fc.write()
@@ -122,14 +120,12 @@ def factory_add(
 @app.command(name="update", no_args_is_help=True)
 def factory_update(
     *,
-    name: Annotated[
+    factory_name: Annotated[
         Optional[str],
-        typer.Option(
-            "--name",
-            "-n",
-            callback=validate_name,
+        typer.Argument(
             help="Factory name",
             show_default=False,
+            callback=validate_name,
         ),
     ],
     newname: Annotated[
@@ -169,31 +165,31 @@ def factory_update(
     """
     Update Factory
     """
-    print(f"Updating factory: {name}")
+    print(f"Updating factory: {factory_name}")
 
     fc = FactoryConfig()
     factory_names = fc.config.sections()
-    if name not in factory_names:
-        exit_with_error(f"Factory name not found: {name}")
+    if factory_name not in factory_names:
+        exit_with_error(f"Factory name not found: {factory_name}")
     if newname:
         print(f"  Renaming factory to {newname}")
         if newname in factory_names:
             exit_with_error(f"Duplicate factory name found: {newname}")
 
-    factory = fc.config[name]
+    factory = fc.config[factory_name]
     if server:
         factory["zpod_api_url"] = server
     if token:
         factory["zpod_api_token"] = token
     if setactive:
-        fc.setactive(name)
+        fc.setactive(factory_name)
 
     if newname:
         fc.config.add_section(newname)
         newfactory = fc.config[newname]
         for key, value in factory.items():
             newfactory[key] = value
-        fc.config.remove_section(name)
+        fc.config.remove_section(factory_name)
 
     fc.write()
     factory_list()
@@ -202,11 +198,9 @@ def factory_update(
 @app.command(name="remove", no_args_is_help=True)
 def factory_remove(
     *,
-    name: Annotated[
+    factory_name: Annotated[
         str,
-        typer.Option(
-            "--name",
-            "-n",
+        typer.Argument(
             help="Factory name",
             show_default=False,
             callback=validate_name,
@@ -216,16 +210,16 @@ def factory_remove(
     """
     Remove Factory
     """
-    print(f"Removing Factory: {name}")
+    print(f"Removing Factory: {factory_name}")
 
     fc = FactoryConfig()
-    if name not in fc.config.sections():
-        exit_with_error(f"Factory name not found: {name}")
+    if factory_name not in fc.config.sections():
+        exit_with_error(f"Factory name not found: {factory_name}")
 
-    factory = fc.config[name]
+    factory = fc.config[factory_name]
     if factory.getboolean("active"):
-        exit_with_error(f"Cannot remove active factory: {name}")
+        exit_with_error(f"Cannot remove active factory: {factory_name}")
 
-    fc.config.remove_section(name)
+    fc.config.remove_section(factory_name)
     fc.write()
     factory_list()
