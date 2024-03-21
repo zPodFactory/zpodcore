@@ -66,7 +66,10 @@ def generate_table(
 def endpoint_permission_list(
     endpoint_name: Annotated[
         str,
-        typer.Option("-e", help="endpoint name"),
+        typer.Argument(
+            help="Endpoint name",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -84,15 +87,28 @@ def endpoint_permission_add(
     *,
     endpoint_name: Annotated[
         str,
-        typer.Option("-e", help="endpoint name"),
+        typer.Argument(
+            help="Endpoint name",
+            show_default=False,
+        ),
     ],
     username: Annotated[
         Optional[str],
-        typer.Option("-u", help="username to add"),
+        typer.Option(
+            "--username",
+            "-u",
+            help="Username to add",
+            show_default=False,
+        ),
     ] = None,
     groupname: Annotated[
         Optional[str],
-        typer.Option("-g", help="group to add"),
+        typer.Option(
+            "--group",
+            "-g",
+            help="Group to add",
+            show_default=False,
+        ),
     ] = None,
 ):
     """
@@ -128,15 +144,28 @@ def endpoint_permission_remove(
     *,
     endpoint_name: Annotated[
         str,
-        typer.Option("-e", help="endpoint name"),
+        typer.Argument(
+            help="Endpoint name",
+            show_default=False,
+        ),
     ],
     username: Annotated[
         Optional[str],
-        typer.Option("-u", help="username to remove"),
+        typer.Option(
+            "--username",
+            "-u",
+            help="Username to remove",
+            show_default=False,
+        ),
     ] = None,
     groupname: Annotated[
         Optional[str],
-        typer.Option("-g", help="group to remove"),
+        typer.Option(
+            "--group",
+            "-g",
+            help="Group to remove",
+            show_default=False,
+        ),
     ] = None,
 ):
     """
