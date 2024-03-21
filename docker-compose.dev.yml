@@ -80,6 +80,8 @@ services:
     entrypoint: /zpodcore/bootstrap/start_worker.sh
     environment:
       - PREFECT_API_URL=http://zpodengineserver:4200/api
+      - PREFECT_TASK_INTROSPECTION_WARN_THRESHOLD=0
+
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
