@@ -1,4 +1,5 @@
 import json
+import urllib.parse
 
 from jinja2 import Template
 
@@ -48,7 +49,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         epc = zpod.endpoint.endpoints["compute"]
         hostname = epc["hostname"]
         username = epc["username"]
-        password = epc["password"]
+        password = urllib.parse.quote(epc["password"])
         datacenter = epc["datacenter"]
         datastore = epc["storage_datastore"]
         # FIXME: we might want this in a zcli setting key/value ?
@@ -64,7 +65,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         # vSphere env
         hostname = f"vcsa.{zpod.domain}"
         username = f"administrator@{zpod.domain}"
-        password = zpod.password
+        password = urllib.parse.quote(zpod.password)
 
         # For now this is hardcoded unless anything changes
         resource_pool = "Cluster/Resources"
@@ -111,6 +112,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         f" -pool={resource_pool}"
         f" -ds={datastore}"
         " -json=true"  # this avoids prefect crashing on the live output
+        " -hidden=true"
         f" -options={options_filename}"
         f" -dc={datacenter}"
         f" /products/{component.component_name}/{component.component_version}/{component.filename}"  # noqa: E501 B950
