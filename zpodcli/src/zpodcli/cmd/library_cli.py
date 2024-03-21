@@ -14,9 +14,6 @@ app = typer.Typer(help="Manage Libraries")
 
 console = Console()
 
-ZPOD_LIBRARY_DESCRIPTION = "Default zPodFactory library"
-ZPOD_LIBRARY_GIT_URL = "https://github.com/zpodfactory/zpodlibrary"
-
 
 def generate_table(libraries: list, action: str = None):
     title = f"{action} Library"
@@ -59,23 +56,39 @@ def library_list():
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def library_create(
-    name: Annotated[
+    library_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Library name",
+            show_default=False,
+        ),
     ],
     git_url: Annotated[
         str,
-        typer.Option("--git_url", "-u"),
-    ] = ZPOD_LIBRARY_GIT_URL,
+        typer.Option(
+            "--git-url",
+            "-u",
+            help="Library git URL",
+            show_default=False,
+        ),
+    ] = "",
     description: Annotated[
-        str, typer.Option("--description", "-d")
-    ] = ZPOD_LIBRARY_DESCRIPTION,
+        str,
+        typer.Option(
+            "--description",
+            "-d",
+            help="Library description",
+            show_default=False,
+        ),
+    ] = "",
 ):
     """
     Create Library
     """
     z: ZpodClient = ZpodClient()
-    library_in = LibraryCreate(name=name, description=description, git_url=git_url)
+    library_in = LibraryCreate(
+        name=library_name, description=description, git_url=git_url
+    )
     library = z.libraries_create.sync(body=library_in)
     generate_table(libraries=[library], action="Create")
 
@@ -83,18 +96,21 @@ def library_create(
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def library_delete(
-    name: Annotated[
+    library_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Library name",
+            show_default=False,
+        ),
     ],
 ):
     """
     Delete Library
     """
     z: ZpodClient = ZpodClient()
-    z.libraries_delete.sync(id=f"name={name}")
+    z.libraries_delete.sync(id=f"name={library_name}")
     console.print(
-        f"Library [magenta]{name}[/magenta] has been deleted successfully",
+        f"Library [magenta]{library_name}[/magenta] has been deleted successfully",
         style="green",
     )
 
@@ -103,18 +119,30 @@ def library_delete(
 @unexpected_status_handler
 def library_update(
     *,
-    enabled: Annotated[
-        Optional[bool],
-        typer.Option("--enable/--disable"),
-    ] = None,
-    name: Annotated[
+    library_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Library name",
+            show_default=False,
+        ),
     ],
     description: Annotated[
         str,
-        typer.Option("--description", "-d"),
-    ] = ZPOD_LIBRARY_DESCRIPTION,
+        typer.Option(
+            "--description",
+            "-d",
+            help="Library description",
+            show_default=False,
+        ),
+    ] = "",
+    enabled: Annotated[
+        Optional[bool],
+        typer.Option(
+            "--enable/--disable",
+            help="Enable or disable library",
+            show_default=False,
+        ),
+    ] = None,
 ):
     """
     Update Library Metadata (Description and Enabled/Disabled)
@@ -122,7 +150,7 @@ def library_update(
     is_enabled = None
     z: ZpodClient = ZpodClient()
     if enabled is None:
-        library = z.libraries_get.sync(id=f"name={name}")
+        library = z.libraries_get.sync(id=f"name={library_name}")
         is_enabled = library.enabled
     elif enabled:
         is_enabled = True
@@ -130,37 +158,43 @@ def library_update(
         is_enabled = False
 
     library_in = LibraryUpdate(enabled=is_enabled, description=description)
-    z.libraries_update.sync(body=library_in, id=f"name={name}")
+    z.libraries_update.sync(body=library_in, id=f"name={library_name}")
     generate_table(libraries=[library], action="Enable")
 
 
 @app.command(name="get", no_args_is_help=True)
 @unexpected_status_handler
 def library_get(
-    name: Annotated[
+    library_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Library name",
+            show_default=False,
+        ),
     ],
 ):
     """
     Get Library
     """
     z: ZpodClient = ZpodClient()
-    library = z.libraries_get.sync(id=f"name={name}")
+    library = z.libraries_get.sync(id=f"name={library_name}")
     generate_table(libraries=[library], action="Get")
 
 
 @app.command(name="resync", no_args_is_help=True)
 @unexpected_status_handler
 def library_resync(
-    name: Annotated[
+    library_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Library name",
+            show_default=False,
+        ),
     ],
 ):
     """
     Resync Libraries (Will refresh *ALL* library components json/metadata)
     """
     z: ZpodClient = ZpodClient()
-    library = z.libraries_resync.sync(id=f"name={name}")
+    library = z.libraries_resync.sync(id=f"name={library_name}")
     generate_table(libraries=[library], action="Sync")
