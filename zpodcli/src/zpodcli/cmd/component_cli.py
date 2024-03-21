@@ -61,9 +61,13 @@ def generate_table(components: list, component_uid: str = None, action: str = No
 @app.command(name="list")
 @unexpected_status_handler
 def component_list(
-    available: Annotated[
+    all_: Annotated[
         bool,
-        typer.Option("-a", help="Show all library components"),
+        typer.Option(
+            "--all",
+            "-a",
+            help="Show all library components",
+        ),
     ] = False,
 ):
     """
@@ -77,7 +81,7 @@ def component_list(
 
     # filter only completed/available components
     filtered_components = []
-    if not available:
+    if not all_:
         filtered_components.extend(
             c
             for c in sorted_components
@@ -97,7 +101,10 @@ def component_list(
 def component_enable(
     component_uid: Annotated[
         str,
-        typer.Option("--uid"),
+        typer.Argument(
+            help="Component UID",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -106,7 +113,11 @@ def component_enable(
 
     z: ZpodClient = ZpodClient()
     component = z.components_enable.sync(id=f"uid={component_uid}")
-    generate_table(components=[component], component_uid=component_uid, action="Enable")
+    generate_table(
+        components=[component],
+        component_uid=component_uid,
+        action="Enable",
+    )
 
 
 @app.command(name="get", no_args_is_help=True)
@@ -114,7 +125,10 @@ def component_enable(
 def component_get(
     component_uid: Annotated[
         str,
-        typer.Option("--uid"),
+        typer.Argument(
+            help="Component UID",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -124,7 +138,11 @@ def component_get(
     z: ZpodClient = ZpodClient()
     component = z.components_get.sync(id=f"uid={component_uid}")
 
-    generate_table(components=[component], component_uid=component_uid, action="Get")
+    generate_table(
+        components=[component],
+        component_uid=component_uid,
+        action="Get",
+    )
 
 
 @app.command(name="disable", no_args_is_help=True)
@@ -132,7 +150,10 @@ def component_get(
 def component_disable(
     component_uid: Annotated[
         str,
-        typer.Option("--uid"),
+        typer.Argument(
+            help="Component UID",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -142,5 +163,7 @@ def component_disable(
     z: ZpodClient = ZpodClient()
     component = z.components_disable.sync(id=f"uid={component_uid}")
     generate_table(
-        components=[component], component_uid=component_uid, action="Disable"
+        components=[component],
+        component_uid=component_uid,
+        action="Disable",
     )
