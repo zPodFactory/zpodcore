@@ -31,9 +31,12 @@ def generate_table(enets: list, action: str = None):
 @app.command(name="list", no_args_is_help=True)
 @unexpected_status_handler
 def enet_list(
-    endpoint: Annotated[
+    endpoint_name: Annotated[
         str,
-        typer.Option("--endpoint", "-e"),
+        typer.Argument(
+            help="Endpoint name",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -41,7 +44,7 @@ def enet_list(
     """
     z = ZpodClient()
 
-    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
+    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint_name}")
     enets = z.endpoints_enet_get_all.sync(id=ep.id)
     generate_table(enets, "List")
 
@@ -49,13 +52,19 @@ def enet_list(
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def enet_create(
-    endpoint: Annotated[
+    endpoint_name: Annotated[
         str,
-        typer.Option("--endpoint", "-e"),
+        typer.Argument(
+            help="Endpoint name",
+            show_default=False,
+        ),
     ],
-    name: Annotated[
+    enet_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="ENet name",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -63,21 +72,27 @@ def enet_create(
     """
     z = ZpodClient()
 
-    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
-    z.endpoints_enet_create.sync(id=ep.id, body=EndpointENetCreate(name=name))
-    print(f"ENet [magenta]{name}[/magenta] has been created.")
+    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint_name}")
+    z.endpoints_enet_create.sync(id=ep.id, body=EndpointENetCreate(name=enet_name))
+    print(f"ENet [magenta]{enet_name}[/magenta] has been created.")
 
 
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def enet_delete(
-    endpoint: Annotated[
+    endpoint_name: Annotated[
         str,
-        typer.Option("--endpoint", "-e"),
+        typer.Argument(
+            help="Endpoint name",
+            show_default=False,
+        ),
     ],
-    name: Annotated[
+    enet_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="ENet name",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -85,6 +100,6 @@ def enet_delete(
     """
     z = ZpodClient()
 
-    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
-    z.endpoints_enet_delete.sync(id=ep.id, name=name)
-    print(f"ENet [magenta]{name}[/magenta] has been scheduled for deletion.")
+    ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint_name}")
+    z.endpoints_enet_delete.sync(id=ep.id, name=enet_name)
+    print(f"ENet [magenta]{enet_name}[/magenta] has been scheduled for deletion.")

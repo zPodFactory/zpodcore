@@ -47,9 +47,12 @@ def permission_group_list():
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_create(
-    name: Annotated[
+    group_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Group name",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -59,38 +62,45 @@ def permission_group_create(
     z: ZpodClient = ZpodClient()
     z.permission_groups_create.sync(
         body=PermissionGroupCreate(
-            name=name,
+            name=group_name,
         )
     )
-    print(f"Permission Group [magenta]{name}[/magenta] has been created.")
+    print(f"Permission Group [magenta]{group_name}[/magenta] has been created.")
 
 
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_update(
-    name: Annotated[
+    group_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Group name",
+            show_default=False,
+        ),
     ],
     newname: Annotated[
         str,
-        typer.Option("--newname"),
+        typer.Option(
+            "--newname",
+            help="New group name",
+            show_default=False,
+        ),
     ],
 ):
     """
     Update Permission Group
     """
-    if newname == name:
+    if newname == group_name:
         print("New name is the same as the old name")
         raise typer.Exit()
 
     z: ZpodClient = ZpodClient()
     z.permission_groups_update.sync(
-        id=f"name={name}",
+        id=f"name={group_name}",
         body=PermissionGroupUpdate(name=newname),
     )
     print(
-        f"Permission Group [magenta]{name}[/magenta] has been "
+        f"Permission Group [magenta]{group_name}[/magenta] has been "
         f"renamed to [magenta]{newname}[/magenta]."
     )
 
@@ -98,9 +108,12 @@ def permission_group_update(
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def permission_group_delete(
-    name: Annotated[
+    group_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Group name",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -109,6 +122,6 @@ def permission_group_delete(
     z: ZpodClient = ZpodClient()
 
     z.permission_groups_delete.sync(
-        id=f"name={name}",
+        id=f"name={group_name}",
     )
-    print(f"Permission Group [magenta]{name}[/magenta] has been deleted.")
+    print(f"Permission Group [magenta]{group_name}[/magenta] has been deleted.")

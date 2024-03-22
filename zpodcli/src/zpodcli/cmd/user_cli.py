@@ -70,23 +70,42 @@ def user_list(
 def user_add(
     username: Annotated[
         str,
-        typer.Option("--username", "-u", help="Username"),
+        typer.Argument(
+            help="Username",
+            show_default=False,
+        ),
     ],
     email: Annotated[
         str,
-        typer.Option("--email", "-e", help="Email"),
+        typer.Option(
+            "--email",
+            "-e",
+            help="Email",
+            show_default=False,
+        ),
     ],
     description: Annotated[
         str,
-        typer.Option("--description", "-d", help="Description"),
+        typer.Option(
+            "--description",
+            "-d",
+            help="Description",
+        ),
     ] = "",
     ssh_key: Annotated[
         str,
-        typer.Option("--ssh-key", "-s", help="SSH Key"),
+        typer.Option(
+            "--ssh-key",
+            "-s",
+            help="SSH Key",
+        ),
     ] = "",
     superadmin: Annotated[
         bool,
-        typer.Option("--superadmin", help="Superadmin"),
+        typer.Option(
+            "--superadmin",
+            help="Superadmin",
+        ),
     ] = False,
 ):
     """
@@ -114,19 +133,33 @@ def user_add(
 def user_update(
     username: Annotated[
         str,
-        typer.Option("--username", "-u", help="Username"),
+        typer.Argument(
+            help="Username",
+            show_default=False,
+        ),
     ],
     description: Annotated[
         str,
-        typer.Option("--description", "-d", help="Description"),
+        typer.Option(
+            "--description",
+            "-d",
+            help="Description",
+        ),
     ] = "",
     ssh_key: Annotated[
         str,
-        typer.Option("--ssh-key", "-s", help="SSH Key"),
+        typer.Option(
+            "--ssh-key",
+            "-s",
+            help="SSH Key",
+        ),
     ] = "",
     superadmin: Annotated[
         bool,
-        typer.Option("--superadmin", help="Superadmin"),
+        typer.Option(
+            "--superadmin",
+            help="Superadmin",
+        ),
     ] = False,
 ):
     """
@@ -149,7 +182,10 @@ def user_update(
 def user_enable(
     username: Annotated[
         str,
-        typer.Option("--username", "-u", help="Username"),
+        typer.Argument(
+            help="Username",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -165,7 +201,10 @@ def user_enable(
 def user_disable(
     username: Annotated[
         str,
-        typer.Option("--username", "-u", help="Username"),
+        typer.Argument(
+            help="Username",
+            show_default=False,
+        ),
     ],
 ):
     """
@@ -181,7 +220,10 @@ def user_disable(
 def user_reset_api_token(
     username: Annotated[
         str,
-        typer.Option("--username", "-u", help="Username"),
+        typer.Argument(
+            help="Username",
+            show_default=False,
+        ),
     ],
 ):
     """

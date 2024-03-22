@@ -71,20 +71,28 @@ def profile_list():
 @app.command(name="info", no_args_is_help=True)
 @unexpected_status_handler
 def profile_info(
-    name: Annotated[
+    profile_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Profile name",
+            show_default=False,
+        ),
     ],
     json_: Annotated[
         bool,
-        typer.Option("--json", "-j", is_flag=True),
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
     ] = False,
 ):
     """
     Profile Info
     """
     z: ZpodClient = ZpodClient()
-    profile = z.profiles_get.sync(id=f"name={name}")
+    profile = z.profiles_get.sync(id=f"name={profile_name}")
 
     if json_:
         print(json.dumps(profile.to_dict()["profile"]))
@@ -95,17 +103,30 @@ def profile_info(
 @app.command(name="create", no_args_is_help=True)
 @unexpected_status_handler
 def profile_create(
-    name: Annotated[
+    profile_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Profile name",
+            show_default=False,
+        ),
     ],
     profile: Annotated[
         Optional[str],
-        typer.Option("--profile", "-p"),
+        typer.Option(
+            "--profile",
+            "-p",
+            help="Profile json",
+            show_default=False,
+        ),
     ] = None,
     profile_file: Annotated[
         Optional[Path],
-        typer.Option("--profile-file", "-pf"),
+        typer.Option(
+            "--profile-file",
+            "-pf",
+            help="File containing profile json",
+            show_default=False,
+        ),
     ] = None,
 ):
     """
@@ -125,32 +146,49 @@ def profile_create(
 
     z.profiles_create.sync(
         body=ProfileCreate(
-            name=name,
+            name=profile_name,
             profile=build_profile(profile_obj),
         )
     )
 
-    print(f"Profile [magenta]{name}[/magenta] has been created.")
+    print(f"Profile [magenta]{profile_name}[/magenta] has been created.")
 
 
 @app.command(name="update", no_args_is_help=True)
 @unexpected_status_handler
 def profile_update(
-    name: Annotated[
+    profile_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Profile name",
+            show_default=False,
+        ),
     ],
     newname: Annotated[
         Optional[str],
-        typer.Option("--newname"),
+        typer.Option(
+            "--newname",
+            help="New profile name",
+            show_default=False,
+        ),
     ] = None,
     profile: Annotated[
         Optional[str],
-        typer.Option("--profile", "-p"),
+        typer.Option(
+            "--profile",
+            "-p",
+            help="Profile json",
+            show_default=False,
+        ),
     ] = None,
     profile_file: Annotated[
         Optional[Path],
-        typer.Option("--profile-file", "-pf"),
+        typer.Option(
+            "--profile-file",
+            "-pf",
+            help="File containing profile json",
+            show_default=False,
+        ),
     ] = None,
 ):
     """
@@ -160,7 +198,7 @@ def profile_update(
         exit_with_error("Can not have both profile file and profile")
 
     profile_update = ProfileUpdate()
-    if newname and newname != name:
+    if newname and newname != profile_name:
         profile_update.name = newname
 
     if profile_file:
@@ -173,26 +211,29 @@ def profile_update(
     z: ZpodClient = ZpodClient()
 
     z.profiles_update.sync(
-        id=f"name={name}",
+        id=f"name={profile_name}",
         body=profile_update,
     )
-    print(f"Profile [magenta]{name}[/magenta] has been updated.")
+    print(f"Profile [magenta]{profile_name}[/magenta] has been updated.")
 
 
 @app.command(name="delete", no_args_is_help=True)
 @unexpected_status_handler
 def profile_delete(
-    name: Annotated[
+    profile_name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Profile name",
+            show_default=False,
+        ),
     ],
 ):
     """
     Profile Delete
     """
     z: ZpodClient = ZpodClient()
-    z.profiles_delete.sync(id=f"name={name}")
-    print(f"Profile [magenta]{name}[/magenta] has been deleted successfully")
+    z.profiles_delete.sync(id=f"name={profile_name}")
+    print(f"Profile [magenta]{profile_name}[/magenta] has been deleted successfully")
 
 
 def load_profile_file(profile_file):

@@ -49,15 +49,28 @@ def setting_list():
 def update(
     name: Annotated[
         str,
-        typer.Option("--name", "-n"),
+        typer.Argument(
+            help="Setting name",
+            show_default=False,
+        ),
     ],
     value: Annotated[
         str,
-        typer.Option("--value", "-v"),
+        typer.Option(
+            "--value",
+            "-v",
+            help="Setting value",
+            show_default=False,
+        ),
     ],
     description: Annotated[
         Optional[str],
-        typer.Option("--description", "-d"),
+        typer.Option(
+            "--description",
+            "-d",
+            help="Setting description",
+            show_default=False,
+        ),
     ] = None,
 ):
     """
