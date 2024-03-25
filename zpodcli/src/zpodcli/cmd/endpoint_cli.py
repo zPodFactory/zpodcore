@@ -1,6 +1,6 @@
 import typer
 from rich.console import Console
-from rich.pretty import Pretty
+from rich.json import JSON
 from rich.table import Table
 
 from zpodcli.cmd import endpoint_permission_cli
@@ -37,8 +37,8 @@ def generate_table(endpoints: list, action: str = None):
         table.add_row(
             f"[dark_khaki]{endpoint.name}[/dark_khaki]",
             endpoint.description,
-            Pretty(epc.to_dict()),
-            Pretty(epn.to_dict()),
+            JSON.from_data(epc.to_dict()),
+            JSON.from_data(epn.to_dict()),
             get_boolean_markdown(endpoint.enabled),
         )
     console.print(table)
