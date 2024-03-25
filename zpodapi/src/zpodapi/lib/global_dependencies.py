@@ -76,9 +76,9 @@ def service_init_annotation(service):
 def validate_version(
     version: Annotated[str | None, Header(include_in_schema=False)] = None,
 ):
-    # If the version header is included, validate that it matches
-    # the current version.  If not, return 417 error.
-    if version and version != __version__:
+    # If the version header is included, validate that major and minor match
+    # the current API version.  If not, return 417 error.
+    if version and version.split(".")[:2] != __version__.split(".")[:2]:
         raise HTTPException(
             status_code=status.HTTP_417_EXPECTATION_FAILED,
             detail={
