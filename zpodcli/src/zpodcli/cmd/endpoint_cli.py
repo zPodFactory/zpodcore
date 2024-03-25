@@ -37,8 +37,8 @@ def generate_table(endpoints: list, action: str = None):
         table.add_row(
             f"[dark_khaki]{endpoint.name}[/dark_khaki]",
             endpoint.description,
-            Pretty(epc),
-            Pretty(epn),
+            Pretty(epc.to_dict()),
+            Pretty(epn.to_dict()),
             get_boolean_markdown(endpoint.enabled),
         )
     console.print(table)

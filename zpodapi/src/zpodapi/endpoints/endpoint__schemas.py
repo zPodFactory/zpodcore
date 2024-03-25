@@ -37,7 +37,7 @@ class D:
 
 
 class EndpointComputeView(SchemaBase):
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="ignore")
 
     name: str = Field(..., D.compute.name)
     driver: str = Field(..., D.compute.driver)
@@ -52,7 +52,7 @@ class EndpointComputeView(SchemaBase):
 
 
 class EndpointNetworkView(SchemaBase):
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="ignore")
 
     name: str = Field(..., D.network.name)
     driver: str = Field(..., D.network.driver)
