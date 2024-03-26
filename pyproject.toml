@@ -33,7 +33,7 @@ files = [
     "zpodapi/src/zpodapi/__init__.py",
     "zpodcli/src/zpodcli/__init__.py",
     "zpodengine/src/zpodengine/__init__.py",
-    "zpodsdk/zpod/__init__.py"
+    "zpodsdk/src/zpodsdk/__init__.py"
 ]
 search = '__version__ = "{current_version}"'
 replace = '__version__ = "{new_version}"'
