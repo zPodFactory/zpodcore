@@ -16,6 +16,7 @@ router = APIRouter(
 @router.get(
     "",
     response_model=list[ProfileView],
+    response_model_exclude_none=True,
 )
 def get_all(
     *,
@@ -27,6 +28,7 @@ def get_all(
 @router.get(
     "/{id}",
     response_model=ProfileView,
+    response_model_exclude_none=True,
 )
 def get(
     *,
@@ -38,6 +40,7 @@ def get(
 @router.post(
     "",
     response_model=ProfileView,
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
@@ -60,6 +63,7 @@ def create(
 @router.patch(
     "/{id}",
     response_model=ProfileView,
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
@@ -69,12 +73,11 @@ def update(
     profile: ProfileAnnotations.GetProfile,
     profile_in: ProfileUpdate,
 ):
-    if profile_in.name:
-        if profile_service.crud.get_all_filtered(name=profile_in.name):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Conflicting record found",
-            )
+    if profile_in.name and profile_service.crud.get_all_filtered(name=profile_in.name):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicting record found",
+        )
 
     if profile_in.profile:
         profile_service.validate_profile(profile_obj=profile_in.model_dump()["profile"])
