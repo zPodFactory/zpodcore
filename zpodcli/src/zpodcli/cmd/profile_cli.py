@@ -5,6 +5,7 @@ from typing import Optional
 import typer
 import yaml
 from rich import print
+from rich.json import JSON
 from rich.table import Table
 from typing_extensions import Annotated
 
@@ -93,9 +94,9 @@ def profile_info(
     """
     z: ZpodClient = ZpodClient()
     profile = z.profiles_get.sync(id=f"name={profile_name}")
-
     if json_:
-        print(json.dumps(profile.to_dict()["profile"]))
+        profile_dict = profile.to_dict()["profile"]
+        print(JSON.from_data(profile_dict, sort_keys=True))
     else:
         print(generate_table([profile], "Info"))
 
@@ -197,6 +198,10 @@ def profile_update(
     if profile_file and profile:
         exit_with_error("Can not have both profile file and profile")
 
+    z: ZpodClient = ZpodClient()
+    if not profile_file and not profile and not newname:
+        exit_with_error("No changes provided")
+
     profile_update = ProfileUpdate()
     if newname and newname != profile_name:
         profile_update.name = newname
@@ -207,8 +212,6 @@ def profile_update(
     elif profile:
         profile_obj = json.loads(profile)
         profile_update.profile = build_profile(profile_obj, False)
-
-    z: ZpodClient = ZpodClient()
 
     z.profiles_update.sync(
         id=f"name={profile_name}",
