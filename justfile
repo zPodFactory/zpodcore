@@ -34,12 +34,30 @@ zpod-release version:
   #!/usr/bin/env bash
   set -euo pipefail
 
+  # Verify bump version is installed
+  if ! poetry self show plugins | grep -q 'poetry-bumpversion'; then
+    echo 'poetry-bumpversion is not installed.  Run "poetry self add poetry-bumpversion".'
+    exit 1
+  fi
+
+  # Verify gh is installed
+  if ! command -v gh >/dev/null 2>&1; then
+      echo 'Install gh first'
+      exit 1
+  fi
+
+  # Verify user is logged into gh
+  if ! gh auth status >/dev/null 2>&1; then
+      echo 'You need to login: gh auth login'
+      exit 1
+  fi
+
   # Verify that repo is clean
   cd {{justfile_directory()}}
   if [[ `git status --porcelain` ]]; then
     # Dirty repo
     echo 'Uncommited changes in repo.  Commit or remove changes before creating release.'
-    exit
+    exit 1
   fi
 
   # Set version
