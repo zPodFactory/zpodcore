@@ -34,6 +34,7 @@ zpod-release version:
   #!/usr/bin/env bash
   set -euo pipefail
 
+  # Verify that repo is clean
   cd {{justfile_directory()}}
   if [[ `git status --porcelain` ]]; then
     # Dirty repo
@@ -41,21 +42,36 @@ zpod-release version:
     exit
   fi
 
-  # Clean repo, so do the release
+  # Set version
   poetry version {{version}}
   newversion=$(poetry version -s)
+
+  # Update lock file in zpodcli
+  cd {{justfile_directory()}}/zpodcli
+  poetry lock --no-update
+
+  # Commit changes
   git commit -am"Version v${newversion}"
   git push
+
+  # Create github release
   gh release create v${newversion} --generate-notes
+
+  # Build and publish zpodsdk
   cd {{justfile_directory()}}/zpodsdk
   poetry build
   poetry publish
 
+  # Temporarily switch to prod version
   cd {{justfile_directory()}}/zpodcli
   sed -i'' -e 's/zpodsdk = {/#zpodsdk = {/' pyproject.toml
   sed -i'' -e 's/#zpodsdk = "/zpodsdk = "/' pyproject.toml
+
+  # Build and publish zpodcli
   poetry build
   poetry publish
+
+  # Switch back to prod version
   sed -i'' -e 's/#zpodsdk = {/zpodsdk = {/' pyproject.toml
   sed -i'' -e 's/zpodsdk = "/#zpodsdk = "/' pyproject.toml
 
