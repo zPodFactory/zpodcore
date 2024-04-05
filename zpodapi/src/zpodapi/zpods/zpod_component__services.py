@@ -4,7 +4,7 @@ from sqlmodel import SQLModel, select
 from zpodapi.lib.service_base import ServiceBase
 from zpodapi.zpods.zpod_component__schemas import ZpodComponentCreate
 from zpodcommon import models as M
-from zpodcommon.enums import ComponentStatus
+from zpodcommon.enums import ComponentStatus, ZpodComponentStatus
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 
@@ -18,14 +18,27 @@ class ZpodComponentService(ServiceBase):
         component_in: ZpodComponentCreate,
     ):
         hostname = component_in.hostname
+        host_id = component_in.host_id
+
+        if (hostname and not host_id) or (not hostname and host_id):
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Must provide both hostname and host-id when either is provided.",  # noqa: E501
+            )
+
         if not hostname:
-            # if hostname is not provided, look up default value
             component = self.session.exec(
                 select(M.Component).where(
                     M.Component.component_uid == component_in.component_uid,
                     M.Component.status == ComponentStatus.ACTIVE,
                 )
             ).one()
+            if component.component_name == "esxi":
+                raise HTTPException(
+                    status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                    detail="Must provide hostname and host-id when adding esxi.",
+                )
+            # if hostname is not provided, look up default value
             hostname = component.component_name
 
         # if hostname is already found, raise error
@@ -33,6 +46,12 @@ class ZpodComponentService(ServiceBase):
             select(M.ZpodComponent).where(
                 M.ZpodComponent.zpod_id == zpod.id,
                 M.ZpodComponent.hostname == hostname,
+                M.ZpodComponent.status.in_(
+                    [
+                        ZpodComponentStatus.ACTIVE,
+                        ZpodComponentStatus.BUILDING,
+                    ]
+                ),
             )
         ).one_or_none():
             raise HTTPException(
