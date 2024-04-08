@@ -59,7 +59,7 @@ def exit_if_status(status_code, content):
                 rf"{error['msg']} \[{', '.join(error['loc'][1:])}]"
                 for error in content_json["detail"]
             ]
-            exit_with_error("  \n".join(messages))
+            exit_with_error("\n  ".join(messages))
         else:
             exit_with_error(f"{content_json['detail']} [{status_code}]")
     elif 500 <= status_code < 600:
