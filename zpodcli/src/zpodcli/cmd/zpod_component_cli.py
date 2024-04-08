@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import confirm
+from zpodcli.lib.prompt import confirm
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView
