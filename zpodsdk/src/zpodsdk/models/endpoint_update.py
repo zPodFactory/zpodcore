@@ -1,4 +1,12 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from attrs import define as _attrs_define
 
@@ -15,17 +23,17 @@ T = TypeVar("T", bound="EndpointUpdate")
 class EndpointUpdate:
     """
     Attributes:
-        endpoints (EndpointsUpdate):
         description (Union[None, Unset, str]):
-        enabled (Union[None, Unset, bool]):
+        endpoints (Union['EndpointsUpdate', None, Unset]):
+        name (Union[None, Unset, str]):
     """
 
-    endpoints: "EndpointsUpdate"
     description: Union[None, Unset, str] = UNSET
-    enabled: Union[None, Unset, bool] = UNSET
+    endpoints: Union["EndpointsUpdate", None, Unset] = UNSET
+    name: Union[None, Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
-        endpoints = self.endpoints.to_dict()
+        from ..models.endpoints_update import EndpointsUpdate
 
         description: Union[None, Unset, str]
         if isinstance(self.description, Unset):
@@ -33,22 +41,28 @@ class EndpointUpdate:
         else:
             description = self.description
 
-        enabled: Union[None, Unset, bool]
-        if isinstance(self.enabled, Unset):
-            enabled = UNSET
+        endpoints: Union[Dict[str, Any], None, Unset]
+        if isinstance(self.endpoints, Unset):
+            endpoints = UNSET
+        elif isinstance(self.endpoints, EndpointsUpdate):
+            endpoints = self.endpoints.to_dict()
         else:
-            enabled = self.enabled
+            endpoints = self.endpoints
+
+        name: Union[None, Unset, str]
+        if isinstance(self.name, Unset):
+            name = UNSET
+        else:
+            name = self.name
 
         field_dict: Dict[str, Any] = {}
-        field_dict.update(
-            {
-                "endpoints": endpoints,
-            }
-        )
+        field_dict.update({})
         if description is not UNSET:
             field_dict["description"] = description
-        if enabled is not UNSET:
-            field_dict["enabled"] = enabled
+        if endpoints is not UNSET:
+            field_dict["endpoints"] = endpoints
+        if name is not UNSET:
+            field_dict["name"] = name
 
         return field_dict
 
@@ -57,7 +71,6 @@ class EndpointUpdate:
         from ..models.endpoints_update import EndpointsUpdate
 
         d = src_dict.copy()
-        endpoints = EndpointsUpdate.from_dict(d.pop("endpoints"))
 
         def _parse_description(data: object) -> Union[None, Unset, str]:
             if data is None:
@@ -68,19 +81,36 @@ class EndpointUpdate:
 
         description = _parse_description(d.pop("description", UNSET))
 
-        def _parse_enabled(data: object) -> Union[None, Unset, bool]:
+        def _parse_endpoints(data: object) -> Union["EndpointsUpdate", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, bool], data)
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                endpoints_type_0 = EndpointsUpdate.from_dict(data)
 
-        enabled = _parse_enabled(d.pop("enabled", UNSET))
+                return endpoints_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["EndpointsUpdate", None, Unset], data)
+
+        endpoints = _parse_endpoints(d.pop("endpoints", UNSET))
+
+        def _parse_name(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        name = _parse_name(d.pop("name", UNSET))
 
         endpoint_update = cls(
-            endpoints=endpoints,
             description=description,
-            enabled=enabled,
+            endpoints=endpoints,
+            name=name,
         )
 
         return endpoint_update

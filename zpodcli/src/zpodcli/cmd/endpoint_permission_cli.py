@@ -24,7 +24,7 @@ class EndpointPermission(str, Enum):
 
 
 app = typer.Typer(
-    help="Manage zPods Endpoint Permissions",
+    help="Endpoint Permissions",
     no_args_is_help=True,
 )
 

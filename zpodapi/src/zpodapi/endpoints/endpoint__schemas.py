@@ -1,6 +1,43 @@
-from pydantic import ConfigDict
+import re
+
+from pydantic import AfterValidator, ConfigDict, StringConstraints
+from pydantic_core import PydanticCustomError
+from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
+from zpodcommon import enums
+
+
+# Annotated[Enum, StringConstraints(to_lower=True)] doesn't work with enum types
+def to_lower(value: str):
+    return value.lower()
+
+
+def validate_fqdn(value: str):
+    """
+    https://en.m.wikipedia.org/wiki/Fully_qualified_domain_name
+    """
+
+    if not 1 < len(value) < 253:
+        raise PydanticCustomError("value_error", "Invalid fqdn length")
+
+    # Remove trailing dot
+    if value[-1] == ".":
+        value = value[:-1]
+
+    #  Split hostname into list of DNS labels
+    labels = value.split(".")
+
+    #  Define pattern of DNS label
+    #  Can begin and end with a number or letter only
+    #  Can contain hyphens, a-z, A-Z, 0-9
+    #  1 - 63 chars allowed
+    fqdn = re.compile(r"^[a-z0-9]([a-z-0-9-]{0,61}[a-z0-9])?$", re.IGNORECASE)
+
+    # Check that all labels match that pattern.
+    if not all(fqdn.match(label) for label in labels):
+        raise PydanticCustomError("value_error", "Invalid fqdn")
+    return value
 
 
 class D:
@@ -8,11 +45,10 @@ class D:
     name = {"example": "mylab"}
     description = {"example": "current testing env"}
     endpoints = {"example": "vcda-4.4.1"}
-    enabled = {"example": True}
+    status = {"example": "ACTIVE"}
 
     class compute:
-        name = {"example": "main"}
-        driver = {"example": "vc"}
+        driver = {"example": "vsphere"}
         hostname = {"example": "my-vcenter.com"}
         username = {"example": "my-username"}
         password = {"example": "my-password"}
@@ -24,7 +60,6 @@ class D:
         vmfolder = {"example": "my-vmfolder"}
 
     class network:
-        name = {"example": "main"}
         driver = {"example": "nsxt"}
         hostname = {"example": "my-nsxt-manager.com"}
         username = {"example": "my-username"}
@@ -33,14 +68,12 @@ class D:
         transportzone = {"example": "my-transportzone"}
         edgecluster = {"example": "my-edgecluster"}
         t0 = {"example": "my-t0"}
-        macdiscoveryprofile = {"example": "my-macdiscoveryprofile"}
 
 
 class EndpointComputeView(SchemaBase):
     model_config = ConfigDict(extra="ignore")
 
-    name: str = Field(..., D.compute.name)
-    driver: str = Field(..., D.compute.driver)
+    driver: enums.EndpointComputeDrivers = Field(..., D.compute.driver)
     hostname: str = Field(..., D.compute.hostname)
     username: str = Field(..., D.compute.username)
     datacenter: str = Field(..., D.compute.datacenter)
@@ -54,15 +87,13 @@ class EndpointComputeView(SchemaBase):
 class EndpointNetworkView(SchemaBase):
     model_config = ConfigDict(extra="ignore")
 
-    name: str = Field(..., D.network.name)
-    driver: str = Field(..., D.network.driver)
+    driver: enums.EndpointNetworkDrivers = Field(..., D.network.driver)
     hostname: str = Field(..., D.network.hostname)
     username: str = Field(..., D.network.username)
     networks: str = Field(..., D.network.networks)
     transportzone: str = Field(..., D.network.transportzone)
     edgecluster: str = Field(..., D.network.edgecluster)
     t0: str = Field(..., D.network.t0)
-    macdiscoveryprofile: str = Field(..., D.network.macdiscoveryprofile)
 
 
 class EndpointsView(SchemaBase):
@@ -74,7 +105,7 @@ class EndpointView(SchemaBase):
     id: int = Field(..., D.id)
     name: str = Field(..., D.name)
     description: str = Field(..., D.description)
-    enabled: bool = Field(..., D.enabled)
+    status: enums.EndpointStatus = Field(..., D.status)
 
 
 class EndpointViewFull(EndpointView):
@@ -82,9 +113,14 @@ class EndpointViewFull(EndpointView):
 
 
 class EndpointComputeCreate(SchemaBase):
-    name: str = Field(..., D.compute.name)
-    driver: str = Field(..., D.compute.driver)
-    hostname: str = Field(..., D.compute.hostname)
+    driver: Annotated[
+        enums.EndpointComputeDrivers,
+        AfterValidator(to_lower),
+    ] = Field(..., D.compute.driver)
+    hostname: Annotated[
+        str,
+        AfterValidator(validate_fqdn),
+    ] = Field(..., D.compute.hostname)
     username: str = Field(..., D.compute.username)
     password: str = Field(..., D.compute.password)
     datacenter: str = Field(..., D.compute.datacenter)
@@ -96,16 +132,20 @@ class EndpointComputeCreate(SchemaBase):
 
 
 class EndpointNetworkCreate(SchemaBase):
-    name: str = Field(..., D.network.name)
-    driver: str = Field(..., D.network.driver)
-    hostname: str = Field(..., D.network.hostname)
+    driver: Annotated[
+        enums.EndpointNetworkDrivers,
+        AfterValidator(to_lower),
+    ] = Field(..., D.network.driver)
+    hostname: Annotated[
+        str,
+        AfterValidator(validate_fqdn),
+    ] = Field(..., D.network.hostname)
     username: str = Field(..., D.network.username)
     password: str = Field(..., D.network.password)
     networks: str = Field(..., D.network.networks)
     transportzone: str = Field(..., D.network.transportzone)
     edgecluster: str = Field(..., D.network.edgecluster)
     t0: str = Field(..., D.network.t0)
-    macdiscoveryprofile: str = Field(..., D.network.macdiscoveryprofile)
 
 
 class EndpointsCreate(SchemaBase):
@@ -114,10 +154,9 @@ class EndpointsCreate(SchemaBase):
 
 
 class EndpointCreate(SchemaBase):
-    name: str = Field(..., D.name)
+    name: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.name)
     description: str = Field(..., D.description)
     endpoints: EndpointsCreate
-    enabled: bool = Field(..., D.enabled)
 
 
 class EndpointComputeUpdate(SchemaBase):
@@ -131,11 +170,11 @@ class EndpointNetworkUpdate(SchemaBase):
 
 
 class EndpointsUpdate(SchemaBase):
-    compute: None | EndpointComputeUpdate
-    network: None | EndpointNetworkUpdate
+    compute: None | EndpointComputeUpdate = None
+    network: None | EndpointNetworkUpdate = None
 
 
 class EndpointUpdate(SchemaBase):
+    name: Annotated[str, StringConstraints(to_lower=True)] | None = Field(None, D.name)
     description: str | None = Field(None, D.description)
-    endpoints: EndpointsUpdate
-    enabled: bool | None = Field(None, D.enabled)
+    endpoints: EndpointsUpdate | None = None

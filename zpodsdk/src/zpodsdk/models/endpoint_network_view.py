@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Type, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.endpoint_network_drivers import EndpointNetworkDrivers
+
 T = TypeVar("T", bound="EndpointNetworkView")
 
 
@@ -10,22 +12,18 @@ T = TypeVar("T", bound="EndpointNetworkView")
 class EndpointNetworkView:
     """
     Attributes:
-        driver (str):
+        driver (EndpointNetworkDrivers):
         edgecluster (str):
         hostname (str):
-        macdiscoveryprofile (str):
-        name (str):
         networks (str):
         t0 (str):
         transportzone (str):
         username (str):
     """
 
-    driver: str
+    driver: EndpointNetworkDrivers
     edgecluster: str
     hostname: str
-    macdiscoveryprofile: str
-    name: str
     networks: str
     t0: str
     transportzone: str
@@ -33,15 +31,11 @@ class EndpointNetworkView:
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        driver = self.driver
+        driver = self.driver.value
 
         edgecluster = self.edgecluster
 
         hostname = self.hostname
-
-        macdiscoveryprofile = self.macdiscoveryprofile
-
-        name = self.name
 
         networks = self.networks
 
@@ -58,8 +52,6 @@ class EndpointNetworkView:
                 "driver": driver,
                 "edgecluster": edgecluster,
                 "hostname": hostname,
-                "macdiscoveryprofile": macdiscoveryprofile,
-                "name": name,
                 "networks": networks,
                 "t0": t0,
                 "transportzone": transportzone,
@@ -72,15 +64,11 @@ class EndpointNetworkView:
     @classmethod
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         d = src_dict.copy()
-        driver = d.pop("driver")
+        driver = EndpointNetworkDrivers(d.pop("driver"))
 
         edgecluster = d.pop("edgecluster")
 
         hostname = d.pop("hostname")
-
-        macdiscoveryprofile = d.pop("macdiscoveryprofile")
-
-        name = d.pop("name")
 
         networks = d.pop("networks")
 
@@ -94,8 +82,6 @@ class EndpointNetworkView:
             driver=driver,
             edgecluster=edgecluster,
             hostname=hostname,
-            macdiscoveryprofile=macdiscoveryprofile,
-            name=name,
             networks=networks,
             t0=t0,
             transportzone=transportzone,

@@ -14,20 +14,16 @@ class EndpointCreate:
     """
     Attributes:
         description (str):
-        enabled (bool):
         endpoints (EndpointsCreate):
         name (str):
     """
 
     description: str
-    enabled: bool
     endpoints: "EndpointsCreate"
     name: str
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
-
-        enabled = self.enabled
 
         endpoints = self.endpoints.to_dict()
 
@@ -37,7 +33,6 @@ class EndpointCreate:
         field_dict.update(
             {
                 "description": description,
-                "enabled": enabled,
                 "endpoints": endpoints,
                 "name": name,
             }
@@ -52,15 +47,12 @@ class EndpointCreate:
         d = src_dict.copy()
         description = d.pop("description")
 
-        enabled = d.pop("enabled")
-
         endpoints = EndpointsCreate.from_dict(d.pop("endpoints"))
 
         name = d.pop("name")
 
         endpoint_create = cls(
             description=description,
-            enabled=enabled,
             endpoints=endpoints,
             name=name,
         )

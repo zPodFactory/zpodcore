@@ -1,6 +1,16 @@
 from enum import Enum
 
 
+class CaseInsensitiveEnum(Enum):
+    @classmethod
+    def _missing_(cls, value: str):
+        value = value.lower()
+        return next(
+            (member for member in cls if member.lower() == value),
+            None,
+        )
+
+
 class ComponentStatus(str, Enum):
     DELETED = "DELETED"
     ACTIVE = "ACTIVE"
@@ -19,8 +29,22 @@ class ComponentDownloadStatus(str, Enum):
     VERIFYING_CHECKSUM = "VERIFYING_CHECKSUM"
 
 
+class EndpointComputeDrivers(str, CaseInsensitiveEnum):
+    VSPHERE = "vsphere"
+
+
+class EndpointNetworkDrivers(str, CaseInsensitiveEnum):
+    NSXT = "nsxt"
+    NSXT_PROJECTS = "nsxt_projects"
+
+
 class EndpointPermission(str, Enum):
     USER = "USER"
+
+
+class EndpointStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    DELETED = "DELETED"
 
 
 class UserStatus(str, Enum):

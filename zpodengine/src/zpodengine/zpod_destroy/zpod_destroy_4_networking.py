@@ -19,7 +19,7 @@ def zpod_destroy_networking(zpod_id: int):
         match driver:
             case "nsxt":
                 return networking_destroy_nsxt(zpod)
-            case "nsxt-projects":
+            case "nsxt_projects":
                 return networking_destroy_nsxt_project(zpod)
             case _:
                 raise f"Unknown driver: {driver}"

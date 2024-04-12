@@ -9,11 +9,13 @@ from .endpoint_create import EndpointCreate
 from .endpoint_enet_create import EndpointENetCreate
 from .endpoint_enet_view import EndpointENetView
 from .endpoint_network_create import EndpointNetworkCreate
+from .endpoint_network_drivers import EndpointNetworkDrivers
 from .endpoint_network_update import EndpointNetworkUpdate
 from .endpoint_network_view import EndpointNetworkView
 from .endpoint_permission_group_add_remove import EndpointPermissionGroupAddRemove
 from .endpoint_permission_user_add_remove import EndpointPermissionUserAddRemove
 from .endpoint_permission_view import EndpointPermissionView
+from .endpoint_status import EndpointStatus
 from .endpoint_update import EndpointUpdate
 from .endpoint_view import EndpointView
 from .endpoint_view_full import EndpointViewFull
@@ -68,12 +70,14 @@ __all__ = (
     "EndpointENetCreate",
     "EndpointENetView",
     "EndpointNetworkCreate",
+    "EndpointNetworkDrivers",
     "EndpointNetworkUpdate",
     "EndpointNetworkView",
     "EndpointPermissionGroupAddRemove",
     "EndpointPermissionUserAddRemove",
     "EndpointPermissionView",
     "EndpointsCreate",
+    "EndpointStatus",
     "EndpointsUpdate",
     "EndpointsView",
     "EndpointUpdate",

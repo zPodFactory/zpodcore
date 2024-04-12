@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
 
 from attrs import define as _attrs_define
 
+from ..models.endpoint_status import EndpointStatus
+
 if TYPE_CHECKING:
     from ..models.endpoints_view import EndpointsView
 
@@ -14,22 +16,20 @@ class EndpointViewFull:
     """
     Attributes:
         description (str):
-        enabled (bool):
         endpoints (EndpointsView):
         id (int):
         name (str):
+        status (EndpointStatus):
     """
 
     description: str
-    enabled: bool
     endpoints: "EndpointsView"
     id: int
     name: str
+    status: EndpointStatus
 
     def to_dict(self) -> Dict[str, Any]:
         description = self.description
-
-        enabled = self.enabled
 
         endpoints = self.endpoints.to_dict()
 
@@ -37,14 +37,16 @@ class EndpointViewFull:
 
         name = self.name
 
+        status = self.status.value
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
                 "description": description,
-                "enabled": enabled,
                 "endpoints": endpoints,
                 "id": id,
                 "name": name,
+                "status": status,
             }
         )
 
@@ -57,20 +59,20 @@ class EndpointViewFull:
         d = src_dict.copy()
         description = d.pop("description")
 
-        enabled = d.pop("enabled")
-
         endpoints = EndpointsView.from_dict(d.pop("endpoints"))
 
         id = d.pop("id")
 
         name = d.pop("name")
 
+        status = EndpointStatus(d.pop("status"))
+
         endpoint_view_full = cls(
             description=description,
-            enabled=enabled,
             endpoints=endpoints,
             id=id,
             name=name,
+            status=status,
         )
 
         return endpoint_view_full

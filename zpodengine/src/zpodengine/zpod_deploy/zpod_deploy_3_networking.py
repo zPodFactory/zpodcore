@@ -15,7 +15,7 @@ def zpod_deploy_networking(zpod_id: int, enet_name: str | None = None):
         match driver:
             case "nsxt":
                 return networking_deploy_nsxt(zpod, enet_name)
-            case "nsxt-projects":
+            case "nsxt_projects":
                 return networking_deploy_nsxt_project(zpod, enet_name)
             case _:
                 raise f"Unknown driver: {driver}"

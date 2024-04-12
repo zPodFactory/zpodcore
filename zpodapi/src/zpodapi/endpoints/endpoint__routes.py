@@ -46,7 +46,7 @@ def create(
     endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointCreate,
 ):
-    if endpoint_service.crud.get(name=endpoint.name):
+    if endpoint_service.get(name_insensitive=endpoint.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Conflicting record found",
@@ -79,7 +79,7 @@ def delete(
     endpoint_service: EndpointAnnotations.EndpointService,
     endpoint: EndpointAnnotations.GetEndpoint,
 ):
-    endpoint_service.crud.delete(item=endpoint)
+    endpoint_service.delete(item=endpoint)
 
 
 @router.put(

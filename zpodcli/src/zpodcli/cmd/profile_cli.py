@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-import yaml
 from rich import print
 from rich.json import JSON
 from rich.table import Table
 from typing_extensions import Annotated
 
+from zpodcli.lib.file import load_json_or_yaml_file
 from zpodcli.lib.utils import exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.profile_create import ProfileCreate
@@ -111,7 +111,7 @@ def profile_create(
             show_default=False,
         ),
     ],
-    profile: Annotated[
+    profile_str: Annotated[
         Optional[str],
         typer.Option(
             "--profile",
@@ -133,18 +133,20 @@ def profile_create(
     """
     Profile Create
     """
-    if not profile_file and not profile:
+    if not profile_file and not profile_str:
         exit_with_error("Must have either profile file or profile")
-    if profile_file and profile:
+    if profile_file and profile_str:
         exit_with_error("Can not have both profile file and profile")
 
     if profile_file:
-        profile_obj = load_profile_file(profile_file)
-    elif profile:
-        profile_obj = json.loads(profile)
+        profile_obj = load_json_or_yaml_file(profile_file)
+    else:
+        try:
+            profile_obj = json.loads(profile_str)
+        except json.JSONDecodeError:
+            exit_with_error("Invalid JSON")
 
     z: ZpodClient = ZpodClient()
-
     z.profiles_create.sync(
         body=ProfileCreate(
             name=profile_name,
@@ -207,7 +209,7 @@ def profile_update(
         profile_update.name = newname
 
     if profile_file:
-        profile_obj = load_profile_file(profile_file)
+        profile_obj = load_json_or_yaml_file(profile_file)
         profile_update.profile = build_profile(profile_obj, False)
     elif profile:
         profile_obj = json.loads(profile)
@@ -237,15 +239,6 @@ def profile_delete(
     z: ZpodClient = ZpodClient()
     z.profiles_delete.sync(id=f"name={profile_name}")
     print(f"Profile [magenta]{profile_name}[/magenta] has been deleted successfully")
-
-
-def load_profile_file(profile_file):
-    extension = profile_file.suffix
-    with profile_file.open() as f:
-        if extension in (".yaml", ".yml"):
-            return yaml.safe_load(f)
-        elif extension == ".json":
-            return json.load(f)
 
 
 def build_profile(profile_obj, is_create=True):

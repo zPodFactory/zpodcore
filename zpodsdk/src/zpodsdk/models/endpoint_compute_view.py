@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, Dict, List, Literal, Type, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -12,9 +12,8 @@ class EndpointComputeView:
     Attributes:
         contentlibrary (str):
         datacenter (str):
-        driver (str):
+        driver (Literal['vsphere']):
         hostname (str):
-        name (str):
         resource_pool (str):
         storage_datastore (str):
         storage_policy (str):
@@ -24,9 +23,8 @@ class EndpointComputeView:
 
     contentlibrary: str
     datacenter: str
-    driver: str
+    driver: Literal["vsphere"]
     hostname: str
-    name: str
     resource_pool: str
     storage_datastore: str
     storage_policy: str
@@ -42,8 +40,6 @@ class EndpointComputeView:
         driver = self.driver
 
         hostname = self.hostname
-
-        name = self.name
 
         resource_pool = self.resource_pool
 
@@ -63,7 +59,6 @@ class EndpointComputeView:
                 "datacenter": datacenter,
                 "driver": driver,
                 "hostname": hostname,
-                "name": name,
                 "resource_pool": resource_pool,
                 "storage_datastore": storage_datastore,
                 "storage_policy": storage_policy,
@@ -85,8 +80,6 @@ class EndpointComputeView:
 
         hostname = d.pop("hostname")
 
-        name = d.pop("name")
-
         resource_pool = d.pop("resource_pool")
 
         storage_datastore = d.pop("storage_datastore")
@@ -102,7 +95,6 @@ class EndpointComputeView:
             datacenter=datacenter,
             driver=driver,
             hostname=hostname,
-            name=name,
             resource_pool=resource_pool,
             storage_datastore=storage_datastore,
             storage_policy=storage_policy,

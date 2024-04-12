@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type, TypeVar
+from typing import Any, Dict, Literal, Type, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -11,9 +11,8 @@ class EndpointComputeCreate:
     Attributes:
         contentlibrary (str):
         datacenter (str):
-        driver (str):
+        driver (Literal['vsphere']):
         hostname (str):
-        name (str):
         password (str):
         resource_pool (str):
         storage_datastore (str):
@@ -24,9 +23,8 @@ class EndpointComputeCreate:
 
     contentlibrary: str
     datacenter: str
-    driver: str
+    driver: Literal["vsphere"]
     hostname: str
-    name: str
     password: str
     resource_pool: str
     storage_datastore: str
@@ -42,8 +40,6 @@ class EndpointComputeCreate:
         driver = self.driver
 
         hostname = self.hostname
-
-        name = self.name
 
         password = self.password
 
@@ -64,7 +60,6 @@ class EndpointComputeCreate:
                 "datacenter": datacenter,
                 "driver": driver,
                 "hostname": hostname,
-                "name": name,
                 "password": password,
                 "resource_pool": resource_pool,
                 "storage_datastore": storage_datastore,
@@ -87,8 +82,6 @@ class EndpointComputeCreate:
 
         hostname = d.pop("hostname")
 
-        name = d.pop("name")
-
         password = d.pop("password")
 
         resource_pool = d.pop("resource_pool")
@@ -106,7 +99,6 @@ class EndpointComputeCreate:
             datacenter=datacenter,
             driver=driver,
             hostname=hostname,
-            name=name,
             password=password,
             resource_pool=resource_pool,
             storage_datastore=storage_datastore,
