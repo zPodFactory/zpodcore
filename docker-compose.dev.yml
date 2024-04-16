@@ -6,8 +6,6 @@ services:
       context: .
       dockerfile: ./zpodapi/dockerfile
       target: dev
-      args:
-        INSTALL_DEV: "${ZPODAPI_DEV_MODE:-false}"
     depends_on:
       - zpodpostgres
     env_file:

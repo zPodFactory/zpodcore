@@ -17,7 +17,6 @@ ENV PATH="${POETRY_VENV}/bin:${PATH}"
 # BUILDER
 FROM base as builder
 
-ARG INSTALL_DEV=false
 ARG POETRY_VERSION
 ARG POETRY_VENV
 WORKDIR /tmp
@@ -34,7 +33,7 @@ RUN python3 -m venv $POETRY_VENV \
     && . $POETRY_VENV/bin/activate \
     && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
     && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
-    && poetry install --no-interaction --no-cache $(test "$INSTALL_DEV" != "true" && echo "--without dev")
+    && poetry install --no-interaction
 
 
 

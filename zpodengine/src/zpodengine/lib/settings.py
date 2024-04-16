@@ -15,8 +15,6 @@ class Settings(BaseSettings):
         extra='ignore'
     )
 
-    DEV_MODE: bool = False
-
     ECHO_POOL: bool | _Debug = False
     ECHO_SQL: bool | _Debug = False
 

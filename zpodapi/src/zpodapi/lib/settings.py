@@ -23,7 +23,6 @@ class Settings(BaseSettings):
 
     DEBUGPY: bool = False
     DEV_AUTOAUTH_USER: int | None = None
-    DEV_MODE: bool = False
     HOST: str = "TBD"
 
     ECHO_POOL: bool | _Debug = False
@@ -57,6 +56,7 @@ class Settings(BaseSettings):
         alias="ZPODCORE_POSTGRES_PASSWORD",
     )
 
+    RICH_MODE: bool = True
     SITE_ID: str = Field(
         "zpod",
         alias="ZPODCORE_SITE_ID",

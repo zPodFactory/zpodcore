@@ -22,7 +22,7 @@ def print_panel_obj(obj, title=None):
 
 
 def log_obj(obj, title):
-    if settings.DEV_MODE:
+    if settings.RICH_MODE:
         print_panel_obj(format_obj(obj), title)
 
     if logger.isEnabledFor(logging.DEBUG):

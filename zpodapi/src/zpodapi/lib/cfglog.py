@@ -37,7 +37,7 @@ def configure_logger():
         datefmt=settings.LOGGER_FORMAT_DATE,
     )
 
-    if settings.DEV_MODE:
+    if settings.RICH_MODE:
         from rich.logging import RichHandler
 
         rich_handler = RichHandler(
