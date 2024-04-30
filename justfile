@@ -30,6 +30,7 @@ alembic-revision message='update':
 zcli *args:
   @poetry -C zpodcli run zcli "$@"
 
+# Create a release version
 zpod-release version:
   #!/usr/bin/env bash
   set -euo pipefail
@@ -93,6 +94,7 @@ zpod-release version:
   sed -i'' -e 's/#zpodsdk = {/zpodsdk = {/' pyproject.toml
   sed -i'' -e 's/zpodsdk = "/#zpodsdk = "/' pyproject.toml
 
+# Update to a release version
 zpod-update version:
   #!/usr/bin/env bash
   set -euo pipefail
@@ -148,6 +150,7 @@ zpodengine-cmd *args:
   @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" poetry -C zpodengine run "$@"
 
 
+# Run command using zpodengine container
 zpodengine-run *args="bash":
   @docker run \
     --volume {{justfile_directory()}}/zpodcommon/src/zpodcommon:/zpodcore/src/zpodcommon \
