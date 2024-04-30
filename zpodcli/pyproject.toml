@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zpodcli"
-version = "0.5.0"
+version = "0.6.0"
 description = ""
 authors = ["Timo Sugliani <timo.sugliani@gmail.com>"]
 license = "MIT"
@@ -15,7 +15,7 @@ python = "^3.10"
 pydantic = "2.6.3"
 typer = {extras = ["all"], version = "0.10.0"}
 zpodsdk = {path = "../zpodsdk", develop = true}
-#zpodsdk = "0.5.0"
+#zpodsdk = "0.6.0"
 pyyaml = "^6.0"
 
 [tool.poetry.group.dev.dependencies]

@@ -780,7 +780,7 @@ files = [
 
 [[package]]
 name = "zpodsdk"
-version = "0.3.0"
+version = "0.6.0"
 description = "A client library for accessing zPod API"
 category = "main"
 optional = false
