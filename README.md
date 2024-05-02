@@ -46,7 +46,8 @@ Complete the following steps to set up your development environment:
 
     Make sure that the port variable in launch.configurations.connect.port matches the port stored in the `ZPODAPI_DEBUG_HOSTPORT` environment variable.
 
-1. Build the Docker containers.  (For DEV, make sure that the `COMPOSE_FILE` environment variable is set to `docker-compose.dev.yml`.  In the root directory, run:
+1. Build the Docker containers.
+In the root directory, run:
 
     ```bash
     docker compose build

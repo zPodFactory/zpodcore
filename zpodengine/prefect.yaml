@@ -1,5 +1,5 @@
 name: zpodengine
-prefect-version: 2.16.2
+prefect-version: 2.18.1
 
 
 definitions:
@@ -44,7 +44,6 @@ build:
     image_name: "{{ compose_project_name.stdout }}-zpodengine"
     tag: v1
     dockerfile: ./zpodengine/dockerfile
-    push: False
     path: "{{ zpodcore_path.stdout }}"
     target: dev
 
