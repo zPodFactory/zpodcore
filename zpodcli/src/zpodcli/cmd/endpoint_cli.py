@@ -13,7 +13,7 @@ from typing_extensions import Annotated
 from zpodcli.cmd import endpoint_permission_cli
 from zpodcli.lib.file import load_json_or_yaml_file
 from zpodcli.lib.prompt import ask
-from zpodcli.lib.utils import exit_with_error
+from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_compute_create import EndpointComputeCreate
 from zpodsdk.models.endpoint_compute_update import EndpointComputeUpdate
@@ -100,7 +100,7 @@ def generate_table(endpoints: list, title: str, all_endpoint_keys=False):
             endpoint_output(ep.compute, compute_endpoint_keys),
             endpoint_output(ep.network, network_endpoint_keys),
         )
-    print(table)
+    console_print(title, table)
 
 
 @app.command(name="list")
@@ -111,7 +111,7 @@ def endpoint_list():
     """
     z = ZpodClient()
     endpoints = z.endpoints_get_all.sync()
-    generate_table(endpoints, "List Endpoints")
+    generate_table(endpoints, "Endpoint List")
 
 
 @app.command(name="info", no_args_is_help=True)
@@ -203,7 +203,7 @@ def endpoint_create(
             exit_with_error("The compute section was not found in the json")
 
         if "network" not in endpoints_dict:
-            exit_with_error(" The network section was not found in the json")
+            exit_with_error("The network section was not found in the json")
 
         errors = []
         endpoint_compute_dict = endpoints_dict["compute"]

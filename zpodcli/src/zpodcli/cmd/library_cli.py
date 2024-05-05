@@ -1,22 +1,19 @@
 from typing import Optional
 
 import typer
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import get_boolean_markdown
+from zpodcli.lib.utils import console_print, get_boolean_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.library_create import LibraryCreate
 from zpodsdk.models.library_update import LibraryUpdate
 
 app = typer.Typer(help="Manage Libraries")
 
-console = Console()
-
 
 def generate_table(libraries: list, action: str = None):
-    title = f"{action} Library"
+    title = f"Library {action}"
 
     table = Table(
         title=title,
@@ -39,7 +36,7 @@ def generate_table(libraries: list, action: str = None):
             f"[magenta]{library.last_modified_date.strftime('%Y-%m-%d %H:%M:%S')}[/magenta]",  # noqa e501
             get_boolean_markdown(library.enabled),
         )
-    console.print(table)
+    console_print(title, table)
 
 
 @app.command(name="list")
@@ -109,9 +106,8 @@ def library_delete(
     """
     z: ZpodClient = ZpodClient()
     z.libraries_delete.sync(id=f"name={library_name}")
-    console.print(
-        f"Library [magenta]{library_name}[/magenta] has been deleted successfully",
-        style="green",
+    print(
+        f"Library [magenta]{library_name}[/magenta] has been deleted successfully.",
     )
 
 

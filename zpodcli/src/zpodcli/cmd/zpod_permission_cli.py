@@ -3,11 +3,10 @@ from typing import List, Optional
 
 import typer
 from rich import print
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import exit_with_error
+from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_permission_group_add_remove import (
     ZpodPermissionGroupAddRemove,
@@ -30,8 +29,6 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-console = Console()
-
 
 def generate_table(
     z: ZpodClient,
@@ -39,7 +36,7 @@ def generate_table(
 ):
     zpod_permissions: List[ZpodPermissionView] = z.zpods_permissions_get_all.sync(zp.id)
 
-    title = f"{zp.name} Permissions"
+    title = f"zPod Permission list {zp.name}"
 
     table = Table(
         title=title,
@@ -63,7 +60,7 @@ def generate_table(
             f"[light_coral]{users}[/light_coral]",
             f"[cornflower_blue]{groups}[/cornflower_blue]",
         )
-    console.print(table)
+    console_print(title, table)
 
 
 @app.command(name="list", no_args_is_help=True)

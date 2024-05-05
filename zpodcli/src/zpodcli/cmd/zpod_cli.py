@@ -2,11 +2,11 @@ from typing import List
 
 import typer
 from rich import print
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.cmd import zpod_component_cli, zpod_permission_cli
+from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
 from zpodsdk.models.zpod_create import ZpodCreate
@@ -16,8 +16,6 @@ from zpodsdk.models.zpod_view import ZpodView
 app = typer.Typer(help="Manage zPods")
 app.add_typer(zpod_component_cli.app, name="component")
 app.add_typer(zpod_permission_cli.app, name="permission")
-
-console = Console()
 
 
 def get_status_markdown(status: str):
@@ -37,8 +35,9 @@ def get_status_markdown(status: str):
 
 
 def generate_table(zpods: list[ZpodView]):
+    title = "zPod List"
     table = Table(
-        title="zPods",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -75,17 +74,17 @@ def generate_table(zpods: list[ZpodView]):
 
         table.add_row(
             f"[bold]{zpod.name}[/bold]",
-            f"[plum4]{zpod.domain}[/plum4]",
+            f"[sky_blue2]{zpod.domain}[/sky_blue2]",
             f"[tan]{zpod.profile}[/tan]",
             components,
             f"[dark_khaki]{zpod.endpoint.name}[/dark_khaki]",
             networks,
-            owners,
+            f"[light_pink1]{owners}[/light_pink1]",
             zpod.password,
             get_status_markdown(zpod.status),
         )
 
-    console.print(table)
+    console_print(title, table)
 
 
 @app.command(name="list")
@@ -119,7 +118,7 @@ def zpod_destroy(
 
     for zpod_name in zpod_names:
         z.zpods_delete.sync(id=f"name={zpod_name}")
-        console.print(
+        print(
             f"zPod [magenta]{zpod_name}[/magenta] has been scheduled for destruction."
         )
 

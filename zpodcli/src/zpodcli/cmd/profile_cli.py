@@ -9,7 +9,7 @@ from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.lib.file import load_json_or_yaml_file
-from zpodcli.lib.utils import exit_with_error
+from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.profile_create import ProfileCreate
 from zpodsdk.models.profile_item_create import ProfileItemCreate
@@ -20,10 +20,11 @@ app = typer.Typer(help="Manage Profiles")
 
 
 def generate_table(profiles: list, action: str = None):
+    title = f"Profile {action}"
     table = Table(
         "Name",
         "Components",
-        title=f"Profile {action}",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -33,7 +34,7 @@ def generate_table(profiles: list, action: str = None):
             f"[tan]{profile.name}[/tan]",
             profile_item_output(profile),
         )
-    return table
+    console_print(title, table)
 
 
 def profile_item_output(profile):
@@ -66,7 +67,7 @@ def profile_list():
     """
     z: ZpodClient = ZpodClient()
     profiles = z.profiles_get_all.sync()
-    print(generate_table(profiles, "List"))
+    generate_table(profiles, "List")
 
 
 @app.command(name="info", no_args_is_help=True)
@@ -98,7 +99,7 @@ def profile_info(
         profile_dict = profile.to_dict()["profile"]
         print(JSON.from_data(profile_dict, sort_keys=True))
     else:
-        print(generate_table([profile], "Info"))
+        generate_table([profile], "Info")
 
 
 @app.command(name="create", no_args_is_help=True)

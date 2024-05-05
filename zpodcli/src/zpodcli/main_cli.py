@@ -2,7 +2,6 @@ from functools import partial
 from typing import Optional
 
 import typer
-from rich import print
 from typing_extensions import Annotated
 
 from zpodcli import __version__
@@ -40,6 +39,14 @@ def main(
             show_default=False,
         ),
     ] = None,
+    svg: Annotated[
+        Optional[bool],
+        typer.Option(
+            "--output-svg",
+            help="Output an SVG file for any list command.",
+            show_default=False,
+        ),
+    ] = None,
     version: Annotated[
         Optional[bool],
         typer.Option(
@@ -51,6 +58,7 @@ def main(
     ] = None,
 ):
     GLOBAL_FLAGS["factory"] = factory
+    GLOBAL_FLAGS["svg"] = svg
 
 
 def launch():

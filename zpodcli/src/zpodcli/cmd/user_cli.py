@@ -3,7 +3,7 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import get_boolean_markdown
+from zpodcli.lib.utils import console_print, get_boolean_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.user_create import UserCreate
 from zpodsdk.models.user_update_admin import UserUpdateAdmin
@@ -12,6 +12,7 @@ app = typer.Typer(help="Manage Users")
 
 
 def generate_table(users, all=False):
+    title = "User List"
     table = Table(
         "Username",
         "Email",
@@ -19,7 +20,7 @@ def generate_table(users, all=False):
         "Creation Date",
         "Last Connection",
         "Superadmin",
-        title="User List",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -46,7 +47,8 @@ def generate_table(users, all=False):
         table.add_row(
             *row,
         )
-    print(table)
+
+    console_print(title, table)
 
 
 @app.command(name="list")

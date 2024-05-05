@@ -7,9 +7,15 @@ from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.lib.factory_config import FactoryConfig
-from zpodcli.lib.utils import exit_with_error
+from zpodcli.lib.utils import console_print, exit_with_error
 
 app = typer.Typer(help="Manage Factories")
+
+
+def get_status_markdown(status: bool):
+    if status:
+        return f"[dark_sea_green4]{status}[/dark_sea_green4]"
+    return f"[indian_red]{status}[/indian_red]"
 
 
 def validate_name(value):
@@ -31,12 +37,14 @@ def factory_list():
     """
     List Factories
     """
+
+    title = "Factory List"
     table = Table(
         "Name",
         "Server",
         "Token",
         "Active Context",
-        title="Factory List",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -47,12 +55,12 @@ def factory_list():
         factory = fc.config[section]
         token = factory["zpod_api_token"]
         table.add_row(
-            section,
-            factory["zpod_api_url"],
+            f"[tan]{section}[/tan]",
+            f"[sky_blue2]{factory['zpod_api_url']}[/sky_blue2]",
             f"{token[:5]}...{token[-5:]}",
-            str(factory.getboolean("active", False)),
+            get_status_markdown(factory.getboolean("active", False)),
         )
-    print(table)
+    console_print(title, table)
 
 
 @app.command(name="add", no_args_is_help=True)

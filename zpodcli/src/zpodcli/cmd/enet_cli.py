@@ -1,9 +1,9 @@
 import typer
 from rich import print
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
+from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_enet_create import EndpointENetCreate
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
@@ -11,21 +11,20 @@ from zpodsdk.models.endpoint_view_full import EndpointViewFull
 app = typer.Typer(help="Manage ENets")
 
 
-console = Console()
-
-
-def generate_table(enets: list, action: str = None):
+def generate_table(enets: list):
+    title = "ENet List"
     table = Table(
         "ENet Name",
         "Project Id",
-        title=f"{action} ENets",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
     )
     for enet in enets:
         table.add_row(enet.name, enet.project_id)
-    console.print(table)
+
+    console_print(title, table)
 
 
 @app.command(name="list", no_args_is_help=True)
@@ -46,7 +45,7 @@ def enet_list(
 
     ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint_name}")
     enets = z.endpoints_enet_get_all.sync(id=ep.id)
-    generate_table(enets, "List")
+    generate_table(enets)
 
 
 @app.command(name="create", no_args_is_help=True)

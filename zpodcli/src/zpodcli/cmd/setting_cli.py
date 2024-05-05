@@ -2,21 +2,20 @@ from typing import Optional
 
 import typer
 from rich import print
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
+from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.setting_update import SettingUpdate
 
 app = typer.Typer(help="Manage Settings")
 
-console = Console()
-
 
 def generate_table(settings: list):
+    title = "Setting List"
     table = Table(
-        title="Settings",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -30,7 +29,7 @@ def generate_table(settings: list):
             f"{setting.description}",
             f"[dark_khaki]{setting.value}[/dark_khaki]",
         )
-    console.print(table)
+    console_print(title, table)
 
 
 @app.command(name="list")
@@ -84,7 +83,7 @@ def update(
         setting = SettingUpdate(description=description, value=value)
 
     z.settings_update.sync(body=setting, id=f"name={name}")
-    console.print(
+    print(
         f"Setting [magenta]{name}[/magenta] has been modified to "
         f"[yellow]{value}[/yellow]."
     )

@@ -4,6 +4,7 @@ from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.cmd import permission_group_user_cli
+from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.permission_group_create import PermissionGroupCreate
 from zpodsdk.models.permission_group_update import PermissionGroupUpdate
@@ -16,10 +17,11 @@ app.add_typer(permission_group_user_cli.app, name="user", no_args_is_help=True)
 def generate_table(
     permission_groups: list[PermissionGroupView],
 ):
+    title = "Permission Group List"
     table = Table(
         "Permission Group",
         "Usernames",
-        title="Permission Groups",
+        title=title,
         title_style="bold",
         show_header=True,
         header_style="bold cyan",
@@ -30,7 +32,7 @@ def generate_table(
             f"[tan]{permission_group.name}[/tan]",
             f"[light_coral]{usernames}[/light_coral]",
         )
-    print(table)
+    console_print(title, table)
 
 
 @app.command(name="list")

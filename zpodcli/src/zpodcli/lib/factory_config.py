@@ -65,7 +65,7 @@ class FactoryConfig:
                 return self.config[factory_name]
 
         exit_with_error(
-            "Please connect to a zPod Server first using the following command:\n\n"
+            "Please connect to a zPodFactory Server first using the following command:\n\n"
             "    zcli factory add --name <xxx> --server <xxx> --token <xxx>\n"
         )
 

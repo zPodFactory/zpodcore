@@ -1,13 +1,11 @@
 import typer
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
+from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 app = typer.Typer(help="Manage Components")
-
-console = Console()
 
 
 def get_status_markdown(status: str):
@@ -43,8 +41,9 @@ def generate_table(components: list, component_uid: str = None, action: str = No
     table.add_column("Version")
     table.add_column("Library")
     table.add_column("Description")
-    table.add_column("Status")
     table.add_column("Download Status")
+    table.add_column("Status")
+
     for component in components:
         table.add_row(
             f"[yellow3]{component.component_uid}[/yellow3]",
@@ -52,10 +51,10 @@ def generate_table(components: list, component_uid: str = None, action: str = No
             f"[cornflower_blue]{component.component_version}[/cornflower_blue]",
             f"[green]{component.library_name}[/green]",
             component.component_description,
-            get_status_markdown(component.status),
             get_status_markdown(component.download_status),
+            get_status_markdown(component.status),
         )
-    console.print(table)
+    console_print(title, table)
 
 
 @app.command(name="list")

@@ -2,19 +2,17 @@ from typing import List
 
 import typer
 from rich import print
-from rich.console import Console
 from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.lib.prompt import confirm
+from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView
 from zpodsdk.models.zpod_view import ZpodView
 
 app = typer.Typer(help="Manage zPod Components", no_args_is_help=True)
-
-console = Console()
 
 
 def get_status_markdown(status: str):
@@ -33,7 +31,7 @@ def generate_table(
     zpod: ZpodView,
     zpod_components: list[ZpodComponentView],
 ):
-    title = f"{zpod.name} Component List"
+    title = "zPod Component List"
 
     table = Table(
         title=title,
@@ -43,24 +41,24 @@ def generate_table(
     )
     table.add_column("Hostname")
     table.add_column("FQDN")
-    table.add_column("Status")
     table.add_column("Component UID")
     table.add_column("Name")
     table.add_column("Version")
     table.add_column("Description")
+    table.add_column("Status")
 
     for zc in zpod_components:
         table.add_row(
             f"[sky_blue2]{zc.hostname}[/sky_blue2]",
             f"[sky_blue2]https://{zc.fqdn}[/sky_blue2]",
-            get_status_markdown(zc.status),
             f"[yellow3]{zc.component.component_uid}[/yellow3]",
             f"[light_coral]{zc.component.component_name}[/light_coral]",
             f"[cornflower_blue]{zc.component.component_version}[/cornflower_blue]",
             zc.component.component_description,
+            get_status_markdown(zc.status),
         )
 
-    console.print(table)
+    console_print(title, table)
 
 
 @app.command(name="list", no_args_is_help=True)
@@ -78,7 +76,6 @@ def zpod_component_list(
     List zPod Components
     """
     print(f"Listing {zpod_name} components")
-
     z: ZpodClient = ZpodClient()
     zpod = z.zpods_get.sync(id=f"name={zpod_name}")
 
