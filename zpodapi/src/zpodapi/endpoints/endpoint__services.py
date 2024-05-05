@@ -27,7 +27,6 @@ class EndpointService(ServiceBase):
         if id:
             where.append(
                 M.Endpoint.id == id,
-                M.Endpoint.status == EndpointStatus.ACTIVE,
             )
         elif name or name_insensitive:
             if name:
