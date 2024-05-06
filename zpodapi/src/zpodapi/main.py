@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+import traceback
+
+import httpx
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.routing import APIRoute
 
 from zpodapi import __version__
@@ -9,6 +12,7 @@ from zpodapi.endpoints import (
     endpoint_permission__routes,
 )
 from zpodapi.lib.global_dependencies import GlobalDepends
+from zpodapi.lib.panel import print_panel
 from zpodapi.libraries import library__routes
 from zpodapi.permission_groups import permission_group__routes
 from zpodapi.profiles import profile__routes
@@ -43,6 +47,19 @@ api = FastAPI(
     ],
     version=__version__,
 )
+
+
+@api.exception_handler(httpx.RequestError)
+async def httpx_request_error_exception_handler(
+    request: Request,
+    exc: httpx.RequestError,
+):
+    print_panel(traceback.format_exc(), "HTTPX Error")
+    raise HTTPException(
+        status_code=418,
+        detail=f"An error occurred while requesting url: {exc.request.url}.  {exc}",
+    ) from exc
+
 
 api.include_router(root__routes.router)
 api.include_router(component__routes.router)
