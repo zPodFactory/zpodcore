@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from zpodapi.endpoints.endpoint__dependencies import EndpointAnnotations
 from zpodapi.lib.route_logger import RouteLogger
@@ -6,10 +6,22 @@ from zpodapi.lib.route_logger import RouteLogger
 from .endpoint_enet__dependencies import EndpointENetAnnotations
 from .endpoint_enet__schemas import EndpointENetCreate, EndpointENetView
 
+
+def is_nsxt_project(
+    endpoint: EndpointAnnotations.GetEndpoint,
+):
+    if endpoint.endpoints["network"]["driver"] != "nsxt_projects":
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Enet not supported by selected Endpoint",
+        )
+
+
 router = APIRouter(
     prefix="/endpoints/{id}/enet",
     tags=["endpoints"],
     route_class=RouteLogger,
+    dependencies=[Depends(is_nsxt_project)],
 )
 
 
