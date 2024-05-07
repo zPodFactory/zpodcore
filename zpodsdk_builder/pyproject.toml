@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zpodsdk-builder"
-version = "0.6.0"
+version = "0.6.1"
 description = "zpodsdk builder from FastAPI openapi spec file"
 authors = ["Timo Sugliani <timo.sugliani@gmail.com>"]
 license = "MIT"
