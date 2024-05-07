@@ -11,19 +11,29 @@ rich_cols := `echo $(tput cols) - $(echo ${COMPOSE_PROJECT_NAME:-zpodcore} | wc 
 
 # Run alembic command in zpodapi container
 alembic *args:
-  docker compose exec -t zpodapi bash -c 'cd /zpodcore/scripts/alembic && alembic {{args}}'
-
-# Upgrade database schema to head
-alembic-upgrade rev="head":
-  docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic upgrade {{rev}}"
+  docker compose exec -t zpodapi bash -c "\
+    cd /zpodcore/scripts/alembic && \
+    alembic {{args}}"
 
 # Downgrade database schema -1
 alembic-downgrade rev="-1":
-  docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic downgrade {{rev}}"
+  docker compose exec -t zpodapi bash -c "\
+    cd /zpodcore/scripts/alembic && \
+    alembic downgrade {{rev}}"
 
 # Generate alembic revision
 alembic-revision message='update':
-  docker compose exec -t zpodapi bash -c "cd /zpodcore/scripts/alembic && alembic revision --autogenerate -m'{{message}}' && chown `id -u`:`id -g` --recursive /zpodcore/scripts/alembic/versions"
+  docker compose exec -t zpodapi bash -c "\
+    cd /zpodcore/scripts/alembic && \
+    alembic revision --autogenerate -m'{{message}}' && \
+    chown `id --user`:`id --group` \
+      --recursive /zpodcore/scripts/alembic/versions"
+
+# Upgrade database schema to head
+alembic-upgrade rev="head":
+  docker compose exec -t zpodapi bash -c "\
+    cd /zpodcore/scripts/alembic && \
+    alembic upgrade {{rev}}"
 
 # Run zcli command
 [no-exit-message]
@@ -115,7 +125,14 @@ zpod-update version:
 
 # Generate coverage docs
 zpodapi-coverage:
-  docker compose exec -t zpodapi bash -c "pytest --cov-report term-missing:skip-covered --cov-report html:tests/cov_html --cov zpodapi --cov zpodcommon && chown `id -u`:`id -g` --recursive /zpodcore/tests/cov_html"
+  docker compose exec -t zpodapi bash -c "\
+    pytest \
+      --cov-report term-missing:skip-covered \
+      --cov-report html:tests/cov_html \
+      --cov zpodapi \
+      --cov zpodcommon && \
+    chown `id --user`:`id --group` \
+      --recursive /zpodcore/tests/cov_html"
 
 # Generate openapi json
 zpodapi-generate-openapi:
@@ -174,4 +191,14 @@ zpodengine-prefect *args:
 # Update zpodsdk
 zpodsdk-update: zpodapi-generate-openapi
   docker build -t zpodfactory/zpodsdk_builder zpodsdk_builder
-  docker run -v "{{justfile_directory()}}/zpodsdk:/zpodcore/zpodsdk" zpodfactory/zpodsdk_builder bash -c "./update.sh && chown `id -u`:`id -g` --recursive /zpodcore/zpodsdk/src/zpodsdk"
+  docker run \
+    --volume "{{justfile_directory()}}/zpodsdk:/zpodcore/zpodsdk" \
+    zpodfactory/zpodsdk_builder \
+    bash -c "\
+      cd /zpodcore && \
+      openapi-python-client update \
+        --path /zpodcore/zpodsdk_builder/openapi.json \
+        --config /zpodcore/zpodsdk_builder/config.yaml \
+        --custom-template-path=/zpodcore/zpodsdk_builder/templates && \
+      chown `id --user`:`id --group` \
+        --recursive /zpodcore/zpodsdk/src/zpodsdk"
