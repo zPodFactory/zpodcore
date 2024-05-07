@@ -110,6 +110,7 @@ zpod-update version:
   docker compose build
   docker compose down
   docker compose up -d
+  sleep 10
   just zpodengine-deploy-all
 
 # Generate coverage docs
