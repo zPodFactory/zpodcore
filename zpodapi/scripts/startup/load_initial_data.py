@@ -49,7 +49,7 @@ with database.get_session_ctx() as session:
 
         setting_debug = M.Setting(
             name="zpodfactory_debug_level",
-            description="Set debug verbosity level on zPodfactory instance",
+            description="Set debug verbosity level on zPodfactory",
             value="INFO",
         )
         session.add(setting_debug)
@@ -77,7 +77,7 @@ with database.get_session_ctx() as session:
 
         settings_ssh_key = M.Setting(
             name="zpodfactory_ssh_key",
-            description="Public SSH Key to be pushed on instance/components",
+            description="Public SSH Key to be pushed on zPod components",
             value="",
         )
         session.add(settings_ssh_key)
