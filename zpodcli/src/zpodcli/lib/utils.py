@@ -1,6 +1,7 @@
 import typer
 from rich import print
 from rich.console import Console
+from rich.terminal_theme import DIMMED_MONOKAI
 
 from zpodcli.lib.global_flags import GLOBAL_FLAGS
 
@@ -27,4 +28,4 @@ def console_print(title, content):
     console.print(content)
     if GLOBAL_FLAGS["svg"]:
         filename = title.replace(" ", "_").lower() + ".svg"
-        console.save_svg(filename, title="")
+        console.save_svg(filename, title="", theme=DIMMED_MONOKAI)
