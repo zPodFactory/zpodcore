@@ -19,7 +19,9 @@ from zpodcli.cmd import (
 )
 from zpodcli.lib.global_flags import GLOBAL_FLAGS
 
-app = typer.Typer(no_args_is_help=True)
+app = typer.Typer(
+    no_args_is_help=True,
+)
 
 
 def version_callback(value: bool):
@@ -35,7 +37,7 @@ def main(
         typer.Option(
             "--factory",
             "-f",
-            help="Use specified factory for current commmand.",
+            help="Use specified factory for current command.",
             show_default=False,
         ),
     ] = None,
