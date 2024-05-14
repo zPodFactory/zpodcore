@@ -1,7 +1,11 @@
+import datetime
+import time
+
 from prefect import task
 
 from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
+from zpodcommon.lib.zboxapi import HTTPStatusError, RequestError, ZboxApiClient
 from zpodengine.lib import database
 from zpodengine.lib.commands import cmd_execute
 from zpodengine.lib.dbutils import DBUtils
@@ -26,6 +30,20 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
             case "zbox":
                 print("--- zbox ---")
                 # Add static routes on NSX T1 unless using vyos below
+
+                # Wait until zboxapi is ready
+                zb = ZboxApiClient.by_zpod(zpod)
+                timeout = datetime.timedelta(seconds=180)
+                finish_time = datetime.datetime.now(datetime.UTC) + timeout
+                while finish_time > datetime.datetime.now(datetime.UTC):
+                    try:
+                        response = zb.get(url="/hosts")
+                        response.raise_for_status()
+                        return
+                    except (RequestError, HTTPStatusError):
+                        print(f"Waiting for {zb.base_url} to start.")
+                        time.sleep(15)
+                raise Exception("Failed to connect to {zb.base_url}.  Exiting.")
 
             case "vyos":
                 print("--- vyos ---")

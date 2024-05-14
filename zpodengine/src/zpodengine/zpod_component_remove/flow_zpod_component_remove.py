@@ -4,6 +4,7 @@ from prefect import flow, task
 
 from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
+from zpodcommon.lib.zboxapi import HTTPStatusError, RequestError, ZboxApiClient
 from zpodengine import settings
 from zpodengine.lib import database
 from zpodengine.lib.utils import ctx_param
@@ -29,8 +30,31 @@ def set_flow_name():
 def flow_zpod_component_remove(
     zpod_component_id: int,
 ):
+    dns = remove_from_dns.submit(zpod_component_id)
     vc = remove_from_vcenter.submit(zpod_component_id)
-    remove_from_db.submit(zpod_component_id, wait_for=[vc])
+    remove_from_db.submit(zpod_component_id, wait_for=[dns, vc])
+
+
+@task()
+def remove_from_dns(zpod_component_id: int):
+    with database.get_session_ctx() as session:
+        zpod_component = session.get(M.ZpodComponent, zpod_component_id)
+
+        zb = ZboxApiClient.by_zpod(zpod_component.zpod)
+        try:
+            # Used .request(method=DELETE), because
+            # .delete() doesn't allow passing json
+            response = zb.request(
+                method="DELETE",
+                url="/hosts",
+                json={
+                    "ip": zpod_component.ip,
+                    "fqdn": zpod_component.hostname,
+                },
+            )
+            response.raise_for_status()
+        except (RequestError, HTTPStatusError):
+            print(f"{zb.base_url} failure.  Skipping...")
 
 
 @task()
