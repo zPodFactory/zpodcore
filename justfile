@@ -182,7 +182,7 @@ zpodengine-run *args="bash":
     --network "${COMPOSE_PROJECT_NAME:-zpodcore}_default" \
     --env PREFECT_API_URL="http://zpodengineserver:4200/api" \
     --env PREFECT_LOCAL_STORAGE_PATH="/results" \
-    --rm -it ${COMPOSE_PROJECT_NAME:-zpodcore}-zpodengine:v1 bash
+    --rm -it ${COMPOSE_PROJECT_NAME:-zpodcore}-zpodengine:v1 "$@"
 
 # Manually Run Prefect Command
 zpodengine-prefect *args:
