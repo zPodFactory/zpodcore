@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import List, Optional
 
 import typer
@@ -8,6 +7,7 @@ from typing_extensions import Annotated
 
 from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.models.endpoint_permission import EndpointPermission
 from zpodsdk.models.endpoint_permission_group_add_remove import (
     EndpointPermissionGroupAddRemove,
 )
@@ -16,11 +16,6 @@ from zpodsdk.models.endpoint_permission_user_add_remove import (
 )
 from zpodsdk.models.endpoint_permission_view import EndpointPermissionView
 from zpodsdk.models.endpoint_view import EndpointView
-
-
-class EndpointPermission(str, Enum):
-    USER = "USER"
-
 
 app = typer.Typer(
     help="Endpoint Permissions",

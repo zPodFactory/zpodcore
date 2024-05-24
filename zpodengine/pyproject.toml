@@ -9,21 +9,22 @@ readme = "README.md"
 email-validator = "2.1.1"
 ipython = "^8.11.0"
 jinja2 = "^3.1.4"
-prefect = "2.18.1"
-prefect-docker = "0.5.1"
+prefect = "2.19.2"
+prefect-docker = "0.5.2"
 psycopg2 = "2.9.9"
 pydantic-settings = "^2.1.0"
 pyopenssl = "^24.0.0"
 python = "3.12.1"
 python-dotenv = "1.0.1"
 pyvmomi = "^8.0.1.0"
-sqlmodel = "0.0.16"
+sqlmodel = "0.0.18"
+requests = "<2.32.0" # Remove this line once this is resolved everywhere: https://github.com/docker/docker-py/issues/3256
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
 pytest-cov = "^4.0"
 pytest-xdist = "^3.2"
-ruff = "^0.3"
+ruff = "^0.4"
 
 [build-system]
 requires = ["poetry-core"]

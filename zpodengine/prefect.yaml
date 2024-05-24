@@ -1,5 +1,5 @@
 name: zpodengine
-prefect-version: 2.18.1
+prefect-version: 2.19.2
 
 
 definitions:
@@ -40,7 +40,7 @@ build:
     stream_output: true
 - prefect_docker.deployments.steps.build_docker_image:
     id: build_image
-    requires: prefect-docker>=0.3.11
+    requires: prefect-docker>=0.5.2
     image_name: "{{ compose_project_name.stdout }}-zpodengine"
     tag: v1
     dockerfile: ./zpodengine/dockerfile

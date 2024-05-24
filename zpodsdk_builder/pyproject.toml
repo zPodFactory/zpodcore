@@ -9,8 +9,8 @@ packages = [{include = "zpodsdk_builder"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-openapi-python-client = "0.19.0"
-ruff = "^0.3"
+openapi-python-client = "0.20.0"
+ruff = "^0.4"
 
 
 [build-system]

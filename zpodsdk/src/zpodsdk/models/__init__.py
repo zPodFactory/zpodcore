@@ -3,6 +3,7 @@
 from .component_view import ComponentView
 from .component_view_full import ComponentViewFull
 from .endpoint_compute_create import EndpointComputeCreate
+from .endpoint_compute_drivers import EndpointComputeDrivers
 from .endpoint_compute_update import EndpointComputeUpdate
 from .endpoint_compute_view import EndpointComputeView
 from .endpoint_create import EndpointCreate
@@ -12,6 +13,7 @@ from .endpoint_network_create import EndpointNetworkCreate
 from .endpoint_network_drivers import EndpointNetworkDrivers
 from .endpoint_network_update import EndpointNetworkUpdate
 from .endpoint_network_view import EndpointNetworkView
+from .endpoint_permission import EndpointPermission
 from .endpoint_permission_group_add_remove import EndpointPermissionGroupAddRemove
 from .endpoint_permission_user_add_remove import EndpointPermissionUserAddRemove
 from .endpoint_permission_view import EndpointPermissionView
@@ -67,6 +69,7 @@ __all__ = (
     "ComponentView",
     "ComponentViewFull",
     "EndpointComputeCreate",
+    "EndpointComputeDrivers",
     "EndpointComputeUpdate",
     "EndpointComputeView",
     "EndpointCreate",
@@ -76,6 +79,7 @@ __all__ = (
     "EndpointNetworkDrivers",
     "EndpointNetworkUpdate",
     "EndpointNetworkView",
+    "EndpointPermission",
     "EndpointPermissionGroupAddRemove",
     "EndpointPermissionUserAddRemove",
     "EndpointPermissionView",

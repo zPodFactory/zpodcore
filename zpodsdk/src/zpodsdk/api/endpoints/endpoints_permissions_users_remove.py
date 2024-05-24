@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from typing import Any, Dict, Literal, Optional, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.endpoint_permission import EndpointPermission
 from ...models.endpoint_permission_user_add_remove import (
     EndpointPermissionUserAddRemove,
 )
@@ -19,7 +20,7 @@ class EndpointsPermissionsUsersRemove:
     def _get_kwargs(
         self,
         id: str,
-        permission: Literal["USER"],
+        permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
     ) -> Dict[str, Any]:
@@ -72,7 +73,7 @@ class EndpointsPermissionsUsersRemove:
     def sync_detailed(
         self,
         id: str,
-        permission: Literal["USER"],
+        permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
     ) -> Response[Union[Any, HTTPValidationError]]:
@@ -80,7 +81,7 @@ class EndpointsPermissionsUsersRemove:
 
         Args:
             id (str):
-            permission (Literal['USER']):
+            permission (EndpointPermission):
             body (EndpointPermissionUserAddRemove):
 
         Raises:
@@ -106,7 +107,7 @@ class EndpointsPermissionsUsersRemove:
     def sync(
         self,
         id: str,
-        permission: Literal["USER"],
+        permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
     ) -> Optional[Union[Any, HTTPValidationError]]:
@@ -114,7 +115,7 @@ class EndpointsPermissionsUsersRemove:
 
         Args:
             id (str):
-            permission (Literal['USER']):
+            permission (EndpointPermission):
             body (EndpointPermissionUserAddRemove):
 
         Raises:
@@ -134,7 +135,7 @@ class EndpointsPermissionsUsersRemove:
     async def asyncio_detailed(
         self,
         id: str,
-        permission: Literal["USER"],
+        permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
     ) -> Response[Union[Any, HTTPValidationError]]:
@@ -142,7 +143,7 @@ class EndpointsPermissionsUsersRemove:
 
         Args:
             id (str):
-            permission (Literal['USER']):
+            permission (EndpointPermission):
             body (EndpointPermissionUserAddRemove):
 
         Raises:
@@ -166,7 +167,7 @@ class EndpointsPermissionsUsersRemove:
     async def asyncio(
         self,
         id: str,
-        permission: Literal["USER"],
+        permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
     ) -> Optional[Union[Any, HTTPValidationError]]:
@@ -174,7 +175,7 @@ class EndpointsPermissionsUsersRemove:
 
         Args:
             id (str):
-            permission (Literal['USER']):
+            permission (EndpointPermission):
             body (EndpointPermissionUserAddRemove):
 
         Raises:

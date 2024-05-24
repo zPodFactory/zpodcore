@@ -1,7 +1,8 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 from attrs import define as _attrs_define
 
+from ..models.endpoint_permission import EndpointPermission
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -17,20 +18,20 @@ class EndpointPermissionView:
     """
     Attributes:
         id (int):
-        permission (Literal['USER']):
+        permission (EndpointPermission):
         permission_groups (Union[Unset, List['PermissionGroupView']]):
         users (Union[Unset, List['UserView']]):
     """
 
     id: int
-    permission: Literal["USER"]
+    permission: EndpointPermission
     permission_groups: Union[Unset, List["PermissionGroupView"]] = UNSET
     users: Union[Unset, List["UserView"]] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         id = self.id
 
-        permission = self.permission
+        permission = self.permission.value
 
         permission_groups: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.permission_groups, Unset):
@@ -68,7 +69,7 @@ class EndpointPermissionView:
         d = src_dict.copy()
         id = d.pop("id")
 
-        permission = d.pop("permission")
+        permission = EndpointPermission(d.pop("permission"))
 
         permission_groups = []
         _permission_groups = d.pop("permission_groups", UNSET)

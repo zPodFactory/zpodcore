@@ -1,7 +1,9 @@
-from typing import Any, Dict, List, Literal, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+from ..models.endpoint_compute_drivers import EndpointComputeDrivers
 
 T = TypeVar("T", bound="EndpointComputeView")
 
@@ -12,7 +14,7 @@ class EndpointComputeView:
     Attributes:
         contentlibrary (str):
         datacenter (str):
-        driver (Literal['vsphere']):
+        driver (EndpointComputeDrivers):
         hostname (str):
         resource_pool (str):
         storage_datastore (str):
@@ -23,7 +25,7 @@ class EndpointComputeView:
 
     contentlibrary: str
     datacenter: str
-    driver: Literal["vsphere"]
+    driver: EndpointComputeDrivers
     hostname: str
     resource_pool: str
     storage_datastore: str
@@ -37,7 +39,7 @@ class EndpointComputeView:
 
         datacenter = self.datacenter
 
-        driver = self.driver
+        driver = self.driver.value
 
         hostname = self.hostname
 
@@ -76,7 +78,7 @@ class EndpointComputeView:
 
         datacenter = d.pop("datacenter")
 
-        driver = d.pop("driver")
+        driver = EndpointComputeDrivers(d.pop("driver"))
 
         hostname = d.pop("hostname")
 

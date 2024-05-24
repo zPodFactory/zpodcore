@@ -16,6 +16,7 @@ from zpodcli.lib.prompt import ask
 from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_compute_create import EndpointComputeCreate
+from zpodsdk.models.endpoint_compute_drivers import EndpointComputeDrivers
 from zpodsdk.models.endpoint_compute_update import EndpointComputeUpdate
 from zpodsdk.models.endpoint_compute_view import EndpointComputeView
 from zpodsdk.models.endpoint_create import EndpointCreate
@@ -229,8 +230,8 @@ def endpoint_create(
         endpoint_compute_dict = {
             "driver": ask(
                 "driver",
-                choices=["vsphere"],
-                default="vsphere",
+                choices=list(EndpointComputeDrivers),
+                default=EndpointComputeDrivers.VSPHERE,
             ),
             "hostname": ask("hostname", validation=validate_hostname),
             "username": ask("username"),
