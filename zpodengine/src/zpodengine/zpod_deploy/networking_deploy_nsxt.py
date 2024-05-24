@@ -1,7 +1,8 @@
 from zpodcommon import models as M
+from zpodcommon.lib.network_utils import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine import settings
-from zpodengine.lib.network import MgmtIp, wait_for_segment_to_realize
+from zpodengine.lib.network import wait_for_segment_to_realize
 
 
 #######################################################################################

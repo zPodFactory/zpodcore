@@ -4,10 +4,11 @@ import urllib.parse
 from jinja2 import Template
 
 from zpodcommon import models as M
+from zpodcommon.lib.network_utils import MgmtIp
 from zpodengine import settings
 from zpodengine.lib.commands import cmd_execute
 from zpodengine.lib.dbutils import DBUtils
-from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN, MgmtIp
+from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN
 
 
 def ovf_deployer(zpod_component: M.ZpodComponent):

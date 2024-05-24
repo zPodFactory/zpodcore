@@ -7,7 +7,6 @@ import time
 from datetime import datetime
 from ipaddress import IPv4Network
 
-from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient
 
 #
@@ -75,71 +74,6 @@ def get_zpod_all_subnets(zpod_subnet: IPv4Network):
     return list(zpod_subnet.subnets(new_prefix=ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN))
 
 
-class MgmtIp:
-    MGMT_HOST_IDS = {
-        "gw": 1,
-        "zbox": 2,
-        "nsxv": 9,
-        "vcsa": 10,
-        "nsx": 20,
-        "nsxt": 20,
-        "vcf": 25,
-        "vrops": 30,
-        "vrli": 31,
-        "vcd": 40,
-        "vcda": 41,
-        "hcx": 45,
-        "vyos": 0,  # vyos(0) will get the subnet's last ip
-    }
-
-    def __init__(self, ipv4network: IPv4Network, host_id: int):
-        # sourcery skip: remove-unnecessary-cast
-        self.ipv4network = ipv4network
-        self.ipv4address = ipv4network.network_address + int(host_id)
-
-    @classmethod
-    def zpod_component(
-        cls,
-        zpod_component: M.ZpodComponent,
-        host_id: int | None = None,
-    ):
-        """Load from zpod_component"""
-        return cls.zpod(
-            zpod=zpod_component.zpod,
-            component_name=zpod_component.component.component_name,
-            host_id=host_id,
-        )
-
-    @classmethod
-    def zpod(
-        cls,
-        zpod: M.Zpod,
-        component_name: str | None = None,
-        host_id: int | None = None,
-    ):
-        """Load from zpod"""
-        if host_id is None:
-            host_id = cls.MGMT_HOST_IDS[component_name]
-        ipv4network = IPv4Network(zpod.networks[0].cidr)
-        return cls(ipv4network=ipv4network, host_id=host_id)
-
-    @property
-    def ip(self):
-        return str(self.ipv4address)
-
-    @property
-    def netmask(self):
-        return str(self.ipv4network.netmask)
-
-    @property
-    def prefixlen(self):
-        return str(self.ipv4network.prefixlen)
-
-    @property
-    def cidr(self):
-        return f"{self.ip}/{self.ipv4network.prefixlen}"
-
-
 #
 # Fetch Host IP address
 # This will be used for sending this ip to zpods/components with:
@@ -160,10 +94,6 @@ def get_host_ip_address(interface_name):
     except Exception as e:
         print(f"Error fetching IP address for {interface_name}: {e}")
         return None
-
-
-def fmt(txt):
-    return txt.replace("/", "\\/")
 
 
 def wait_for_segment_to_be_evacuted(

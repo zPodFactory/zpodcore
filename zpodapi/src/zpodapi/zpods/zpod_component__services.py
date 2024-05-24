@@ -5,6 +5,11 @@ from zpodapi.lib.service_base import ServiceBase
 from zpodapi.zpods.zpod_component__schemas import ZpodComponentCreate
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus, ZpodComponentStatus
+from zpodcommon.lib.network_utils import (
+    MgmtIp,
+    get_all_active_addresses,
+    get_zpod_reserved_addresses,
+)
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 
@@ -26,13 +31,13 @@ class ZpodComponentService(ServiceBase):
                 detail="Must provide both hostname and host-id when either is provided.",  # noqa: E501
             )
 
+        component = self.session.exec(
+            select(M.Component).where(
+                M.Component.component_uid == component_in.component_uid,
+                M.Component.status == ComponentStatus.ACTIVE,
+            )
+        ).one()
         if not hostname:
-            component = self.session.exec(
-                select(M.Component).where(
-                    M.Component.component_uid == component_in.component_uid,
-                    M.Component.status == ComponentStatus.ACTIVE,
-                )
-            ).one()
             if component.component_name == "esxi":
                 raise HTTPException(
                     status_code=status.HTTP_406_NOT_ACCEPTABLE,
@@ -56,7 +61,24 @@ class ZpodComponentService(ServiceBase):
         ).one_or_none():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Conflicting record found",
+                detail="Conflicting hostname found",
+            )
+
+        component_ip = MgmtIp.zpod(
+            zpod,
+            host_id=host_id,
+            component_name=component.component_name,
+        ).ipv4address
+
+        if component_ip in get_zpod_reserved_addresses(zpod):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Invalid IP: {component_ip}.  Specified IP is a reserved IP.",
+            )
+        if component_ip in get_all_active_addresses(zpod):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Invalid IP: {component_ip}.  Specified IP is already in use.",
             )
 
         zpod_engine = ZpodEngineClient()

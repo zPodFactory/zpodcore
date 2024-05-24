@@ -1,7 +1,7 @@
 from zpodcommon import models as M
-from zpodcommon.lib.nsx import NsxClient
+from zpodcommon.lib.nsx import NsxClient, fmt
 from zpodengine import settings
-from zpodengine.lib.network import fmt, wait_for_segment_to_be_evacuted
+from zpodengine.lib.network import wait_for_segment_to_be_evacuted
 
 
 def networking_destroy_nsxt(zpod: M.Zpod):

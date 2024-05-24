@@ -3,8 +3,8 @@ import time
 from prefect import task
 
 from zpodcommon import models as M
+from zpodcommon.lib.network_utils import MgmtIp
 from zpodengine.lib import database, dnsmasq
-from zpodengine.lib.network import MgmtIp
 
 
 @task

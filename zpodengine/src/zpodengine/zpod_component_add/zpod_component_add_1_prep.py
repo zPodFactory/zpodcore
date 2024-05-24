@@ -3,8 +3,12 @@ from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus, ZpodComponentStatus
+from zpodcommon.lib.network_utils import (
+    MgmtIp,
+    get_all_active_addresses,
+    get_zpod_reserved_addresses,
+)
 from zpodengine.lib import database
-from zpodengine.lib.network import MgmtIp
 
 
 @task(persist_result=True)
@@ -26,14 +30,24 @@ def zpod_component_add_prep(
         if not hostname:
             hostname = component.component_name
 
+        component_ip = MgmtIp.zpod(
+            zpod,
+            host_id=host_id,
+            component_name=component.component_name,
+        ).ipv4address
+
+        if component_ip in get_zpod_reserved_addresses(zpod):
+            raise ValueError(
+                f"Invalid IP: {component_ip}.  Specified IP is a reserved IP."
+            )
+        if component_ip in get_all_active_addresses(zpod):
+            raise ValueError(
+                f"Invalid IP: {component_ip}.  Specified IP is already in use."
+            )
         zpod_component = M.ZpodComponent(
             zpod_id=zpod_id,
             component_id=component.id,
-            ip=MgmtIp.zpod(
-                zpod,
-                host_id=host_id,
-                component_name=component.component_name,
-            ).ip,
+            ip=component_ip,
             hostname=hostname,
             fqdn=f"{hostname}.{zpod.domain}",
             status=ZpodComponentStatus.BUILDING,

@@ -53,6 +53,8 @@ def event_hook_response(response: httpx.Response):
         f"{response.status_code} {response.safejson() or response.text}"
     )
 
+def fmt(txt):
+    return txt.replace("/", "\\/")
 
 class Auth(httpx.Auth):
     token_name = "x-xsrf-token"
