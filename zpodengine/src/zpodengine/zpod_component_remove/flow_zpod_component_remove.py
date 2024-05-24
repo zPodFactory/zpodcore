@@ -42,19 +42,12 @@ def remove_from_dns(zpod_component_id: int):
 
         zb = ZboxApiClient.by_zpod(zpod_component.zpod)
         try:
-            # Used .request(method=DELETE), because
-            # .delete() doesn't allow passing json
-            response = zb.request(
-                method="DELETE",
-                url="/hosts",
-                json={
-                    "ip": zpod_component.ip,
-                    "fqdn": zpod_component.hostname,
-                },
+            response = zb.delete(
+                url=f"/dns/{zpod_component.ip}/{zpod_component.hostname}"
             )
             response.raise_for_status()
-        except (RequestError, HTTPStatusError):
-            print(f"{zb.base_url} failure.  Skipping...")
+        except (RequestError, HTTPStatusError) as e:
+            print(f"{e.request.url} failure.  Skipping...")
 
 
 @task()

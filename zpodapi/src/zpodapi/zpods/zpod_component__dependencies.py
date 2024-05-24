@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Path, status
 
 from zpodapi.lib.global_dependencies import service_init_annotation
-from zpodapi.lib.id_types import IdValidator
+from zpodapi.lib.types import IdValidator
 from zpodcommon import models as M
 
 from .zpod__dependencies import ZpodAnnotations

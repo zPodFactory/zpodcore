@@ -1,43 +1,14 @@
-import re
-
 from pydantic import AfterValidator, ConfigDict, StringConstraints
-from pydantic_core import PydanticCustomError
 from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
+from zpodapi.lib.types import validate_fqdn
 from zpodcommon import enums
 
 
 # Annotated[Enum, StringConstraints(to_lower=True)] doesn't work with enum types
 def to_lower(value: str):
     return value.lower()
-
-
-def validate_fqdn(value: str):
-    """
-    https://en.m.wikipedia.org/wiki/Fully_qualified_domain_name
-    """
-
-    if not 1 < len(value) < 253:
-        raise PydanticCustomError("value_error", "Invalid fqdn length")
-
-    # Remove trailing dot
-    if value[-1] == ".":
-        value = value[:-1]
-
-    #  Split hostname into list of DNS labels
-    labels = value.split(".")
-
-    #  Define pattern of DNS label
-    #  Can begin and end with a number or letter only
-    #  Can contain hyphens, a-z, A-Z, 0-9
-    #  1 - 63 chars allowed
-    fqdn = re.compile(r"^[a-z0-9]([a-z-0-9-]{0,61}[a-z0-9])?$", re.IGNORECASE)
-
-    # Check that all labels match that pattern.
-    if not all(fqdn.match(label) for label in labels):
-        raise PydanticCustomError("value_error", "Invalid fqdn")
-    return value
 
 
 class D:

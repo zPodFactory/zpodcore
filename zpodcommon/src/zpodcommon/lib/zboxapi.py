@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 import types
 
 import httpx
@@ -8,26 +9,38 @@ from httpx import HTTPStatusError, RequestError  # noqa: F401
 from zpodcommon import models as M
 from zpodcommon.lib import database
 
+insideFastAPI = "fastapi" in sys.modules
+if insideFastAPI:
+    from fastapi import HTTPException
+
 logger = logging.getLogger(__name__)
 
 
 def safejson(response: httpx.Response):
-    if response.status_code == 404:
-        return {}
     try:
         response.raise_for_status()
     except httpx.HTTPStatusError as e:
         print(response.text)
         raise e
-
     try:
         return response.json()
     except json.JSONDecodeError:
         return {}
 
 
-def results(response: httpx.Response):
-    return response.safejson().get("results", [])
+def safejson_fastapi(response: httpx.Response):
+    try:
+        return safejson(response)
+    except httpx.HTTPStatusError as e:
+        try:
+            detail = response.json()["detail"]
+        except json.JSONDecodeError:
+            detail = response.text
+
+        raise HTTPException(
+            status_code=response.status_code,
+            detail=detail,
+        ) from e
 
 
 def event_hook_request(request: httpx.Request):
@@ -40,9 +53,10 @@ def event_hook_request(request: httpx.Request):
 
 def event_hook_response(response: httpx.Response):
     # Add safejson to response
-    response.safejson = types.MethodType(safejson, response)
-    # Add results to response
-    response.results = types.MethodType(results, response)
+    response.safejson = types.MethodType(
+        safejson_fastapi if insideFastAPI else safejson,
+        response,
+    )
 
     response.read()
     request = response.request

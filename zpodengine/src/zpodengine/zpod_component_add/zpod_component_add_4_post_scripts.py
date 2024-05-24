@@ -37,13 +37,16 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                 finish_time = datetime.datetime.now(datetime.UTC) + timeout
                 while finish_time > datetime.datetime.now(datetime.UTC):
                     try:
-                        response = zb.get(url="/hosts")
+                        response = zb.get(url="/dns")
                         response.raise_for_status()
                         return
-                    except (RequestError, HTTPStatusError):
-                        print(f"Waiting for {zb.base_url} to start.")
+                    except (RequestError, HTTPStatusError) as e:
+                        print(f"Waiting for {e.request.url} to start.")
                         time.sleep(15)
-                raise Exception("Failed to connect to {zb.base_url}.  Exiting.")
+
+                # Would prefer to raise an error here, but we need to support old
+                # zbox versions
+                print("DNS startup failure.  Skipping...")
 
             case "vyos":
                 print("--- vyos ---")

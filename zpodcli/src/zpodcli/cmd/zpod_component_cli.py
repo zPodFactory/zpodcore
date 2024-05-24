@@ -10,7 +10,6 @@ from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView
-from zpodsdk.models.zpod_view import ZpodView
 
 app = typer.Typer(help="Manage zPod Components", no_args_is_help=True)
 
@@ -28,7 +27,6 @@ def get_status_markdown(status: str):
 
 
 def generate_table(
-    zpod: ZpodView,
     zpod_components: list[ZpodComponentView],
 ):
     title = "zPod Component List"
@@ -77,17 +75,13 @@ def zpod_component_list(
     """
     print(f"Listing {zpod_name} components")
     z: ZpodClient = ZpodClient()
-    zpod = z.zpods_get.sync(id=f"name={zpod_name}")
+    zpod_components: List[ZpodComponentView] = z.zpods_components_get_all.sync(
+        id=f"name={zpod_name}"
+    )
 
-    if zpod.name == zpod_name:
-        zpod_components: List[ZpodComponentView] = z.zpods_components_get_all.sync(
-            zpod.id
-        )
-
-        # Sort per FQDN
-        sorted_zpod_components = sorted(zpod_components, key=lambda zc: zc.fqdn)
-
-        generate_table(zpod, sorted_zpod_components)
+    # Sort per FQDN
+    sorted_zpod_components = sorted(zpod_components, key=lambda zc: zc.fqdn)
+    generate_table(sorted_zpod_components)
 
 
 @app.command(name="add", no_args_is_help=True)
@@ -148,10 +142,8 @@ def zpod_component_add(
     print(f"Adding component {component_uid} to zPod {zpod_name}")
 
     z: ZpodClient = ZpodClient()
-    zpod = z.zpods_get.sync(id=f"name={zpod_name}")
-
     z.zpods_components_add.sync(
-        zpod.id,
+        id=f"name={zpod_name}",
         body=ZpodComponentCreate(
             component_uid=component_uid,
             host_id=host_id,

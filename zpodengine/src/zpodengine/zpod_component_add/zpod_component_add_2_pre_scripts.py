@@ -19,19 +19,19 @@ def zpod_component_add_pre_scripts(
         zpod_component = session.get(M.ZpodComponent, zpod_component_id)
 
         c = zpod_component.component
-        if c.component_name != 'zbox':
+        if c.component_name != "zbox":
             zb = ZboxApiClient.by_zpod(zpod_component.zpod)
             try:
                 response = zb.post(
-                    url="/hosts",
+                    url="/dns",
                     json={
                         "ip": zpod_component.ip,
-                        "fqdn": zpod_component.hostname,
+                        "hostname": zpod_component.hostname,
                     },
                 )
                 response.raise_for_status()
-            except (RequestError, HTTPStatusError):
-                print(f"{zb.base_url} failure.  Skipping...")
+            except (RequestError, HTTPStatusError) as e:
+                print(f"{e.request.url} failure.  Skipping...")
 
         match c.component_name:
             case "vcsa":

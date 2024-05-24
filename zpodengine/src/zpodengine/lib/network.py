@@ -95,7 +95,7 @@ class MgmtIp:
     def __init__(self, ipv4network: IPv4Network, host_id: int):
         # sourcery skip: remove-unnecessary-cast
         self.ipv4network = ipv4network
-        self.ipv4address = list(ipv4network.hosts())[int(host_id) - 1]
+        self.ipv4address = ipv4network.network_address + int(host_id)
 
     @classmethod
     def zpod_component(

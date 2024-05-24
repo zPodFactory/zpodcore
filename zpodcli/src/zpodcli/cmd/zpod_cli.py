@@ -5,7 +5,7 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.cmd import zpod_component_cli, zpod_permission_cli
+from zpodcli.cmd import zpod_component_cli, zpod_dns_cli, zpod_permission_cli
 from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
@@ -15,6 +15,7 @@ from zpodsdk.models.zpod_view import ZpodView
 
 app = typer.Typer(help="Manage zPods")
 app.add_typer(zpod_component_cli.app, name="component")
+app.add_typer(zpod_dns_cli.app, name="dns")
 app.add_typer(zpod_permission_cli.app, name="permission")
 
 

@@ -49,6 +49,9 @@ from .validation_error import ValidationError
 from .zpod_component_create import ZpodComponentCreate
 from .zpod_component_view import ZpodComponentView
 from .zpod_create import ZpodCreate
+from .zpod_dns_create import ZpodDnsCreate
+from .zpod_dns_update import ZpodDnsUpdate
+from .zpod_dns_view import ZpodDnsView
 from .zpod_feature_view import ZpodFeatureView
 from .zpod_feature_view_data import ZpodFeatureViewData
 from .zpod_network_view import ZpodNetworkView
@@ -110,6 +113,9 @@ __all__ = (
     "ZpodComponentCreate",
     "ZpodComponentView",
     "ZpodCreate",
+    "ZpodDnsCreate",
+    "ZpodDnsUpdate",
+    "ZpodDnsView",
     "ZpodFeatureView",
     "ZpodFeatureViewData",
     "ZpodNetworkView",

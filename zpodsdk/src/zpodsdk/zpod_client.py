@@ -432,6 +432,41 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_dns_add(self):
+        from zpodsdk.api.zpods import zpods_dns_add
+
+        return zpods_dns_add.ZpodsDnsAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_dns_get(self):
+        from zpodsdk.api.zpods import zpods_dns_get
+
+        return zpods_dns_get.ZpodsDnsGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_dns_get_all(self):
+        from zpodsdk.api.zpods import zpods_dns_get_all
+
+        return zpods_dns_get_all.ZpodsDnsGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_dns_remove(self):
+        from zpodsdk.api.zpods import zpods_dns_remove
+
+        return zpods_dns_remove.ZpodsDnsRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_dns_update(self):
+        from zpodsdk.api.zpods import zpods_dns_update
+
+        return zpods_dns_update.ZpodsDnsUpdate(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_features_get_all(self):
         from zpodsdk.api.zpods import zpods_features_get_all
 
