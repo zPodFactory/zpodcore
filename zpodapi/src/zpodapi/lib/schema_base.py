@@ -94,7 +94,7 @@ def Field(
 
     all_args = FIELD_ARGS | default_args | ind_args
     if all_args.get("example"):
-        all_args["schema_extra"]["example"] = all_args["example"]
+        all_args["schema_extra"]["examples"] = [all_args["example"]]
     del all_args["example"]
 
     return SQLModelField(**all_args)
