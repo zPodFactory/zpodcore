@@ -95,11 +95,7 @@ def zpod_component_add_deploy(
                 print("--- Normal Component ---")
                 ovf_deployer(zpod_component)
 
-                with vCenter(
-                    host=f"vcsa.{zpod_component.zpod.domain}",
-                    user=f"administrator@{zpod_component.zpod.domain}",
-                    pwd=zpod_component.zpod.password,
-                ) as vc:
+                with vCenter.auth_by_zpod(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.hostname)
                     print("Start VM")
                     vc.poweron_vm(vm)
