@@ -13,7 +13,7 @@ class MgmtIp:
         "vcsa": 10,
         "nsx": 20,
         "nsxt": 20,
-        "vcf": 25,
+        "cloudbuilder": 25,
         "vrops": 30,
         "vrli": 31,
         "vcd": 40,

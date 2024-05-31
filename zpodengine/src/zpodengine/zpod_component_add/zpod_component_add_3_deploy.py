@@ -47,8 +47,8 @@ def zpod_component_add_deploy(
                 print("--- vyos ---")
                 # Add static routes on NSX T1
 
-            case "vcf":
-                print("--- vcf ---")
+            case "cloudbuilder":
+                print("--- cloudbuilder ---")
 
                 ovf_deployer(zpod_component)
 
