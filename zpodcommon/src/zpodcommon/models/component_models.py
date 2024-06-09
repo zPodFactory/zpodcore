@@ -15,6 +15,6 @@ class Component(CommonDatesMixin, ModelBase, table=True):
     component_description: str = Field(..., unique=False, nullable=False)
     library_name: str = Field(default=None, foreign_key="libraries.name", nullable=True)
     filename: str = Field(..., unique=False, nullable=False)
-    jsonfile: str = Field(..., unique=True, index=True, nullable=False)
+    jsonfile: str = Field(..., unique=False, index=True, nullable=False)
     status: str = Field(..., nullable=True)
     download_status: str = Field(..., nullable=True)
