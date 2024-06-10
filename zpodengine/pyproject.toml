@@ -18,7 +18,7 @@ python = "3.12.1"
 python-dotenv = "1.0.1"
 pyvmomi = "^8.0.1.0"
 sqlmodel = "0.0.18"
-requests = "<2.32.0" # Remove this line once this is resolved everywhere: https://github.com/docker/docker-py/issues/3256
+requests = "<2.33.0" # Remove this line once this is resolved everywhere: https://github.com/docker/docker-py/issues/3256
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8"
