@@ -15,14 +15,8 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
     component = zpod_component.component
     zpod = zpod_component.zpod
 
-    # Open Component JSON file
-    f = open(component.jsonfile)
-
-    # Load component JSON
-    cjson = json.load(f)
-
     # Load govc deploy spec
-    govc_spec = cjson["component_deploy_govc_spec"]
+    govc_spec = component.component_json["component_deploy_govc_spec"]
 
     # Fetch component default gw and netmask from zpod
     gw = MgmtIp.zpod(zpod, "gw")
@@ -42,9 +36,10 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         # all other components rely on zbox/vyos as their DNS server.
         zpod_dns = MgmtIp.zpod(zpod, "zbox").ip
 
-    print(f"Component Nested: {cjson['component_isnested']}")
+    isnested = component.component_json['component_isnested']
+    print(f"Component Nested: {isnested}")
 
-    if cjson["component_isnested"] is False:
+    if isnested is False:
         print(f"[L1] Deployment for {component.component_name}")
         # This means we deploy on the physical endpoint vSphere env
         epc = zpod.endpoint.endpoints["compute"]
@@ -59,7 +54,6 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         resource_pool = f"{site_id}-{zpod.name}"
         zpod_portgroup = f"{site_id}-{zpod.name}-segment"
         vm_name = zpod_component.fqdn
-
     else:
         print(f"[L2] Deployment for {component.component_name}")
         # This means we deploy the component as a nested L2 VM from the zpod

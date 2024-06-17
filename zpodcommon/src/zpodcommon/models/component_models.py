@@ -1,3 +1,6 @@
+import json
+from functools import cached_property
+
 from sqlmodel import Field
 
 from zpodcommon.models.model_base import ModelBase
@@ -18,3 +21,11 @@ class Component(CommonDatesMixin, ModelBase, table=True):
     jsonfile: str = Field(..., unique=False, index=True, nullable=False)
     status: str = Field(..., nullable=True)
     download_status: str = Field(..., nullable=True)
+
+    @cached_property
+    def component_json(self) -> dict:
+        # Open Component JSON file
+        f = open(self.jsonfile)
+
+        # Load component JSON
+        return json.load(f)
