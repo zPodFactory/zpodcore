@@ -60,6 +60,11 @@ deployments:
   schedule: {}
   work_pool: *zpodengine_work_pool
 
+- name: component_sync
+  entrypoint: src/zpodengine/component_sync/flow_component_sync.py:flow_component_sync
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
 - name: zpod_component_add
   entrypoint: src/zpodengine/zpod_component_add/flow_zpod_component_add.py:flow_zpod_component_add
   schedule: {}
