@@ -15,6 +15,7 @@ class ComponentViewFull:
         component_name (str):
         component_uid (str):
         component_version (str):
+        file_checksum (str):
         filename (str):
         id (int):
         jsonfile (str):
@@ -27,6 +28,7 @@ class ComponentViewFull:
     component_name: str
     component_uid: str
     component_version: str
+    file_checksum: str
     filename: str
     id: int
     jsonfile: str
@@ -42,6 +44,8 @@ class ComponentViewFull:
         component_uid = self.component_uid
 
         component_version = self.component_version
+
+        file_checksum = self.file_checksum
 
         filename = self.filename
 
@@ -66,6 +70,7 @@ class ComponentViewFull:
                 "component_name": component_name,
                 "component_uid": component_uid,
                 "component_version": component_version,
+                "file_checksum": file_checksum,
                 "filename": filename,
                 "id": id,
                 "jsonfile": jsonfile,
@@ -88,6 +93,8 @@ class ComponentViewFull:
         component_uid = d.pop("component_uid")
 
         component_version = d.pop("component_version")
+
+        file_checksum = d.pop("file_checksum")
 
         filename = d.pop("filename")
 
@@ -113,6 +120,7 @@ class ComponentViewFull:
             component_name=component_name,
             component_uid=component_uid,
             component_version=component_version,
+            file_checksum=file_checksum,
             filename=filename,
             id=id,
             jsonfile=jsonfile,
