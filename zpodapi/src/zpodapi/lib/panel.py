@@ -22,6 +22,10 @@ def print_panel_obj(obj, title=None):
 
 
 def log_obj(obj, title):
+    # DO NOT log bytes (component upload feature)
+    if isinstance(obj, bytes):
+        return
+
     if settings.RICH_MODE:
         print_panel_obj(format_obj(obj), title)
 
