@@ -29,3 +29,11 @@ class ComponentService(ServiceBase):
     def disable(self, *, component: M.Component):
         component.status = ComponentStatus.INACTIVE
         return self.crud.save(component)
+
+    def sync(self, *, filename: str):
+        zpod_engine = ZpodEngineClient()
+        zpod_engine.create_flow_run_by_name(
+            flow_name="component_sync",
+            deployment_name="component_sync",
+            filename=filename,
+        )

@@ -1,9 +1,14 @@
+import os
+
 import typer
+from rich.progress import Progress
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print
+from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+
+CHUNK_SIZE = 1024 * 1024 * 16  # 16MB
 
 app = typer.Typer(help="Manage Components")
 
@@ -166,3 +171,64 @@ def component_disable(
         component_uid=component_uid,
         action="Disable",
     )
+
+
+@app.command(name="upload", no_args_is_help=True)
+@unexpected_status_handler
+def component_upload(
+    filename: Annotated[
+        str,
+        typer.Argument(
+            help="File to upload",
+            show_default=False,
+        ),
+    ],
+):
+    """
+    Upload a file that represents a component
+    """
+
+    z: ZpodClient = ZpodClient()
+
+    client = z._client.get_httpx_client()
+
+    file_size = os.path.getsize(filename)
+    basename = os.path.basename(filename)
+
+    offset = get_server_file_size(basename)
+
+    with open(filename, "rb") as file, Progress() as progress:
+        file.seek(offset)
+        task = progress.add_task(f"Uploading {filename}", total=file_size)
+        progress.update(task, advance=offset)
+
+        while True:
+            chunk = file.read(CHUNK_SIZE)
+            if not chunk:
+                break
+
+            response = client.post(
+                "/components/upload",
+                files={"file": chunk},
+                data={"filename": basename, "offset": offset},
+            )
+
+            if response.status_code != 200:
+                exit_with_error("Error uploading file.")
+
+            offset += len(chunk)
+            progress.update(task, advance=len(chunk))
+
+    # Upload finished, let's tell zPodAPI & launch zPodEngine flow
+    z.components_sync.sync(filename=basename)
+
+
+def get_server_file_size(filename: str) -> int:
+    z: ZpodClient = ZpodClient()
+
+    client = z._client.get_httpx_client()
+
+    response = client.get(f"/components/upload/{os.path.basename(filename)}")
+    if response.status_code == 200:
+        return response.json().get("current_size", 0)
+    return 0

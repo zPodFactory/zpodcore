@@ -109,6 +109,10 @@ def get_component_uid(component):
     return f"{component['component_name']}-{component['component_version']}"
 
 
+def get_component_checksum(component):
+    return component["component_download_file_checksum"]
+
+
 def find_component_by_uid(components: List[M.Component], uid: str) -> M.Component:
     return next((comp for comp in components if comp.component_uid == uid), None)
 
@@ -172,6 +176,7 @@ def create_component_dict(
         "status": status,
         "download_status": download_status,
         "component_uid": get_component_uid(git_component),
+        "file_checksum": get_component_checksum(git_component),
         **{
             k: v
             for k, v in git_component.items()
