@@ -7,6 +7,7 @@ Create Date: 2024-06-18 17:44:37.783173
 """
 
 import json
+from pathlib import Path
 
 import sqlalchemy as sa
 import sqlmodel
@@ -38,9 +39,13 @@ def upgrade():
     conn = op.get_bind()
     results = conn.execute(text("select id, jsonfile from components")).fetchall()
     for id_, jsonfile in results:
-        with open(jsonfile) as f:
-            component_json = json.load(f)
-            component_checksum = component_json["component_download_file_checksum"]
+        if Path(jsonfile).exists():
+            with open(jsonfile) as f:
+                component_json = json.load(f)
+                component_checksum = component_json["component_download_file_checksum"]
+        else:
+            print(f"Unable to find file: {jsonfile}")
+            component_checksum = ""
 
         op.execute(
             components_table.update()
