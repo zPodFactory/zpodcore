@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.body_upload_components_upload_post import BodyUploadComponentsUploadPost
+from ...models.body_components_upload import BodyComponentsUpload
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -17,7 +17,7 @@ class ComponentsUpload:
     def _get_kwargs(
         self,
         *,
-        body: BodyUploadComponentsUploadPost,
+        body: BodyComponentsUpload,
     ) -> Dict[str, Any]:
         headers: Dict[str, Any] = {}
 
@@ -64,12 +64,12 @@ class ComponentsUpload:
     def sync_detailed(
         self,
         *,
-        body: BodyUploadComponentsUploadPost,
+        body: BodyComponentsUpload,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Upload
 
         Args:
-            body (BodyUploadComponentsUploadPost):
+            body (BodyComponentsUpload):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -92,12 +92,12 @@ class ComponentsUpload:
     def sync(
         self,
         *,
-        body: BodyUploadComponentsUploadPost,
+        body: BodyComponentsUpload,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Upload
 
         Args:
-            body (BodyUploadComponentsUploadPost):
+            body (BodyComponentsUpload):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -114,12 +114,12 @@ class ComponentsUpload:
     async def asyncio_detailed(
         self,
         *,
-        body: BodyUploadComponentsUploadPost,
+        body: BodyComponentsUpload,
     ) -> Response[Union[Any, HTTPValidationError]]:
         """Upload
 
         Args:
-            body (BodyUploadComponentsUploadPost):
+            body (BodyComponentsUpload):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -140,12 +140,12 @@ class ComponentsUpload:
     async def asyncio(
         self,
         *,
-        body: BodyUploadComponentsUploadPost,
+        body: BodyComponentsUpload,
     ) -> Optional[Union[Any, HTTPValidationError]]:
         """Upload
 
         Args:
-            body (BodyUploadComponentsUploadPost):
+            body (BodyComponentsUpload):
 
         Raises:
             errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

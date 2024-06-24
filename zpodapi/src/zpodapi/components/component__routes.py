@@ -67,9 +67,15 @@ def disable(
     return component_service.disable(component=component)
 
 
-@router.post("/upload", dependencies=[GlobalDepends.OnlySuperAdmin])
+@router.post(
+    "/upload",
+    operation_id="components_upload",
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
 async def upload(
-    file: UploadFile, filename: FILENAME = Form(...), offset: int = Form(...)
+    file: UploadFile,
+    filename: FILENAME = Form(...),
+    offset: int = Form(...),
 ):
     file_location = os.path.join("/products", filename)
 
@@ -95,7 +101,10 @@ async def upload(
     return JSONResponse({"filename": filename, "current_size": current_size})
 
 
-@router.get("/upload/{filename}", dependencies=[GlobalDepends.OnlySuperAdmin])
+@router.get(
+    "/upload/{filename}",
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
 async def upload_filesize(filename: FILENAME):
     file_location = os.path.join("/products", filename)
     if os.path.exists(file_location):
@@ -107,7 +116,8 @@ async def upload_filesize(filename: FILENAME):
 
 @router.post("/sync/{filename}", dependencies=[GlobalDepends.OnlySuperAdmin])
 async def sync(
-    filename: FILENAME, component_service: ComponentAnnotations.ComponentService
+    filename: FILENAME,
+    component_service: ComponentAnnotations.ComponentService,
 ):
     #
     # File has been uploaded, now we need to checksum it and enable the component

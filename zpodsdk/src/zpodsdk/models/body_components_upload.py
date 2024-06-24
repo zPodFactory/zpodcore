@@ -6,11 +6,11 @@ from attrs import field as _attrs_field
 
 from ..types import File
 
-T = TypeVar("T", bound="BodyUploadComponentsUploadPost")
+T = TypeVar("T", bound="BodyComponentsUpload")
 
 
 @_attrs_define
-class BodyUploadComponentsUploadPost:
+class BodyComponentsUpload:
     """
     Attributes:
         file (File):
@@ -72,14 +72,14 @@ class BodyUploadComponentsUploadPost:
 
         offset = d.pop("offset")
 
-        body_upload_components_upload_post = cls(
+        body_components_upload = cls(
             file=file,
             filename=filename,
             offset=offset,
         )
 
-        body_upload_components_upload_post.additional_properties = d
-        return body_upload_components_upload_post
+        body_components_upload.additional_properties = d
+        return body_components_upload
 
     @property
     def additional_keys(self) -> List[str]:
