@@ -121,6 +121,5 @@ async def sync(
 ):
     #
     # File has been uploaded, now we need to checksum it and enable the component
-    #
-    # FIXME: check if filename seems to be a valid filename (no / allowed)
+
     return component_service.sync(filename=filename)
