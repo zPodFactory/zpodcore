@@ -109,9 +109,9 @@ async def upload_filesize(filename: FILENAME):
     file_location = os.path.join("/products", filename)
     if os.path.exists(file_location):
         current_size = os.path.getsize(file_location)
-        return JSONResponse({"filename": filename, "current_size": current_size})
     else:
-        return JSONResponse({"filename": filename, "current_size": 0})
+        current_size = 0
+    return JSONResponse({"filename": filename, "current_size": current_size})
 
 
 @router.post("/sync/{filename}", dependencies=[GlobalDepends.OnlySuperAdmin])
