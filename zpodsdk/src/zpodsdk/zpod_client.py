@@ -46,6 +46,20 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def components_upload(self):
+        from zpodsdk.api.components import components_upload
+
+        return components_upload.ComponentsUpload(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def components_upload_filesize(self):
+        from zpodsdk.api.components import components_upload_filesize
+
+        return components_upload_filesize.ComponentsUploadFilesize(self._client)
+
+    @property
+    @cache  # noqa: B019
     def endpoints_create(self):
         from zpodsdk.api.endpoints import endpoints_create
 

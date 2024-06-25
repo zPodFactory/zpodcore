@@ -90,3 +90,17 @@ def validate_hostname(value: str):
 
 
 HOSTNAME = Annotated[str, AfterValidator(validate_hostname)]
+
+
+def validate_filename(value: str):
+    # Define a regex pattern for allowed characters in filenames
+    # This pattern allows alphanumeric characters, underscores, hyphens, and dots
+    pattern = re.compile(r"^[\w\-. ]+$")
+
+    # Check if the filename matches the pattern
+    if not pattern.match(value):
+        raise PydanticCustomError("value_error", "Invalid filename")
+    return value
+
+
+FILENAME = Annotated[str, AfterValidator(validate_filename)]

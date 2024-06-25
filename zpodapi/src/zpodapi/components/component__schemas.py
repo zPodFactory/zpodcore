@@ -17,6 +17,7 @@ class D:
     }
     status = {"example": ComponentStatus.ACTIVE}
     download_status = {"example": ComponentDownloadStatus.SCHEDULED}
+    file_checksum = {"example": "sha256:1234567890"}
 
 
 class ComponentView(SchemaBase):
@@ -33,3 +34,4 @@ class ComponentViewFull(ComponentView):
     jsonfile: str = Field(..., D.jsonfile)
     status: str = Field(..., D.status)
     download_status: str | None = Field(None, D.download_status)
+    file_checksum: str = Field(..., D.file_checksum)

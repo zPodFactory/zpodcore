@@ -21,6 +21,7 @@ class Component(CommonDatesMixin, ModelBase, table=True):
     jsonfile: str = Field(..., unique=False, index=True, nullable=False)
     status: str = Field(..., nullable=True)
     download_status: str = Field(..., nullable=True)
+    file_checksum: str = Field(..., nullable=False)
 
     @cached_property
     def component_json(self) -> dict:
