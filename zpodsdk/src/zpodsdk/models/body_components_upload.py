@@ -14,17 +14,21 @@ class BodyComponentsUpload:
     """
     Attributes:
         file (File):
+        file_size (int):
         filename (str):
         offset (int):
     """
 
     file: File
+    file_size: int
     filename: str
     offset: int
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         file = self.file.to_tuple()
+
+        file_size = self.file_size
 
         filename = self.filename
 
@@ -35,6 +39,7 @@ class BodyComponentsUpload:
         field_dict.update(
             {
                 "file": file,
+                "file_size": file_size,
                 "filename": filename,
                 "offset": offset,
             }
@@ -44,6 +49,8 @@ class BodyComponentsUpload:
 
     def to_multipart(self) -> Dict[str, Any]:
         file = self.file.to_tuple()
+
+        file_size = (None, str(self.file_size).encode(), "text/plain")
 
         filename = (None, str(self.filename).encode(), "text/plain")
 
@@ -56,6 +63,7 @@ class BodyComponentsUpload:
         field_dict.update(
             {
                 "file": file,
+                "file_size": file_size,
                 "filename": filename,
                 "offset": offset,
             }
@@ -68,12 +76,15 @@ class BodyComponentsUpload:
         d = src_dict.copy()
         file = File(payload=BytesIO(d.pop("file")))
 
+        file_size = d.pop("file_size")
+
         filename = d.pop("filename")
 
         offset = d.pop("offset")
 
         body_components_upload = cls(
             file=file,
+            file_size=file_size,
             filename=filename,
             offset=offset,
         )

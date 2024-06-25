@@ -194,7 +194,6 @@ def component_upload(
 
     file_size = os.path.getsize(filename)
     basename = os.path.basename(filename)
-
     offset = get_server_file_size(basename)
 
     with open(filename, "rb") as file, Progress() as progress:
@@ -210,7 +209,11 @@ def component_upload(
             response = client.post(
                 "/components/upload",
                 files={"file": chunk},
-                data={"filename": basename, "offset": offset},
+                data={
+                    "filename": basename,
+                    "offset": offset,
+                    "file_size": file_size,
+                },
             )
 
             if response.status_code != 200:
@@ -218,9 +221,6 @@ def component_upload(
 
             offset += len(chunk)
             progress.update(task, advance=len(chunk))
-
-    # Upload finished, let's tell zPodAPI & launch zPodEngine flow
-    z.components_sync.sync(filename=basename)
 
 
 def get_server_file_size(filename: str) -> int:

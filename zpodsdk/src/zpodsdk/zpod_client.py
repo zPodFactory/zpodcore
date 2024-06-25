@@ -46,13 +46,6 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
-    def components_sync(self):
-        from zpodsdk.api.components import components_sync
-
-        return components_sync.ComponentsSync(self._client)
-
-    @property
-    @cache  # noqa: B019
     def components_upload(self):
         from zpodsdk.api.components import components_upload
 

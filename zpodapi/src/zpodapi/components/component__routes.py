@@ -1,6 +1,4 @@
-import os
-
-from fastapi import APIRouter, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Form, UploadFile, status
 from fastapi.responses import JSONResponse
 
 from zpodapi.lib.global_dependencies import GlobalDepends
@@ -73,31 +71,13 @@ def disable(
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 async def upload(
+    component_service: ComponentAnnotations.ComponentService,
     file: UploadFile,
     filename: FILENAME = Form(...),
     offset: int = Form(...),
+    file_size: int = Form(...),
 ):
-    file_location = os.path.join("/products", filename)
-
-    # Check if the file exists and handle accordingly
-    if os.path.exists(file_location):
-        current_size = os.path.getsize(file_location)
-        if offset != current_size:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Offset does not match the current file size.",
-            )
-    elif offset != 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File does not exist, offset must be 0.",
-        )
-
-    with open(file_location, "ab") as f:
-        f.seek(offset)
-        f.write(await file.read())
-
-    current_size = os.path.getsize(file_location)
+    current_size = await component_service.upload(file, filename, offset, file_size)
     return JSONResponse({"filename": filename, "current_size": current_size})
 
 
@@ -105,21 +85,9 @@ async def upload(
     "/upload/{filename}",
     dependencies=[GlobalDepends.OnlySuperAdmin],
 )
-async def upload_filesize(filename: FILENAME):
-    file_location = os.path.join("/products", filename)
-    if os.path.exists(file_location):
-        current_size = os.path.getsize(file_location)
-    else:
-        current_size = 0
-    return JSONResponse({"filename": filename, "current_size": current_size})
-
-
-@router.post("/sync/{filename}", dependencies=[GlobalDepends.OnlySuperAdmin])
-async def sync(
-    filename: FILENAME,
+async def upload_filesize(
     component_service: ComponentAnnotations.ComponentService,
+    filename: FILENAME,
 ):
-    #
-    # File has been uploaded, now we need to checksum it and enable the component
-
-    return component_service.sync(filename=filename)
+    current_size = await component_service.upload_filesize(filename)
+    return JSONResponse({"filename": filename, "current_size": current_size})
