@@ -77,7 +77,12 @@ async def upload(
     offset: int = Form(...),
     file_size: int = Form(...),
 ):
-    current_size = await component_service.upload(file, filename, offset, file_size)
+    current_size = await component_service.upload(
+        file=file,
+        filename=filename,
+        offset=offset,
+        file_size=file_size,
+    )
     return JSONResponse({"filename": filename, "current_size": current_size})
 
 
@@ -89,5 +94,5 @@ async def upload_filesize(
     component_service: ComponentAnnotations.ComponentService,
     filename: FILENAME,
 ):
-    current_size = await component_service.upload_filesize(filename)
+    current_size = await component_service.upload_filesize(filename=filename)
     return JSONResponse({"filename": filename, "current_size": current_size})
