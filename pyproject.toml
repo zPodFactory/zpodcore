@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zpodcore"
-version = "0.7.0"
+version = "0.7.1"
 description = ""
 authors = ["Kelby Valenti <kelby.valenti@gmail.com>", "Timo Sugliani <timo.sugliani@gmail.com>"]
 readme = "README.md"
