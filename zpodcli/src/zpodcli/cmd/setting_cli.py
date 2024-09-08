@@ -7,6 +7,7 @@ from typing_extensions import Annotated
 
 from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.models.setting_create import SettingCreate
 from zpodsdk.models.setting_update import SettingUpdate
 
 app = typer.Typer(help="Manage Settings")
@@ -30,6 +31,49 @@ def generate_table(settings: list):
             f"[dark_khaki]{setting.value}[/dark_khaki]",
         )
     console_print(title, table)
+
+
+@app.command(name="create", no_args_is_help=True)
+@unexpected_status_handler
+def setting_create(
+    name: Annotated[
+        str,
+        typer.Option(
+            "--name",
+            "-n",
+            help="Setting Name",
+            show_default=False,
+        ),
+    ],
+    value: Annotated[
+        str,
+        typer.Option(
+            "--value",
+            "-v",
+            help="Setting Value",
+            show_default=False,
+        ),
+    ],
+    description: Annotated[
+        str,
+        typer.Option(
+            "--description",
+            "-d",
+            help="Setting Description",
+            show_default=False,
+        ),
+    ] = None,
+):
+    """
+    Create Setting
+    """
+    z: ZpodClient = ZpodClient()
+    setting = SettingCreate(name=name, value=value, description=description)
+    z.settings_create.sync(body=setting)
+    print(
+        f"Setting [magenta]{name}[/magenta] has been created"
+        f"with value [magenta]{value}[/magenta]."
+    )
 
 
 @app.command(name="list")
@@ -87,3 +131,22 @@ def update(
         f"Setting [magenta]{name}[/magenta] has been modified to "
         f"[yellow]{value}[/yellow]."
     )
+
+
+@app.command(name="delete", no_args_is_help=True)
+@unexpected_status_handler
+def setting_delete(
+    name: Annotated[
+        str,
+        typer.Argument(
+            help="Setting Name",
+            show_default=False,
+        ),
+    ],
+):
+    """
+    Delete Setting
+    """
+    z: ZpodClient = ZpodClient()
+    z.settings_delete.sync(id=f"name={name}")
+    print(f"Setting [magenta]{name}[/magenta] has been deleted.")
