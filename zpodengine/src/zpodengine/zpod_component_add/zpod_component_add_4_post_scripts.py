@@ -4,11 +4,11 @@ import time
 from prefect import task
 
 from zpodcommon import models as M
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.vmware import vCenter
 from zpodcommon.lib.zboxapi import HTTPStatusError, RequestError, ZboxApiClient
 from zpodengine.lib import database
 from zpodengine.lib.commands import cmd_execute
-from zpodengine.lib.dbutils import DBUtils
 from zpodengine.zpod_component_add.zpod_component_add_utils import (
     handle_zpod_component_add_failure,
 )

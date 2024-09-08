@@ -3,7 +3,7 @@ from prefect import task
 from zpodcommon import models as M
 from zpodcommon.enums import ZpodStatus
 from zpodengine.lib import database
-from zpodengine.lib.dbutils import DBUtils
+from zpodcommon.lib.dbutils import DBUtils
 from zpodengine.lib.network import get_zpod_all_subnets, get_zpod_primary_subnet
 
 

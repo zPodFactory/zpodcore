@@ -4,10 +4,10 @@ import urllib.parse
 from jinja2 import Template
 
 from zpodcommon import models as M
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network_utils import MgmtIp
 from zpodengine import settings
 from zpodengine.lib.commands import cmd_execute
-from zpodengine.lib.dbutils import DBUtils
 from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN
 
 
@@ -36,7 +36,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         # all other components rely on zbox/vyos as their DNS server.
         zpod_dns = MgmtIp.zpod(zpod, "zbox").ip
 
-    isnested = component.component_json['component_isnested']
+    isnested = component.component_json["component_isnested"]
     print(f"Component Nested: {isnested}")
 
     if isnested is False:
@@ -76,9 +76,19 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
     url = f"https://{username}:{password}@{hostname}/sdk"
     print(f"Deploying to [https://{username}:XXXXXXXX@{hostname}/sdk]...")
 
+    # FF (Feature Flag) support for esxi hostname = fqdn (William Lam templates)
+    zpod_component_hostname = zpod_component.hostname
+    if component.component_json[
+        "component_type"
+    ] == "esxi" and DBUtils.get_setting_value("ff_esxi_hostname_is_fqdn"):
+        print(
+            f"[ff_esxi_hostname_is_fqdn] Setting hostname to: {zpod_component.fqdn}..."
+        )
+        zpod_component_hostname = zpod_component.fqdn
+
     t = Template(json.dumps(govc_spec))
     govc_spec_render = t.render(
-        zpod_hostname=zpod_component.hostname,
+        zpod_hostname=zpod_component_hostname,
         zpod_ipaddress=zpod_component.ip,
         zpod_netmask=zpod_netmask,
         zpod_netprefix=ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,

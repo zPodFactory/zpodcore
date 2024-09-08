@@ -63,7 +63,7 @@ def get_zpod_primary_subnet(endpoint: str):
 # Example:
 # zpod_subnet = 10.96.50.0/24
 # provides:
-# - 10.96.50.0/26   [VDS/NSX-T on vlan 0(native no taggging)]
+# - 10.96.50.0/26   [VDS/NSX-T on native vlan (no tagging)]
 # - 10.96.50.64/26  [zbox/vyos on vlan 64]
 # - 10.96.50.128/26 [zbox/vyos on vlan 128]
 # - 10.96.50.192/26 [zbox/vyos on vlan 192]

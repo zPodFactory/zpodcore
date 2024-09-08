@@ -6,6 +6,7 @@ from zpodapi import settings
 from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import enums
 from zpodcommon import models as M
+from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 from ..profiles.profile__utils import validate_profile
@@ -41,6 +42,12 @@ class ZpodService(ServiceBase):
         item_in: ZpodCreate,
         current_user: M.User,
     ):
+        # FF (Feature Flag) support for unique password
+        zpod_password = (
+            DBUtils.get_setting_value("ff_unique_zpod_password")
+            or zpod__utils.gen_password()
+        )
+
         zpod = M.Zpod(
             name=item_in.name,
             description=item_in.description,
@@ -48,7 +55,7 @@ class ZpodService(ServiceBase):
             endpoint_id=item_in.endpoint_id,
             profile=item_in.profile,
             status=enums.ZpodStatus.PENDING,
-            password=zpod__utils.gen_password(),
+            password=zpod_password,
             permissions=[
                 M.ZpodPermission(
                     permission=enums.ZpodPermission.OWNER,
