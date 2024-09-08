@@ -1,8 +1,10 @@
 import random
 import string
 
+# Set default password length to 16 for VCF 5.2 requirements
 
-def gen_password(length=12):
+
+def gen_password(length=16):
     remaining = length
     pw = []
 
