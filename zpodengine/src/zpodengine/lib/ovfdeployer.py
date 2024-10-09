@@ -79,7 +79,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
     # FF (Feature Flag) support for esxi hostname = fqdn (William Lam templates)
     zpod_component_hostname = zpod_component.hostname
     if component.component_json[
-        "component_type"
+        "component_name"
     ] == "esxi" and DBUtils.get_setting_value("ff_esxi_hostname_is_fqdn"):
         print(
             f"[ff_esxi_hostname_is_fqdn] Setting hostname to: {zpod_component.fqdn}..."
