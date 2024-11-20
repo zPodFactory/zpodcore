@@ -5,7 +5,7 @@ RUN apt-get update \
     curl \
     git
 
-RUN pip install prefect-docker
+RUN pip install "prefect-docker==0.5.4"
 
 # Remove this line once this is resolved everywhere: https://github.com/docker/docker-py/issues/3256
 RUN pip install "requests==2.31.0"
