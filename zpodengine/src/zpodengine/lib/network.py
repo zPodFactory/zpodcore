@@ -5,7 +5,7 @@ import socket
 import struct
 import time
 from datetime import datetime
-from ipaddress import IPv4Network
+from ipaddress import ip_network, IPv4Network
 
 from zpodcommon.lib.nsx import NsxClient
 
@@ -27,12 +27,12 @@ def get_zpod_primary_subnet(endpoint: str):
     with NsxClient(endpoint=endpoint) as nsx:
         segments = nsx.search(resource_type="Segment")
 
-        # Get all in use subnets
+        # Get all in use IPv4 subnets only
         in_use_subnets = [
             IPv4Network(subnet["network"])
             for segment in segments
             for subnet in segment.get("subnets", [])
-            if subnet.get("network")
+            if subnet.get("network") and isinstance(ip_network(subnet["network"], strict=False), IPv4Network)
         ]
 
         # Get all possible subnets
