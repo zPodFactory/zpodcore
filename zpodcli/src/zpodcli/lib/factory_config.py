@@ -66,7 +66,7 @@ class FactoryConfig:
 
         exit_with_error(
             "Please connect to a zPodFactory Server first using the following command:\n\n"
-            "    zcli factory add --name <xxx> --server <xxx> --token <xxx>\n"
+            "    zcli factory add <factoryname> --server <http://fqdn:8000> --token <xxxxxx>\n"
         )
 
     def setactive(self, name):
