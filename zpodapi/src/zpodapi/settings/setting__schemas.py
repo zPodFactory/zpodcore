@@ -6,7 +6,7 @@ from zpodapi.lib.schema_base import Field, SchemaBase
 
 def hide_sensitive(v: str, info: ValidationInfo):
     name = info.data["name"]
-    if "password" in name or "ssh_key" in name:
+    if "password" in name:
         return "********"
     return v
 
