@@ -152,18 +152,21 @@ class vCenter:
         result.expandableReservation = True
         return result
 
-    def create_vapp(self, vapp_name, cluster_name, folder_name):
+    def create_vapp(self, vapp_name, resource_pool_name, folder_name):
         content = self.si.content
 
-        clusterMO = None
+        resource_pool = None
 
         container = content.viewManager.CreateContainerView(
-            content.rootFolder, [vim.ClusterComputeResource], True
+            content.rootFolder, [vim.ClusterComputeResource, vim.ResourcePool], True
         )
 
-        for cluster in container.view:
-            if cluster.name == cluster_name:
-                clusterMO = cluster
+        for _resource_pool in container.view:
+            if _resource_pool.name == resource_pool_name:
+                if isinstance(_resource_pool, vim.ClusterComputeResource):
+                    resource_pool = _resource_pool.resourcePool
+                else:
+                    resource_pool = _resource_pool
 
         folders = content.viewManager.CreateContainerView(
             content.rootFolder, [vim.Folder], True
@@ -184,7 +187,7 @@ class vCenter:
         configSpec.entityConfig = []
         configSpec.property = []
 
-        clusterMO.resourcePool.CreateVApp(vapp_name, resSpec, configSpec, vmFolderMO)
+        resource_pool.CreateVApp(vapp_name, resSpec, configSpec, vmFolderMO)
 
     def delete_vapp(self, vapp_name):
         if vapp := self.get_vapp(vapp_name):
