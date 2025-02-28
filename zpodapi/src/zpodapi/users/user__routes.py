@@ -6,13 +6,8 @@ from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .user__dependencies import UserAnnotations
-from .user__schemas import (
-    UserCreate,
-    UserUpdate,
-    UserUpdateAdmin,
-    UserViewFull,
-    UserViewFullPlus,
-)
+from .user__schemas import (UserCreate, UserUpdate, UserUpdateAdmin,
+                            UserViewFull, UserViewFullPlus)
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +70,7 @@ def create(
     ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflicting record found",
+            detail="User already exists",
         )
     return user_service.create(user_in=user_in)
 
