@@ -52,7 +52,7 @@ def create(
     if zpod_service.get(name=zpod_in.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflicting record found",
+            detail="zPod already exists",
         )
 
     zpod_service.validate_profile(profile_name=zpod_in.profile)

@@ -50,7 +50,7 @@ def create(
     ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflicting record found",
+            detail="Library already exists",
         )
     return library_service.create(item_in=library_in)
 

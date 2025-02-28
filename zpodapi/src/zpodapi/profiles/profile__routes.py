@@ -53,7 +53,7 @@ def create(
     if profile_service.crud.get_all_filtered(name=profile_in.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflicting record found",
+            detail="Profile already exists",
         )
     if not force:
         profile_service.validate_profile(profile_obj=profile_in.model_dump()["profile"])

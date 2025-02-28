@@ -51,7 +51,7 @@ def create(
     if setting_service.crud.get_all_filtered(name=setting_in.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflicting record found",
+            detail="Setting already exists",
         )
     return setting_service.create(item_in=setting_in)
 

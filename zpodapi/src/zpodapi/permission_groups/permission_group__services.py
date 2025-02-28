@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from sqlmodel import SQLModel
+from zpodcommon import models as M
 
 from zpodapi.lib.service_base import ServiceBase
-from zpodcommon import models as M
 
 
 class PermissionGroupService(ServiceBase):
@@ -14,10 +14,17 @@ class PermissionGroupService(ServiceBase):
         permission_group: M.PermissionGroup,
         user_id: int,
     ):
+        for _user in permission_group.users:
+            if _user.id == user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="User already in group",
+                )
+
         if not (user := self.session.get(M.User, user_id)):
             raise HTTPException(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                detail="User not found",
+                detail="User not found in group",
             )
 
         permission_group.users.append(user)
@@ -38,7 +45,7 @@ class PermissionGroupService(ServiceBase):
         else:
             raise HTTPException(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
-                detail="User not found",
+                detail="User not found in group",
             )
         self.session.commit()
 

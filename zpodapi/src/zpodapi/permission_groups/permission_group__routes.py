@@ -4,12 +4,10 @@ from zpodapi.lib.global_dependencies import GlobalDepends
 
 from ..users.user__schemas import UserView
 from .permission_group__dependencies import PermissionGroupAnnotations
-from .permission_group__schemas import (
-    PermissionGroupCreate,
-    PermissionGroupUpdate,
-    PermissionGroupUserAdd,
-    PermissionGroupView,
-)
+from .permission_group__schemas import (PermissionGroupCreate,
+                                        PermissionGroupUpdate,
+                                        PermissionGroupUserAdd,
+                                        PermissionGroupView)
 
 router = APIRouter(
     prefix="/permission_groups",
@@ -54,7 +52,7 @@ def create(
     if permission_group_service.crud.get_all_filtered(name=permission_group_in.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflicting record found",
+            detail="Permission group already exists",
         )
 
     return permission_group_service.crud.create(
