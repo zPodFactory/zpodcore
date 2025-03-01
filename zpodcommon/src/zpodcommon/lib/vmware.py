@@ -31,6 +31,7 @@ class vCenter:
     def connect(self):
         self.si = None
         try:
+            print(f"Initializing vCenter connection {self.host} with user {self.user}")
             self.si = connect.SmartConnect(
                 host=self.host,
                 user=self.user,
@@ -362,7 +363,7 @@ class vCenter:
         start_at = datetime.datetime.now(datetime.UTC)
         timeout = datetime.timedelta(seconds=timeout)
 
-        print("Waiting for VMware Tools...")
+        print(f"Waiting for VMware Tools for VM {vm_name}...")
         while start_at + timeout > datetime.datetime.now(datetime.UTC):
             vm = self.get_vm(vm_name)
 
@@ -384,7 +385,7 @@ class vCenter:
         if not status:
             return False
 
-        print("Waiting for VMware Tools IP...")
+        print(f"Waiting for VMware Tools IP {ipaddress} on VM {vm_name}...")
         while start_at + timeout > datetime.datetime.now(datetime.UTC):
             vm = self.get_vm(vm_name)
 

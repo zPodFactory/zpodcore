@@ -1,8 +1,9 @@
-from zpodapi import settings
-from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
+
+from zpodapi import settings
+from zpodapi.lib.service_base import ServiceBase
 
 
 class EndpointENetService(ServiceBase):
@@ -12,7 +13,7 @@ class EndpointENetService(ServiceBase):
         self,
         endpoint: M.Endpoint,
     ):
-        with NsxClient(endpoint=endpoint) as nsx:
+        with NsxClient.auth_by_endpoint(endpoint=endpoint) as nsx:
             projects = nsx.get(url="/policy/api/v1/orgs/default/projects").results()
             return [
                 build_enet_dict(x)
@@ -25,7 +26,7 @@ class EndpointENetService(ServiceBase):
         endpoint: M.Endpoint,
         name: str,
     ):
-        with NsxClient(endpoint=endpoint) as nsx:
+        with NsxClient.auth_by_endpoint(endpoint=endpoint) as nsx:
             projects = nsx.get(url="/policy/api/v1/orgs/default/projects").results()
             target_project_id = f"{settings.SITE_ID}-{name}-enet-project"
             return next(
@@ -39,13 +40,20 @@ class EndpointENetService(ServiceBase):
         name: str,
     ):
         project_id = f"{settings.SITE_ID}-{name}-enet-project"
-        with NsxClient(endpoint=endpoint) as nsx:
+        epnet = endpoint.endpoints["network"]
+        with NsxClient.auth_by_endpoint(endpoint=endpoint) as nsx:
             nsx.patch(
                 url=f"/policy/api/v1/orgs/default/projects/{project_id}",
                 json={
                     "id": project_id,
-                    "tier_0s": [f"/infra/tier-0s/{nsx.epnet['t0']}"],
-                    "site_infos": [{"edge_cluster_paths": [nsx.edge_cluster_path()]}],
+                    "tier_0s": [f"/infra/tier-0s/{epnet['t0']}"],
+                    "site_infos": [
+                        {
+                            "edge_cluster_paths": [
+                                nsx.edge_cluster_path(epnet["edgecluster"])
+                            ]
+                        }
+                    ],
                 },
             )
             # PS: This operation does not support concurrent calls.

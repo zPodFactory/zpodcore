@@ -2,11 +2,12 @@ import datetime
 import time
 
 from prefect import task
-
 from zpodcommon import models as M
 from zpodcommon.lib.dbutils import DBUtils
+from zpodcommon.lib.nsx import NsxClient
 from zpodcommon.lib.vmware import vCenter
 from zpodcommon.lib.zboxapi import HTTPStatusError, RequestError, ZboxApiClient
+
 from zpodengine.lib import database
 from zpodengine.lib.commands import cmd_execute
 from zpodengine.zpod_component_add.zpod_component_add_utils import (
@@ -97,7 +98,6 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                 print("--- esxi ---")
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
-                    print(f"Waiting for VMware Tools IP {zpod_component.ip}...")
                     vc.wait_for_tools_ip(f"{zpod_component.fqdn}", zpod_component.ip)
 
                 # Check esxi host ssl certificate regeneration has been done before
@@ -119,5 +119,52 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                 )
                 cmd_execute(f'pwsh -c "& {cmd}"').check_returncode()
 
+            case "nsx":
+                with vCenter.auth_by_zpod(zpod=zpod) as vc:
+                    vc.wait_for_tools_ip(
+                        vm_name=zpod_component.hostname, ipaddress=zpod_component.ip
+                    )
+
+                retries = 60
+                wait_time = 60
+                nsx_is_ready = False
+                for retry in range(retries):
+                    try:
+                        nsx = NsxClient.auth_by_zpod(zpod=zpod_component.zpod)
+                        response = nsx.get(url="/api/v1/cluster/status")
+                        nsx_status = (
+                            response.safejson()
+                            .get("detailed_cluster_status")
+                            .get("overall_status")
+                        )
+                        print(f"NSX cluster status is {nsx_status}")
+                        if nsx_status != "STABLE":
+                            raise ValueError(f"NSX cluster status is {nsx_status}")
+                        nsx_is_ready = True
+                        break
+                    except (RequestError, HTTPStatusError) as e:
+                        print(
+                            f"Waiting for {e.request.url} {e} - Retry {retry}/{retries}"
+                        )
+                        print("Sleeping...")
+                        time.sleep(wait_time)
+                    except ValueError as e:
+                        print(f"{e} - Retry {retry}/{retries}")
+                        print("Sleeping...")
+                        time.sleep(wait_time)
+                if not nsx_is_ready:
+                    raise ValueError(f"NSX cluster not ready after {retries} retries")
+
+                license_nsx = DBUtils.get_component_license(component, "enterprise")
+                if license_nsx is not None:
+                    print(f"Setting license key {license_nsx} on NSX")
+                    response = nsx.post(
+                        url="/api/v1/licenses",
+                        json={
+                            "license_key": license_nsx,
+                        },
+                    )
+                    response.safejson()
+                    print("License key set successfully on NSX")
             case _:
                 print("Normal component, nothing to do here yet...")

@@ -53,8 +53,10 @@ def event_hook_response(response: httpx.Response):
         f"{response.status_code} {response.safejson() or response.text}"
     )
 
+
 def fmt(txt):
     return txt.replace("/", "\\/")
+
 
 class Auth(httpx.Auth):
     token_name = "x-xsrf-token"
@@ -91,23 +93,24 @@ class Auth(httpx.Auth):
 class NsxClient(httpx.Client):
     def __init__(
         self,
-        endpoint: M.Endpoint,
+        host=None,
+        user=None,
+        pwd=None,
         verify: bool = False,
         **kwargs,
     ):
-        self.epnet = endpoint.endpoints["network"]
-
         kwargs.setdefault("event_hooks", {})
         kwargs["event_hooks"].setdefault("request", []).insert(0, event_hook_request)
         kwargs["event_hooks"].setdefault("response", []).insert(0, event_hook_response)
 
-        nsx_url = f"https://{self.epnet['hostname']}"
+        nsx_url = f"https://{host}"
+        print(f"Initializing NSX connection {nsx_url} with user {user}")
         return super().__init__(
             auth=Auth(
                 url=(f"{nsx_url}/api/session/create"),
                 data={
-                    "j_username": self.epnet["username"],
-                    "j_password": self.epnet["password"],
+                    "j_username": user,
+                    "j_password": pwd,
                 },
                 timeout=httpx.Timeout(30.0, connect=60.0),
                 verify=verify,
@@ -119,14 +122,33 @@ class NsxClient(httpx.Client):
         )
 
     @classmethod
+    def auth_by_endpoint(cls, endpoint: M.Endpoint, **kwargs):
+        epnet = endpoint.endpoints["network"]
+        return cls(
+            host=epnet["hostname"],
+            user=epnet["username"],
+            pwd=epnet["password"],
+            **kwargs,
+        )
+
+    @classmethod
     def auth_by_endpoint_id(cls, endpoint_id: int, **kwargs):
         with database.get_session_ctx() as session:
             endpoint = session.get(M.Endpoint, endpoint_id)
-            return cls(endpoint, **kwargs)
+            return cls.auth_by_endpoint(endpoint=endpoint, **kwargs)
+
+    @classmethod
+    def auth_by_zpod_endpoint(cls, zpod: M.Zpod, **kwargs):
+        return cls.auth_by_endpoint(endpoint=zpod.endpoint, **kwargs)
 
     @classmethod
     def auth_by_zpod(cls, zpod: M.Zpod, **kwargs):
-        return cls(zpod.endpoint, **kwargs)
+        return cls(
+            host=f"nsx.{zpod.domain}",
+            user="admin",
+            pwd=zpod.password,
+            **kwargs,
+        )
 
     def search_one(self, **terms):
         if data := self.search(**terms):
@@ -145,7 +167,7 @@ class NsxClient(httpx.Client):
 
     @cache  # noqa: B019
     def edge_cluster_path(self, edge_cluster_name: str | None = None):
-        edge_cluster_name = edge_cluster_name or self.epnet["edgecluster"]
+        edge_cluster_name = edge_cluster_name
         edge_cluster = self.search_one(
             resource_type="PolicyEdgeCluster",
             display_name=edge_cluster_name,
@@ -154,7 +176,7 @@ class NsxClient(httpx.Client):
 
     @cache  # noqa: B019
     def transport_zone_path(self, transport_zone_name: str | None = None):
-        transport_zone_name = transport_zone_name or self.epnet["transportzone"]
+        transport_zone_name = transport_zone_name
         transport_zone = self.search_one(
             resource_type="PolicyTransportZone",
             display_name=transport_zone_name,

@@ -1,6 +1,7 @@
 from zpodcommon import models as M
 from zpodcommon.lib.network_utils import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
+
 from zpodengine import settings
 from zpodengine.lib.network import wait_for_segment_to_realize
 
@@ -10,9 +11,10 @@ def networking_deploy_nsxt(zpod: M.Zpod, enet_name: str | None = None):
     if enet_name:
         raise ValueError("enet_name not allowed for driver=nsxt endpoints")
 
-    with NsxClient(zpod.endpoint) as nsx:
+    epnet = zpod.endpoint.endpoints["network"]
+    with NsxClient.auth_by_endpoint(endpoint=zpod.endpoint) as nsx:
         inst_prefix = f"{settings.SITE_ID}-{zpod.name}"
-        tier0_path = f"/infra/tier-0s/{nsx.epnet['t0']}"
+        tier0_path = f"/infra/tier-0s/{epnet['t0']}"
         base_path = "/policy/api/v1"
 
         # Create T1
@@ -41,7 +43,7 @@ def networking_deploy_nsxt(zpod: M.Zpod, enet_name: str | None = None):
                 f"/locale-services/{inst_prefix}-locale-services"
             ),
             json={
-                "edge_cluster_path": nsx.edge_cluster_path(),
+                "edge_cluster_path": nsx.edge_cluster_path(epnet["edgecluster"]),
             },
         )
 
@@ -54,7 +56,7 @@ def networking_deploy_nsxt(zpod: M.Zpod, enet_name: str | None = None):
                 "id": segment_id,
                 "connectivity_path": (f"/infra/tier-1s/{tier1_id}"),
                 "subnets": [{"gateway_address": MgmtIp.zpod(zpod, "gw").cidr}],
-                "transport_zone_path": nsx.transport_zone_path(),
+                "transport_zone_path": nsx.transport_zone_path(epnet["transportzone"]),
                 "vlan_ids": ["0-4094"],
             },
         )

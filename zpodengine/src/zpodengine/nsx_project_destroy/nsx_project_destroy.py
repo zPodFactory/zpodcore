@@ -1,7 +1,7 @@
 from prefect import task
-
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient, fmt
+
 from zpodengine.lib import database
 from zpodengine.lib.network import wait_for_segment_to_be_evacuted
 
@@ -25,7 +25,7 @@ def nsx_project_destroy(project_id: str, endpoint_id: int):
 
 class NsxProjectDestroy:
     def __init__(self, project_id: str, endpoint: M.Endpoint, orgid="default") -> None:
-        self.nsx = NsxClient(endpoint)
+        self.nsx = NsxClient.auth_by_endpoint(endpoint=endpoint)
         self.project_id = project_id
         self.project_path = f"/orgs/{orgid}/projects/{project_id}"
 

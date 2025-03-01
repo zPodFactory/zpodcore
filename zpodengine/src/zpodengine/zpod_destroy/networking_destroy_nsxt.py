@@ -1,5 +1,6 @@
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient, fmt
+
 from zpodengine import settings
 from zpodengine.lib.network import wait_for_segment_to_be_evacuted
 
@@ -10,7 +11,7 @@ def networking_destroy_nsxt(zpod: M.Zpod):
     t1_path = f"/infra/tier-1s/{t1_name}"
     print(f"Destroy {t1_name}")
 
-    with NsxClient.auth_by_zpod(zpod) as nsx:
+    with NsxClient.auth_by_zpod_endpoint(zpod) as nsx:
         # Destroy Connected Items (Segments)
         for connected in nsx.search(connectivity_path=fmt(t1_path)):
             if connected["resource_type"] == "Segment":
