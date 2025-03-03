@@ -56,14 +56,14 @@ def find_matching_license(component_groups: list, licenses: list, license_type: 
         return None
 
     lic_group = component_groups.pop()
-    # print(f"Checking for component license: {lic_group}")
+    print(f"Checking for component license: {lic_group}_{license_type}")
     for lic in licenses:
-        # print(f" - Checking license: {lic.name}...")
+        print(f" - Checking license: {lic.name}...")
         if f"{lic_group}_{license_type}" in lic.name:
-            # print(f"*** FOUND LICENSE MATCH: {lic.value} ***")
+            print(f"Found license key matching criteria: {lic.value} ***")
             return lic.value
 
-    # print("No match found, trying again...")
+    print("No match found, trying again...")
     return find_matching_license(component_groups, licenses, license_type)
 
 

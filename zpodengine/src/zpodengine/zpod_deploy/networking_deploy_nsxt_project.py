@@ -1,18 +1,20 @@
 from zpodcommon import models as M
 from zpodcommon.lib.network_utils import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
+
 from zpodengine import settings
 from zpodengine.lib.network import wait_for_segment_to_realize
 
 
 #######################################################################################
 def networking_deploy_nsxt_project(zpod: M.Zpod, enet_name: str | None = None):
-    with NsxClient(zpod.endpoint) as nsx:
+    epnet = zpod.endpoint.endpoints["network"]
+    with NsxClient.auth_by_endpoint(endpoint=zpod.endpoint) as nsx:
         inst_prefix = f"{settings.SITE_ID}-{zpod.name}"
         project_prefix = enet_name[:-8] if enet_name else inst_prefix
 
-        orgid = nsx.epnet.get("orgid", "default")
-        tier0_path = f"/infra/tier-0s/{nsx.epnet['t0']}"
+        orgid = epnet.get("orgid", "default")
+        tier0_path = f"/infra/tier-0s/{epnet['t0']}"
         project_id = enet_name or f"{inst_prefix}-project"
         project_path = f"/orgs/{orgid}/projects/{project_id}"
         base_path = f"/policy/api/v1{project_path}"
@@ -28,7 +30,13 @@ def networking_deploy_nsxt_project(zpod: M.Zpod, enet_name: str | None = None):
                 json={
                     "id": project_id,
                     "tier_0s": [tier0_path],
-                    "site_infos": [{"edge_cluster_paths": [nsx.edge_cluster_path()]}],
+                    "site_infos": [
+                        {
+                            "edge_cluster_paths": [
+                                nsx.edge_cluster_path(epnet["edgecluster"])
+                            ]
+                        }
+                    ],
                 },
             )
 
@@ -58,7 +66,7 @@ def networking_deploy_nsxt_project(zpod: M.Zpod, enet_name: str | None = None):
                 f"/locale-services/{project_prefix}-locale-services"
             ),
             json={
-                "edge_cluster_path": nsx.edge_cluster_path(),
+                "edge_cluster_path": nsx.edge_cluster_path(epnet["edgecluster"]),
             },
         )
 
@@ -71,7 +79,7 @@ def networking_deploy_nsxt_project(zpod: M.Zpod, enet_name: str | None = None):
                 "id": segment_id,
                 "connectivity_path": (f"{project_path}/infra/tier-1s/{tier1_id}"),
                 "subnets": [{"gateway_address": MgmtIp.zpod(zpod, "gw").cidr}],
-                "transport_zone_path": nsx.transport_zone_path(),
+                "transport_zone_path": nsx.transport_zone_path(epnet["transportzone"]),
                 "vlan_ids": ["0-4094"],
             },
         )
