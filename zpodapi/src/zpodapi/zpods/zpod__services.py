@@ -48,6 +48,30 @@ class ZpodService(ServiceBase):
             or zpod__utils.gen_password()
         )
 
+        # FF (Feature Flag) support for restricting zPod name with username prefix
+        if DBUtils.get_setting_value("ff_restrict_zpod_with_username_prefix") == "true":
+            if (
+                not item_in.name.startswith(current_user.username + "-")
+                and not current_user.superadmin
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                    detail=f"zPod name must start with '{current_user.username}-'",
+                )
+
+        endpoint = self.session.exec(
+            select(M.Endpoint).where(
+                M.Endpoint.id == item_in.endpoint_id,
+                M.Endpoint.status == enums.EndpointStatus.ACTIVE,
+            )
+        ).first()
+
+        if not endpoint:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Endpoint not found or not active",
+            )
+
         zpod = M.Zpod(
             name=item_in.name,
             description=item_in.description,
