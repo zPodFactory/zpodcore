@@ -48,6 +48,16 @@ class ZpodService(ServiceBase):
             or zpod__utils.gen_password()
         )
 
+        if (DBUtils.get_setting_value("ff_keep_zpod_passwords_from_previous_deployments") == "true"):
+            old_zpod = self.session.exec(
+                select(M.Zpod).where(
+                    M.Zpod.name == item_in.name,
+                    M.Zpod.status == enums.ZpodStatus.DELETED,
+                ).order_by(M.Zpod.creation_date.desc())
+            ).first()
+            if old_zpod is not None:
+                zpod_password = old_zpod.password
+
         # FF (Feature Flag) support for restricting zPod name with username prefix
         if DBUtils.get_setting_value("ff_restrict_zpod_with_username_prefix") == "true":
             if (
