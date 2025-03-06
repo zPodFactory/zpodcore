@@ -48,7 +48,7 @@ class ZpodService(ServiceBase):
             or zpod__utils.gen_password()
         )
 
-        if (DBUtils.get_setting_value("ff_keep_zpod_passwords_from_previous_deployments") == "true"):
+        if (DBUtils.get_setting_value("ff_reuse_zpod_password") == "true"):
             old_zpod = self.session.exec(
                 select(M.Zpod).where(
                     M.Zpod.name == item_in.name,
