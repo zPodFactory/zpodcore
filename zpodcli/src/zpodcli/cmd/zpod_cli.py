@@ -90,7 +90,18 @@ def generate_table(zpods: list[ZpodView]):
 
 @app.command(name="list")
 @unexpected_status_handler
-def zpod_list():
+def zpod_list(
+    *,
+    owner: Annotated[
+        str,
+        typer.Option(
+            "--owner",
+            "-o",
+            help="filter by owner",
+            show_default=False,
+        ),
+    ] = "",
+):
     """
     List zPods
     """
@@ -98,7 +109,25 @@ def zpod_list():
 
     z: ZpodClient = ZpodClient()
     zpods = z.zpods_get_all.sync()
-    generate_table(zpods)
+
+    if not owner:
+        # If no owner filter is specified, show all zPods
+        filtered_zpods = zpods
+    else:
+        # Filter zPods by owner
+        filtered_zpods = []
+        for zpod in zpods:
+            # Check if the specified owner is an owner of this zPod
+            owner_permissions = [
+                perm
+                for perm in zpod.permissions
+                if perm.permission == ZpodPermission.OWNER
+                and any(owner == user.username for user in perm.users)
+            ]
+            if owner_permissions:
+                filtered_zpods.append(zpod)
+
+    generate_table(filtered_zpods)
 
 
 @app.command(name="destroy", no_args_is_help=True)
