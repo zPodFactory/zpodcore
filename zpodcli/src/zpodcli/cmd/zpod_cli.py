@@ -188,7 +188,7 @@ def zpod_create(
             help="Endpoint to deploy zPod",
             show_default=False,
         ),
-    ],
+    ] = None,
     profile: Annotated[
         str,
         typer.Option(
@@ -197,7 +197,7 @@ def zpod_create(
             help="Profile definition",
             show_default=False,
         ),
-    ],
+    ] = None,
     enet_name: Annotated[
         str,
         typer.Option(
@@ -211,6 +211,39 @@ def zpod_create(
     Create a zPod
     """
     z: ZpodClient = ZpodClient()
+
+    # If no endpoint specified, try to find the only available one
+    if endpoint is None:
+        endpoints = z.endpoints_get_all.sync()
+        if len(endpoints) == 1:
+            endpoint = endpoints[0].name
+            print(f"Using default endpoint: [magenta]{endpoint}[/magenta]")
+        else:
+            print("Error: No endpoint specified and multiple endpoints are available.")
+            print("Please specify an endpoint using the --endpoint (-e) option.")
+            print("\nAvailable endpoints:")
+            for ep in endpoints:
+                print(f"  - {ep.name}")
+            raise typer.Exit(1)
+
+    # If no profile specified, try to get the default profile from settings
+    if profile is None:
+        settings = z.settings_get_all.sync()
+        default_profile = None
+        for setting in settings:
+            if setting.name == "ff_zpod_default_profile":
+                default_profile = setting.value
+                break
+
+        if default_profile:
+            profile = default_profile
+            print(f"Using default profile: [magenta]{profile}[/magenta]")
+        else:
+            print(
+                "Error: No profile specified and no default profile found in settings `ff_zpod_default_profile`."
+            )
+            print("Please specify a profile using the --profile (-p) option.")
+            raise typer.Exit(1)
 
     ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
     zpod_details = ZpodCreate(
