@@ -48,12 +48,14 @@ class ZpodService(ServiceBase):
             or zpod__utils.gen_password()
         )
 
-        if (DBUtils.get_setting_value("ff_reuse_zpod_password") == "true"):
+        if DBUtils.get_setting_value("ff_reuse_zpod_password") == "true":
             old_zpod = self.session.exec(
-                select(M.Zpod).where(
+                select(M.Zpod)
+                .where(
                     M.Zpod.name == item_in.name,
                     M.Zpod.status == enums.ZpodStatus.DELETED,
-                ).order_by(M.Zpod.creation_date.desc())
+                )
+                .order_by(M.Zpod.creation_date.desc())
             ).first()
             if old_zpod is not None:
                 zpod_password = old_zpod.password
@@ -171,3 +173,18 @@ class ZpodService(ServiceBase):
         if order_by:
             stmt = stmt.order_by(order_by)
         return self.session.exec(stmt)
+
+    def is_zpod_name_used(self, name: str) -> bool:
+        """Check if a zpod name is already in use, regardless of permissions.
+
+        Args:
+            name: The zpod name to check
+
+        Returns:
+            bool: True if the name is already in use, False otherwise
+        """
+        stmt = select(M.Zpod).where(
+            M.Zpod.name == name,
+            M.Zpod.status.not_in([enums.ZpodStatus.DELETED.value]),
+        )
+        return self.session.exec(stmt).one_or_none() is not None

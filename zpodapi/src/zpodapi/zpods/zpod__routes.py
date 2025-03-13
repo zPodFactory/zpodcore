@@ -49,7 +49,7 @@ def create(
     current_user: GlobalAnnotations.GetCurrentUser,
     zpod_in: ZpodCreate,
 ):
-    if zpod_service.get(name=zpod_in.name):
+    if zpod_service.is_zpod_name_used(name=zpod_in.name):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="zPod already exists",
