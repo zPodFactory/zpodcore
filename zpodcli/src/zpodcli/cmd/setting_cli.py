@@ -71,7 +71,7 @@ def setting_create(
     setting = SettingCreate(name=name, value=value, description=description)
     z.settings_create.sync(body=setting)
     print(
-        f"Setting [magenta]{name}[/magenta] has been created"
+        f"Setting [magenta]{name}[/magenta] has been created "
         f"with value [magenta]{value}[/magenta]."
     )
 
