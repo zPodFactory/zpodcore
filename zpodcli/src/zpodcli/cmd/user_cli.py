@@ -179,6 +179,25 @@ def user_update(
     print(f"User [magenta]{username}[/magenta] has been updated.")
 
 
+@app.command(name="delete", no_args_is_help=True)
+@unexpected_status_handler
+def user_delete(
+    username: Annotated[
+        str,
+        typer.Argument(
+            help="Username",
+            show_default=False,
+        ),
+    ],
+):
+    """
+    Delete User
+    """
+    z: ZpodClient = ZpodClient()
+    z.users_delete.sync(id=f"username={username}")
+    print(f"User [magenta]{username}[/magenta] has been deleted.")
+
+
 @app.command(name="enable", no_args_is_help=True)
 @unexpected_status_handler
 def user_enable(

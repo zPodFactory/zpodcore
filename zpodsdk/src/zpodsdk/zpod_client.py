@@ -355,6 +355,13 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def users_delete(self):
+        from zpodsdk.api.users import users_delete
+
+        return users_delete.UsersDelete(self._client)
+
+    @property
+    @cache  # noqa: B019
     def users_disable(self):
         from zpodsdk.api.users import users_disable
 

@@ -6,8 +6,13 @@ from zpodapi.lib.global_dependencies import GlobalAnnotations, GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .user__dependencies import UserAnnotations
-from .user__schemas import (UserCreate, UserUpdate, UserUpdateAdmin,
-                            UserViewFull, UserViewFullPlus)
+from .user__schemas import (
+    UserCreate,
+    UserUpdate,
+    UserUpdateAdmin,
+    UserViewFull,
+    UserViewFullPlus,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +92,19 @@ def update(
     user_in: UserUpdateAdmin | UserUpdate,
 ):
     return user_service.update(item=user, item_in=user_in)
+
+
+@router.delete(
+    "/{id}/delete",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
+)
+def delete(
+    *,
+    user_service: UserAnnotations.UserService,
+    user: UserAnnotations.GetUser,
+):
+    return user_service.delete(item=user)
 
 
 @router.patch(
