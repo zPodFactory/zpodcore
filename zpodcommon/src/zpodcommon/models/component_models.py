@@ -1,5 +1,6 @@
 import json
 from functools import cached_property
+from typing import Literal
 
 from sqlmodel import Field
 
@@ -30,3 +31,43 @@ class Component(CommonDatesMixin, ModelBase, table=True):
 
         # Load component JSON
         return json.load(f)
+
+    def get_usernames(
+        self,
+        zpod_domain: str,
+    ) -> list[dict[str, str]] | None:
+        """Get the usernames for this component based on protocol.
+
+        Args:
+            zpod_domain: The domain of the zPod
+
+        Returns:
+            list[dict[str, str]]: List of usernames with type (ui or ssh)
+        """
+        usernames = []
+
+        # Always add SSH user
+        usernames.append({"username": "root", "type": "ssh"})
+
+        # UI usernames
+        match self.component_name.lower():
+            case "cloudbuilder":
+                usernames.append({"username": "admin", "type": "ui"})
+            case "esxi":
+                usernames.append({"username": "root", "type": "ui"})
+            case "nsx" | "nsxt" | "nsxv":
+                usernames.append({"username": "admin", "type": "ui"})
+            case "vcd":
+                usernames.append({"username": "administrator", "type": "ui"})
+            case "vcda":
+                usernames.append({"username": "admin", "type": "ui"})
+            case "vcsa":
+                usernames.append({"username": f"administrator@{zpod_domain}", "type": "ui"})
+            case "vrli":
+                usernames.append({"username": "admin", "type": "ui"})
+            case "vrops":
+                usernames.append({"username": "admin", "type": "ui"})
+            case "vyos" | "zbox" | _:
+                pass
+
+        return usernames

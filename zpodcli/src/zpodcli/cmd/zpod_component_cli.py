@@ -4,12 +4,12 @@ import typer
 from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
+from zpodsdk.models.zpod_component_create import ZpodComponentCreate
+from zpodsdk.models.zpod_component_view import ZpodComponentView
 
 from zpodcli.lib.prompt import confirm
 from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
-from zpodsdk.models.zpod_component_create import ZpodComponentCreate
-from zpodsdk.models.zpod_component_view import ZpodComponentView
 
 app = typer.Typer(help="Manage zPod Components", no_args_is_help=True)
 
@@ -42,21 +42,37 @@ def generate_table(
     table.add_column("Component UID")
     table.add_column("Name")
     table.add_column("Version")
+    table.add_column("[light_pink1]SSH[/light_pink1]/[dark_khaki]UI[/dark_khaki] users")
     table.add_column("Description")
     table.add_column("Status")
 
     for zc in zpod_components:
+        usernames_list = []
+        for username in zc.usernames:
+            if username["type"] == "ssh":
+                usernames_list.append(f"[light_pink1]{username['username']}[/light_pink1]")
+            elif username["type"] == "ui":
+                usernames_list.append(f"[dark_khaki]{username['username']}[/dark_khaki]")
+
+        # On joint les noms d'utilisateur s'il y en a, sinon chaîne vide
+        usernames = ", ".join(usernames_list)
+
         table.add_row(
             f"[sky_blue2]{zc.hostname}[/sky_blue2]",
             f"[sky_blue2]https://{zc.fqdn}[/sky_blue2]",
             f"[yellow3]{zc.component.component_uid}[/yellow3]",
             f"[light_coral]{zc.component.component_name}[/light_coral]",
             f"[cornflower_blue]{zc.component.component_version}[/cornflower_blue]",
+            usernames,
             zc.component.component_description,
             get_status_markdown(zc.status),
         )
 
     console_print(title, table)
+
+    # Display password if it exists in the first component
+    if zpod_components and zpod_components[0].password:
+        print(f"\nzPod password: [red]{zpod_components[0].password}[/red]")
 
 
 @app.command(name="list", no_args_is_help=True)
