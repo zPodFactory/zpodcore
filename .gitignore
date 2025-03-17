@@ -22,3 +22,6 @@ logs/*
 # Openapi files
 zpodsdk_builder/openapi.json
 zpodapi/scripts/openapi/openapi.json
+
+# Extra post scripts
+zpodengine/src/zpodengine/zpod_component_add/extra_post_scripts/
