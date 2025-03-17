@@ -22,6 +22,8 @@ class ZpodComponentView:
         status (Union[Unset, str]):
         vcpu (Union[None, Unset, int]):
         vmem (Union[None, Unset, int]):
+        usernames (Union[None, Unset, list[dict[str, str]]]):
+        password (Union[None, Unset, str]):
     """
 
     component: "ComponentView"
@@ -31,6 +33,8 @@ class ZpodComponentView:
     status: Union[Unset, str] = UNSET
     vcpu: Union[None, Unset, int] = UNSET
     vmem: Union[None, Unset, int] = UNSET
+    usernames: Union[None, Unset, list[dict[str, str]]] = UNSET
+    password: Union[None, Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component = self.component.to_dict()
@@ -67,6 +71,18 @@ class ZpodComponentView:
         else:
             vmem = self.vmem
 
+        usernames: Union[None, Unset, list[dict[str, str]]]
+        if isinstance(self.usernames, Unset):
+            usernames = UNSET
+        else:
+            usernames = self.usernames
+
+        password: Union[None, Unset, str]
+        if isinstance(self.password, Unset):
+            password = UNSET
+        else:
+            password = self.password
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
@@ -85,6 +101,10 @@ class ZpodComponentView:
             field_dict["vcpu"] = vcpu
         if vmem is not UNSET:
             field_dict["vmem"] = vmem
+        if usernames is not UNSET:
+            field_dict["usernames"] = usernames
+        if password is not UNSET:
+            field_dict["password"] = password
 
         return field_dict
 
@@ -142,6 +162,10 @@ class ZpodComponentView:
 
         vmem = _parse_vmem(d.pop("vmem", UNSET))
 
+        usernames = d.pop("usernames", UNSET)
+
+        password = d.pop("password", UNSET)
+
         zpod_component_view = cls(
             component=component,
             fqdn=fqdn,
@@ -150,6 +174,8 @@ class ZpodComponentView:
             status=status,
             vcpu=vcpu,
             vmem=vmem,
+            usernames=usernames,
+            password=password,
         )
 
         return zpod_component_view

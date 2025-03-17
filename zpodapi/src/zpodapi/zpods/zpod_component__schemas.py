@@ -9,6 +9,13 @@ class D:
     ip = {"example": "10.196.176.13"}
     hostname = {"example": "esxi13"}
     fqdn = {"example": "esxi13.demo.zpodfactory.io"}
+    password = {"example": "yZnqji!a4xbo"}
+    usernames = {
+        "example": [
+            {"username": "administrator@demo.zpodfactory.io", "type": "ui"},
+            {"username": "root", "type": "ssh"}
+        ]
+    }
     vcpu = {"example": 4}
     vmem = {"example": 16}
     status = {"example": "ACTIVE"}
@@ -19,6 +26,8 @@ class ZpodComponentView(SchemaBase):
     ip: str | None = Field(None, D.ip)
     hostname: str | None = Field(None, D.hostname)
     fqdn: str | None = Field(None, D.fqdn)
+    password: str | None = Field(None, D.password)
+    usernames: list[dict[str, str | None]] | None = Field(None, D.usernames)
     vcpu: int | None = Field(None, D.vcpu)
     vmem: int | None = Field(None, D.vmem)
     status: str = Field(None, D.status)

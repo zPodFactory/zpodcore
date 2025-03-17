@@ -115,6 +115,18 @@ class ZpodComponent(CommonDatesMixin, ModelBase, table=True):
         nullable=True,
     )
 
+    @property
+    def password(self) -> str | None:
+        return self.zpod.password if self.zpod else None
+
+    @property
+    def usernames(self) -> list[dict[str, str]] | None:
+        if not self.zpod or not self.component:
+            return None
+        return self.component.get_usernames(
+            zpod_domain=self.zpod.domain,
+        )
+
     zpod: "Zpod" = Relationship(back_populates="components")
     component: "Component" = Relationship()
 
