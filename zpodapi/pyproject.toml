@@ -19,7 +19,7 @@ pydantic-settings = "2.2.1"
 python = "3.12.1"
 python-dotenv = "1.0.1"
 python-jose = {extras = ["cryptography"], version = "3.4.0"}
-python-multipart = "0.0.9"
+python-multipart = "0.0.18"
 pyvmomi = "8.0.2.0.1"
 rich = "13.7.1"
 sqlmodel = "0.0.18"
