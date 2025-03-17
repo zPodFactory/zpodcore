@@ -488,13 +488,6 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
-    def zpods_features_get_all(self):
-        from zpodsdk.api.zpods import zpods_features_get_all
-
-        return zpods_features_get_all.ZpodsFeaturesGetAll(self._client)
-
-    @property
-    @cache  # noqa: B019
     def zpods_get(self):
         from zpodsdk.api.zpods import zpods_get
 

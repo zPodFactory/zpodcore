@@ -12,7 +12,10 @@ from zpodengine.zpod_destroy.zpod_destroy_3_vapp import zpod_destroy_vapp
 from zpodengine.zpod_destroy.zpod_destroy_4_networking import (
     zpod_destroy_networking,
 )
-from zpodengine.zpod_destroy.zpod_destroy_5_finalize import (
+from zpodengine.zpod_destroy.zpod_destroy_5_config_scripts import (
+    zpod_destroy_config_scripts,
+)
+from zpodengine.zpod_destroy.zpod_destroy_6_finalize import (
     zpod_destroy_finalize,
 )
 
@@ -64,11 +67,18 @@ def flow_zpod_destroy(
         wait_for=[vapp],
     )
 
+    config_scripts = zpod_destroy_config_scripts.with_options(
+        **options(name="config_scripts"),
+    ).submit(
+        zpod_id=zpod_id,
+        wait_for=[dnsmasq, networking],
+    )
+
     zpod_destroy_finalize.with_options(
         **options(name="finalize"),
     ).submit(
         zpod_id=zpod_id,
-        wait_for=[dnsmasq, vapp, networking],
+        wait_for=[config_scripts],
     )
 
 

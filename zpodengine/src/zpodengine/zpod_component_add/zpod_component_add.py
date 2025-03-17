@@ -11,7 +11,10 @@ from zpodengine.zpod_component_add.zpod_component_add_3_deploy import (
 from zpodengine.zpod_component_add.zpod_component_add_4_post_scripts import (
     zpod_component_add_post_scripts,
 )
-from zpodengine.zpod_component_add.zpod_component_add_5_finalize import (
+from zpodengine.zpod_component_add.zpod_component_add_5_config_scripts import (
+    zpod_component_add_config_scripts,
+)
+from zpodengine.zpod_component_add.zpod_component_add_6_finalize import (
     zpod_component_add_finalize,
 )
 
@@ -67,9 +70,16 @@ def zpod_component_add(
         wait_for=[deploy],
     )
 
+    config_scripts = zpod_component_add_config_scripts.with_options(
+        **options(name="config_scripts"),
+    ).submit(
+        zpod_component_id=zpod_component.result().id,
+        wait_for=[post_scripts],
+    )
+
     return zpod_component_add_finalize.with_options(
         **options(name="finalize"),
     ).submit(
         zpod_component_id=zpod_component.result().id,
-        wait_for=[post_scripts],
+        wait_for=[config_scripts],
     )

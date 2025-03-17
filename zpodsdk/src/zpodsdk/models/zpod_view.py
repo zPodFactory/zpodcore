@@ -10,7 +10,6 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.endpoint_view import EndpointView
     from ..models.zpod_component_view import ZpodComponentView
-    from ..models.zpod_feature_view import ZpodFeatureView
     from ..models.zpod_network_view import ZpodNetworkView
     from ..models.zpod_permission_view import ZpodPermissionView
 
@@ -32,8 +31,8 @@ class ZpodView:
         password (str):
         profile (str):
         status (ZpodStatus):
+        features (dict[str, Any]):
         components (Union[Unset, List['ZpodComponentView']]):
-        features (Union[Unset, List['ZpodFeatureView']]):
         networks (Union[Unset, List['ZpodNetworkView']]):
         permissions (Union[Unset, List['ZpodPermissionView']]):
     """
@@ -48,8 +47,8 @@ class ZpodView:
     password: str
     profile: str
     status: ZpodStatus
+    features: dict[str, Any] = {}
     components: Union[Unset, List["ZpodComponentView"]] = UNSET
-    features: Union[Unset, List["ZpodFeatureView"]] = UNSET
     networks: Union[Unset, List["ZpodNetworkView"]] = UNSET
     permissions: Union[Unset, List["ZpodPermissionView"]] = UNSET
 
@@ -74,19 +73,16 @@ class ZpodView:
 
         status = self.status.value
 
+        features: Dict[str, Any] = {}
+        if self.features:
+            features.update(self.features)
+
         components: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.components, Unset):
             components = []
             for components_item_data in self.components:
                 components_item = components_item_data.to_dict()
                 components.append(components_item)
-
-        features: Union[Unset, List[Dict[str, Any]]] = UNSET
-        if not isinstance(self.features, Unset):
-            features = []
-            for features_item_data in self.features:
-                features_item = features_item_data.to_dict()
-                features.append(features_item)
 
         networks: Union[Unset, List[Dict[str, Any]]] = UNSET
         if not isinstance(self.networks, Unset):
@@ -115,12 +111,11 @@ class ZpodView:
                 "password": password,
                 "profile": profile,
                 "status": status,
+                "features": features,
             }
         )
         if components is not UNSET:
             field_dict["components"] = components
-        if features is not UNSET:
-            field_dict["features"] = features
         if networks is not UNSET:
             field_dict["networks"] = networks
         if permissions is not UNSET:
@@ -132,7 +127,6 @@ class ZpodView:
     def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
         from ..models.endpoint_view import EndpointView
         from ..models.zpod_component_view import ZpodComponentView
-        from ..models.zpod_feature_view import ZpodFeatureView
         from ..models.zpod_network_view import ZpodNetworkView
         from ..models.zpod_permission_view import ZpodPermissionView
 
@@ -157,19 +151,16 @@ class ZpodView:
 
         status = ZpodStatus(d.pop("status"))
 
+        features: Dict[str, Any] = {}
+        if d.get("features"):
+            features.update(d.pop("features"))
+
         components = []
         _components = d.pop("components", UNSET)
         for components_item_data in _components or []:
             components_item = ZpodComponentView.from_dict(components_item_data)
 
             components.append(components_item)
-
-        features = []
-        _features = d.pop("features", UNSET)
-        for features_item_data in _features or []:
-            features_item = ZpodFeatureView.from_dict(features_item_data)
-
-            features.append(features_item)
 
         networks = []
         _networks = d.pop("networks", UNSET)
@@ -196,8 +187,8 @@ class ZpodView:
             password=password,
             profile=profile,
             status=status,
-            components=components,
             features=features,
+            components=components,
             networks=networks,
             permissions=permissions,
         )

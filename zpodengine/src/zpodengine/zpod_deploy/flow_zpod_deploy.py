@@ -16,7 +16,10 @@ from zpodengine.zpod_deploy.zpod_deploy_4_vapp import zpod_deploy_vapp
 from zpodengine.zpod_deploy.zpod_deploy_5_get_profile import (
     zpod_deploy_get_profile,
 )
-from zpodengine.zpod_deploy.zpod_deploy_6_finalize import (
+from zpodengine.zpod_deploy.zpod_deploy_6_config_scripts import (
+    zpod_deploy_config_scripts,
+)
+from zpodengine.zpod_deploy.zpod_deploy_7_finalize import (
     zpod_deploy_finalize,
 )
 
@@ -122,12 +125,20 @@ def flow_zpod_deploy(
             )
         wait_for = [last_component_item]
 
+    # Execute config scripts
+    config_scripts = zpod_deploy_config_scripts.with_options(
+        **options(name="config_scripts"),
+    ).submit(
+        zpod_id=zpod_id,
+        wait_for=[last_component_item],
+    )
+
     # Finalize
     zpod_deploy_finalize.with_options(
         **options(name="finalize"),
     ).submit(
         zpod_id=zpod_id,
-        wait_for=[last_component_item],
+        wait_for=[config_scripts],
     )
 
 
