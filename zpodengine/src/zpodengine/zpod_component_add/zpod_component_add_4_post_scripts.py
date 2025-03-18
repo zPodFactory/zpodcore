@@ -146,6 +146,17 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                                 raise ValueError(
                                     f"NSX management cluster status is {nsx_status}"
                                 )
+                            if DBUtils.get_setting_value("ff_component_wait_for_status") == "true":
+                                nsx_overall_status = (
+                                    response.safejson()
+                                    .get("detailed_cluster_status")
+                                    .get("overall_status")
+                                )
+                                print(f"NSX overall cluster status is {nsx_status}")
+                                if nsx_overall_status != "STABLE":
+                                    raise ValueError(
+                                        f"NSX overall cluster status is {nsx_status}"
+                                    )
                             nsx_is_ready = True
                             break
                         except (RequestError, HTTPStatusError) as e:
