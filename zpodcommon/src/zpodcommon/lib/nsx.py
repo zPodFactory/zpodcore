@@ -55,7 +55,10 @@ def event_hook_response(response: httpx.Response):
 
 
 def fmt(txt):
-    return txt.replace("/", "\\/")
+    escaped = txt.replace("/", "\\/")
+    # Then URL encode only the backslashes, leaving the forward slashes as is
+    newtxt = escaped.replace("\\", "%5C")
+    return newtxt
 
 
 class Auth(httpx.Auth):
