@@ -182,7 +182,6 @@ class vCenter:
 
         resSpec = vim.ResourceConfigSpec()
         resSpec.memoryAllocation = self.create_allocation_object(resSpec, 163840)
-        resSpec.scaleDescendantsShares = "disabled"
         resSpec.cpuAllocation = self.create_allocation_object(resSpec, 4000)
         configSpec = vim.vApp.VAppConfigSpec()
         configSpec.entityConfig = []
