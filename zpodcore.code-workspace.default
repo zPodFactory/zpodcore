@@ -6,23 +6,38 @@
         },
         {
             "path": "zpodapi",
-            "name": "zPod API"
+            "name": "zpodapi",
+            "settings": {
+                "python.defaultInterpreterPath": "${workspaceFolder}/zpodapi/.venv/bin/python",
+            }
         },
         {
             "path": "zpodcli",
-            "name": "zPod CLI"
+            "name": "zpodcli",
+            "settings": {
+                "python.defaultInterpreterPath": "${workspaceFolder}/zpodcli/.venv/bin/python",
+            }
         },
         {
             "path": "zpodcommon",
-            "name": "zPod Common"
+            "name": "zpodcommon",
+            "settings": {
+                "python.defaultInterpreterPath": "${workspaceFolder}/zpodapi/.venv/bin/python",
+            }
         },
         {
             "path": "zpodengine",
-            "name": "zPod Engine"
+            "name": "zpodengine",
+            "settings": {
+                "python.defaultInterpreterPath": "${workspaceFolder}/zpodengine/.venv/bin/python",
+            }
         },
         {
             "path": "zpodsdk",
-            "name": "zPod SDK"
+            "name": "zpodsdk",
+            "settings": {
+                "python.defaultInterpreterPath": "${workspaceFolder}/zpodsdk/.venv/bin/python",
+            }
         },
     ],
     "launch": {
@@ -30,7 +45,7 @@
         "configurations": [
             {
                 "name": "Debug zPodAPI",
-                "type": "python",
+                "type": "debugpy",
                 "request": "attach",
                 "connect": {
                     "host": "localhost",
@@ -51,16 +66,19 @@
             "../zpodapi/src", // Allow vscode to see zpodapi modules
             "../zpodcommon/src", // Allow vscode to see zpodcommon modules
             "../zpodengine/src", // Allow vscode to see zpodengine modules
+            "../zpodsdk/src", // Allow vscode to see zpodsdk modules
         ],
+        "python.analysis.diagnosticSeverityOverrides": {
+            "reportInvalidTypeForm": "none"
+        },
         "[python]": {
             "editor.defaultFormatter": "charliermarsh.ruff",
-            "editor.formatOnSave": true,
             "editor.codeActionsOnSave": {
-                "source.organizeImports": true
+                "source.organizeImports": "explicit"
             }
-
         },
         "python.languageServer": "Pylance",
+        "editor.formatOnSave": true,
         "files.exclude": {
             "**/.DS_Store": true,
             "**/.git": true,
@@ -93,7 +111,6 @@
             "ms-vscode-remote.vscode-remote-extensionpack",
             "ms-vscode.remote-explorer",
             "skellock.just",
-            "sourcery.sourcery",
         ]
     }
 }

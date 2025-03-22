@@ -1,4 +1,4 @@
-FROM python:3.10.7-slim as requirements-stage
+FROM python:3.10.7-slim AS requirements-stage
 WORKDIR /tmp
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir poetry
@@ -7,7 +7,7 @@ ARG INSTALL_DEV=false
 RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry export --dev -f requirements.txt --output requirements.txt --without-hashes ; else poetry export -f requirements.txt --output requirements.txt --without-hashes ; fi"
 
 # BASE
-FROM python:3.10-slim as base
+FROM python:3.10-slim AS base
 RUN pip install --no-cache-dir --upgrade pip
 WORKDIR /zpodcore/zpodsdk_builder
 ENV PYTHONPATH=/zpodcore/zpodsdk_builder
@@ -16,6 +16,6 @@ RUN pip install --no-cache-dir --upgrade -r /requirements.txt
 CMD ["tail", "-f", "/dev/null"]
 
 # PROD
-FROM base as production
+FROM base AS production
 COPY . /zpodcore/zpodsdk_builder
 

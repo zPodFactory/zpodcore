@@ -1,11 +1,9 @@
-FROM prefecthq/prefect:2.19.2-python3.12
+FROM prefecthq/prefect:2.20.16-python3.12
 
 RUN apt-get update \
     && apt-get install -y \
     curl \
     git
 
-RUN pip install "prefect-docker==0.5.4"
+RUN pip install "prefect-docker==0.5.5"
 
-# Remove this line once this is resolved everywhere: https://github.com/docker/docker-py/issues/3256
-RUN pip install "requests==2.31.0"

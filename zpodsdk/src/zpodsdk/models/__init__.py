@@ -51,6 +51,9 @@ from .user_view_full_plus import UserViewFullPlus
 from .validation_error import ValidationError
 from .zpod_component_create import ZpodComponentCreate
 from .zpod_component_view import ZpodComponentView
+from .zpod_component_view_usernames_type_0_item import (
+    ZpodComponentViewUsernamesType0Item,
+)
 from .zpod_create import ZpodCreate
 from .zpod_dns_create import ZpodDnsCreate
 from .zpod_dns_update import ZpodDnsUpdate
@@ -118,6 +121,7 @@ __all__ = (
     "ValidationError",
     "ZpodComponentCreate",
     "ZpodComponentView",
+    "ZpodComponentViewUsernamesType0Item",
     "ZpodCreate",
     "ZpodDnsCreate",
     "ZpodDnsUpdate",

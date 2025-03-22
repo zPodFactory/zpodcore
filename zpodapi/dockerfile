@@ -5,7 +5,7 @@ ARG POETRY_VERSION=1.7.1
 
 ######################################
 # BASE
-FROM python:3.12.1-slim-bookworm as base
+FROM python:3.12.1-slim-bookworm AS base
 
 ARG POETRY_VENV
 
@@ -15,7 +15,7 @@ ENV PATH="${POETRY_VENV}/bin:${PATH}"
 
 ######################################
 # BUILDER
-FROM base as builder
+FROM base AS builder
 
 ARG POETRY_VERSION
 ARG POETRY_VENV
@@ -39,7 +39,7 @@ RUN python3 -m venv $POETRY_VENV \
 
 ######################################
 # MAIN
-FROM base as main
+FROM base AS main
 
 ARG POETRY_VENV
 
@@ -60,14 +60,14 @@ CMD ["tail", "-f", "/dev/null"]
 
 ######################################
 # DEV
-FROM main as dev
+FROM main AS dev
 CMD ["python", "/zpodcore/scripts/startup/start_reload.py"]
 
 
 
 ######################################
 # PROD
-FROM main as production
+FROM main AS production
 COPY ./zpodapi/scripts /zpodcore/scripts
 COPY ./zpodapi/tests /zpodcore/tests
 COPY ./zpodapi/src/zpodapi /zpodcore/src/zpodapi

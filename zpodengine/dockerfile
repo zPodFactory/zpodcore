@@ -12,7 +12,7 @@ ARG VCC_VERSION=1.2.0-beta
 
 #################################################
 # Base
-FROM python:3.12.1-slim-bookworm as base
+FROM python:3.12.1-slim-bookworm AS base
 
 ARG POETRY_VENV
 
@@ -22,7 +22,7 @@ ENV PATH="${POETRY_VENV}/bin:${PATH}"
 
 #################################################
 # Builder
-FROM base as builder
+FROM base AS builder
 
 ARG INSTALL_DEV=false
 ARG POETRY_VERSION
@@ -86,7 +86,7 @@ RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
 
 #################################################
 # MAIN
-FROM base as main
+FROM base AS main
 ARG PS_INSTALL_VERSION
 ARG POWERCLI_VERSION
 ARG POWERNSX_VERSION
@@ -185,12 +185,12 @@ CMD ["tail", "-f", "/dev/null"]
 
 #################################################
 # DEV
-FROM main as dev
+FROM main AS dev
 
 
 
 #################################################
 # PROD
-FROM main as production
+FROM main AS production
 COPY ./zpodengine/src/zpodengine /zpodcore/src/zpodengine
 COPY ./zpodcommon/src/zpodcommon /zpodcore/src/zpodcommon
