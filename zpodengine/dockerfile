@@ -1,13 +1,14 @@
 # Define Versions
 ARG POETRY_VENV=/opt/venv
-ARG POETRY_VERSION=1.7.1
-ARG PS_VERSION=7.4.1
-ARG PS_INSTALL_VERSION=7-4-1
-ARG POWERCLI_VERSION=13.2.1.22851661
+ARG POETRY_VERSION=2.1.1
+ARG PS_VERSION=7.5.0
+ARG PS_INSTALL_VERSION=7-5-0
+ARG POWERCLI_VERSION=13.3.0.24145081
 ARG POWERNSX_VERSION=3.0.1192
 ARG POWERVCF_VERSION=2.4.1.1000
-ARG GOVC_VERSION=0.34.2
+ARG GOVC_VERSION=0.49.0
 ARG VCC_VERSION=1.2.0-beta
+ARG TERRAFORM_VERSION=1.7.4
 
 
 #################################################
@@ -32,6 +33,7 @@ ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
 ARG GOVC_VERSION
 ARG VCC_VERSION
+ARG TERRAFORM_VERSION
 
 WORKDIR /tmp
 
@@ -41,6 +43,7 @@ RUN apt-get update \
     gcc \
     git \
     libpq-dev \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -69,6 +72,16 @@ RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     && echo "ARCH=$ARCH" \
     && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz \
     && curl -o /usr/local/bin/vcc -L https://github.com/vmware-labs/vmware-customer-connect-cli/releases/download/v${VCC_VERSION}/vcc-linux-v${VCC_VERSION}
+
+# Download and install Terraform
+RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
+    "linux/amd64")   echo "amd64";; \
+    "linux/arm64")   echo "arm64";; \
+    *)               echo ""     ;; esac) \
+    && echo "ARCH=$ARCH" \
+    && curl -o /tmp/terraform.zip -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip \
+    && unzip /tmp/terraform.zip -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/terraform
 
 # Define the folder where we will be installing PowerShell
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
@@ -99,6 +112,7 @@ COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
 # Copy other packages
 COPY --from=builder ["/usr/local/bin/govc", "/usr/local/bin/govc"]
 COPY --from=builder ["/usr/local/bin/vcc", "/usr/local/bin/vcc"]
+COPY --from=builder ["/usr/local/bin/terraform", "/usr/local/bin/terraform"]
 COPY --from=builder ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
 
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
@@ -170,7 +184,7 @@ RUN Install-Module -Scope AllUsers Subnet -RequiredVersion 1.0.14
 
 # On by default to suppress nagging. Set to $false if you don't want to help us make PowerCLI better.
 RUN Set-PowerCLIConfiguration -ParticipateInCeip $true -Confirm:$false
-RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:$false
+RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
 # Remove those "Write-Progress" that try to make a nice ascii animation bar which causes problems when no TTY
 SHELL ["/bin/sh", "-c"]
