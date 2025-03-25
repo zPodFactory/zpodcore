@@ -58,8 +58,6 @@ from .zpod_create import ZpodCreate
 from .zpod_dns_create import ZpodDnsCreate
 from .zpod_dns_update import ZpodDnsUpdate
 from .zpod_dns_view import ZpodDnsView
-from .zpod_feature_view import ZpodFeatureView
-from .zpod_feature_view_data import ZpodFeatureViewData
 from .zpod_network_view import ZpodNetworkView
 from .zpod_permission import ZpodPermission
 from .zpod_permission_group_add_remove import ZpodPermissionGroupAddRemove
@@ -126,8 +124,6 @@ __all__ = (
     "ZpodDnsCreate",
     "ZpodDnsUpdate",
     "ZpodDnsView",
-    "ZpodFeatureView",
-    "ZpodFeatureViewData",
     "ZpodNetworkView",
     "ZpodPermission",
     "ZpodPermissionGroupAddRemove",

@@ -84,6 +84,15 @@ class ZpodService(ServiceBase):
                 detail="Endpoint not found or not active",
             )
 
+
+        features = item_in.features
+        if not features:
+            features = {}
+        if not features.get("config-scripts"):
+            default_config_scripts = DBUtils.get_setting_value("ff_default_config_scripts")
+            if default_config_scripts:
+                features["config-scripts"] = default_config_scripts.split(",")
+
         zpod = M.Zpod(
             name=item_in.name,
             description=item_in.description,
@@ -92,6 +101,7 @@ class ZpodService(ServiceBase):
             profile=item_in.profile,
             status=enums.ZpodStatus.PENDING,
             password=zpod_password,
+            features=features,
             permissions=[
                 M.ZpodPermission(
                     permission=enums.ZpodPermission.OWNER,
@@ -99,6 +109,7 @@ class ZpodService(ServiceBase):
                 )
             ],
         )
+
         self.session.add(zpod)
         self.session.flush()
 

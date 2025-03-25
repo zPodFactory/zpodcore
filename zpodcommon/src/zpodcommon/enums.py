@@ -55,6 +55,7 @@ class UserStatus(str, Enum):
 class ZpodComponentStatus(str, Enum):
     ACTIVE = "ACTIVE"
     BUILDING = "BUILDING"
+    CONFIG_SCRIPTS = "CONFIG_SCRIPTS"
     ADD_FAILED = "ADD_FAILED"
     DELETE_FAILED = "DELETE_FAILED"
 
@@ -68,6 +69,7 @@ class ZpodPermission(str, Enum):
 class ZpodStatus(str, Enum):
     ACTIVE = "ACTIVE"
     BUILDING = "BUILDING"
+    CONFIG_SCRIPTS = "CONFIG_SCRIPTS"
     DELETED = "DELETED"
     DELETING = "DELETING"
     DEPLOY_FAILED = "DEPLOY_FAILED"

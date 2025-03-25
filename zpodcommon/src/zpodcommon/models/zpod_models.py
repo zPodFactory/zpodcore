@@ -52,6 +52,10 @@ class Zpod(CommonDatesMixin, ModelBase, table=True):
         default=...,
         nullable=False,
     )
+    features: Dict[str, Any] = Field(
+        default={},
+        sa_column=Column(JSON, nullable=False, index=False),
+    )
 
     components: List["ZpodComponent"] = Relationship(
         back_populates="zpod",
@@ -60,12 +64,6 @@ class Zpod(CommonDatesMixin, ModelBase, table=True):
         },
     )
     networks: List["ZpodNetwork"] = Relationship(
-        back_populates="zpod",
-        sa_relationship_kwargs={
-            "cascade": "all,delete,delete-orphan",
-        },
-    )
-    features: List["ZpodFeature"] = Relationship(
         back_populates="zpod",
         sa_relationship_kwargs={
             "cascade": "all,delete,delete-orphan",
@@ -129,28 +127,6 @@ class ZpodComponent(CommonDatesMixin, ModelBase, table=True):
 
     zpod: "Zpod" = Relationship(back_populates="components")
     component: "Component" = Relationship()
-
-
-class ZpodFeature(ModelBase, table=True):
-    __tablename__ = "zpod_features"
-
-    id: int | None = Field(
-        default=None,
-        primary_key=True,
-        nullable=False,
-    )
-    zpod_id: int = Field(
-        default=...,
-        nullable=False,
-        foreign_key="zpods.id",
-    )
-    data: Dict[Any, Any] | None = Field(
-        default={},
-        sa_column=Column(JSON, index=False),
-    )
-
-    zpod: "Zpod" = Relationship(back_populates="features")
-
 
 class ZpodNetwork(ModelBase, table=True):
     __tablename__ = "zpod_networks"
