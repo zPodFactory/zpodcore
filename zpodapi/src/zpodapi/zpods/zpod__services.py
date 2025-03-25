@@ -11,7 +11,7 @@ from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
 from ..profiles.profile__utils import validate_profile
 from . import zpod__utils
-from .zpod__schemas import ZpodCreate, ZpodUpdate
+from .zpod__schemas import ZpodCreate
 
 
 class ZpodService(ServiceBase):
