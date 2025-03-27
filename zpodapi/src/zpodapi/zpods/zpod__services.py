@@ -163,10 +163,11 @@ class ZpodService(ServiceBase):
         where=None,
         order_by=M.Zpod.name,
     ):
-        stmt = select(select_fields).select_from(M.Zpod)
+        # First get distinct IDs based on non-JSON fields
+        base_query = select(M.Zpod.id).select_from(M.Zpod)
         if not self.is_superadmin:
-            stmt = (
-                stmt.join(M.ZpodPermission)
+            base_query = (
+                base_query.join(M.ZpodPermission)
                 .outerjoin(M.ZpodPermissionUserLink)
                 .outerjoin(M.ZpodPermissionGroupLink)
                 .outerjoin(M.PermissionGroup)
@@ -180,7 +181,15 @@ class ZpodService(ServiceBase):
             ).distinct()
 
         if where:
-            stmt = stmt.where(*where)
+            if isinstance(where, list):
+                where = [w for w in where if not isinstance(w.left, M.Zpod.features.__class__)]
+            else:
+                where = [where]
+            base_query = base_query.where(*where)
+
+        # Then get all fields for those IDs
+        stmt = select(select_fields).select_from(M.Zpod).where(M.Zpod.id.in_(base_query))
+
         if order_by:
             stmt = stmt.order_by(order_by)
         return self.session.exec(stmt)
