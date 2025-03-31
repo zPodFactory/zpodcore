@@ -187,7 +187,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
 {chr(10).join(static_routes)}
         ║
         ║ [dark_sea_green4]zPod-{zpod.name}-segment[/dark_sea_green4] ([cyan]{endpoint.endpoints.network.transportzone}[/cyan])
-        ║ - This NSX Segment carries VLANs [magenta]\[0-4094][/magenta] (802.1Q Trunk)
+        ║ - This NSX Segment carries VLANs [magenta]\\[0-4094][/magenta] (802.1Q Trunk)
         ║ """
 
         # Calculate zbox box width based on content
