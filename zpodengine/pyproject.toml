@@ -23,7 +23,7 @@ sqlmodel = "0.0.18"
 pytest = "^8"
 pytest-cov = "^4.0"
 pytest-xdist = "^3.2"
-ruff = "^0.4"
+ruff = "^0.11"
 
 [build-system]
 requires = ["poetry-core"]

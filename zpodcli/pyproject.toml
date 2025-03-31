@@ -19,7 +19,7 @@ zpodsdk = {path = "../zpodsdk", develop = true}
 pyyaml = "^6.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.4"
+ruff = "^0.11"
 ipython = "^8.9.0"
 
 
