@@ -1,9 +1,11 @@
 import os
+from typing import Annotated
 
 import typer
+from rich import print
+from rich.json import JSON
 from rich.progress import Progress
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import console_print, exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
@@ -73,11 +75,19 @@ def component_list(
             help="Show all library components",
         ),
     ] = False,
+    json_: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     List Components
     """
-
     z: ZpodClient = ZpodClient()
     components = z.components_get_all.sync()
     # Sort component by unique uid name
@@ -97,7 +107,11 @@ def component_list(
 
         sorted_components = filtered_components
 
-    generate_table(sorted_components)
+    if json_:
+        components_dict = [c.to_dict() for c in sorted_components]
+        print(JSON.from_data(components_dict, sort_keys=True))
+    else:
+        generate_table(sorted_components)
 
 
 @app.command(name="enable", no_args_is_help=True)

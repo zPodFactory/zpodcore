@@ -4,6 +4,7 @@ import time
 from prefect import task
 
 from zpodcommon import models as M
+from zpodcommon.enums import ZpodComponentStatus
 from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.nsx import NsxClient
 from zpodcommon.lib.vmware import vCenter
@@ -12,12 +13,14 @@ from zpodengine.lib import database
 from zpodengine.lib.commands import cmd_execute
 from zpodengine.zpod_component_add.zpod_component_add_utils import (
     handle_zpod_component_add_failure,
+    set_zpod_component_status,
 )
 
 
 @task
 @handle_zpod_component_add_failure
 def zpod_component_add_post_scripts(*, zpod_component_id: int):
+    set_zpod_component_status(zpod_component_id, ZpodComponentStatus.POST_SCRIPTS)
     with database.get_session_ctx() as session:
         zpod_component = session.get(M.ZpodComponent, zpod_component_id)
 
@@ -146,7 +149,12 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                                 raise ValueError(
                                     f"NSX management cluster status is {nsx_status}"
                                 )
-                            if DBUtils.get_setting_value("ff_component_wait_for_status") == "true":
+                            if (
+                                DBUtils.get_setting_value(
+                                    "ff_component_wait_for_status"
+                                )
+                                == "true"
+                            ):
                                 nsx_overall_status = (
                                     response.safejson()
                                     .get("detailed_cluster_status")

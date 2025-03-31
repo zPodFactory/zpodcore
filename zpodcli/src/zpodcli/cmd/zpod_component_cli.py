@@ -1,33 +1,24 @@
-from typing import List
+import time
+from typing import Annotated
 
 import typer
 from rich import print
+from rich.json import JSON
+from rich.live import Live
 from rich.table import Table
-from typing_extensions import Annotated
-from zpodsdk.models.zpod_component_create import ZpodComponentCreate
-from zpodsdk.models.zpod_component_view import ZpodComponentView
 
 from zpodcli.lib.prompt import confirm
-from zpodcli.lib.utils import console_print
+from zpodcli.lib.utils import console_print, get_status_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.models.zpod_component_create import ZpodComponentCreate
+from zpodsdk.models.zpod_component_view import ZpodComponentView
 
 app = typer.Typer(help="Manage zPod Components", no_args_is_help=True)
 
 
-def get_status_markdown(status: str):
-    match status:
-        case "ACTIVE":
-            return f"[dark_sea_green4]{status}[/dark_sea_green4]"
-        case "BUILDING":
-            return f"[grey63]{status}...[/grey63]"
-        case "ADD_FAILED" | "DELETE_FAILED":
-            return f"[indian_red]{status}[/indian_red]"
-        case _:
-            return "[royal_blue1]UNKNOWN[/royal_blue1]"
-
-
 def generate_table(
     zpod_components: list[ZpodComponentView],
+    return_table=False,
 ):
     title = "zPod Component List"
 
@@ -38,10 +29,8 @@ def generate_table(
         header_style="bold cyan",
     )
     table.add_column("Hostname")
-    table.add_column("FQDN")
     table.add_column("Component UID")
-    table.add_column("Name")
-    table.add_column("Version")
+    table.add_column("FQDN")
     table.add_column("[light_pink1]SSH[/light_pink1]/[dark_khaki]UI[/dark_khaki] users")
     table.add_column("Description")
     table.add_column("Status")
@@ -50,29 +39,51 @@ def generate_table(
         usernames_list = []
         for username in zc.usernames:
             if username["type"] == "ssh":
-                usernames_list.append(f"[light_pink1]{username['username']}[/light_pink1]")
+                usernames_list.append(
+                    f"[light_pink1]{username['username']}[/light_pink1]"
+                )
             elif username["type"] == "ui":
-                usernames_list.append(f"[dark_khaki]{username['username']}[/dark_khaki]")
+                usernames_list.append(
+                    f"[dark_khaki]{username['username']}[/dark_khaki]"
+                )
 
         # On joint les noms d'utilisateur s'il y en a, sinon chaîne vide
         usernames = ", ".join(usernames_list)
 
         table.add_row(
             f"[sky_blue2]{zc.hostname}[/sky_blue2]",
-            f"[sky_blue2]https://{zc.fqdn}[/sky_blue2]",
             f"[yellow3]{zc.component.component_uid}[/yellow3]",
-            f"[light_coral]{zc.component.component_name}[/light_coral]",
-            f"[cornflower_blue]{zc.component.component_version}[/cornflower_blue]",
+            f"[sky_blue2]https://{zc.fqdn}[/sky_blue2]",
             usernames,
             zc.component.component_description,
             get_status_markdown(zc.status),
         )
+
+    if return_table:
+        return table
 
     console_print(title, table)
 
     # Display password if it exists in the first component
     if zpod_components and zpod_components[0].password:
         print(f"\nzPod password: [red]{zpod_components[0].password}[/red]")
+
+
+def sort_components_by_ip(
+    components: list[ZpodComponentView],
+) -> list[ZpodComponentView]:
+    """Sort components by IP address in ascending order.
+
+    Args:
+        components: List of components to sort
+
+    Returns:
+        Sorted list of components, with components without IPs at the beginning
+    """
+    return sorted(
+        components,
+        key=lambda zc: [int(i) for i in zc.ip.split(".")] if zc.ip else [0, 0, 0, 0],
+    )
 
 
 @app.command(name="list", no_args_is_help=True)
@@ -85,19 +96,56 @@ def zpod_component_list(
             show_default=False,
         ),
     ],
+    json_: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
+    ] = False,
+    wait: Annotated[
+        bool,
+        typer.Option(
+            "--wait",
+            "-w",
+            help="Refresh list every 5 seconds (Ctrl+C to quit)",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     List zPod Components
     """
-    print(f"Listing {zpod_name} components")
-    z: ZpodClient = ZpodClient()
-    zpod_components: List[ZpodComponentView] = z.zpods_components_get_all.sync(
-        id=f"name={zpod_name}"
-    )
+    if wait:
+        if json_:
+            print("Error: Cannot use --wait (-w) with --json (-j) flags together.")
+            raise typer.Exit(1)
+        with Live(refresh_per_second=1, transient=False) as live:
+            while True:
+                z: ZpodClient = ZpodClient()
+                zpod_components: list[ZpodComponentView] = (
+                    z.zpods_components_get_all.sync(id=f"name={zpod_name}")
+                )
 
-    # Sort per FQDN
-    sorted_zpod_components = sorted(zpod_components, key=lambda zc: zc.fqdn)
-    generate_table(sorted_zpod_components)
+                sorted_zpod_components = sort_components_by_ip(zpod_components)
+                table = generate_table(sorted_zpod_components, return_table=True)
+                live.update(table)
+                time.sleep(5)
+    else:
+        z: ZpodClient = ZpodClient()
+        zpod_components: list[ZpodComponentView] = z.zpods_components_get_all.sync(
+            id=f"name={zpod_name}"
+        )
+
+        sorted_zpod_components = sort_components_by_ip(zpod_components)
+
+        if json_:
+            zpod_components_dict = [zc.to_dict() for zc in sorted_zpod_components]
+            print(JSON.from_data(zpod_components_dict, sort_keys=True))
+        else:
+            generate_table(sorted_zpod_components)
 
 
 @app.command(name="add", no_args_is_help=True)

@@ -21,6 +21,27 @@ def get_boolean_markdown(boolean: bool):
     return f"[indian_red]{boolean}[/indian_red]"
 
 
+def get_status_markdown(status: str):
+    """Get status markdown with appropriate color coding
+
+    Args:
+        status: The status string to format
+    """
+    match status:
+        case "ACTIVE":
+            return f"[dark_sea_green4]{status}[/dark_sea_green4]"
+        case "PENDING" | "BUILDING" | "POST_SCRIPTS" | "CONFIG_SCRIPTS":
+            return f"[grey63]{status}...[/grey63]"
+        case "DELETING":
+            return f"[orange3]{status}...[/orange3]"
+        case "DELETED":
+            return f"[dark_orange3]{status}[/dark_orange3]"
+        case "DEPLOY_FAILED" | "DESTROY_FAILED" | "ADD_FAILED" | "DELETE_FAILED":
+            return f"[indian_red]{status}[/indian_red]"
+        case _:
+            return "[royal_blue1]UNKNOWN[/royal_blue1]"
+
+
 # Prints Rich Console object.
 # if global SVG flag is True, will generate SVG output file.
 def console_print(title, content):

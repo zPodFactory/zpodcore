@@ -1,12 +1,22 @@
-from typing import List
+import time
+from datetime import datetime
+from typing import Annotated
 
 import typer
 from rich import print
+from rich.console import Group
+from rich.json import JSON
+from rich.live import Live
+from rich.spinner import Spinner
 from rich.table import Table
-from typing_extensions import Annotated
 
-from zpodcli.cmd import zpod_component_cli, zpod_dns_cli, zpod_permission_cli
-from zpodcli.lib.utils import console_print
+from zpodcli.cmd import (
+    zpod_component_cli,
+    zpod_dns_cli,
+    zpod_info_cli,
+    zpod_permission_cli,
+)
+from zpodcli.lib.utils import console_print, get_status_markdown
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
 from zpodsdk.models.zpod_create import ZpodCreate
@@ -16,26 +26,11 @@ from zpodsdk.models.zpod_view import ZpodView
 app = typer.Typer(help="Manage zPods")
 app.add_typer(zpod_component_cli.app, name="component")
 app.add_typer(zpod_dns_cli.app, name="dns")
+app.add_typer(zpod_info_cli.app)
 app.add_typer(zpod_permission_cli.app, name="permission")
 
 
-def get_status_markdown(status: str):
-    match status:
-        case "ACTIVE":
-            return f"[dark_sea_green4]{status}[/dark_sea_green4]"
-        case "PENDING" | "BUILDING":
-            return f"[grey63]{status}...[/grey63]"
-        case "DELETING":
-            return f"[orange3]{status}...[/orange3]"
-        case "DELETED":
-            return f"[dark_orange3]{status}[/dark_orange3]"
-        case "DEPLOY_FAILED" | "DESTROY_FAILED":
-            return f"[indian_red]{status}[/indian_red]"
-        case _:
-            return "[royal_blue1]UNKNOWN[/royal_blue1]"
-
-
-def generate_table(zpods: list[ZpodView]):
+def generate_table(zpods: list[ZpodView], return_table=False):
     title = "zPod List"
     table = Table(
         title=title,
@@ -85,7 +80,33 @@ def generate_table(zpods: list[ZpodView]):
             get_status_markdown(zpod.status),
         )
 
-    console_print(title, table)
+    if return_table:
+        return table
+    else:
+        console_print(title, table)
+
+
+def filter_zpods_by_owner(zpods: list[ZpodView], owner: str) -> list[ZpodView]:
+    """Filter zPods by owner.
+
+    Args:
+        zpods: List of zPods to filter
+        owner: Owner username to filter by
+
+    Returns:
+        Filtered list of zPods owned by the specified user
+    """
+    if not owner:
+        return zpods
+    return [
+        zpod
+        for zpod in zpods
+        if any(
+            perm.permission == ZpodPermission.OWNER
+            and any(owner == user.username for user in perm.users)
+            for perm in zpod.permissions
+        )
+    ]
 
 
 @app.command(name="list")
@@ -101,40 +122,57 @@ def zpod_list(
             show_default=False,
         ),
     ] = "",
+    json_: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
+    ] = False,
+    wait: Annotated[
+        bool,
+        typer.Option(
+            "--wait",
+            "-w",
+            help="Refresh list every 5 seconds (Ctrl+C to quit)",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     List zPods
     """
-    print("Listing zPods")
-
     z: ZpodClient = ZpodClient()
-    zpods = z.zpods_get_all.sync()
 
-    if not owner:
-        # If no owner filter is specified, show all zPods
-        filtered_zpods = zpods
+    if wait:
+        if json_:
+            print("Error: Cannot use --wait (-w) with --json (-j) flags together.")
+            raise typer.Exit(1)
+        with Live(refresh_per_second=1, transient=False) as live:
+            while True:
+                zpods = z.zpods_get_all.sync()
+                filtered_zpods = filter_zpods_by_owner(zpods, owner)
+                table = generate_table(filtered_zpods, return_table=True)
+                live.update(table)
+                time.sleep(5)
     else:
-        # Filter zPods by owner
-        filtered_zpods = []
-        for zpod in zpods:
-            # Check if the specified owner is an owner of this zPod
-            owner_permissions = [
-                perm
-                for perm in zpod.permissions
-                if perm.permission == ZpodPermission.OWNER
-                and any(owner == user.username for user in perm.users)
-            ]
-            if owner_permissions:
-                filtered_zpods.append(zpod)
+        zpods = z.zpods_get_all.sync()
+        filtered_zpods = filter_zpods_by_owner(zpods, owner)
 
-    generate_table(filtered_zpods)
+        if json_:
+            zpods_dict = [zpod.to_dict() for zpod in filtered_zpods]
+            print(JSON.from_data(zpods_dict, sort_keys=True))
+        else:
+            generate_table(filtered_zpods)
 
 
 @app.command(name="destroy", no_args_is_help=True)
 @unexpected_status_handler
 def zpod_destroy(
     zpod_names: Annotated[
-        List[str],
+        list[str],
         typer.Argument(
             help="zPod Name",
             show_default=False,
@@ -206,6 +244,23 @@ def zpod_create(
             show_default=False,
         ),
     ] = None,
+    wait: Annotated[
+        bool,
+        typer.Option(
+            "--wait",
+            "-w",
+            help="Wait for task to complete",
+            is_flag=True,
+        ),
+    ] = False,
+    no_spinner: Annotated[
+        bool,
+        typer.Option(
+            "--no-spinner",
+            help="Disable spinner animation when waiting",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     Create a zPod
@@ -245,6 +300,19 @@ def zpod_create(
             print("Please specify a profile using the --profile (-p) option.")
             raise typer.Exit(1)
 
+    # Get profile information once before creating the zpod
+    profile_info = z.profiles_get.sync(id=f"name={profile}")
+    # Extract component order from profile structure
+    component_order = []
+    for component in profile_info.profile:
+        if isinstance(component, list):
+            # Handle ESXi components
+            for esxi in component:
+                component_order.append((esxi.component_uid, esxi.hostname))
+        else:
+            # Handle single components like zbox
+            component_order.append(component.component_uid)
+
     ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")
     zpod_details = ZpodCreate(
         name=zpod_name,
@@ -257,3 +325,134 @@ def zpod_create(
 
     z.zpods_create.sync(body=zpod_details)
     print(f"zPod [magenta]{zpod_name}[/magenta] is being deployed...")
+
+    if wait:
+        try:
+            if no_spinner:
+                while True:
+                    zpod = z.zpods_get.sync(id=f"name={zpod_name}")
+                    status = zpod.status
+
+                    if status == "ACTIVE":
+                        print(
+                            f"zPod [magenta]{zpod_name}[/magenta] deployment [green]success[/green]!"
+                        )
+                        break
+                    elif status in ["DEPLOY_FAILED", "DESTROY_FAILED"]:
+                        print(
+                            f"\nzPod [magenta]{zpod_name}[/magenta] deployment [red]failure[/red]!"
+                        )
+                        raise typer.Exit(1)
+
+                    time.sleep(5)
+            else:
+                with Live(
+                    refresh_per_second=10,
+                    transient=False,
+                    auto_refresh=True,
+                ) as live:
+                    # Store start time for elapsed time calculation
+                    start_time = datetime.now()
+                    while True:
+                        # Calculate elapsed time
+                        elapsed = datetime.now() - start_time
+                        hours = elapsed.seconds // 3600
+                        minutes = (elapsed.seconds % 3600) // 60
+                        seconds = elapsed.seconds % 60
+                        elapsed_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+                        zpod_status_table = Table(
+                            show_header=False,
+                            box=None,
+                            padding=(0, 0),
+                        )
+                        zpod_status_table.add_column("Status", style="bold")
+                        zpod_status_table.add_column("Spinner", style="yellow")
+
+                        # Only check status every 5 seconds
+                        if elapsed.seconds % 5 == 0:
+                            zpod = z.zpods_get.sync(id=f"name={zpod_name}")
+                            status = zpod.status
+
+                            # Create component status lines
+                            component_status_table = Table(
+                                show_header=False,
+                                box=None,
+                                padding=(0, 0),
+                            )
+                            component_status_table.add_column("Status", style="bold")
+                            component_status_table.add_column("Spinner", style="yellow")
+
+                            # Update component statuses
+                            for component_info in component_order:
+                                if isinstance(component_info, tuple):
+                                    component_uid, hostname = component_info
+                                else:
+                                    component_uid = component_info
+                                    hostname = None
+
+                                component = next(
+                                    (
+                                        c
+                                        for c in zpod.components
+                                        if c.component.component_uid == component_uid
+                                        and (hostname is None or c.hostname == hostname)
+                                    ),
+                                    None,
+                                )
+                                if component:
+                                    if component.status not in [
+                                        "ACTIVE",
+                                        "DEPLOY_FAILED",
+                                    ]:
+                                        component_status_table.add_row(
+                                            f"- {component.hostname}[[yellow3]{component.component.component_uid}[/yellow3]]: {get_status_markdown(component.status)} ",
+                                            Spinner("dots", style="yellow"),
+                                        )
+                                    else:
+                                        component_status_table.add_row(
+                                            f"- {component.hostname}[[yellow3]{component.component.component_uid}[/yellow3]]: {get_status_markdown(component.status)}",
+                                            "",
+                                        )
+
+                        if status not in ["ACTIVE", "DEPLOY_FAILED"]:
+                            zpod_status_table.add_row(
+                                f"Overall status: {get_status_markdown(status)} [dim]({elapsed_str})[/dim] ",
+                                Spinner("dots", style="yellow"),
+                            )
+                        else:
+                            zpod_status_table.add_row(
+                                f"Overall status: {get_status_markdown(status)} [dim]({elapsed_str})[/dim]",
+                                "",
+                            )
+
+                        # Create a group with the status table
+                        layout = Group(
+                            zpod_status_table,
+                            component_status_table,
+                        )
+                        live.update(layout)
+
+                        if status == "ACTIVE":
+                            live.stop()
+                            print(
+                                f"zPod [magenta]{zpod_name}[/magenta] deployment [green]success[/green]!"
+                            )
+                            break
+                        elif status == "DEPLOY_FAILED":
+                            live.stop()
+                            print(
+                                f"\nzPod [magenta]{zpod_name}[/magenta] deployment [red]failure[/red]!"
+                            )
+                            raise typer.Exit(1)
+
+                        # Update elapsed time every second
+                        time.sleep(1)
+        except KeyboardInterrupt:
+            print("\nStopped monitoring zPod deployment.")
+            print(
+                f"zPod [magenta]{zpod_name}[/magenta] is still being deployed in the background."
+            )
+            print(
+                "You can check its status later using 'zpod list' or 'zpod info' command."
+            )

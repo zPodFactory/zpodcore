@@ -1,14 +1,13 @@
 import json
 import re
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
 from attrs import fields_dict
 from rich import print
 from rich.json import JSON
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.cmd import endpoint_permission_cli
 from zpodcli.lib.file import load_json_or_yaml_file

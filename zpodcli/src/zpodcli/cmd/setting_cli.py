@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
 from rich import print
+from rich.json import JSON
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import console_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
@@ -78,13 +78,28 @@ def setting_create(
 
 @app.command(name="list")
 @unexpected_status_handler
-def setting_list():
+def setting_list(
+    json_: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
+    ] = False,
+):
     """
     List Settings
     """
     z: ZpodClient = ZpodClient()
     settings = z.settings_get_all.sync()
-    generate_table(settings=settings)
+
+    if json_:
+        settings_dict = [setting.to_dict() for setting in settings]
+        print(JSON.from_data(settings_dict, sort_keys=True))
+    else:
+        generate_table(settings=settings)
 
 
 @app.command(no_args_is_help=True)

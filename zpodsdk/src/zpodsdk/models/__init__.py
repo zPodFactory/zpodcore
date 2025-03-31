@@ -55,6 +55,7 @@ from .zpod_component_view_usernames_type_0_item import (
     ZpodComponentViewUsernamesType0Item,
 )
 from .zpod_create import ZpodCreate
+from .zpod_create_features_type_0 import ZpodCreateFeaturesType0
 from .zpod_dns_create import ZpodDnsCreate
 from .zpod_dns_update import ZpodDnsUpdate
 from .zpod_dns_view import ZpodDnsView
@@ -65,7 +66,9 @@ from .zpod_permission_user_add_remove import ZpodPermissionUserAddRemove
 from .zpod_permission_view import ZpodPermissionView
 from .zpod_status import ZpodStatus
 from .zpod_update import ZpodUpdate
+from .zpod_update_features_type_0 import ZpodUpdateFeaturesType0
 from .zpod_view import ZpodView
+from .zpod_view_features_type_0 import ZpodViewFeaturesType0
 
 __all__ = (
     "BodyComponentsUpload",
@@ -121,6 +124,7 @@ __all__ = (
     "ZpodComponentView",
     "ZpodComponentViewUsernamesType0Item",
     "ZpodCreate",
+    "ZpodCreateFeaturesType0",
     "ZpodDnsCreate",
     "ZpodDnsUpdate",
     "ZpodDnsView",
@@ -131,5 +135,7 @@ __all__ = (
     "ZpodPermissionView",
     "ZpodStatus",
     "ZpodUpdate",
+    "ZpodUpdateFeaturesType0",
     "ZpodView",
+    "ZpodViewFeaturesType0",
 )

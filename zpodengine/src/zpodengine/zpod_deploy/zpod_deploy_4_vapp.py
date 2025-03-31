@@ -8,7 +8,7 @@ from zpodengine.lib import database
 
 @task
 def zpod_deploy_vapp(zpod_id: int):
-    print("Create zPod VAPP")
+    print("Create zPod vApp")
     with database.get_session_ctx() as session:
         zpod = session.get(M.Zpod, zpod_id)
         with vCenter.auth_by_zpod_endpoint(zpod=zpod) as vc:
