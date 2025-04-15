@@ -2,10 +2,9 @@ from typing import Annotated, Optional
 
 import typer
 from rich import print
-from rich.json import JSON
 from rich.table import Table
 
-from zpodcli.lib.utils import console_print
+from zpodcli.lib.utils import console_print, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.setting_create import SettingCreate
 from zpodsdk.models.setting_update import SettingUpdate
@@ -88,6 +87,14 @@ def setting_list(
             is_flag=True,
         ),
     ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     List Settings
@@ -97,7 +104,7 @@ def setting_list(
 
     if json_:
         settings_dict = [setting.to_dict() for setting in settings]
-        print(JSON.from_data(settings_dict, sort_keys=True))
+        json_print(settings_dict, no_color=no_color)
     else:
         generate_table(settings=settings)
 

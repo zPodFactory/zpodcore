@@ -5,7 +5,6 @@ from typing import Annotated
 import typer
 from rich import print
 from rich.console import Group
-from rich.json import JSON
 from rich.live import Live
 from rich.spinner import Spinner
 from rich.table import Table
@@ -16,7 +15,7 @@ from zpodcli.cmd import (
     zpod_info_cli,
     zpod_permission_cli,
 )
-from zpodcli.lib.utils import console_print, get_status_markdown
+from zpodcli.lib.utils import console_print, get_status_markdown, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
 from zpodsdk.models.zpod_create import ZpodCreate
@@ -131,6 +130,14 @@ def zpod_list(
             is_flag=True,
         ),
     ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
     wait: Annotated[
         bool,
         typer.Option(
@@ -163,7 +170,8 @@ def zpod_list(
 
         if json_:
             zpods_dict = [zpod.to_dict() for zpod in filtered_zpods]
-            print(JSON.from_data(zpods_dict, sort_keys=True))
+            json_print(zpods_dict, no_color=no_color)
+
         else:
             generate_table(filtered_zpods)
 

@@ -1,15 +1,13 @@
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Annotated, Optional
 
 import typer
 from rich import print
-from rich.json import JSON
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.file import load_json_or_yaml_file
-from zpodcli.lib.utils import console_print, exit_with_error
+from zpodcli.lib.utils import console_print, exit_with_error, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.profile_create import ProfileCreate
 from zpodsdk.models.profile_item_create import ProfileItemCreate
@@ -89,6 +87,14 @@ def profile_info(
             is_flag=True,
         ),
     ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     Profile Info
@@ -96,8 +102,8 @@ def profile_info(
     z: ZpodClient = ZpodClient()
     profile = z.profiles_get.sync(id=f"name={profile_name}")
     if json_:
-        profile_dict = profile.to_dict()["profile"]
-        print(JSON.from_data(profile_dict, sort_keys=True))
+        profile_dict = profile.to_dict()
+        json_print(profile_dict, no_color=no_color)
     else:
         generate_table([profile], "Info")
 

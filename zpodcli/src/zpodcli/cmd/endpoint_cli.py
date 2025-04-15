@@ -6,13 +6,16 @@ from typing import Annotated, Optional
 import typer
 from attrs import fields_dict
 from rich import print
-from rich.json import JSON
 from rich.table import Table
 
 from zpodcli.cmd import endpoint_permission_cli
 from zpodcli.lib.file import load_json_or_yaml_file
 from zpodcli.lib.prompt import ask
-from zpodcli.lib.utils import console_print, exit_with_error
+from zpodcli.lib.utils import (
+    console_print,
+    exit_with_error,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_compute_create import EndpointComputeCreate
 from zpodsdk.models.endpoint_compute_drivers import EndpointComputeDrivers
@@ -133,6 +136,14 @@ def endpoint_info(
             is_flag=True,
         ),
     ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     Endpoint Info
@@ -140,8 +151,8 @@ def endpoint_info(
     z = ZpodClient()
     endpoint = z.endpoints_get.sync(id=f"name={endpoint_name}")
     if json_:
-        endpoints_dict = endpoint.to_dict()["endpoints"]
-        print(JSON.from_data(endpoints_dict, sort_keys=True))
+        endpoint_dict = endpoint.to_dict()
+        json_print(endpoint_dict, no_color=no_color)
     else:
         generate_table([endpoint], title="Endpoint Info", all_endpoint_keys=True)
 

@@ -1,6 +1,10 @@
+import json
+import sys
+
 import typer
 from rich import print
 from rich.console import Console
+from rich.json import JSON
 from rich.terminal_theme import DIMMED_MONOKAI
 
 from zpodcli.lib.global_flags import GLOBAL_FLAGS
@@ -50,3 +54,16 @@ def console_print(title, content):
     if GLOBAL_FLAGS["svg"]:
         filename = title.replace(" ", "_").lower() + ".svg"
         console.save_svg(filename, title="", theme=DIMMED_MONOKAI)
+
+
+def json_print(data, no_color=False):
+    """Print JSON data with optional color formatting
+
+    Args:
+        data: The data to print as JSON
+        no_color: If True, print without color formatting
+    """
+    if no_color:
+        sys.stdout.write(json.dumps(data, sort_keys=True) + "\n")
+    else:
+        print(JSON.from_data(data, sort_keys=True))

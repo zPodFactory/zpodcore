@@ -3,12 +3,11 @@ from typing import Annotated
 
 import typer
 from rich import print
-from rich.json import JSON
 from rich.live import Live
 from rich.table import Table
 
 from zpodcli.lib.prompt import confirm
-from zpodcli.lib.utils import console_print, get_status_markdown
+from zpodcli.lib.utils import console_print, get_status_markdown, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView
@@ -105,6 +104,14 @@ def zpod_component_list(
             is_flag=True,
         ),
     ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
     wait: Annotated[
         bool,
         typer.Option(
@@ -142,8 +149,10 @@ def zpod_component_list(
         sorted_zpod_components = sort_components_by_ip(zpod_components)
 
         if json_:
-            zpod_components_dict = [zc.to_dict() for zc in sorted_zpod_components]
-            print(JSON.from_data(zpod_components_dict, sort_keys=True))
+            zpod_components_dict = [
+                component.to_dict() for component in sorted_zpod_components
+            ]
+            json_print(zpod_components_dict, no_color=no_color)
         else:
             generate_table(sorted_zpod_components)
 
