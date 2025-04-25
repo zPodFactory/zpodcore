@@ -2,7 +2,6 @@ import json
 import os
 
 from jinja2 import Template
-from rich import print as pprint
 
 from zpodcommon import models as M
 from zpodcommon.lib.dbutils import DBUtils
@@ -106,7 +105,7 @@ def vcsa_deployer(zpod_component: M.ZpodComponent):
     )
 
     print("vcsa spec options generated file")
-    pprint(vcsa_spec_render)
+    print(vcsa_spec_render)
 
     vm_name = f"vcsa.{zpod.domain}"
 
