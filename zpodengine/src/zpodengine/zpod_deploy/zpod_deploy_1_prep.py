@@ -13,7 +13,7 @@ from zpodengine.lib.network import (
 )
 
 
-@task
+@task(tags=["atomic_operation"])
 def zpod_deploy_prep(zpod_id: int):
     # Add default network
     with database.get_session_ctx() as session:
