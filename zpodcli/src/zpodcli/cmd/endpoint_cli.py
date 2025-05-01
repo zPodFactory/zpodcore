@@ -194,10 +194,23 @@ def endpoint_create(
             show_default=False,
         ),
     ] = None,
+    generate_config_sample: Annotated[
+        bool,
+        typer.Option(
+            "--generate-config-sample",
+            "-g",
+            help="Generate a sample endpoint configuration file",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     Endpoint Create
     """
+    if generate_config_sample:
+        endpoint_generate_sample(endpoint_name)
+        return
+
     if endpoints_file and endpoints_str:
         exit_with_error("Can not have both endpoints file and endpoints")
 
@@ -270,11 +283,16 @@ def endpoint_create(
             "t0": ask("t0"),
         }
 
-    endpoint_compute_model = EndpointComputeCreate(**endpoint_compute_dict)
-    endpoint_compute_dict["driver"] = endpoint_compute_dict["driver"].lower()
+    # Convert drivers to proper enum instances before creating models
+    endpoint_compute_dict["driver"] = EndpointComputeDrivers(
+        endpoint_compute_dict["driver"].lower()
+    )
     endpoint_network_dict["driver"] = EndpointNetworkDrivers(
         endpoint_network_dict["driver"].lower()
     )
+
+    # Create models with the converted drivers
+    endpoint_compute_model = EndpointComputeCreate(**endpoint_compute_dict)
     endpoint_network_model = EndpointNetworkCreate(**endpoint_network_dict)
 
     z: ZpodClient = ZpodClient()
@@ -409,6 +427,47 @@ def endpoint_delete(
     z: ZpodClient = ZpodClient()
     z.endpoints_delete.sync(id=f"name={endpoint_name}")
     print(f"Endpoint [magenta]{endpoint_name}[/magenta] has been deleted successfully")
+
+
+def endpoint_generate_sample(endpoint_name: str):
+    """
+    Generate a sample JSON endpoint file in the current directory
+    """
+    sample_endpoint = {
+        "compute": {
+            "driver": "vsphere",
+            "hostname": "vcenter.example.com",
+            "username": "administrator@vsphere.local",
+            "password": "your-vcenter-password",
+            "datacenter": "Datacenter-1",
+            "resource_pool": "Cluster-1",
+            "storage_policy": "",
+            "storage_datastore": "datastore-1",
+            "contentlibrary": "",
+            "vmfolder": "vm",
+        },
+        "network": {
+            "driver": "nsxt",
+            "hostname": "nsxt.example.com",
+            "username": "admin",
+            "password": "your-nsxt-password",
+            "networks": "10.42.0.0/16",
+            "transportzone": "tz-1",
+            "edgecluster": "edge-cluster-1",
+            "t0": "tier-0-gateway",
+        },
+    }
+
+    output_file = f"{endpoint_name}-sample.json"
+    with open(output_file, "w") as f:
+        json.dump(sample_endpoint, f, indent=4)
+
+    print(
+        f"Sample endpoint JSON file has been generated: [magenta]{output_file}[/magenta]"
+    )
+    print(
+        "Edit this file with your actual endpoint configuration values before using it."
+    )
 
 
 def validate_keywords(section, expected_keys: set, actual_keys: set) -> str | None:
