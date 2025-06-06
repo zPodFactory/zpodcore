@@ -102,7 +102,7 @@ def profile_info(
     z: ZpodClient = ZpodClient()
     profile = z.profiles_get.sync(id=f"name={profile_name}")
     if json_:
-        profile_dict = profile.to_dict()
+        profile_dict = profile.to_dict()["profile"]
         json_print(profile_dict, no_color=no_color)
     else:
         generate_table([profile], "Info")
