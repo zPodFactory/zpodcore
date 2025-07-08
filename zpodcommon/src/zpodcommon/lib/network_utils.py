@@ -14,6 +14,7 @@ class MgmtIp:
         "nsx": 20,
         "nsxt": 20,
         "cloudbuilder": 25,
+        "vcfinstaller": 25,
         "vrops": 30,
         "vrli": 31,
         "vcd": 40,
