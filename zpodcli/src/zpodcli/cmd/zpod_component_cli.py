@@ -208,6 +208,14 @@ def zpod_component_add(
             show_default=False,
         ),
     ] = None,
+    vdisks: Annotated[
+        list[int],
+        typer.Option(
+            "--vdisks",
+            help="vdisks",
+            show_default=False,
+        ),
+    ] = None,
 ):
     """
     Add Component to zPod
@@ -223,6 +231,7 @@ def zpod_component_add(
             hostname=hostname,
             vcpu=vcpu,
             vmem=vmem,
+            vdisks=vdisks,
         ),
     )
 

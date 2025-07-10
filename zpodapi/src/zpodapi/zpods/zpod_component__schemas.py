@@ -13,11 +13,12 @@ class D:
     usernames = {
         "example": [
             {"username": "administrator@demo.zpodfactory.io", "type": "ui"},
-            {"username": "root", "type": "ssh"}
+            {"username": "root", "type": "ssh"},
         ]
     }
     vcpu = {"example": 4}
     vmem = {"example": 16}
+    vdisks = {"example": [10, 400]}
     status = {"example": "ACTIVE"}
 
 
@@ -30,6 +31,7 @@ class ZpodComponentView(SchemaBase):
     usernames: list[dict[str, str | None]] | None = Field(None, D.usernames)
     vcpu: int | None = Field(None, D.vcpu)
     vmem: int | None = Field(None, D.vmem)
+    vdisks: list[int] | None = Field(None, D.vdisks)
     status: str = Field(None, D.status)
 
 
@@ -39,3 +41,4 @@ class ZpodComponentCreate(SchemaBase):
     hostname: str | None = Field(None, D.hostname)
     vcpu: int | None = Field(None, D.vcpu)
     vmem: int | None = Field(None, D.vmem)
+    vdisks: list[int] | None = Field(None, D.vdisks)

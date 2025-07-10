@@ -1,4 +1,12 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Dict,
+    List,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from attrs import define as _attrs_define
 
@@ -15,6 +23,7 @@ class ZpodComponentCreate:
         host_id (Union[None, Unset, int]):
         hostname (Union[None, Unset, str]):
         vcpu (Union[None, Unset, int]):
+        vdisks (Union[List[int], None, Unset]):
         vmem (Union[None, Unset, int]):
     """
 
@@ -22,6 +31,7 @@ class ZpodComponentCreate:
     host_id: Union[None, Unset, int] = UNSET
     hostname: Union[None, Unset, str] = UNSET
     vcpu: Union[None, Unset, int] = UNSET
+    vdisks: Union[List[int], None, Unset] = UNSET
     vmem: Union[None, Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
@@ -45,6 +55,15 @@ class ZpodComponentCreate:
         else:
             vcpu = self.vcpu
 
+        vdisks: Union[List[int], None, Unset]
+        if isinstance(self.vdisks, Unset):
+            vdisks = UNSET
+        elif isinstance(self.vdisks, list):
+            vdisks = self.vdisks
+
+        else:
+            vdisks = self.vdisks
+
         vmem: Union[None, Unset, int]
         if isinstance(self.vmem, Unset):
             vmem = UNSET
@@ -63,6 +82,8 @@ class ZpodComponentCreate:
             field_dict["hostname"] = hostname
         if vcpu is not UNSET:
             field_dict["vcpu"] = vcpu
+        if vdisks is not UNSET:
+            field_dict["vdisks"] = vdisks
         if vmem is not UNSET:
             field_dict["vmem"] = vmem
 
@@ -100,6 +121,23 @@ class ZpodComponentCreate:
 
         vcpu = _parse_vcpu(d.pop("vcpu", UNSET))
 
+        def _parse_vdisks(data: object) -> Union[List[int], None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                vdisks_type_0 = cast(List[int], data)
+
+                return vdisks_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union[List[int], None, Unset], data)
+
+        vdisks = _parse_vdisks(d.pop("vdisks", UNSET))
+
         def _parse_vmem(data: object) -> Union[None, Unset, int]:
             if data is None:
                 return data
@@ -114,6 +152,7 @@ class ZpodComponentCreate:
             host_id=host_id,
             hostname=hostname,
             vcpu=vcpu,
+            vdisks=vdisks,
             vmem=vmem,
         )
 

@@ -17,6 +17,7 @@ def flow_zpod_component_add(
     hostname: str | None = None,
     vcpu: int | None = None,
     vmem: int | None = None,
+    vdisks: list[int] | None = None,
 ):
     zpod_component_add(
         zpod_id=zpod_id,
@@ -26,6 +27,7 @@ def flow_zpod_component_add(
         hostname=hostname,
         vcpu=vcpu,
         vmem=vmem,
+        vdisks=vdisks,
     )
 
 

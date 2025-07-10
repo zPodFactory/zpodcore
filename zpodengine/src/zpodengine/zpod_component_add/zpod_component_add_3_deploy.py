@@ -75,14 +75,14 @@ def zpod_component_add_deploy(
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
                     if vcpu:
-                        print("Set CPU")
+                        print(f"Set CPU to {vcpu}")
                         vc.set_vm_vcpu(vm=vm, vcpu_num=vcpu)
                     if vmem:
-                        print("Set Memory")
+                        print(f"Set Memory to {vmem}GB")
                         vc.set_vm_vmem(vm=vm, vmem_gb=vmem)
                     if vdisks:
                         for disk_number, vdisk_gb in enumerate(vdisks, 2):
-                            print(f"Resize Hard disk {disk_number}")
+                            print(f"Resize Hard disk {disk_number} to {vdisk_gb}GB")
                             vc.set_vm_vdisk(
                                 vm=vm,
                                 vdisk_gb=vdisk_gb,

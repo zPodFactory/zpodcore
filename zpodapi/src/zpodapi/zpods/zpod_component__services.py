@@ -93,6 +93,7 @@ class ZpodComponentService(ServiceBase):
             hostname=component_in.hostname,
             vcpu=component_in.vcpu,
             vmem=component_in.vmem,
+            vdisks=component_in.vdisks,
         )
 
     def remove(
