@@ -55,25 +55,35 @@ def remove_from_vcenter(zpod_component_id: int):
     with database.get_session_ctx() as session:
         zpod_component = session.get(M.ZpodComponent, zpod_component_id)
 
-        # Open Component JSON file
-        f = open(zpod_component.component.jsonfile)
-
-        # Load component JSON
-        cjson = json.load(f)
-
         zpod = zpod_component.zpod
-        if cjson["component_isnested"]:
+        try:
             with vCenter.auth_by_zpod(zpod=zpod) as vc:
-                vc.delete_vm_nested(
-                    domain_name=zpod.domain,
-                    vm_name=zpod_component.hostname,
-                )
-        else:
+                print(f"Nested L2 VM (from zpod): {zpod_component.hostname}")
+                vm = vc.get_vm(zpod_component.hostname)
+                print(vm)
+                if vm:
+                    vc.delete_vm_nested(
+                        domain_name=zpod.domain,
+                        vm_name=zpod_component.hostname,
+                    )
+                    return
+        except Exception as e:
+            print(e)
+            print(f"Nested L2 VM (from zpod) not found: {zpod_component.hostname}")
+
+        try:
             with vCenter.auth_by_zpod_endpoint(zpod=zpod) as vc:
+                print(f"vApp L1 VM (from endpoint): {zpod_component.fqdn}")
+                vm = vc.get_vm(zpod_component.fqdn)
+                print(vm)
                 vc.delete_vm_from_vapp(
                     vapp_name=f"{settings.SITE_ID}-{zpod.name}",
                     vm_name=zpod_component.fqdn,
                 )
+                return
+        except Exception as e:
+            print(e)
+            print(f"vApp L1 VM (from endpoint) not found: {zpod_component.fqdn}")
 
 
 @task()
