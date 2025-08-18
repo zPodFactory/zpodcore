@@ -7,7 +7,7 @@ set positional-arguments
 rich_cols := `echo $(tput cols) - $(echo ${COMPOSE_PROJECT_NAME:-zpodcore} | wc -c) - 17 - 3 | bc`
 
 @_default:
-  just --list --list-heading $'Commands:\n'
+  just --list  
 
 # Run alembic command in zpodapi container
 alembic *args:
