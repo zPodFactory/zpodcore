@@ -84,12 +84,13 @@ class ZpodService(ServiceBase):
                 detail="Endpoint not found or not active",
             )
 
-
         features = item_in.features
         if not features:
             features = {}
         if not features.get("config-scripts"):
-            default_config_scripts = DBUtils.get_setting_value("ff_default_config_scripts")
+            default_config_scripts = DBUtils.get_setting_value(
+                "ff_default_config_scripts"
+            )
             if default_config_scripts:
                 features["config-scripts"] = default_config_scripts.split(",")
 
@@ -182,13 +183,19 @@ class ZpodService(ServiceBase):
 
         if where:
             if isinstance(where, list):
-                where = [w for w in where if not isinstance(w.left, M.Zpod.features.__class__)]
+                where = [
+                    w
+                    for w in where
+                    if not isinstance(w.left, M.Zpod.features.__class__)
+                ]
             else:
                 where = [where]
             base_query = base_query.where(*where)
 
         # Then get all fields for those IDs
-        stmt = select(select_fields).select_from(M.Zpod).where(M.Zpod.id.in_(base_query))
+        stmt = (
+            select(select_fields).select_from(M.Zpod).where(M.Zpod.id.in_(base_query))
+        )
 
         if order_by:
             stmt = stmt.order_by(order_by)

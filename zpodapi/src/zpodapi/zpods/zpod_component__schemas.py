@@ -4,7 +4,7 @@ from zpodapi.lib.schema_base import Field, SchemaBase
 
 class D:
     id = {"example": 1}
-    component_uid = {"example": "esxi-8.0u1a"}
+    component_uid = {"example": "esxi-8.0u3e"}
     host_id = {"example": 13}
     ip = {"example": "10.196.176.13"}
     hostname = {"example": "esxi13"}
@@ -18,6 +18,7 @@ class D:
     }
     vcpu = {"example": 4}
     vmem = {"example": 16}
+    vnics = {"example": 4}
     vdisks = {"example": [10, 400]}
     status = {"example": "ACTIVE"}
 
@@ -31,6 +32,7 @@ class ZpodComponentView(SchemaBase):
     usernames: list[dict[str, str | None]] | None = Field(None, D.usernames)
     vcpu: int | None = Field(None, D.vcpu)
     vmem: int | None = Field(None, D.vmem)
+    vnics: int | None = Field(None, D.vnics)
     vdisks: list[int] | None = Field(None, D.vdisks)
     status: str = Field(None, D.status)
 
@@ -41,4 +43,5 @@ class ZpodComponentCreate(SchemaBase):
     hostname: str | None = Field(None, D.hostname)
     vcpu: int | None = Field(None, D.vcpu)
     vmem: int | None = Field(None, D.vmem)
+    vnics: int | None = Field(None, D.vnics)
     vdisks: list[int] | None = Field(None, D.vdisks)

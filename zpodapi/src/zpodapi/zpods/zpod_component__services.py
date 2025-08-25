@@ -93,6 +93,7 @@ class ZpodComponentService(ServiceBase):
             hostname=component_in.hostname,
             vcpu=component_in.vcpu,
             vmem=component_in.vmem,
+            vnics=component_in.vnics,
             vdisks=component_in.vdisks,
         )
 
