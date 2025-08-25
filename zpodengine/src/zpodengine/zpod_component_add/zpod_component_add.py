@@ -28,6 +28,7 @@ def zpod_component_add(
     hostname: str | None = None,
     vcpu: int | None = None,
     vmem: int | None = None,
+    vnics: int | None = None,
     vdisks: list[int] | None = None,
     wait_for=None,
 ):
@@ -59,6 +60,7 @@ def zpod_component_add(
         zpod_component_id=zpod_component.result().id,
         vcpu=vcpu,
         vmem=vmem,
+        vnics=vnics,
         vdisks=vdisks,
         wait_for=[pre_scripts],
     )

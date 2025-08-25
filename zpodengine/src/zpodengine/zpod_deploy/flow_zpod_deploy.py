@@ -105,6 +105,7 @@ def flow_zpod_deploy(
                     hostname=sub_profile_item.get("hostname"),
                     vcpu=sub_profile_item.get("vcpu"),
                     vmem=sub_profile_item.get("vmem"),
+                    vnics=sub_profile_item.get("vnics"),
                     vdisks=sub_profile_item.get("vdisks"),
                     wait_for=wait_for,
                 )
@@ -120,6 +121,7 @@ def flow_zpod_deploy(
                 hostname=profile_item.get("hostname"),
                 vcpu=profile_item.get("vcpu"),
                 vmem=profile_item.get("vmem"),
+                vnics=profile_item.get("vnics"),
                 vdisks=profile_item.get("vdisks"),
                 wait_for=wait_for,
             )

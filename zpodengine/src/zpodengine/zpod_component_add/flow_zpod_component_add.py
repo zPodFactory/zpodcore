@@ -17,6 +17,7 @@ def flow_zpod_component_add(
     hostname: str | None = None,
     vcpu: int | None = None,
     vmem: int | None = None,
+    vnics: int | None = None,
     vdisks: list[int] | None = None,
 ):
     zpod_component_add(
@@ -27,6 +28,7 @@ def flow_zpod_component_add(
         hostname=hostname,
         vcpu=vcpu,
         vmem=vmem,
+        vnics=vnics,
         vdisks=vdisks,
     )
 
@@ -36,6 +38,6 @@ if __name__ == "__main__":
         flow_zpod_component_add(
             zpod_id=1,
             zpod_name="Demo",
-            component_uid="cds-10.2",
+            component_uid="vcd-10.6.1.1",
         )
     )

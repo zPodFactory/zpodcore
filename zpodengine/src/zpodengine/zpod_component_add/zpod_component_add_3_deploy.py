@@ -17,6 +17,7 @@ def zpod_component_add_deploy(
     zpod_component_id: int,
     vcpu: int | None = None,
     vmem: int | None = None,
+    vnics: int | None = None,
     vdisks: list[int] | None = None,
 ):
     print("Deploy OVA")
@@ -80,6 +81,9 @@ def zpod_component_add_deploy(
                     if vmem:
                         print(f"Set Memory to {vmem}GB")
                         vc.set_vm_vmem(vm=vm, vmem_gb=vmem)
+                    if vnics:
+                        print(f"Set NICs to {vnics}")
+                        vc.set_vm_vnic(vm=vm, vnic_num=vnics)
                     if vdisks:
                         for disk_number, vdisk_gb in enumerate(vdisks, 2):
                             print(f"Resize Hard disk {disk_number} to {vdisk_gb}GB")
