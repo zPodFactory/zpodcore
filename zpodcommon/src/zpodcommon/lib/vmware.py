@@ -294,6 +294,88 @@ class vCenter:
         task_id = vm.ReconfigVM_Task(spec)
         task.WaitForTask(task_id)
 
+    def _clone_dvpg_backing_from(self, nic: vim.vm.device.VirtualEthernetCard):
+        """
+        Build a new DVPortgroup backing that matches the given NIC's DVPG.
+        Raises if the NIC is not DVPG-backed.
+        """
+        b = nic.backing
+        if not isinstance(
+            b, vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo
+        ):
+            raise ValueError(
+                f"Unsupported NIC backing type: expected DistributedVirtualPortBackingInfo, got {type(b).__name__}"
+            )
+        new_backing = (
+            vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo()
+        )
+        new_backing.port = vim.dvs.PortConnection()
+        new_backing.port.portgroupKey = b.port.portgroupKey
+        new_backing.port.switchUuid = b.port.switchUuid
+        return new_backing
+
+    def set_vm_vnic(self, vm: vim.VirtualMachine, vnic_num: int) -> None:
+        """
+        Ensure the VM has at least `vnic_num` vNICs.
+        - Never removes NICs.
+        - If the VM already has >= vnic_num, do nothing.
+        - If fewer, add vmxnet3 NICs on the same DVPortgroup as the first NIC.
+        - Blocks until the reconfig task completes.
+        - Returns nothing.
+        """
+
+        print(f"set_vm_vnic:Setting VM {vm.name} to {vnic_num} NIC(s)...")
+
+        devices = vm.config.hardware.device
+        current_nics = [
+            d for d in devices if isinstance(d, vim.vm.device.VirtualEthernetCard)
+        ]
+        current_count = len(current_nics)
+
+        if vnic_num <= current_count:
+            print(f"VM already has {current_count} NIC(s); no change needed.")
+            return
+
+        if current_count == 0:
+            raise ValueError("Cannot infer DVPortgroup: VM has no existing NICs.")
+
+        # Mirror the first NIC's DVPG
+        dvpg_backing = self._clone_dvpg_backing_from(current_nics[0])
+
+        to_add = vnic_num - current_count
+
+        # Build a pool of existing keys and choose unique negative keys for new devices
+        existing_keys = {d.key for d in devices if hasattr(d, "key")}
+        next_key = -100
+        while next_key in existing_keys:
+            next_key -= 1
+
+        device_changes = []
+        for _ in range(to_add):
+            dev_spec = vim.vm.device.VirtualDeviceSpec()
+            dev_spec.operation = vim.vm.device.VirtualDeviceSpec.Operation.add
+
+            nic = vim.vm.device.VirtualVmxnet3()
+            nic.backing = dvpg_backing
+
+            nic.connectable = vim.vm.device.VirtualDevice.ConnectInfo()
+            nic.connectable.connected = True
+            nic.connectable.startConnected = True
+            nic.connectable.allowGuestControl = True
+
+            # Assign a unique negative key to avoid duplicate-key errors across multiple adds
+            nic.key = next_key
+            next_key -= 1
+
+            dev_spec.device = nic
+            device_changes.append(dev_spec)
+
+        spec = vim.vm.ConfigSpec()
+        spec.deviceChange = device_changes
+
+        task_id = vm.ReconfigVM_Task(spec)
+        task.WaitForTask(task_id)
+
     def set_vm_vdisk(self, vm: vim.VirtualMachine, vdisk_gb: int, disk_number: int):
         disk_label = f"Hard disk {disk_number}"
         disk_size = int(vdisk_gb) * 1024 * 1024 * 1024
