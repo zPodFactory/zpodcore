@@ -37,6 +37,7 @@ class ZpodComponentView:
         vcpu (Union[None, Unset, int]):
         vdisks (Union[List[int], None, Unset]):
         vmem (Union[None, Unset, int]):
+        vnics (Union[None, Unset, int]):
     """
 
     component: "ComponentView"
@@ -49,6 +50,7 @@ class ZpodComponentView:
     vcpu: Union[None, Unset, int] = UNSET
     vdisks: Union[List[int], None, Unset] = UNSET
     vmem: Union[None, Unset, int] = UNSET
+    vnics: Union[None, Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component = self.component.to_dict()
@@ -112,6 +114,12 @@ class ZpodComponentView:
         else:
             vmem = self.vmem
 
+        vnics: Union[None, Unset, int]
+        if isinstance(self.vnics, Unset):
+            vnics = UNSET
+        else:
+            vnics = self.vnics
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
@@ -136,6 +144,8 @@ class ZpodComponentView:
             field_dict["vdisks"] = vdisks
         if vmem is not UNSET:
             field_dict["vmem"] = vmem
+        if vnics is not UNSET:
+            field_dict["vnics"] = vnics
 
         return field_dict
 
@@ -252,6 +262,15 @@ class ZpodComponentView:
 
         vmem = _parse_vmem(d.pop("vmem", UNSET))
 
+        def _parse_vnics(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        vnics = _parse_vnics(d.pop("vnics", UNSET))
+
         zpod_component_view = cls(
             component=component,
             fqdn=fqdn,
@@ -263,6 +282,7 @@ class ZpodComponentView:
             vcpu=vcpu,
             vdisks=vdisks,
             vmem=vmem,
+            vnics=vnics,
         )
 
         return zpod_component_view

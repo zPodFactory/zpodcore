@@ -25,6 +25,7 @@ class ProfileItemCreate:
         vcpu (Union[None, Unset, int]):
         vdisks (Union[List[int], None, Unset]):
         vmem (Union[None, Unset, int]):
+        vnics (Union[None, Unset, int]):
     """
 
     component_uid: str
@@ -33,6 +34,7 @@ class ProfileItemCreate:
     vcpu: Union[None, Unset, int] = UNSET
     vdisks: Union[List[int], None, Unset] = UNSET
     vmem: Union[None, Unset, int] = UNSET
+    vnics: Union[None, Unset, int] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         component_uid = self.component_uid
@@ -70,6 +72,12 @@ class ProfileItemCreate:
         else:
             vmem = self.vmem
 
+        vnics: Union[None, Unset, int]
+        if isinstance(self.vnics, Unset):
+            vnics = UNSET
+        else:
+            vnics = self.vnics
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(
             {
@@ -86,6 +94,8 @@ class ProfileItemCreate:
             field_dict["vdisks"] = vdisks
         if vmem is not UNSET:
             field_dict["vmem"] = vmem
+        if vnics is not UNSET:
+            field_dict["vnics"] = vnics
 
         return field_dict
 
@@ -147,6 +157,15 @@ class ProfileItemCreate:
 
         vmem = _parse_vmem(d.pop("vmem", UNSET))
 
+        def _parse_vnics(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        vnics = _parse_vnics(d.pop("vnics", UNSET))
+
         profile_item_create = cls(
             component_uid=component_uid,
             host_id=host_id,
@@ -154,6 +173,7 @@ class ProfileItemCreate:
             vcpu=vcpu,
             vdisks=vdisks,
             vmem=vmem,
+            vnics=vnics,
         )
 
         return profile_item_create
