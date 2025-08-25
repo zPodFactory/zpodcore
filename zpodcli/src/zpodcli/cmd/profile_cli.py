@@ -45,6 +45,8 @@ def profile_item_output(profile):
             data_values.append(f"CPU: {vcpu}")
         if vmem := profile_item.vmem:
             data_values.append(f"Mem: {vmem}GB")
+        if vnics := profile_item.vnics:
+            data_values.append(f"NICs: {vnics}")
         if vdisks := profile_item.vdisks:
             vdisks_txt = ", ".join([f"{vdisk}GB" for vdisk in vdisks])
             data_values.append(f"Disks: {vdisks_txt}")

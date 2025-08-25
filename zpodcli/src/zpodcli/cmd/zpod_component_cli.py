@@ -208,6 +208,14 @@ def zpod_component_add(
             show_default=False,
         ),
     ] = None,
+    vnics: Annotated[
+        int,
+        typer.Option(
+            "--vnics",
+            help="vnics",
+            show_default=False,
+        ),
+    ] = None,
     vdisks: Annotated[
         list[int],
         typer.Option(
@@ -231,6 +239,7 @@ def zpod_component_add(
             hostname=hostname,
             vcpu=vcpu,
             vmem=vmem,
+            vnics=vnics,
             vdisks=vdisks,
         ),
     )
