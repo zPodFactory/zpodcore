@@ -51,7 +51,7 @@ class Component(CommonDatesMixin, ModelBase, table=True):
 
         # UI usernames
         match self.component_name.lower():
-            case "cloudbuilder":
+            case "cloudbuilder" | "vcfinstaller":
                 usernames.append({"username": "admin", "type": "ui"})
             case "esxi":
                 usernames.append({"username": "root", "type": "ui"})
@@ -62,7 +62,9 @@ class Component(CommonDatesMixin, ModelBase, table=True):
             case "vcda":
                 usernames.append({"username": "admin", "type": "ui"})
             case "vcsa":
-                usernames.append({"username": f"administrator@{zpod_domain}", "type": "ui"})
+                usernames.append(
+                    {"username": f"administrator@{zpod_domain}", "type": "ui"}
+                )
             case "vrli":
                 usernames.append({"username": "admin", "type": "ui"})
             case "vrops":
