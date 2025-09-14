@@ -94,6 +94,17 @@ class ZpodService(ServiceBase):
             if default_config_scripts:
                 features["config-scripts"] = default_config_scripts.split(",")
 
+        if not item_in.name.isascii():
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Name contains non-ASCII characters",
+            )
+        if not item_in.name[0].isalpha():
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Name must start with a letter",
+            )
+
         zpod = M.Zpod(
             name=item_in.name,
             description=item_in.description,

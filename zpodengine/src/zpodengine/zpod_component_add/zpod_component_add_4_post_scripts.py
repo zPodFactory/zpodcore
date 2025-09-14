@@ -82,7 +82,6 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                     license_parts.append(f"-license_vsan {license_vsan}")
 
                 license_tanzu = DBUtils.get_component_license(component, "tanzu")
-
                 if license_tanzu is not None:
                     license_parts.append(f"-license_tanzu {license_tanzu}")
 
@@ -130,66 +129,71 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                         vm_name=zpod_component.hostname, ipaddress=zpod_component.ip
                     )
 
-                license_nsx = DBUtils.get_component_license(component, "enterprise")
-                if license_nsx is not None:
-                    retries = 60
-                    wait_time = 60
-                    nsx_is_ready = False
-                    for retry in range(retries):
-                        try:
-                            nsx = NsxClient.auth_by_zpod(zpod=zpod_component.zpod)
-                            response = nsx.get(url="/api/v1/cluster/status")
-                            nsx_status = (
-                                response.safejson()
-                                .get("mgmt_cluster_status")
-                                .get("status")
-                            )
-                            print(f"NSX management cluster status is {nsx_status}")
-                            if nsx_status != "STABLE":
-                                raise ValueError(
-                                    f"NSX management cluster status is {nsx_status}"
-                                )
-                            if (
-                                DBUtils.get_setting_value(
-                                    "ff_component_wait_for_status"
-                                )
-                                == "true"
-                            ):
-                                nsx_overall_status = (
-                                    response.safejson()
-                                    .get("detailed_cluster_status")
-                                    .get("overall_status")
-                                )
-                                print(f"NSX overall cluster status is {nsx_status}")
-                                if nsx_overall_status != "STABLE":
-                                    raise ValueError(
-                                        f"NSX overall cluster status is {nsx_status}"
-                                    )
-                            nsx_is_ready = True
-                            break
-                        except (RequestError, HTTPStatusError) as e:
-                            print(
-                                f"Waiting for {e.request.url} {e} - Retry {retry}/{retries}"
-                            )
-                            print("Sleeping...")
-                            time.sleep(wait_time)
-                        except ValueError as e:
-                            print(f"{e} - Retry {retry}/{retries}")
-                            print("Sleeping...")
-                            time.sleep(wait_time)
-                    if not nsx_is_ready:
-                        raise ValueError(
-                            f"NSX management cluster not ready after {retries} retries"
+                retries = 60
+                wait_time = 60
+                nsx_is_ready = False
+                for retry in range(retries):
+                    try:
+                        nsx = NsxClient.auth_by_zpod(zpod=zpod_component.zpod)
+                        response = nsx.get(url="/api/v1/cluster/status")
+                        nsx_status = (
+                            response.safejson().get("mgmt_cluster_status").get("status")
                         )
-
-                    print(f"Setting license key {license_nsx} on NSX")
-                    response = nsx.post(
-                        url="/api/v1/licenses",
-                        json={
-                            "license_key": license_nsx,
-                        },
+                        print(f"NSX management cluster status is {nsx_status}")
+                        if nsx_status != "STABLE":
+                            raise ValueError(
+                                f"NSX management cluster status is {nsx_status}"
+                            )
+                        if (
+                            DBUtils.get_setting_value("ff_component_wait_for_status")
+                            == "true"
+                        ):
+                            nsx_overall_status = (
+                                response.safejson()
+                                .get("detailed_cluster_status")
+                                .get("overall_status")
+                            )
+                            print(f"NSX overall cluster status is {nsx_status}")
+                            if nsx_overall_status != "STABLE":
+                                raise ValueError(
+                                    f"NSX overall cluster status is {nsx_status}"
+                                )
+                        nsx_is_ready = True
+                        break
+                    except (RequestError, HTTPStatusError) as e:
+                        print(
+                            f"Waiting for {e.request.url} {e} - Retry {retry}/{retries}"
+                        )
+                        print("Sleeping...")
+                        time.sleep(wait_time)
+                    except ValueError as e:
+                        print(f"{e} - Retry {retry}/{retries}")
+                        print("Sleeping...")
+                        time.sleep(wait_time)
+                if not nsx_is_ready:
+                    raise ValueError(
+                        f"NSX management cluster not ready after {retries} retries"
                     )
-                    response.safejson()
-                    print("License key set successfully on NSX")
+
+                for license_type in [
+                    "enterprise",
+                    "solution",
+                    "component1",
+                    "component2",
+                    "component3",
+                ]:
+                    license_nsx = DBUtils.get_component_license(component, license_type)
+                    if license_nsx is not None:
+                        print(
+                            f"Setting license {license_type} key {license_nsx} on NSX"
+                        )
+                        response = nsx.post(
+                            url="/api/v1/licenses",
+                            json={
+                                "license_key": license_nsx,
+                            },
+                        )
+                        response.safejson()
+                        print(f"License {license_type} key set successfully on NSX")
             case _:
                 print("Normal component, nothing to do here yet...")
