@@ -9,6 +9,7 @@ class MgmtIp:
     MGMT_HOST_IDS = {
         "gw": 1,
         "zbox": 2,
+        "zrdp": 3,
         "nsxv": 9,
         "vcsa": 10,
         "nsx": 20,
