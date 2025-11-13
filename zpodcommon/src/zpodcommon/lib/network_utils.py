@@ -10,6 +10,8 @@ class MgmtIp:
         "gw": 1,
         "zbox": 2,
         "zrdp": 3,
+        "hcx-cloud": 7,
+        "hcx-connector": 8,
         "nsxv": 9,
         "vcsa": 10,
         "nsx": 20,
@@ -20,7 +22,6 @@ class MgmtIp:
         "vrli": 31,
         "vcd": 40,
         "vcda": 41,
-        "hcx": 45,
         "vyos": 0,  # vyos(0) will get the subnet's last ip
     }
 
