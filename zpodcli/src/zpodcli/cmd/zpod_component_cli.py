@@ -45,6 +45,12 @@ def generate_table(
                 usernames_list.append(
                     f"[dark_khaki]{username['username']}[/dark_khaki]"
                 )
+            elif username["type"] == "ui-proxmox":
+                usernames_list.append(
+                    f"[dark_khaki]{username['username']}[/dark_khaki]"
+                )
+                # Add port for Proxmox UI
+                zc.fqdn = f"{zc.fqdn}:8006"
 
         # On joint les noms d'utilisateur s'il y en a, sinon chaîne vide
         usernames = ", ".join(usernames_list)

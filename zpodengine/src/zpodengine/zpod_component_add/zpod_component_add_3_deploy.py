@@ -65,8 +65,8 @@ def zpod_component_add_deploy(
                 # Prep deploy template from component json
                 vcsa_deployer(zpod_component)
 
-            case "esxi":
-                print("--- esxi ---")
+            case "esxi" | "proxmox":
+                print("--- hypervisor ---")
                 # post configuration (sizing / disks, etc)
 
                 ovf_deployer(zpod_component)

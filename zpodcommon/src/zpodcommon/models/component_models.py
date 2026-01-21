@@ -55,6 +55,8 @@ class Component(CommonDatesMixin, ModelBase, table=True):
                 usernames.append({"username": "admin", "type": "ui"})
             case "esxi":
                 usernames.append({"username": "root", "type": "ui"})
+            case "proxmox":
+                usernames.append({"username": "root", "type": "ui-proxmox"})
             case "nsx" | "nsxt" | "nsxv":
                 usernames.append({"username": "admin", "type": "ui"})
             case "vcd":
