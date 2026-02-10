@@ -51,8 +51,21 @@ def generate_table(
                 )
                 # Add port for Proxmox UI
                 zc.fqdn = f"{zc.fqdn}:8006"
+            elif username["type"] == "ui-proxmox-dm":
+                usernames_list.append(
+                    f"[dark_khaki]{username['username']}[/dark_khaki]"
+                )
+                # Add port for Proxmox Datacenter Manager UI
+                zc.fqdn = f"{zc.fqdn}:8443"
+            elif username["type"] == "ui-proxmox-bs":
+                usernames_list.append(
+                    f"[dark_khaki]{username['username']}[/dark_khaki]"
+                )
+                # Add port for Proxmox Backup Server UI
+                zc.fqdn = f"{zc.fqdn}:8007"
 
-        # On joint les noms d'utilisateur s'il y en a, sinon chaîne vide
+
+        # Join the usernames if there are any; otherwise, an empty string
         usernames = ", ".join(usernames_list)
 
         table.add_row(

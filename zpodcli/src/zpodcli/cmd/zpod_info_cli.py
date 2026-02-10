@@ -301,6 +301,20 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
                         access_urls.append(
                             f"[dark_khaki]UI:[/dark_khaki] [sky_blue2]https://{component.fqdn}:8006[/sky_blue2]"
                         )
+                    elif username.additional_properties["type"] == "ui-proxmox-dm":
+                        cred_lines.append(
+                            f"[dark_khaki]UI:[/dark_khaki] {username.additional_properties['username']}"
+                        )
+                        access_urls.append(
+                            f"[dark_khaki]UI:[/dark_khaki] [sky_blue2]https://{component.fqdn}:8443[/sky_blue2]"
+                        )
+                    elif username.additional_properties["type"] == "ui-proxmox-bs":
+                        cred_lines.append(
+                            f"[dark_khaki]UI:[/dark_khaki] {username.additional_properties['username']}"
+                        )
+                        access_urls.append(
+                            f"[dark_khaki]UI:[/dark_khaki] [sky_blue2]https://{component.fqdn}:8007[/sky_blue2]"
+                        )
                     elif username.additional_properties["type"] == "ssh":
                         cred_lines.append(
                             f"[light_pink1]SSH:[/light_pink1] {username.additional_properties['username']}"
