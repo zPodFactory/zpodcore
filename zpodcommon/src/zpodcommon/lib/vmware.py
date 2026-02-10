@@ -41,7 +41,7 @@ class vCenter:
             atexit.register(connect.Disconnect, self.si)
         except vim.fault.InvalidLogin as e:
             raise ConnectionError("Invalid username or password.") from e
-        except IOError as e:
+        except OSError as e:
             raise ConnectionError(f"Unable to connect to host: {self.host}.") from e
 
     def create_filter_spec(self, pc, data, props, vimtype):
@@ -393,8 +393,44 @@ class vCenter:
                     operation="edit",
                 )
                 spec = vim.vm.ConfigSpec()
-                spec.deviceChange.append(updated_spec)
-                task.WaitForTask(vm.Reconfigure(spec))
+                spec.deviceChange = [updated_spec]
+                task_id = vm.ReconfigVM_Task(spec)
+                task.WaitForTask(task_id)
+
+    def set_vm_configuration(
+        self,
+        *,
+        vm: vim.VirtualMachine,
+        vcpu: int | None = None,
+        vmem_gb: int | None = None,
+        vnic_num: int | None = None,
+        vdisks_gb: list[int] | None = None,
+        vdisk_start_number: int = 2,
+    ) -> None:
+        """
+        Convenience wrapper to apply common VM sizing/config changes.
+
+        - CPU: sets vCPU count if `vcpu` is provided
+        - Memory: sets memory (GB) if `vmem_gb` is provided
+        - NICs: ensures VM has at least `vnic_num` NICs if provided
+        - Disks: resizes disks listed in `vdisks_gb`, starting at "Hard disk {vdisk_start_number}"
+        """
+        if vcpu is not None:
+            print(f"Set CPU to {vcpu}")
+            self.set_vm_vcpu(vm=vm, vcpu_num=vcpu)
+
+        if vmem_gb is not None:
+            print(f"Set Memory to {vmem_gb}GB")
+            self.set_vm_vmem(vm=vm, vmem_gb=vmem_gb)
+
+        if vnic_num is not None:
+            print(f"Set NICs to {vnic_num}")
+            self.set_vm_vnic(vm=vm, vnic_num=vnic_num)
+
+        if vdisks_gb:
+            for disk_number, vdisk_gb in enumerate(vdisks_gb, vdisk_start_number):
+                print(f"Resize Hard disk {disk_number} to {vdisk_gb}GB")
+                self.set_vm_vdisk(vm=vm, vdisk_gb=vdisk_gb, disk_number=disk_number)
 
     def add_disk_to_vm(self, vm: vim.VirtualMachine, disk_size_in_kb: int):
         #
