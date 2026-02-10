@@ -71,27 +71,36 @@ def zpod_component_add_deploy(
 
                 ovf_deployer(zpod_component)
 
-                print(f"VM resizing to {vcpu} CPUs, and {vmem}GB Memory")
+                with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
+                    vm = vc.get_vm(name=zpod_component.fqdn)
+                    vc.set_vm_configuration(
+                        vm=vm,
+                        vcpu=vcpu,
+                        vmem_gb=vmem,
+                        vnic_num=vnics,
+                        vdisks_gb=vdisks,
+                    )
+                    print("Start VM")
+                    vc.poweron_vm(vm)
+
+            # Proxmox Datacenter Manager and Proxmox Backup Server are deployed non nested
+            case "proxmox-dm" | "proxmox-bs":
+                print("--- proxmox components ---")
+
+                ovf_deployer(zpod_component)
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
-                    if vcpu:
-                        print(f"Set CPU to {vcpu}")
-                        vc.set_vm_vcpu(vm=vm, vcpu_num=vcpu)
-                    if vmem:
-                        print(f"Set Memory to {vmem}GB")
-                        vc.set_vm_vmem(vm=vm, vmem_gb=vmem)
-                    if vnics:
-                        print(f"Set NICs to {vnics}")
-                        vc.set_vm_vnic(vm=vm, vnic_num=vnics)
-                    if vdisks:
-                        for disk_number, vdisk_gb in enumerate(vdisks, 2):
-                            print(f"Resize Hard disk {disk_number} to {vdisk_gb}GB")
-                            vc.set_vm_vdisk(
-                                vm=vm,
-                                vdisk_gb=vdisk_gb,
-                                disk_number=disk_number,
-                            )
+
+                    # Set VM configuration
+                    vc.set_vm_configuration(
+                        vm=vm,
+                        vcpu=vcpu,
+                        vmem_gb=vmem,
+                        vnic_num=vnics,
+                        vdisks_gb=vdisks,
+                    )
+
                     print("Start VM")
                     vc.poweron_vm(vm)
 
