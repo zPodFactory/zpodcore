@@ -57,7 +57,7 @@ def factory_list():
         table.add_row(
             f"[tan]{section}[/tan]",
             f"[sky_blue2]{factory['zpod_api_url']}[/sky_blue2]",
-            f"{token[:5]}...{token[-5:]}",
+            f"{token}",
             get_status_markdown(factory.getboolean("active", False)),
         )
     console_print(title, table)
