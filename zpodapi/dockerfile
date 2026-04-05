@@ -1,5 +1,4 @@
-ARG POETRY_VENV=/opt/venv
-ARG POETRY_VERSION=1.7.1
+ARG UV_VERSION=0.10
 
 
 
@@ -7,9 +6,11 @@ ARG POETRY_VERSION=1.7.1
 # BASE
 FROM python:3.12.1-slim-bookworm AS base
 
-ARG POETRY_VENV
-
-ENV PATH="${POETRY_VENV}/bin:${PATH}"
+COPY --from=ghcr.io/astral-sh/uv:0.10 /uv /usr/local/bin/uv
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
 
 
 
@@ -17,8 +18,6 @@ ENV PATH="${POETRY_VENV}/bin:${PATH}"
 # BUILDER
 FROM base AS builder
 
-ARG POETRY_VERSION
-ARG POETRY_VENV
 WORKDIR /tmp
 
 RUN apt-get update && \
@@ -27,13 +26,8 @@ RUN apt-get update && \
     gcc && \
     rm -rf /var/lib/apt/lists/*
 
-
-COPY ./zpodapi/pyproject.toml ./zpodapi/poetry.lock* /tmp/
-RUN python3 -m venv $POETRY_VENV \
-    && . $POETRY_VENV/bin/activate \
-    && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
-    && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
-    && poetry install --no-interaction
+COPY ./zpodapi/pyproject.toml ./zpodapi/uv.lock /tmp/
+RUN uv sync --frozen --no-install-project
 
 
 
@@ -41,15 +35,13 @@ RUN python3 -m venv $POETRY_VENV \
 # MAIN
 FROM base AS main
 
-ARG POETRY_VENV
-
 RUN apt-get update && \
     apt-get install -y \
     libpq5 \
     git && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
+COPY --from=builder /opt/venv /opt/venv
 
 ENV PYTHONPATH=/zpodcore/src
 
