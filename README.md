@@ -98,10 +98,13 @@ The monorepo moved from Poetry to [uv](https://docs.astral.sh/uv/) in a single b
 A few things worth knowing if you are resuming a branch older than the migration or
 troubleshooting an unexpected pin:
 
-- **Local `uv sync` for `zpodapi` / `zpodengine` requires `libpq-dev` on the host**
-  because those projects pin `psycopg2` (source-only). If you only want the lockfile
-  without building, run `uv lock`; full installs still happen inside the Docker
-  builder stage which installs `libpq-dev` before `uv sync`.
+- **Local `uv sync` for `zpodapi` / `zpodengine` requires both `gcc` and `libpq-dev`
+  on the host** because those projects pin `psycopg2` (source-only). psycopg2's
+  `setup.py` shells out to `cc` and includes libpq headers. On Debian/Ubuntu:
+  `sudo apt install gcc libpq-dev`. If you only want the lockfile without building,
+  run `uv lock` instead of `uv sync` — resolution alone doesn't compile anything.
+  Full installs still happen inside the Docker builder stages, which install both
+  `libpq-dev` and `gcc` before `uv sync`.
 - **`zpodsdk_builder` now pins `click<8.2`.** This was masked by `poetry.lock` (which
   had `click 8.1.8`). `openapi-python-client 0.20.0` via `typer <0.13` is incompatible
   with `click 8.2+` (`TypeError: Secondary flag is not valid for non-boolean flag`).
