@@ -38,17 +38,17 @@ alembic-upgrade rev="head":
 # Run zcli command
 [no-exit-message]
 zcli *args:
-  @poetry -C zpodcli run zcli "$@"
+  @uv --project zpodcli run zcli "$@"
 
 # Create a release version
 zpod-release version:
   #!/usr/bin/env bash
   set -euo pipefail
 
-  # Verify bump version is installed
-  if ! poetry self show plugins | grep -q 'poetry-bumpversion'; then
-    echo 'poetry-bumpversion is not installed.  Run "poetry self add poetry-bumpversion".'
-    exit 1
+  # Verify uv is installed
+  if ! command -v uv >/dev/null 2>&1; then
+      echo 'Install uv first: https://docs.astral.sh/uv/'
+      exit 1
   fi
 
   # Verify gh is installed
@@ -71,38 +71,33 @@ zpod-release version:
     exit 1
   fi
 
-  # Set version
-  poetry version {{version}}
-  newversion=$(poetry version -s)
+  # Bump version across all subprojects + root (see [tool.bumpversion] in pyproject.toml).
+  # bump-my-version commits and tags automatically.
+  uvx bump-my-version bump --new-version {{version}} patch
+  newversion={{version}}
 
-  # Update lock file in zpodcli
+  # Refresh zpodcli's lockfile so the new zpodsdk pin is reflected
   cd {{justfile_directory()}}/zpodcli
-  poetry lock --no-update
+  uv lock --upgrade-package zpodsdk
+  git commit -am "Update zpodcli/uv.lock for v${newversion}" || true
 
-  # Commit changes
-  git commit -am"Version v${newversion}"
   git push
+  git push --tags
 
   # Create github release
   gh release create v${newversion} --generate-notes
 
-  # Build and publish zpodsdk
+  # Build and publish zpodsdk (uv build reads PyPI creds from
+  # UV_PUBLISH_TOKEN or ~/.pypirc; uv publish ignores [tool.uv.sources])
   cd {{justfile_directory()}}/zpodsdk
-  poetry build
-  poetry publish
+  uv build
+  uv publish
 
-  # Temporarily switch to prod version
+  # Build and publish zpodcli. `uv build` ignores [tool.uv.sources], so the
+  # wheel pins `zpodsdk==${newversion}` from PyPI — no sed dance needed.
   cd {{justfile_directory()}}/zpodcli
-  sed -i'' -e 's/zpodsdk = {/#zpodsdk = {/' pyproject.toml
-  sed -i'' -e 's/#zpodsdk = "/zpodsdk = "/' pyproject.toml
-
-  # Build and publish zpodcli
-  poetry build
-  poetry publish
-
-  # Switch back to prod version
-  sed -i'' -e 's/#zpodsdk = {/zpodsdk = {/' pyproject.toml
-  sed -i'' -e 's/zpodsdk = "/#zpodsdk = "/' pyproject.toml
+  uv build
+  uv publish
 
 # Update to a release version
 zpod-update version:
@@ -165,7 +160,7 @@ zpodengine-deploy-all:
 
 # Manually Run Command
 zpodengine-cmd *args:
-  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" poetry run "$@"
+  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" uv run "$@"
 
 
 # Run command using zpodengine container

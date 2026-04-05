@@ -8,26 +8,23 @@ Complete the following steps to set up your development environment:
 
 1. Install Docker and Docker Compose
 
-1. Install pyenv and add 3.12.1
+1. Install [uv](https://docs.astral.sh/uv/):
 
     ```bash
-    brew install pyenv
-    pyenv install 3.12.1
+    curl -LsSf https://astral.sh/uv/install.sh | sh
     ```
 
-1. Install Poetry:
+    uv will manage the Python toolchain for you — no separate pyenv step is
+    required. Each subproject pins its own `requires-python`, and
+    `uv sync` will download the matching interpreter automatically.
+
+1. Create each subproject virtualenv. In `/zpodapi`, `/zpodengine`, `/zpodcli`, and `/zpodsdk`, run:
 
     ```bash
-    pip install poetry
+    uv sync
     ```
 
-1. Configure Virtual Environment.  In the `/zpodapi`, `/zpodengine` and `/zpodcli` directories, run:
-
-    ```bash
-    pyenv local 3.12.1
-    poetry config virtualenvs.in-project true
-    poetry install
-    ```
+    Each subproject is released independently and keeps its own `uv.lock`.
 
 1. Configure Environment Variables.  (See `/zpodapi/src/zpodapi/lib/settings.py` file for all available settings)  In the root directory, run:
 
