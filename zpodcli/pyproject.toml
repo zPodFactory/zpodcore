@@ -1,28 +1,35 @@
-[tool.poetry]
+[project]
 name = "zpodcli"
 version = "0.7.2"
 description = ""
-authors = ["Timo Sugliani <timo.sugliani@gmail.com>"]
-license = "MIT"
+authors = [{ name = "Timo Sugliani", email = "timo.sugliani@gmail.com" }]
+license = { text = "MIT" }
 readme = "README.md"
-packages = [{include = "zpodcli", from = "src"}]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic==2.10.6",
+    "typer==0.15.4",
+    "pyyaml>=6.0,<7",
+    "zpodsdk==0.7.2",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 zcli = "zpodcli.main_cli:launch"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pydantic = "2.10.6"
-typer = "0.15.4"
-zpodsdk = {path = "../zpodsdk", develop = true}
-#zpodsdk = "0.7.2"
-pyyaml = "^6.0"
+[dependency-groups]
+dev = [
+    "ipython>=8.9,<9",
+    "ruff>=0.11,<0.12",
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.11"
-ipython = "^8.9.0"
+# Dev-only path override. Released wheels still pin zpodsdk==0.7.2 from
+# PyPI because `uv build` ignores [tool.uv.sources].
+[tool.uv.sources]
+zpodsdk = { path = "../zpodsdk", editable = true }
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/zpodcli"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
