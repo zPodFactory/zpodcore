@@ -1,6 +1,5 @@
 # Define Versions
-ARG POETRY_VENV=/opt/venv
-ARG POETRY_VERSION=2.1.1
+ARG UV_VERSION=0.10
 ARG PS_VERSION=7.5.0
 ARG PS_INSTALL_VERSION=7-5-0
 ARG POWERCLI_VERSION=13.3.0.24145081
@@ -15,9 +14,11 @@ ARG TERRAFORM_VERSION=1.7.4
 # Base
 FROM python:3.12.1-slim-bookworm AS base
 
-ARG POETRY_VENV
-
-ENV PATH="${POETRY_VENV}/bin:${PATH}"
+COPY --from=ghcr.io/astral-sh/uv:0.10 /uv /usr/local/bin/uv
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
 
 
 
@@ -26,8 +27,6 @@ ENV PATH="${POETRY_VENV}/bin:${PATH}"
 FROM base AS builder
 
 ARG INSTALL_DEV=false
-ARG POETRY_VERSION
-ARG POETRY_VENV
 ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
@@ -47,12 +46,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./zpodengine/pyproject.toml ./zpodengine/poetry.lock* /tmp/
-RUN python3 -m venv $POETRY_VENV \
-    && . $POETRY_VENV/bin/activate \
-    && $POETRY_VENV/bin/pip install --no-cache-dir -U pip setuptools \
-    && $POETRY_VENV/bin/pip install --no-cache-dir poetry==${POETRY_VERSION} \
-    && poetry install --no-interaction --no-cache --no-root $(test "$INSTALL_DEV" != "true" && echo "--without dev")
+COPY ./zpodengine/pyproject.toml ./zpodengine/uv.lock /tmp/
+RUN uv sync --frozen --no-install-project $(test "$INSTALL_DEV" != "true" && echo "--no-dev")
 
 RUN echo "I'm building for $TARGETPLATFORM"
 
@@ -104,10 +99,9 @@ ARG PS_INSTALL_VERSION
 ARG POWERCLI_VERSION
 ARG POWERNSX_VERSION
 ARG POWERVCF_VERSION
-ARG POETRY_VENV
 
 # Copy python packages
-COPY --from=builder ${POETRY_VENV} ${POETRY_VENV}
+COPY --from=builder /opt/venv /opt/venv
 
 # Copy other packages
 COPY --from=builder ["/usr/local/bin/govc", "/usr/local/bin/govc"]

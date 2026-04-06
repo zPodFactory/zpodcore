@@ -1,10 +1,3 @@
-[tool.poetry]
-name = "zpodcore"
-version = "0.7.2"
-description = ""
-authors = ["Kelby Valenti <kelby.valenti@gmail.com>", "Timo Sugliani <timo.sugliani@gmail.com>"]
-readme = "README.md"
-
 [tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
@@ -29,30 +22,61 @@ known-first-party = [
     "zpodsdk",
 ]
 
-[[tool.poetry_bumpversion.replacements]]
-files = [
-    "zpodapi/src/zpodapi/__init__.py",
-    "zpodcli/src/zpodcli/__init__.py",
-    "zpodengine/src/zpodengine/__init__.py",
-    "zpodsdk/src/zpodsdk/__init__.py"
-]
+# Version bumping replaces the old poetry-bumpversion plugin.
+# Invoke with:  uvx bump-my-version bump --new-version <version> patch
+[tool.bumpversion]
+current_version = "0.7.2"
+allow_dirty = false
+commit = true
+tag = true
+tag_name = "v{new_version}"
+message = "Version v{new_version}"
+
+[[tool.bumpversion.files]]
+filename = "zpodapi/src/zpodapi/__init__.py"
 search = '__version__ = "{current_version}"'
 replace = '__version__ = "{new_version}"'
 
-[[tool.poetry_bumpversion.replacements]]
-files = [
-    "zpodapi/pyproject.toml",
-    "zpodcli/pyproject.toml",
-    "zpodengine/pyproject.toml",
-    "zpodsdk/pyproject.toml",
-    "zpodsdk_builder/pyproject.toml"
-]
+[[tool.bumpversion.files]]
+filename = "zpodcli/src/zpodcli/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "zpodengine/src/zpodengine/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "zpodsdk/src/zpodsdk/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "zpodapi/pyproject.toml"
 search = 'version = "{current_version}"'
 replace = 'version = "{new_version}"'
 
-[[tool.poetry_bumpversion.replacements]]
-files = [
-    "zpodcli/pyproject.toml"
-]
-search = 'zpodsdk = "{current_version}"'
-replace = 'zpodsdk = "{new_version}"'
+[[tool.bumpversion.files]]
+filename = "zpodcli/pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "zpodengine/pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "zpodsdk/pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "zpodsdk_builder/pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+# The root itself carries no package — only tooling config.
+# zpodcli's zpodsdk dep is auto-updated via [tool.uv.sources] + [project]
+# (see zpodcli/pyproject.toml); no sed dance is needed anymore.

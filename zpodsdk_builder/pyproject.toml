@@ -1,18 +1,17 @@
-[tool.poetry]
+[project]
 name = "zpodsdk-builder"
 version = "0.7.2"
 description = "zpodsdk builder from FastAPI openapi spec file"
-authors = ["Timo Sugliani <timo.sugliani@gmail.com>"]
-license = "MIT"
-readme = "README.md"
-packages = [{include = "zpodsdk_builder"}]
+authors = [{ name = "Timo Sugliani", email = "timo.sugliani@gmail.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "openapi-python-client==0.20.0",
+    # openapi-python-client 0.20.0 (via typer<0.13) is incompatible with click>=8.2
+    # (TypeError: Secondary flag is not valid for non-boolean flag).
+    "click<8.2",
+    "ruff>=0.4,<0.5",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-openapi-python-client = "0.20.0"
-ruff = "^0.4"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+package = false
