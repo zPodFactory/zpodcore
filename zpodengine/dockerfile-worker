@@ -1,9 +1,8 @@
-FROM prefecthq/prefect:2.20.16-python3.12
+FROM prefecthq/prefect:3.6.24-python3.12
 
 RUN apt-get update \
     && apt-get install -y \
     curl \
     git
 
-RUN pip install "prefect-docker==0.5.5"
-
+RUN pip install "prefect-docker==0.7.1"

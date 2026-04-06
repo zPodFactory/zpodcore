@@ -74,12 +74,14 @@ def flow_zpod_destroy(
         wait_for=[dnsmasq, networking],
     )
 
+    # Finalize — call .result() to propagate task failures to the flow
+    # (Prefect 3 no longer auto-propagates). Ensures on_failure fires.
     zpod_destroy_finalize.with_options(
         **options(name="finalize"),
     ).submit(
         zpod_id=zpod_id,
         wait_for=[config_scripts],
-    )
+    ).result()
 
 
 if __name__ == "__main__":
