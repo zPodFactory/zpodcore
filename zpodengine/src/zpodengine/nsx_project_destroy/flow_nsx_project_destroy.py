@@ -16,7 +16,7 @@ def flow_nsx_project_destroy(project_id: str, endpoint_id: int):
     ).submit(
         project_id=project_id,
         endpoint_id=endpoint_id,
-    )
+    ).result()
 
 
 if __name__ == "__main__":

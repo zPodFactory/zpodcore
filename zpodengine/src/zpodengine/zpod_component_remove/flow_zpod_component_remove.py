@@ -32,7 +32,7 @@ def flow_zpod_component_remove(
 ):
     dns = remove_from_dns.submit(zpod_component_id)
     vc = remove_from_vcenter.submit(zpod_component_id)
-    remove_from_db.submit(zpod_component_id, wait_for=[dns, vc])
+    remove_from_db.submit(zpod_component_id, wait_for=[dns, vc]).result()
 
 
 @task()

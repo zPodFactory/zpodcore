@@ -135,13 +135,16 @@ def flow_zpod_deploy(
         wait_for=[last_component_item],
     )
 
-    # Finalize
+    # Finalize — call .result() on the final future so that any upstream
+    # task failure propagates as an exception. Without this, Prefect 3
+    # considers the flow Completed even if tasks failed (task failures
+    # no longer auto-propagate). This ensures the on_failure hook fires.
     zpod_deploy_finalize.with_options(
         **options(name="finalize"),
     ).submit(
         zpod_id=zpod_id,
         wait_for=[config_scripts],
-    )
+    ).result()
 
 
 if __name__ == "__main__":
