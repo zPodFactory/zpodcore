@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import os
 import shutil
 from datetime import datetime
-from typing import List
 
 import git
 from rich import print
@@ -17,25 +18,50 @@ from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 from .library__schemas import LibraryCreate
 
 
+class LibraryCloneError(Exception):
+    """Raised when git clone fails during library creation."""
+
+    pass
+
+
 class LibraryService(ServiceBase):
     base_model: SQLModel = M.Library
 
     def create(self, *, item_in: LibraryCreate):
-        library = self.crud.create(item_in=item_in)
+        library_path = f"/library/{item_in.name}"
 
-        # TODO: git clone git_url, and create all the components
-        create_library(library)
-        component_jsonfiles = list_jsonfiles(f"/library/{library.name}")
-        for component_jsonfile in component_jsonfiles:
-            git_component = get_component(component_jsonfile)
-            component_dict = create_component_dict(
-                library_name=item_in.name,
-                component_jsonfile=component_jsonfile,
-                git_component=git_component,
-            )
-            self.session.add(M.Component(**component_dict))
-        self.session.commit()
-        return library
+        # Clone the repository first (most likely failure point)
+        try:
+            clone_library(git_url=item_in.git_url, dest_path=library_path)
+        except git.GitCommandError as e:
+            raise LibraryCloneError(
+                f"Failed to clone repository '{item_in.git_url}': {e}"
+            ) from e
+        except Exception as e:
+            raise LibraryCloneError(
+                f"Unexpected error cloning repository '{item_in.git_url}': {e}"
+            ) from e
+
+        # Clone succeeded, now create database entry
+        try:
+            library = self.crud.create(item_in=item_in)
+
+            component_jsonfiles = list_jsonfiles(library_path)
+            for component_jsonfile in component_jsonfiles:
+                git_component = get_component(component_jsonfile)
+                component_dict = create_component_dict(
+                    library_name=item_in.name,
+                    component_jsonfile=component_jsonfile,
+                    git_component=git_component,
+                )
+                self.session.add(M.Component(**component_dict))
+            self.session.commit()
+            return library
+        except Exception as e:
+            # Database operation failed, clean up the cloned directory
+            print(f"Database error ({e}), cleaning up cloned directory: {library_path}")
+            cleanup_library_path(library_path)
+            raise
 
     def delete(self, *, item: M.Library):
         statement = select(M.Component).where(M.Component.library_name == item.name)
@@ -113,7 +139,7 @@ def get_component_checksum(component):
     return component["component_download_file_checksum"]
 
 
-def find_component_by_uid(components: List[M.Component], uid: str) -> M.Component:
+def find_component_by_uid(components: list[M.Component], uid: str) -> M.Component:
     return next((comp for comp in components if comp.component_uid == uid), None)
 
 
@@ -136,9 +162,20 @@ def mark_component_deleted(component, session):
     session.add(component)
 
 
-def create_library(library: M.Library):
-    print(f"Creating Library: {library.name}...")
-    git.Repo.clone_from(library.git_url, f"/library/{library.name}")
+def clone_library(git_url: str, dest_path: str):
+    """Clone a git repository to the specified path.
+
+    Raises:
+        git.GitCommandError: If the git clone operation fails
+    """
+    print(f"Cloning library from {git_url} to {dest_path}...")
+    git.Repo.clone_from(git_url, dest_path)
+
+
+def cleanup_library_path(library_path: str):
+    """Remove a library directory if it exists."""
+    if os.path.exists(library_path):
+        shutil.rmtree(library_path)
 
 
 def update_library(library: M.Library, session: object):

@@ -5,6 +5,7 @@ from zpodapi.lib.route_logger import RouteLogger
 
 from .library__dependencies import LibraryAnnotations
 from .library__schemas import LibraryCreate, LibraryUpdate, LibraryView
+from .library__services import LibraryCloneError
 
 router = APIRouter(
     prefix="/libraries",
@@ -52,7 +53,13 @@ def create(
             status_code=status.HTTP_409_CONFLICT,
             detail="Library already exists",
         )
-    return library_service.create(item_in=library_in)
+    try:
+        return library_service.create(item_in=library_in)
+    except LibraryCloneError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
 
 
 @router.patch(
