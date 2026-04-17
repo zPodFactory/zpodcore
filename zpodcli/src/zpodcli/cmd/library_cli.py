@@ -1,6 +1,7 @@
 from typing import Optional
 
 import typer
+from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
@@ -68,7 +69,7 @@ def library_create(
             help="Library git URL",
             show_default=False,
         ),
-    ] = "",
+    ] = ...,
     description: Annotated[
         str,
         typer.Option(
@@ -77,7 +78,7 @@ def library_create(
             help="Library description",
             show_default=False,
         ),
-    ] = "",
+    ] = ...,
 ):
     """
     Create Library
