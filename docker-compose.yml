@@ -56,7 +56,7 @@ services:
       - PREFECT_API_DATABASE_TIMEOUT=30
       - PREFECT_API_DATABASE_CONNECTION_TIMEOUT=15
       - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:${ZPODCORE_POSTGRES_PASSWORD}@zpodpostgres/prefect
-      - PREFECT_API_URL=http://${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}/api
+      - PREFECT_API_URL=/api
       - PREFECT_SERVER_API_HOST=0.0.0.0
       - TELEMETRY_ENABLED=false
     ports:
