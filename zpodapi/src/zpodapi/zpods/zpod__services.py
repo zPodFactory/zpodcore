@@ -14,6 +14,16 @@ from . import zpod__utils
 from .zpod__schemas import ZpodCreate
 
 
+def _parse_positive_int(raw: str | None) -> int:
+    if raw is None:
+        return 0
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return 0
+    return value if value > 0 else 0
+
+
 class ZpodService(ServiceBase):
     base_model: M.Zpod = M.Zpod
 
@@ -104,6 +114,41 @@ class ZpodService(ServiceBase):
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 detail="Name must start with a letter",
             )
+
+        # FF (Feature Flag) support for max zpods per user.
+        # ff_max_zpods_<username> fully overrides the global ff_max_zpods_per_user
+        # for that user (any value, including 0/invalid meaning "infinite").
+        # Superadmins are exempt.
+        if not current_user.superadmin:
+            user_raw = DBUtils.get_setting_value(
+                f"ff_max_zpods_{current_user.username}"
+            )
+            if user_raw is not None:
+                max_allowed = _parse_positive_int(user_raw)
+            else:
+                max_allowed = _parse_positive_int(
+                    DBUtils.get_setting_value("ff_max_zpods_per_user")
+                )
+
+            if max_allowed > 0:
+                owned_count = self.session.exec(
+                    select(func.count(M.Zpod.id))
+                    .join(M.ZpodPermission)
+                    .join(M.ZpodPermissionUserLink)
+                    .where(
+                        M.ZpodPermissionUserLink.user_id == current_user.id,
+                        M.ZpodPermission.permission == enums.ZpodPermission.OWNER,
+                        M.Zpod.status != enums.ZpodStatus.DELETED,
+                    )
+                ).one()
+                if owned_count >= max_allowed:
+                    raise HTTPException(
+                        status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                        detail=(
+                            f"Maximum number of zPods reached for user "
+                            f"'{current_user.username}' ({max_allowed})"
+                        ),
+                    )
 
         zpod = M.Zpod(
             name=item_in.name,
