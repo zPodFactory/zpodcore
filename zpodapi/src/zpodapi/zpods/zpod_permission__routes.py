@@ -125,7 +125,7 @@ def permissions_groups_remove(
         groupname=permission_group_in.groupname,
     )
     return zpod_permission_service.group_remove(
-        zpode=zpod,
+        zpod=zpod,
         permission=permission,
         group=group,
     )
