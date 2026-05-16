@@ -48,10 +48,6 @@ class User(CommonDatesMixin, ModelBase, table=True):
         default="",
         nullable=False,
     )
-    creation_date: datetime = Field(
-        sa_column_kwargs={"default": datetime.utcnow},
-        nullable=False,
-    )
     last_connection_date: datetime = Field(
         default=None,
         nullable=True,

@@ -1,18 +1,19 @@
 from datetime import datetime
 
-from pydantic import EmailStr, StringConstraints, validate_email
-from pydantic import Field as PField
+from pydantic import AfterValidator, EmailStr, StringConstraints, validate_email
 from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon.enums import UserStatus
 
 
-class EmailStrLower(EmailStr):
-    @classmethod
-    def validate(cls, value: EmailStr) -> EmailStr:
-        email = validate_email(value)[1]
-        return email.lower()
+def _lowercase_email(value: str) -> str:
+    return validate_email(value)[1].lower()
+
+
+# pydantic v2 replacement for the old `class EmailStrLower(EmailStr)` with a
+# `validate` classmethod — that subclass-with-validate pattern was removed.
+EmailStrLower = Annotated[EmailStr, AfterValidator(_lowercase_email)]
 
 
 class D:
@@ -62,15 +63,10 @@ class UserView(SchemaBase):
 class UserViewFull(UserView):
     description: str = Field(..., D.description)
     creation_date: datetime = Field(..., D.creation_date)
-
-    # Had to use a Pydantic Field instead, because of
-    # https://github.com/openapi-generators/openapi-python-client/issues/698 and because
-    # sqlmodel intercepts the "nullable" argument
-    last_connection_date: datetime | None = PField(
-        None,
-        **D.last_connection_date,
-        nullable=True,
-    )
+    # `datetime | None` type annotation is enough — pydantic v2 + OpenAPI 3.1
+    # render it as `type: [string, null]`, replacing the old v1 workaround
+    # that needed `pydantic.Field(..., nullable=True)`.
+    last_connection_date: datetime | None = Field(None, D.last_connection_date)
     superadmin: bool = Field(..., D.superadmin)
     status: str = Field(..., D.status)
 

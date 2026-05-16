@@ -13,8 +13,19 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.4,<0.5",
+    # pytest 8.4+ requires Python 3.9+; SDK's requires-python is 3.8.1.
+    # Stay on the latest 8.3.x to keep the published Python range unchanged.
+    "pytest==8.3.5",
+    "ruff==0.15.9",
 ]
+
+[tool.uv]
+# Supply-chain mitigation: ignore packages published in the last 30 days.
+exclude-newer = "30 days"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zpodsdk"]

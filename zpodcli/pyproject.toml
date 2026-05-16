@@ -7,9 +7,9 @@ license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "pydantic==2.10.6",
+    "pydantic==2.12.5",
     "typer==0.15.4",
-    "pyyaml>=6.0,<7",
+    "pyyaml==6.0.3",
     "zpodsdk==0.7.2",
 ]
 
@@ -18,9 +18,18 @@ zcli = "zpodcli.main_cli:launch"
 
 [dependency-groups]
 dev = [
-    "ipython>=8.9,<9",
-    "ruff>=0.11,<0.12",
+    "ipython==8.39.0",
+    "pytest==8.4.2",
+    "ruff==0.15.9",
 ]
+
+[tool.uv]
+# Supply-chain mitigation: ignore packages published in the last 30 days.
+exclude-newer = "30 days"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
 
 # Dev-only path override. Released wheels still pin zpodsdk==0.7.2 from
 # PyPI because `uv build` ignores [tool.uv.sources].
