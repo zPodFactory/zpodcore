@@ -142,6 +142,94 @@ zpodapi-exec *args="bash":
 zpodapi-pytest *args:
   docker compose exec -t zpodapi pytest {{args}}
 
+# Run all subproject unit tests locally (no docker)
+zpod-runtests:
+  #!/usr/bin/env bash
+  set -uo pipefail
+  cd {{justfile_directory()}}
+
+  bold=$'\e[1m'
+  cyan=$'\e[36m'
+  green=$'\e[32m'
+  red=$'\e[31m'
+  dim=$'\e[2m'
+  reset=$'\e[0m'
+
+  declare -a SUBJECTS=(
+    "zpodapi|zpodapi"
+    "zpodcli|zpodcli"
+    "zpodengine|zpodengine (+ zpodcommon)"
+    "zpodsdk|zpodsdk"
+  )
+
+  # Aligns test ids to W cols (truncating long ones), counts results, prints
+  # a one-line "N/M passed (P%) in Ts" summary at the end.
+  format_results() {
+    awk -v W=70 '
+      BEGIN { passed=0; failed=0; skipped=0; duration="?" }
+      /^[^[:space:]]+::[^[:space:]]+ (PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)/ {
+        match($0, /PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS/)
+        status = substr($0, RSTART, RLENGTH)
+        nodeid = substr($0, 1, RSTART - 2)
+        if (length(nodeid) > W) nodeid = substr(nodeid, 1, W - 3) "..."
+        color = (status == "PASSED" || status == "XPASS") ? "\033[32m" \
+              : (status == "SKIPPED" || status == "XFAIL") ? "\033[33m" \
+              : "\033[31m"
+        printf "  %-*s %s%s\033[0m\n", W, nodeid, color, status
+        if (status == "PASSED" || status == "XPASS") passed++
+        else if (status == "SKIPPED" || status == "XFAIL") skipped++
+        else failed++
+        next
+      }
+      /^=+ .* in [0-9.]+s/ {
+        if (match($0, /in [0-9.]+s/)) {
+          duration = substr($0, RSTART + 3, RLENGTH - 3)
+        }
+        next
+      }
+      END {
+        total = passed + failed + skipped
+        print ""
+        if (total == 0) {
+          print "  \033[33mno tests collected\033[0m"
+        } else {
+          rate = int(100 * passed / total + 0.5)
+          color = failed ? "\033[31m" : "\033[32m"
+          if (failed) {
+            printf "  %s%d/%d passed (%d%%)\033[0m — %d failed — %s\n", \
+                   color, passed, total, rate, failed, duration
+          } else {
+            printf "  %s%d/%d passed (%d%%)\033[0m in %s\n", \
+                   color, passed, total, rate, duration
+          }
+        }
+      }
+    '
+  }
+
+  failed=()
+  for entry in "${SUBJECTS[@]}"; do
+    dir="${entry%%|*}"
+    label="${entry##*|}"
+    echo
+    echo "${bold}${cyan}── ${label} ──${reset}"
+    # Disable color in pytest output so awk filtering is easier; we add our own.
+    # The stderr filter drops Python readline's "Cannot read termcap database"
+    # warning, harmless on Debian where /etc/termcap (legacy) is not shipped.
+    if ! { cd "$dir" && uv run --group dev pytest -v --no-header --color=no -p no:warnings 2> >(grep -vE 'Cannot read termcap|using dumb terminal' >&2); } | format_results; then
+      failed+=("$label")
+    fi
+  done
+
+  echo
+  echo "${bold}── Summary ──${reset}"
+  if [ ${#failed[@]} -eq 0 ]; then
+    echo "${green}${bold}All subprojects passed${reset}"
+  else
+    echo "${red}${bold}Failed:${reset} ${failed[*]}"
+    exit 1
+  fi
+
 # Start Docker Environment
 zpodcore-start $COLUMNS=rich_cols:
   docker compose up --remove-orphans
