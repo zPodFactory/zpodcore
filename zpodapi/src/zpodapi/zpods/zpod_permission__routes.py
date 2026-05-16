@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 from zpodapi.users.user__schemas import UserView
 from zpodcommon.enums import ZpodPermission
@@ -11,6 +11,7 @@ from .zpod__dependencies import ZpodAnnotations, ZpodDepends
 from .zpod_permission__dependencies import ZpodPermissionAnnotations
 from .zpod_permission__schemas import (
     ZpodPermissionGroupAddRemove,
+    ZpodPermissionMineView,
     ZpodPermissionUserAddRemove,
     ZpodPermissionView,
 )
@@ -31,6 +32,26 @@ def permissions_get_all(
     zpod: ZpodAnnotations.GetZpod,
 ):
     return zpod.permissions
+
+
+@router.get(
+    "/mine",
+    summary="zPod Permission Get Mine",
+    response_model=ZpodPermissionMineView,
+)
+def permissions_get_mine(
+    *,
+    zpod_user_permissions: ZpodAnnotations.GetUserZpodPermissions,
+):
+    for level in (ZpodPermission.ADMIN, ZpodPermission.OWNER, ZpodPermission.USER):
+        if level in zpod_user_permissions:
+            return ZpodPermissionMineView(permission=level)
+    # Unreachable in practice: GetZpod 404s a non-superadmin with no grant, and a
+    # superadmin always holds the virtual ADMIN. Defensive fallback only.
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="zPod not found",
+    )
 
 
 @router.post(

@@ -21,6 +21,11 @@ class ZpodPermissionView(SchemaBase):
     permission_groups: list[PermissionGroupView] = []
 
 
+class ZpodPermissionMineView(SchemaBase):
+    # Caller's highest effective permission on the zPod (ADMIN >= OWNER > USER).
+    permission: enums.ZpodPermission = Field(..., D.permission)
+
+
 class ZpodPermissionUserAddRemove(SchemaBase):
     user_id: int | None = Field(None, D.user_id)
     username: str | None = Field(None, D.username)
