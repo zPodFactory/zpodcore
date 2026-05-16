@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from zpodapi.endpoints.endpoint__dependencies import EndpointAnnotations
+from zpodapi.lib.global_dependencies import GlobalDepends
 from zpodapi.lib.route_logger import RouteLogger
 
 from .endpoint_enet__dependencies import EndpointENetAnnotations
@@ -51,6 +52,7 @@ def enet_get(
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def enet_create(
     *,
@@ -64,6 +66,7 @@ def enet_create(
 @router.delete(
     "/{name}",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[GlobalDepends.OnlySuperAdmin],
 )
 def enet_delete(
     *,

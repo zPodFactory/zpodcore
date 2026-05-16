@@ -14,7 +14,7 @@ router = APIRouter(
     "",
     summary="zPod Dns Get All",
     response_model=list[ZpodDnsView],
-    dependencies=[ZpodDepends.ZpodMaintainer],
+    dependencies=[ZpodDepends.ZpodReader],
 )
 def dns_get_all(
     *,
@@ -28,7 +28,7 @@ def dns_get_all(
     "/{ip}/{hostname}",
     summary="zPod Dns Get",
     response_model=ZpodDnsView,
-    dependencies=[ZpodDepends.ZpodMaintainer],
+    dependencies=[ZpodDepends.ZpodReader],
 )
 def dns_get(
     *,

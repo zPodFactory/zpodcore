@@ -59,6 +59,7 @@ def components_add(
     "/{component_id}",
     summary="zPod Component Remove",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[ZpodDepends.ZpodMaintainer],
 )
 def components_remove(
     *,
