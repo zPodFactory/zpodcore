@@ -195,7 +195,6 @@ class ZpodService(ServiceBase):
                 M.Profile.name == profile_name.lower(),
             )
         ).one_or_none():
-            print(profile)
             validate_profile(session=self.session, profile_obj=profile.profile)
         else:
             raise HTTPException(

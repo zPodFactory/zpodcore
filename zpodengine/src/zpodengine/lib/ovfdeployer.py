@@ -103,7 +103,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
     )
 
     print("govc ovf property options generated file")
-    print(govc_spec_render)
+    print(json.dumps(json.loads(govc_spec_render), indent=2))
 
     options_filename = f"/tmp/{zpod_component.fqdn}.json"
     with open(options_filename, "w") as f:

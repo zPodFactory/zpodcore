@@ -105,7 +105,7 @@ def vcsa_deployer(zpod_component: M.ZpodComponent):
     )
 
     print("vcsa spec options generated file")
-    print(vcsa_spec_render)
+    print(json.dumps(json.loads(vcsa_spec_render), indent=2))
 
     vm_name = f"vcsa.{zpod.domain}"
 

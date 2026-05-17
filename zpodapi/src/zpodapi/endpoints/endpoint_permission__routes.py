@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status
 
 from zpodapi.lib.global_dependencies import GlobalDepends
+from zpodapi.lib.route_logger import RouteLogger
 from zpodapi.users.user__schemas import UserView
 from zpodcommon.enums import EndpointPermission
 
@@ -19,6 +20,7 @@ from .endpoint_permission__schemas import (
 router = APIRouter(
     prefix="/endpoints/{id}/permissions",
     tags=["endpoints"],
+    route_class=RouteLogger,
 )
 
 

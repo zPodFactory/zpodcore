@@ -45,12 +45,11 @@ def event_hook_response(response: httpx.Response):
     response.results = types.MethodType(results, response)
 
     response.read()
-    request = response.request
 
     # Log Response
     print(
-        f"RESPONSE: {request.method.upper()} {request.url}\n"
-        f"{response.status_code} {response.safejson() or response.text}"
+        f"RESPONSE: {response.status_code}\n"
+        f"{response.text}"
     )
 
 

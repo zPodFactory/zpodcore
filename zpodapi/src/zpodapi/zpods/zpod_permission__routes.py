@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
+from zpodapi.lib.route_logger import RouteLogger
 from zpodapi.users.user__schemas import UserView
 from zpodcommon.enums import ZpodPermission
 
@@ -19,6 +20,7 @@ from .zpod_permission__schemas import (
 router = APIRouter(
     prefix="/zpods/{id}/permissions",
     tags=["zpods"],
+    route_class=RouteLogger,
 )
 
 

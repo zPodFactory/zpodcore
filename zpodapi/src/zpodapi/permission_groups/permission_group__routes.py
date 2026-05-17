@@ -1,17 +1,21 @@
 from fastapi import APIRouter, HTTPException, status
 
 from zpodapi.lib.global_dependencies import GlobalDepends
+from zpodapi.lib.route_logger import RouteLogger
 
 from ..users.user__schemas import UserView
 from .permission_group__dependencies import PermissionGroupAnnotations
-from .permission_group__schemas import (PermissionGroupCreate,
-                                        PermissionGroupUpdate,
-                                        PermissionGroupUserAdd,
-                                        PermissionGroupView)
+from .permission_group__schemas import (
+    PermissionGroupCreate,
+    PermissionGroupUpdate,
+    PermissionGroupUserAdd,
+    PermissionGroupView,
+)
 
 router = APIRouter(
     prefix="/permission_groups",
     tags=["permission_groups"],
+    route_class=RouteLogger,
 )
 
 
