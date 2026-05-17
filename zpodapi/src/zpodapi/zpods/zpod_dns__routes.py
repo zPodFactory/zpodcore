@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
+from zpodapi.lib.route_logger import RouteLogger
+
 from .zpod__dependencies import ZpodAnnotations, ZpodDepends
 from .zpod_dns__dependencies import ZpodDnsAnnotations
 from .zpod_dns__schemas import ZpodDnsCreate, ZpodDnsUpdate, ZpodDnsView
@@ -7,6 +9,7 @@ from .zpod_dns__schemas import ZpodDnsCreate, ZpodDnsUpdate, ZpodDnsView
 router = APIRouter(
     prefix="/zpods/{id}/dns",
     tags=["zpods"],
+    route_class=RouteLogger,
 )
 
 

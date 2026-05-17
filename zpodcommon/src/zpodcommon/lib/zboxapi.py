@@ -44,11 +44,7 @@ def safejson_fastapi(response: httpx.Response):
 
 
 def event_hook_request(request: httpx.Request):
-    # Log Request
-    print(
-        f"REQUEST: {request.method.upper()} {request.url}\n"
-        f"{request.content.decode()}"
-    )
+    pass
 
 
 def event_hook_response(response: httpx.Response):
@@ -59,13 +55,6 @@ def event_hook_response(response: httpx.Response):
     )
 
     response.read()
-    request = response.request
-
-    # Log Response
-    print(
-        f"RESPONSE: {request.method.upper()} {request.url}\n"
-        f"{response.status_code} {response.safejson() or response.text}"
-    )
 
 
 class ZboxApiClient(httpx.Client):

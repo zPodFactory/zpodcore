@@ -1,11 +1,14 @@
 from fastapi import APIRouter
 
+from zpodapi.lib.route_logger import RouteLogger
+
 from .zpod__dependencies import ZpodAnnotations
 from .zpod_network__schemas import ZpodNetworkView
 
 router = APIRouter(
     prefix="/zpods/{id}/networks",
     tags=["zpods"],
+    route_class=RouteLogger,
 )
 
 

@@ -1,5 +1,7 @@
 from fastapi import APIRouter, status
 
+from zpodapi.lib.route_logger import RouteLogger
+
 from .zpod__dependencies import ZpodAnnotations, ZpodDepends
 from .zpod_component__dependencies import ZpodComponentAnnotations
 from .zpod_component__schemas import ZpodComponentCreate, ZpodComponentView
@@ -7,6 +9,7 @@ from .zpod_component__schemas import ZpodComponentCreate, ZpodComponentView
 router = APIRouter(
     prefix="/zpods/{id}/components",
     tags=["zpods"],
+    route_class=RouteLogger,
 )
 
 
