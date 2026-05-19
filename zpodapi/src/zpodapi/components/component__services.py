@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import BinaryIO
 
 from fastapi import HTTPException, status
@@ -8,6 +9,8 @@ from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentDownloadStatus, ComponentStatus
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
+
+PRODUCTS_PATH = "/products"
 
 
 class ComponentService(ServiceBase):
@@ -31,8 +34,37 @@ class ComponentService(ServiceBase):
         return component
 
     def disable(self, *, component: M.Component):
+        self._remove_component_file(component)
         component.status = ComponentStatus.INACTIVE
+        # The downloaded file is gone — reset so the state stays honest and a
+        # later enable() re-downloads it.
+        component.download_status = ComponentDownloadStatus.NOT_STARTED
         return self.crud.save(component)
+
+    @staticmethod
+    def _remove_component_file(component: M.Component) -> None:
+        """Best-effort removal of a component's downloaded product file.
+
+        The file lives at /products/<name>/<version>/<filename>; once removed,
+        now-empty version/name directories are pruned. Filesystem errors are
+        logged but never block the component from being disabled.
+        """
+        file_path = (
+            Path(PRODUCTS_PATH)
+            / component.component_name
+            / component.component_version
+            / component.filename
+        )
+        try:
+            if file_path.is_file():
+                file_path.unlink()
+                print(f"Removed component file: {file_path}")
+            # Prune now-empty parent directories (version, then name).
+            for directory in (file_path.parent, file_path.parent.parent):
+                if directory.is_dir() and not any(directory.iterdir()):
+                    directory.rmdir()
+        except OSError as e:
+            print(f"Could not remove component file {file_path}: {e}")
 
     async def upload(
         self,
