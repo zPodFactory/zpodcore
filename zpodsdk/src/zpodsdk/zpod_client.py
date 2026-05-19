@@ -516,6 +516,13 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_permissions_get_mine(self):
+        from zpodsdk.api.zpods import zpods_permissions_get_mine
+
+        return zpods_permissions_get_mine.ZpodsPermissionsGetMine(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_permissions_groups_add(self):
         from zpodsdk.api.zpods import zpods_permissions_groups_add
 

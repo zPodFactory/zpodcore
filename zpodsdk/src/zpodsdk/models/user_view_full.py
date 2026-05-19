@@ -27,7 +27,7 @@ class UserViewFull:
         status (str):
         superadmin (bool):
         username (str):
-        last_connection_date (Union[None, Unset, datetime.datetime]):  Example: 2023-01-01T00:01:00.
+        last_connection_date (Union[None, Unset, datetime.datetime]):
     """
 
     creation_date: datetime.datetime
