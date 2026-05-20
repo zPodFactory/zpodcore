@@ -11,7 +11,7 @@ from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN
 
 
 def vcsa_extract_iso(component: M.Component):
-    # Customer Connect provides an ISO for the vcsa component.
+    # The vcsa component is distributed as an ISO.
     # It cannot be used directly so some preparation is required.
     # First step is to extract the content of ISO and prepare the structure
     # for automation tools.

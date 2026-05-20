@@ -1,12 +1,25 @@
+from typing import Annotated
+
 from pydantic import AfterValidator, StringConstraints, ValidationInfo
-from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 
+# Setting names whose value must not be returned by the API. The DB still
+# holds the real value (read by zpodengine via DBUtils.get_setting_value) —
+# the masking is only on SettingView serialisation, so clients can see the
+# setting exists but never its content.
+SENSITIVE_SETTINGS = frozenset({
+    "zpodfactory_broadcom_download_token",
+})
 
-def hide_sensitive(v: str, info: ValidationInfo):
-    name = info.data["name"]
-    if name == 'zpodfactory_customerconnect_password':
+
+def hide_sensitive(v: str, info: ValidationInfo) -> str:
+    """Mask the value of known-sensitive settings in API responses.
+
+    An empty value is returned unchanged so admins can see the setting has
+    not been configured yet; any non-empty value is replaced with ``********``.
+    """
+    if info.data.get("name") in SENSITIVE_SETTINGS and v:
         return "********"
     return v
 

@@ -6,7 +6,6 @@ ARG POWERCLI_VERSION=13.3.0.24145081
 ARG POWERNSX_VERSION=3.0.1192
 ARG POWERVCF_VERSION=2.4.1.1000
 ARG GOVC_VERSION=0.50.0
-ARG VCC_VERSION=1.2.0-beta
 ARG TERRAFORM_VERSION=1.7.4
 
 
@@ -31,7 +30,6 @@ ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
 ARG GOVC_VERSION
-ARG VCC_VERSION
 ARG TERRAFORM_VERSION
 
 WORKDIR /tmp
@@ -59,14 +57,13 @@ RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     && echo "ARCH=$ARCH" \
     && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz
 
-# Download govc (FIXME: vcc will break on arm64, no binaries built)
+# Download govc
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     "linux/amd64")   echo "x86_64";; \
     "linux/arm64")   echo "arm64" ;; \
     *)               echo ""      ;; esac) \
     && echo "ARCH=$ARCH" \
-    && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz \
-    && curl -o /usr/local/bin/vcc -L https://github.com/vmware-labs/vmware-customer-connect-cli/releases/download/v${VCC_VERSION}/vcc-linux-v${VCC_VERSION}
+    && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz
 
 # Download and install Terraform
 RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
@@ -87,10 +84,9 @@ RUN mkdir -p ${PS_INSTALL_FOLDER}
 # Decompress the Powershell tar.gz
 RUN tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 
-# Decompress govc/vcc and make executable
+# Decompress govc and make executable
 RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
-    && chmod +x /usr/local/bin/govc \
-    && chmod +x /usr/local/bin/vcc
+    && chmod +x /usr/local/bin/govc
 
 #################################################
 # MAIN
@@ -105,7 +101,6 @@ COPY --from=builder /opt/venv /opt/venv
 
 # Copy other packages
 COPY --from=builder ["/usr/local/bin/govc", "/usr/local/bin/govc"]
-COPY --from=builder ["/usr/local/bin/vcc", "/usr/local/bin/vcc"]
 COPY --from=builder ["/usr/local/bin/terraform", "/usr/local/bin/terraform"]
 COPY --from=builder ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
 
