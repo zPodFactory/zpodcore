@@ -61,19 +61,12 @@ with database.get_session_ctx() as session:
         )
         session.add(setting_domain)
 
-        setting_cc_username = M.Setting(
-            name="zpodfactory_customerconnect_username",
-            description="VMware Customer Connect user account",
-            value="user@xyz.com",
+        setting_broadcom_token = M.Setting(
+            name="zpodfactory_broadcom_download_token",
+            description="Broadcom Support Portal Generated Download Token",
+            value="",
         )
-        session.add(setting_cc_username)
-
-        setting_cc_password = M.Setting(
-            name="zpodfactory_customerconnect_password",
-            description="VMware Customer Connect user password",
-            value="amazingpassword",
-        )
-        session.add(setting_cc_password)
+        session.add(setting_broadcom_token)
 
         settings_ssh_key = M.Setting(
             name="zpodfactory_ssh_key",

@@ -69,10 +69,8 @@ def flow_component_sync(filename: str):
                 with open(c.jsonfile) as f:
                     component_json = json.load(f)
 
-                # Depending the download engine, the filename is either:
-                # - simple filename: "filename.ova" (customer_connect engine)
-                # - URI full path: "https://somewhere/filename.ova" (https engine)
-
+                # component_download_file is the full https URL; the on-disk
+                # filename is its basename.
                 component_filename = os.path.basename(
                     component_json["component_download_file"]
                 )

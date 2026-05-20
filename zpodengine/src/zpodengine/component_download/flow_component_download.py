@@ -6,10 +6,8 @@ import shutil
 import subprocess
 import time
 from pathlib import Path
-from typing import Tuple
 from urllib.parse import urlparse
 
-import requests
 from prefect import flow, get_run_logger, task
 from pydantic import BaseModel
 from sqlmodel import select
@@ -24,21 +22,40 @@ PRODUCTS_PATH = "/products"
 BYTE_SIZE = 1024
 POWERS = {"KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5}
 
+# Component JSONs may store the Broadcom depot URL with a ${BROADCOM_DOWNLOAD_TOKEN}
+# placeholder; it is substituted with the zpodfactory_broadcom_download_token
+# setting at download time, so the per-customer token stays out of library files.
+BROADCOM_TOKEN_PLACEHOLDER = "${BROADCOM_DOWNLOAD_TOKEN}"
+_BROADCOM_URL_TOKEN_RE = re.compile(r"(https://dl\.broadcom\.com/)[^/]+(/PROD/)")
+
+
+def _resolve_broadcom_token(url: str) -> str:
+    """Substitute the Broadcom token placeholder with the configured value."""
+    if BROADCOM_TOKEN_PLACEHOLDER not in url:
+        return url
+    token = DBUtils.get_setting_value("zpodfactory_broadcom_download_token")
+    if not token:
+        raise ValueError(
+            "Broadcom depot URL uses ${BROADCOM_DOWNLOAD_TOKEN} but the "
+            "zpodfactory_broadcom_download_token setting is not set."
+        )
+    return url.replace(BROADCOM_TOKEN_PLACEHOLDER, token)
+
+
+def _redact_broadcom_token(s: str) -> str:
+    """Mask the token in a Broadcom depot URL for safe logging."""
+    return _BROADCOM_URL_TOKEN_RE.sub(r"\1***\2", s)
+
 
 class Component(BaseModel):
     component_name: str
     component_version: str
     component_type: str | None = None
     component_description: str | None = None
-    component_url: str | None = None
     component_download_engine: str
-    component_download_product: str | None = None
-    component_download_subproduct: str | None = None
-    component_download_version: str | None = None
     component_download_file: str | None = None
     component_download_file_checksum: str | None = None  # "sha265:checksum"
     component_download_file_size: str
-    component_download_type: str | None = None
     component_isnested: bool | None = None
     component_dst_path: Path | None = None
     component_dl_path: Path | None = None
@@ -87,108 +104,8 @@ def get_component_json(uid: str):
     return get_json_from_file(component.jsonfile)
 
 
-# I could not use subprocess.run for both types of commands
-# This is due to the fact that I needed to capture download progress when
-# using vcc command and wget isn't could not run wget with Popen either.
-def run_command(cmd: str, cmd_engine: str):
-    if not cmd:
-        raise ValueError("No command specified")
-    if cmd_engine == "customerconnect":
-        return subprocess.Popen(
-            args=cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-        )
-    else:
-        return subprocess.run(
-            args=cmd,
-            capture_output=True,
-            shell=True,
-            check=True,
-        )
-
-
-def get_customerconnect_credentials() -> Tuple[str, str]:
-    vcc_username = DBUtils.get_setting_value("zpodfactory_customerconnect_username")
-    vcc_password = DBUtils.get_setting_value("zpodfactory_customerconnect_password")
-    return vcc_username, vcc_password
-
-
-def get_avi_pulse_releases(component):
-    response = requests.get(component.component_url)
-    response.raise_for_status()
-    response_data = response.json()
-    major_versions = response_data.get("result", {}).get("major_version", [])
-    releases = []
-    for release in major_versions:
-        system_list = release.get("system_list", [])
-        if system_list:
-            release_info = {
-                "id": system_list[0]["id"],
-                "name": release["major_name"],
-            }
-            releases.append(release_info)
-    return releases
-
-
-def get_avi_pulse_release_id(component):
-    releases = get_avi_pulse_releases(component)
-    if not releases:
-        raise ValueError("No releases found")
-    for release in releases:
-        if release.get("name") == component.component_version:
-            return release.get("id")
-    return None
-
-
-def get_avi_pulse_files(component, release_id):
-    url = f"{component.component_url}/{release_id}"
-    response = requests.get(url, headers={"Accept": "application/json"})
-    downloads = response.json().get("result").get("software_detail_list")
-    release_files = [
-        download.get("ecosystem_software_list")
-        for download in downloads
-        if download.get("ecosystem_name") == "VMware"
-    ]
-    return release_files[0]
-
-
-def get_avi_pulse_file_id(avi_pulse_files):
-    for file in avi_pulse_files:
-        if "SHA1" not in file.get("software_name").split(" "):
-            return file.get("software_id")
-
-
-def get_avi_pulse_file_download_url(component, release_id, release_file_id):
-    url = f"{component.component_url}/downloads/{release_id}/{release_file_id}"
-    response = requests.get(url).json()
-    return {
-        "url": response.get("url"),
-        "filename": response.get("filename"),
-    }
-
-
-def get_avi_pulse_file_download_cmd(component):
-    release_id = get_avi_pulse_release_id(component)
-    if release_id:
-        release_files = get_avi_pulse_files(component, release_id)
-        release_file_id = get_avi_pulse_file_id(release_files)
-        release_file_url = get_avi_pulse_file_download_url(
-            component, release_id, release_file_id
-        )
-        return (
-            "wget"
-            " --no-check-certificate"
-            f" {shlex.quote(release_file_url['url'])}"
-            " -O"
-            f" {shlex.quote(PRODUCTS_PATH)}/{shlex.quote(release_file_url['filename'])}"
-            " -q"
-        )
-    else:
-        raise ValueError(
-            f"An error occured, check {component.component_version} for typo"
-        )
+class UnsupportedEngineError(ValueError):
+    """The library component declares a download engine we no longer support."""
 
 
 def generate_download_command(component: Component):
@@ -203,41 +120,11 @@ def generate_download_command(component: Component):
             f" -P {shlex.quote(PRODUCTS_PATH)}"
         )
 
-    elif component.component_download_engine == "avipulse":
-        try:
-            return get_avi_pulse_file_download_cmd(component)
-        except Exception as e:
-            print("Failed to generate avipulse download command:", e)
-            raise ValueError("Error generating avipulse download command") from e
-
-    elif component.component_download_engine == "customerconnect":
-        try:
-            vcc_username, vcc_password = get_customerconnect_credentials()
-            download_type_arg = (
-                f" -t {shlex.quote(component.component_download_type)}"
-                if component.component_download_type
-                else ""
-            )
-            return (
-                "vcc download"
-                " -a"
-                f" --user {shlex.quote(vcc_username)}"
-                f" --pass {shlex.quote(vcc_password)}"
-                f" -p {shlex.quote(component.component_download_product)}"
-                f" -s {shlex.quote(component.component_download_subproduct)}"
-                f" -v {shlex.quote(component.component_download_version)}"
-                f" -f {shlex.quote(component.component_download_file)}"
-                f" -o {shlex.quote(PRODUCTS_PATH)}"
-                f"{download_type_arg}"
-            )
-        except Exception as e:
-            print("Failed to retrieve customerconnect credentials:", e)
-            raise ValueError("Error retrieving customerconnect credentials") from e
-
-    else:
-        raise ValueError(
-            f"Unsupported download engine: {component.component_download_engine}"
-        )
+    raise UnsupportedEngineError(
+        f"Unsupported download engine: "
+        f"{component.component_download_engine!r}. Only 'https' is "
+        f"supported; the library component needs to be updated."
+    )
 
 
 @task(
@@ -245,34 +132,13 @@ def generate_download_command(component: Component):
 )
 def download_component(component: Component) -> int:
     logger = get_run_logger()
-    https_cmd = (
-        generate_download_command(component)
-        if component.component_download_engine in ["https", "avipulse"]
-        else ""
-    )
-    customer_connect_cmd = (
-        generate_download_command(component)
-        if component.component_download_engine == "customerconnect"
-        else ""
-    )
-    cmd = (
-        https_cmd
-        if component.component_download_engine in {"https", "avipulse"}
-        else customer_connect_cmd
-    )
-
-    hidden_pass_cmd = re.sub(
-        r"(--pass\s+)(\S+)", r"\1" + "********", customer_connect_cmd
-    )
-    print_cmd = (
-        https_cmd
-        if component.component_download_engine in ["https", "avipulse"]
-        else hidden_pass_cmd
-    )
-    print("Printing....", print_cmd)
     prev_download = Path(PRODUCTS_PATH) / component.component_download_file
 
     try:
+        # Inside the try so UnsupportedEngineError is caught and the
+        # FAILED_UNSUPPORTED_ENGINE status gets written to the DB.
+        cmd = generate_download_command(component)
+
         if prev_download.exists():
             logger.info(
                 f"Cleaning previously failed {component.component_uid} download"
@@ -282,52 +148,42 @@ def download_component(component: Component) -> int:
         logger.info(
             f"Downloading {component.component_name}-{component.component_version} ..."
         )
-        logger.info(f"Executing download command {print_cmd}")
+        logger.info(f"Executing download command {_redact_broadcom_token(cmd)}")
 
-        process = run_command(cmd=cmd, cmd_engine=component.component_download_engine)
-
-        while (
-            component.component_download_engine == "customerconnect"
-            and process.poll() is None
-        ):
-            process.stdout.readline()
-
-        return_code = (
-            process.wait()
-            if component.component_download_engine == "customerconnect"
-            else process.returncode
+        subprocess.run(args=cmd, capture_output=True, shell=True, check=True)
+        logger.info(f"{component.component_uid} downloaded")
+        return 0
+    except UnsupportedEngineError as e:
+        logger.error(str(e))
+        update_db(
+            component.component_uid,
+            ComponentDownloadStatus.FAILED_UNSUPPORTED_ENGINE,
         )
-        if return_code != 0:
-            msg = (
-                process.stderr.read().decode().strip()
-                if component.component_download_engine == "customerconnect"
-                else process.stdout.decode()
-            )
-            logger.info(f"stderr: {msg}")
-            if "Authentication failure" in msg:
-                raise RuntimeError("AuthenticationError")
-            if "You are not entitled" in msg:
-                raise RuntimeError("EntitlementError")
-        else:
-            logger.info(f"{component.component_uid} downloaded")
-            return 0
-    except RuntimeError as e:
-        if "AuthenticationError" in e.args:
-            update_db(
-                component.component_uid, ComponentDownloadStatus.FAILED_AUTHENTICATION
-            )
-            logger.error("The provided credentials are not valid.")
-        if "EntitlementError" in e.args:
-            update_db(
-                component.component_uid, ComponentDownloadStatus.FAILED_NOT_ENTITLED
-            )
-            logger.error(
-                "The provided credentials are not entitled to download this sub-product"
-            )
-
-        # We want Prefect task to fail !
         raise e
-
+    except subprocess.CalledProcessError as e:
+        # wget surfaces HTTP errors on stderr. The Broadcom depot embeds the
+        # token in the URL path, so a bad/expired token returns 403 Forbidden
+        # (a missing one returns 401 Unauthorized) — both are auth failures
+        # from the operator's point of view: the token needs updating.
+        stderr = (e.stderr or b"").decode(errors="replace")
+        if any(s in stderr for s in ("401", "403", "Unauthorized", "Forbidden")):
+            logger.error(
+                "Broadcom rejected the download (401/403) — the "
+                "zpodfactory_broadcom_download_token setting is missing, "
+                "invalid or expired; update it via the settings API."
+            )
+            update_db(
+                component.component_uid,
+                ComponentDownloadStatus.FAILED_AUTHENTICATION,
+            )
+        else:
+            logger.error(
+                f"Error downloading {component.component_uid}: {stderr or e}"
+            )
+            update_db(
+                component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN
+            )
+        raise e
     except Exception as e:
         logger.error(f"Error downloading {component.component_uid}")
         update_db(component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN)
@@ -342,7 +198,9 @@ def get_component(request: dict, uid: str):
     component = Component(**request)
 
     if component.component_download_engine == "https":
-        component.component_dl_url = component.component_download_file
+        component.component_dl_url = _resolve_broadcom_token(
+            component.component_download_file
+        )
         download_file = urlparse(component.component_download_file).path.split("/")[-1]
         component.component_download_file = download_file
 
@@ -369,7 +227,7 @@ def get_file_size(component: Component) -> int | None:
     return None
 
 
-def get_size_unit(component: Component) -> Tuple[float, str]:
+def get_size_unit(component: Component) -> tuple[float, str]:
     size_str, unit_str = component.component_download_file_size.split(" ")
     size = float(size_str)
     unit = unit_str.upper()
@@ -432,6 +290,13 @@ def verify_checksum(component: Component, filename: Path) -> bool:
     if checksum != expected_checksum:
         logger.info(f"Expected Checksum: {expected_checksum}")
         update_db(component.component_uid, ComponentDownloadStatus.FAILED_CHECKSUM)
+        # Remove the bad file so the next download attempt starts clean and
+        # we don't leave a checksum-mismatched payload at the staging path.
+        try:
+            Path(filename).unlink(missing_ok=True)
+            logger.info(f"Removed {filename} (checksum mismatch)")
+        except OSError as exc:
+            logger.warning(f"Could not remove {filename}: {exc}")
         raise ValueError("Checksum does not match")
     logger.info(f"Updating {component.component_uid} status")
     update_db(
@@ -446,35 +311,20 @@ def calculate_percentage(current_size, expected_size):
     return round(100 * current_size / expected_size)
 
 
-def get_download_paths(component: Component) -> Tuple[str, str]:
+def get_download_paths(component: Component) -> tuple[str, str]:
     dl_path = component.component_dl_path
     tmp_dl_path = f"{dl_path}.tmp"
     return dl_path, tmp_dl_path
 
 
-def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=30):
+def track_download_progress(dl_path, tmp_dl_path, file_size, timeout=30):
     logger = get_run_logger()
     start_time = time.time()
-    # logger.info("Tracking downloading process")
     while not Path(dl_path).exists() and not Path(tmp_dl_path).exists():
         elapsed_time = time.time() - start_time
 
-        #  Stop tracking progress when download_status is:
-        # - FAILED_AUTHENTICATION
-        # - FAILED_NOT_ENTITLED
-        #
-        # Raise an error so Prefect engine fails the Task
-        #
-        c = get_component_by_uid(component.component_uid)
-
-        if c.download_status in [
-            ComponentDownloadStatus.FAILED_AUTHENTICATION,
-            ComponentDownloadStatus.FAILED_NOT_ENTITLED,
-        ]:
-            raise RuntimeError(f"VMware Customer Connect error: {c.download_status} !")
-
         if elapsed_time > timeout:
-            logger.info(f"Timeout, waiting for file to track { dl_path} {tmp_dl_path}")
+            logger.info(f"Timeout, waiting for file to track {dl_path} {tmp_dl_path}")
             return "Timeout"
 
         time.sleep(1)
@@ -490,18 +340,27 @@ def track_download_progress(dl_path, tmp_dl_path, file_size, component, timeout=
     )
 
 
+# component_download_file_size only drives the rendered percentage; if it is
+# slightly off (rounding, eyeballed value, etc.) the percent can plateau just
+# below 100 forever. Treat the download as finished once the file has stopped
+# growing — checksum verify is the real correctness gate.
+PROGRESS_POLL_SECONDS = 5
+PROGRESS_STABLE_POLLS_DONE = 6  # 6 * 5s = 30s of unchanged file size
+
+
 @task(task_run_name="{component.component_uid}-update-download-progress")
-def update_download_progress(component):  # sourcery skip: raise-specific-error
+def update_download_progress(component):
     logger = get_run_logger()
     dl_path, tmp_dl_path = get_download_paths(component)
     expected_size = round(convert_to_byte(component=component))
 
     logger.info(f"Tracking download progress for component {component.component_uid}")
 
-    while True:
-        c = get_component_by_uid(component.component_uid)
+    last_size = -1
+    stable_polls = 0
 
-        progress = track_download_progress(dl_path, tmp_dl_path, expected_size, c)
+    while True:
+        progress = track_download_progress(dl_path, tmp_dl_path, expected_size)
 
         if progress == "Timeout":
             logger.info("Timeout: no file to track, exiting")
@@ -518,7 +377,26 @@ def update_download_progress(component):  # sourcery skip: raise-specific-error
             )
             return True
 
-        time.sleep(5)
+        # Permissive fallback: if the file has stopped growing for a while the
+        # download is finished even if percent didn't quite reach 100.
+        current_path = Path(dl_path) if Path(dl_path).exists() else Path(tmp_dl_path)
+        current_size = (
+            current_path.stat().st_size if current_path.exists() else -1
+        )
+        if current_size > 0 and current_size == last_size:
+            stable_polls += 1
+            if stable_polls >= PROGRESS_STABLE_POLLS_DONE:
+                logger.info(
+                    f"Download size stable at {current_size} bytes for "
+                    f"{PROGRESS_STABLE_POLLS_DONE * PROGRESS_POLL_SECONDS}s; "
+                    f"treating as completed (checksum verify will confirm)."
+                )
+                return True
+        else:
+            stable_polls = 0
+        last_size = current_size
+
+        time.sleep(PROGRESS_POLL_SECONDS)
 
     return False
 
@@ -584,19 +462,15 @@ def flow_component_download(uid: str):
 
     logger.info(f"update_download_progress Status: {result}")
 
-    # tsugliani:
-    # Adding this because something is not working in this whole logic again :-(
-    c = get_component_by_uid(component.component_uid)
-    if c.download_status in [
-        ComponentDownloadStatus.FAILED_AUTHENTICATION,
-        ComponentDownloadStatus.FAILED_NOT_ENTITLED,
-    ]:
-        raise RuntimeError(
-            "VMware Customer Connect error: Check Account entitlements/credentials !"
-        )
-
     if not result:
-        update_db(component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN)
+        # Preserve any specific FAILED_* status that download_component
+        # already set (auth, unsupported engine, etc.); only fall back to
+        # FAILED_UNKNOWN when nothing more specific is on record.
+        c = get_component_by_uid(component.component_uid)
+        if not (c and str(c.download_status).startswith("FAILED_")):
+            update_db(
+                component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN
+            )
         raise ValueError(f"Unable to download {uid}")
 
     verify = verify_checksum(
