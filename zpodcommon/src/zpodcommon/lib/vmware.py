@@ -166,6 +166,231 @@ class vCenter:
                 if result := self.find_folder(name, child):
                     return result
 
+    def get_folder(self, name, root=None):
+        """Find a VM folder by name anywhere under `root` (default: the whole
+        inventory)."""
+        content = self.si.content
+        folders = content.viewManager.CreateContainerView(
+            root or content.rootFolder, [vim.Folder], True
+        ).view
+        for folder in folders:
+            if result := self.find_folder(name, folder):
+                return result
+        return None
+
+    def get_or_create_folder(self, parent_name, child_name):
+        """Return the `child_name` subfolder of `parent_name`, creating it if
+        missing."""
+        parent = self.get_folder(parent_name)
+        if parent is None:
+            raise RuntimeError(f"folder not found: {parent_name}")
+        for child in parent.childEntity:
+            if isinstance(child, vim.Folder) and child.name == child_name:
+                return child
+        return parent.CreateFolder(child_name)
+
+    @staticmethod
+    def inventory_path(obj):
+        """Absolute vCenter inventory path of a managed object, e.g.
+        /<datacenter>/vm/<folder>/<sub> (the rootFolder, whose parent is None,
+        renders as the leading slash)."""
+        parts = []
+        node = obj
+        while node is not None and node.parent is not None:
+            parts.append(node.name)
+            node = node.parent
+        return "/" + "/".join(reversed(parts))
+
+    def get_network(self, name=None, preferred="VM Network"):
+        """Return the network named `name`; if `name` is None, return any
+        network on the endpoint, preferring `preferred`."""
+        if name is not None:
+            return self.get_portgroup(name)
+        networks = self.get_obj_list(vim.Network)
+        if not networks:
+            return None
+        for net in networks:
+            if net.name == preferred:
+                return net
+        return networks[0]
+
+    def mark_as_template(self, vm):
+        vm.MarkAsTemplate()
+
+    def set_custom_field(self, entity, name, value):
+        cfm = self.si.content.customFieldsManager
+        key = next((f.key for f in cfm.field or [] if f.name == name), None)
+        if key is None:
+            key = cfm.AddFieldDefinition(name=name, moType=vim.VirtualMachine).key
+        cfm.SetField(entity=entity, key=key, value=value)
+
+    def get_custom_field(self, entity, name):
+        cfm = self.si.content.customFieldsManager
+        key = next((f.key for f in cfm.field or [] if f.name == name), None)
+        if key is None:
+            return None
+        return next(
+            (cv.value for cv in entity.customValue or [] if cv.key == key), None
+        )
+
+    def network_backing(self, network):
+        """Build a NIC backing matching the network type (NSX opaque / DVPG /
+        standard)."""
+        if isinstance(network, vim.OpaqueNetwork):
+            backing = vim.vm.device.VirtualEthernetCard.OpaqueNetworkBackingInfo()
+            backing.opaqueNetworkId = network.summary.opaqueNetworkId
+            backing.opaqueNetworkType = network.summary.opaqueNetworkType
+            return backing
+        if isinstance(network, vim.dvs.DistributedVirtualPortgroup):
+            backing = (
+                vim.vm.device.VirtualEthernetCard.DistributedVirtualPortBackingInfo()
+            )
+            backing.port = vim.dvs.PortConnection()
+            backing.port.portgroupKey = network.key
+            backing.port.switchUuid = network.config.distributedVirtualSwitch.uuid
+            return backing
+        backing = vim.vm.device.VirtualEthernetCard.NetworkBackingInfo()
+        backing.deviceName = network.name
+        backing.network = network
+        return backing
+
+    def clone_template(
+        self,
+        *,
+        template,
+        name,
+        resource_pool_name,
+        datastore_name,
+        folder_name,
+        vapp_properties=None,
+        portgroup_name=None,
+        power_on=False,
+    ):
+        """Clone a VM template into the given resource pool / datastore / folder.
+
+        Optionally override vApp/OVF property values (``{key: value}`` matched by
+        fully-qualified OVF key) and remap *all* NICs to ``portgroup_name``.
+        Returns the cloned VM, left powered off unless ``power_on`` is set.
+        """
+        pool = self.get_vapp(resource_pool_name) or self.get_obj(
+            vim.ResourcePool, "name", resource_pool_name
+        )
+        if pool is None:
+            raise RuntimeError(f"resource pool/vApp not found: {resource_pool_name}")
+        datastore = self.get_obj(vim.Datastore, "name", datastore_name)
+        if datastore is None:
+            raise RuntimeError(f"datastore not found: {datastore_name}")
+        folder = self.get_folder(folder_name)
+        if folder is None:
+            raise RuntimeError(f"vmfolder not found: {folder_name}")
+
+        relocate = vim.vm.RelocateSpec()
+        relocate.pool = pool  # VirtualApp is a ResourcePool; clone lands in it
+        relocate.datastore = datastore
+
+        config = vim.vm.ConfigSpec()
+        if vapp_properties:
+            config.vAppConfig = self.vapp_property_overrides(
+                template, vapp_properties
+            )
+        if portgroup_name:
+            config.deviceChange = self.nic_portgroup_changes(template, portgroup_name)
+
+        clone_spec = vim.vm.CloneSpec(
+            location=relocate, config=config, powerOn=power_on, template=False
+        )
+        task.WaitForTask(
+            template.CloneVM_Task(folder=folder, name=name, spec=clone_spec)
+        )
+        return self.get_vm(name)
+
+    def vapp_property_overrides(self, template, values):
+        """``VmConfigSpec`` overriding the cloned VM's vApp/OVF property values.
+
+        govc/OVF keys are fully qualified (``[classId.]id[.instanceId]``, e.g.
+        ``vami.ip0.SDDC-Manager``) while vCenter splits them into
+        id/classId/instanceId, so match every key form. Each set/miss is logged
+        for troubleshooting (secrets masked)."""
+        spec = vim.vApp.VmConfigSpec()
+        vapp = template.config.vAppConfig
+        template_props = list(vapp.property) if vapp else []
+
+        by_key = {}
+        for prop in template_props:
+            for form in self.property_key_forms(prop):
+                by_key.setdefault(form, prop)
+
+        print(
+            f"Injecting {len(values)} OVF properties "
+            f"({len(template_props)} available on template)"
+        )
+        props = []
+        unmatched = []
+        for key, value in values.items():
+            prop = by_key.get(key)
+            if prop is None:
+                unmatched.append(key)
+                print(f"  MISS {key!r} ({self.mask_secret(key, value)}) — no template property")
+                continue
+            info = vim.vApp.PropertyInfo()
+            info.key = prop.key
+            info.value = value
+            pspec = vim.vApp.PropertySpec()
+            pspec.operation = "edit"
+            pspec.info = info
+            props.append(pspec)
+            print(
+                f"  SET {key!r} -> id={prop.id!r} instanceId={prop.instanceId!r} "
+                f"key={prop.key} = {self.mask_secret(key, value)}"
+            )
+        if unmatched:
+            print(f"  WARNING: {len(unmatched)} unmatched: {unmatched}")
+        spec.property = props
+        return spec
+
+    def nic_portgroup_changes(self, template, portgroup_name):
+        """Device changes remapping ALL NICs of `template` to `portgroup_name`."""
+        network = self.get_portgroup(portgroup_name)
+        if network is None:
+            raise RuntimeError(f"portgroup not found: {portgroup_name}")
+        backing = self.network_backing(network)
+        changes = []
+        for device in template.config.hardware.device:
+            if isinstance(device, vim.vm.device.VirtualEthernetCard):
+                device.backing = backing
+                spec = vim.vm.device.VirtualDeviceSpec()
+                spec.operation = vim.vm.device.VirtualDeviceSpec.Operation.edit
+                spec.device = device
+                changes.append(spec)
+        print(
+            f"Remapping {len(changes)} NIC(s) to portgroup {portgroup_name!r} "
+            f"({type(backing).__name__})"
+        )
+        return changes
+
+    @staticmethod
+    def property_key_forms(prop):
+        """All fully-qualified spellings govc may use for a vApp property:
+        id, classId.id, id.instanceId, classId.id.instanceId."""
+        cid = prop.classId or ""
+        iid = prop.instanceId or ""
+        forms = [prop.id]
+        if cid:
+            forms.append(f"{cid}.{prop.id}")
+        if iid:
+            forms.append(f"{prop.id}.{iid}")
+        if cid and iid:
+            forms.append(f"{cid}.{prop.id}.{iid}")
+        return forms
+
+    @staticmethod
+    def mask_secret(key, value):
+        """Hide secret values in logs (Prefect persists task logs)."""
+        k = key.lower()
+        if "password" in k or "passwd" in k or "ssh" in k:
+            return f"***(len={len(str(value))})"
+        return repr(value)
+
     def get_vapps(self, root=None, props=None):
         return self.get_obj_list(vim.VirtualApp, root=root, props=props)
 
@@ -204,16 +429,7 @@ class vCenter:
                 else:
                     resource_pool = _resource_pool
 
-        folders = content.viewManager.CreateContainerView(
-            content.rootFolder, [vim.Folder], True
-        ).view
-        vmFolderMO = None
-
-        for folder in folders:
-            if isinstance(folder, vim.Folder):
-                if result := self.find_folder(folder_name, folder):
-                    vmFolderMO = result
-                    break
+        vmFolderMO = self.get_folder(folder_name)
 
         resSpec = vim.ResourceConfigSpec()
         resSpec.memoryAllocation = self.create_allocation_object(resSpec, 163840)
@@ -345,7 +561,7 @@ class vCenter:
         task_id = vm.ReconfigVM_Task(spec)
         task.WaitForTask(task_id)
 
-    def _clone_dvpg_backing_from(self, nic: vim.vm.device.VirtualEthernetCard):
+    def clone_dvpg_backing_from(self, nic: vim.vm.device.VirtualEthernetCard):
         """
         Build a new DVPortgroup backing that matches the given NIC's DVPG.
         Raises if the NIC is not DVPG-backed.
@@ -391,7 +607,7 @@ class vCenter:
             raise ValueError("Cannot infer DVPortgroup: VM has no existing NICs.")
 
         # Mirror the first NIC's DVPG
-        dvpg_backing = self._clone_dvpg_backing_from(current_nics[0])
+        dvpg_backing = self.clone_dvpg_backing_from(current_nics[0])
 
         to_add = vnic_num - current_count
 
