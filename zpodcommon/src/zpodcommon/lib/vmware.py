@@ -67,19 +67,54 @@ class vCenter:
                 ret.extend(arg)
         return ret
 
-    def get_obj(self, vimtype, attr, value, root=None, props=None):
-        objs = self.get_obj_list(vimtype, root=root)
-        info = [
-            oprops if props else oprops["obj"]
-            for oprops in self.get_props(data=objs, props=self.joinitems(attr, props))
-            if oprops[attr] == value
-        ]
-        li = len(info)
-        if li == 1:
-            return info[0]
-        elif li == 0:
-            return None
-        raise Exception("Multiple results found when there should only be one")
+    def get_obj(
+        self,
+        vimtype,
+        attr,
+        value,
+        root=None,
+        props=None,
+        max_retries: int = 3,
+        backoff: float = 1.0,
+    ):
+        # vSphere container views hand out managed-object references that
+        # can go stale if another caller (e.g. a parallel zpod_destroy)
+        # deletes objects concurrently. RetrievePropertiesEx then raises
+        # vmodl.fault.ManagedObjectNotFound and fails the whole batch,
+        # even when our target object is fine. Re-enumerating yields a
+        # fresh view that excludes the deleted ref; retry with backoff.
+        for attempt in range(max_retries + 1):
+            try:
+                objs = self.get_obj_list(vimtype, root=root)
+                info = [
+                    oprops if props else oprops["obj"]
+                    for oprops in self.get_props(
+                        data=objs, props=self.joinitems(attr, props)
+                    )
+                    if oprops[attr] == value
+                ]
+                li = len(info)
+                if li == 1:
+                    return info[0]
+                elif li == 0:
+                    return None
+                raise Exception(
+                    "Multiple results found when there should only be one"
+                )
+            except vmodl.fault.ManagedObjectNotFound as exc:
+                if attempt >= max_retries:
+                    raise
+                # print() rather than logger.warning so Prefect's
+                # log_prints=True picks it up into the task-run logs.
+                print(
+                    f"vSphere ManagedObjectNotFound looking up "
+                    f"{vimtype.__name__} '{value}' (stale ref {exc.obj}, "
+                    f"attempt {attempt + 1}/{max_retries + 1}) — "
+                    "re-enumerating"
+                )
+                time.sleep(backoff * (2 ** attempt))
+        # Loop returns or raises on every path; safety belt for type checkers.
+        raise RuntimeError("get_obj retry loop exited without returning")
 
     def get_obj_list(self, vimtype, root=None, props=None):
         if root is None:
@@ -93,7 +128,7 @@ class vCenter:
         return self.get_props(data=view, props=props) if props else view
 
     def get_portgroups(self, props=None):
-        return self.get_obj_list([vim.Network], props=props)
+        return self.get_obj_list(vim.Network, props=props)
 
     def get_portgroup(self, name, props=None):
         return self.get_obj(vim.Network, "name", name, props=props)
@@ -189,16 +224,32 @@ class vCenter:
 
         resource_pool.CreateVApp(vapp_name, resSpec, configSpec, vmFolderMO)
 
-    def delete_vapp(self, vapp_name):
-        if vapp := self.get_vapp(vapp_name):
-            if vapp.summary.vAppState != "stopped":
-                # Wait for vApp PowerOff operation to complete
-                task_id = vapp.PowerOffVApp_Task(True)
-                task.WaitForTask(task_id)
+    def delete_vapp(self, vapp_name, max_retries: int = 5, backoff: float = 2.0):
+        # vCenter serializes operations on a vApp. If a deploy/clone/power-on
+        # task is still settling when we tear the zpod down, PowerOff/Destroy
+        # raise vim.fault.VAppTaskInProgress ("Operation cannot be performed
+        # while a vApp operation is in progress."). Re-fetch and retry with
+        # backoff until the in-flight task clears.
+        for attempt in range(max_retries + 1):
+            try:
+                if vapp := self.get_vapp(vapp_name):
+                    if vapp.summary.vAppState != "stopped":
+                        # Wait for vApp PowerOff operation to complete
+                        task.WaitForTask(vapp.PowerOffVApp_Task(True))
 
-            # Wait for vApp Destroy operation to complete
-            task_id = vapp.Destroy_Task()
-            task.WaitForTask(task_id)
+                    # Wait for vApp Destroy operation to complete
+                    task.WaitForTask(vapp.Destroy_Task())
+                return
+            except vim.fault.VAppTaskInProgress:
+                if attempt >= max_retries:
+                    raise
+                # print() rather than logger.warning so Prefect's
+                # log_prints=True picks it up into the task-run logs.
+                print(
+                    f"vSphere VAppTaskInProgress deleting vApp '{vapp_name}' "
+                    f"(attempt {attempt + 1}/{max_retries + 1}) — retrying"
+                )
+                time.sleep(backoff * (2 ** attempt))
 
     def delete_vm_from_vapp(self, vapp_name: str, vm_name: str):
         print("Delete VM from vApp")
