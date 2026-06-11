@@ -105,6 +105,38 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
     print("govc ovf property options generated file")
     print(json.dumps(json.loads(govc_spec_render), indent=2))
 
+    # FF (Feature Flag): stage the OVA once into a VM Template and clone it for
+    # every subsequent L1 deployment instead of re-uploading it each time.
+    # Only L1 components (component_isnested is False) land on the endpoint
+    # vCenter. Any failure falls back to the direct OVA import below.
+    if (
+        isnested is False
+        and DBUtils.get_setting_value("ff_endpoint_ova_staging") == "true"
+    ):
+        try:
+            from zpodengine.lib.ova_staging import deploy_from_template
+
+            deploy_from_template(
+                zpod=zpod,
+                component=component,
+                compute=zpod.endpoint.endpoints["compute"],
+                govc_spec=govc_spec,
+                real_property_values={
+                    pm["Key"]: pm["Value"]
+                    for pm in json.loads(govc_spec_render).get("PropertyMapping", [])
+                },
+                vm_name=vm_name,
+                vapp_pool_name=resource_pool,
+                portgroup_name=zpod_portgroup,
+                govc_url=url,
+            )
+            return
+        except Exception as e:
+            print(
+                "[ff_endpoint_ova_staging] staging/clone failed, falling back to "
+                f"direct OVA import: {e}"
+            )
+
     options_filename = f"/tmp/{zpod_component.fqdn}.json"
     with open(options_filename, "w") as f:
         f.write(govc_spec_render)
