@@ -2,14 +2,24 @@ from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
 
+from zpodcli.lib.global_flags import GLOBAL_FLAGS
 from zpodcli.lib.utils import JsonOption, NoColorOption, console_print, json_print
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.setting_create import SettingCreate
 from zpodsdk.models.setting_update import SettingUpdate
 
 app = typer.Typer(help="Manage Settings")
+
+
+def _display_setting_value(name: str, value: str | None) -> str:
+    value = value or ""
+    if GLOBAL_FLAGS["svg"] and (
+        name == "zpodfactory_ssh_key" or value.startswith("ssh-rsa")
+    ):
+        return "ssh-rsa XXXXXXXX… root@zPodMaster"
+    return value
 
 
 def generate_table(settings: list):
@@ -27,7 +37,7 @@ def generate_table(settings: list):
         table.add_row(
             f"[tan]{setting.name}[/tan]",
             f"{setting.description}",
-            f"[dark_khaki]{setting.value}[/dark_khaki]",
+            f"[dark_khaki]{_display_setting_value(setting.name, setting.value)}[/dark_khaki]",
         )
     console_print(title, table)
 

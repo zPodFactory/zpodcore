@@ -4,7 +4,6 @@ from typing import Annotated
 import typer
 from rich import print
 from rich.live import Live
-from rich.table import Table
 
 from zpodcli.lib.prompt import confirm
 from zpodcli.lib.utils import (
@@ -15,6 +14,7 @@ from zpodcli.lib.utils import (
     get_status_markdown,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView

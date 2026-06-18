@@ -4,7 +4,6 @@ from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
 
 from zpodcli.lib.file import load_json_or_yaml_file
 from zpodcli.lib.utils import (
@@ -14,6 +13,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.profile_create import ProfileCreate
 from zpodsdk.models.profile_item_create import ProfileItemCreate

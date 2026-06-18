@@ -6,7 +6,6 @@ from typing import Annotated
 import typer
 from attrs import fields_dict
 from rich import print
-from rich.table import Table
 
 from zpodcli.cmd import endpoint_permission_cli
 from zpodcli.lib.file import load_json_or_yaml_file
@@ -18,6 +17,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_compute_create import EndpointComputeCreate
 from zpodsdk.models.endpoint_compute_drivers import EndpointComputeDrivers

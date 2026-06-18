@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from typing import Annotated
 
@@ -6,9 +7,33 @@ import typer
 from rich import print
 from rich.console import Console
 from rich.json import JSON
-from rich.terminal_theme import DIMMED_MONOKAI
+from rich.table import Table
 
+from zpodcli.lib.catppuccin_mocha import CATPPUCCIN_MOCHA_TERMINAL
 from zpodcli.lib.global_flags import GLOBAL_FLAGS
+
+DEFAULT_SVG_WIDTH = 240
+DEFAULT_SVG_MIN_WIDTH = 200
+
+
+class ZcliTable(Table):
+    """Rich table tuned for SVG screenshots (no wrap/truncation)."""
+
+    def __init__(self, *args, **kwargs):
+        if GLOBAL_FLAGS["svg"]:
+            kwargs.setdefault("expand", False)
+        super().__init__(*args, **kwargs)
+
+    def add_column(self, *args, **kwargs):
+        if GLOBAL_FLAGS["svg"]:
+            kwargs.setdefault("no_wrap", True)
+            kwargs.setdefault("overflow", "ignore")
+        return super().add_column(*args, **kwargs)
+
+
+def _svg_console_width() -> int:
+    width = int(os.environ.get("ZCLI_SVG_WIDTH", str(DEFAULT_SVG_WIDTH)))
+    return max(width, DEFAULT_SVG_MIN_WIDTH)
 
 
 def _set_no_color(value: bool) -> bool:
@@ -79,14 +104,16 @@ def get_status_markdown(status: str):
 # if global SVG flag is True, will generate SVG output file.
 # if --no-color was given, colors are stripped (bold/dim styling is kept).
 def console_print(title, content):
-    console = Console(
-        record=GLOBAL_FLAGS["svg"],
-        no_color=GLOBAL_FLAGS["no_color"],
-    )
+    if GLOBAL_FLAGS["svg"]:
+        width = _svg_console_width()
+        # Rich only honors `width` when `height` is also set (non-TTY environments).
+        console = Console(record=True, width=width, height=80, soft_wrap=False)
+    else:
+        console = Console(no_color=GLOBAL_FLAGS["no_color"])
     console.print(content)
     if GLOBAL_FLAGS["svg"]:
         filename = title.replace(" ", "_").lower() + ".svg"
-        console.save_svg(filename, title="", theme=DIMMED_MONOKAI)
+        console.save_svg(filename, title="", theme=CATPPUCCIN_MOCHA_TERMINAL)
 
 
 def json_print(data):

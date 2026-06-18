@@ -2,10 +2,10 @@ from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
 
 from zpodcli.cmd import permission_group_user_cli
 from zpodcli.lib.utils import JsonOption, NoColorOption, console_print, json_print
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.permission_group_create import PermissionGroupCreate
 from zpodsdk.models.permission_group_update import PermissionGroupUpdate

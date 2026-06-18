@@ -3,7 +3,6 @@ from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
 
 from zpodcli.lib.factory_config import FactoryConfig
 from zpodcli.lib.utils import (
@@ -14,6 +13,7 @@ from zpodcli.lib.utils import (
     get_boolean_markdown,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 
 app = typer.Typer(help="Manage Factories")
 

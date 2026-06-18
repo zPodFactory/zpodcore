@@ -2,7 +2,6 @@ from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -11,6 +10,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_permission import ZpodPermission
 from zpodsdk.models.zpod_permission_group_add_remove import (

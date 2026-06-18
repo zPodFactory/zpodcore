@@ -5,7 +5,7 @@ from typing import Annotated
 import typer
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, box
+from rich.table import box
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -14,6 +14,7 @@ from zpodcli.lib.utils import (
     get_status_markdown,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_dns_view import ZpodDnsView
 from zpodsdk.models.zpod_permission import ZpodPermission
