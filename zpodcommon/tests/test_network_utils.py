@@ -15,6 +15,6 @@ def test_mgmt_ip_arithmetic():
 
 def test_mgmt_ip_known_host_ids():
     assert MgmtIp.MGMT_HOST_IDS["gw"] == 1
-    assert MgmtIp.MGMT_HOST_IDS["zbox"] == 2
+    assert MgmtIp.MGMT_HOST_IDS["zcore"] == 2
     assert MgmtIp.MGMT_HOST_IDS["vcsa"] == 10
     assert MgmtIp.MGMT_HOST_IDS["nsxt"] == 20

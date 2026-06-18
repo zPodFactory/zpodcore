@@ -60,14 +60,14 @@ def get_zpod_primary_subnet(endpoint: str):
 # We defaulted each of them to a /26 network
 # This means we will have 4 x /26 usable in the zPod
 # The first /26 will be managed by the Native VDS/NSX-T Segment
-# The last 3 x /26 will be managed by zbox/vyos through guest VLANs
+# The last 3 x /26 will be managed by zcore/vyos through guest VLANs
 # Example:
 # zpod_subnet = 10.96.50.0/24
 # provides:
 # - 10.96.50.0/26   [VDS/NSX-T on native vlan (no tagging)]
-# - 10.96.50.64/26  [zbox/vyos on vlan 64]
-# - 10.96.50.128/26 [zbox/vyos on vlan 128]
-# - 10.96.50.192/26 [zbox/vyos on vlan 192]
+# - 10.96.50.64/26  [zcore/vyos on vlan 64]
+# - 10.96.50.128/26 [zcore/vyos on vlan 128]
+# - 10.96.50.192/26 [zcore/vyos on vlan 192]
 #
 
 

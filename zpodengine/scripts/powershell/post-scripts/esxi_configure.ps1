@@ -1,6 +1,6 @@
 Param (
     [String]$zPodHostname = $(throw "-zPodHostname required"),
-    [string]$zBoxHostname = $(throw "-zBoxHostname required"),
+    [string]$zCoreHostname = $(throw "-zCoreHostname required"),
     [string]$zPodFactory = $(throw "-zPodFactory required"),
     [String]$zPodPassword = $(throw "-zPodPassword required")
 )
@@ -16,7 +16,7 @@ $LIB_DIR = "/zpodengine/scripts/powershell/lib"
 Retry-Command -ScriptBlock { Connect-VIServer -Server $zPodHostname -User root -Password $zPodPassword }
 
 # NFS
-Retry-Command -ScriptBlock { Get-VMHost | New-Datastore -NFS -Name "NFS-01" -Path "/FILER/STORAGE01/NFS-01" -NfsHost $zBoxHostname }
+Retry-Command -ScriptBlock { Get-VMHost | New-Datastore -NFS -Name "NFS-01" -Path "/FILER/STORAGE01/NFS-01" -NfsHost $zCoreHostname }
 
 # Set to Connected (not maintenance mode)
 Retry-Command -ScriptBlock { Get-VMHost | Set-VMHost -State "Connected" | Out-Null }

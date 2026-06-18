@@ -12,8 +12,8 @@ def zpod_deploy_dnsmasq(zpod_id: int):
     with database.get_session_ctx() as session:
         zpod = session.get(M.Zpod, zpod_id)
 
-        # Fetch associate zbox IP from subnet
-        dns_ip = MgmtIp.zpod(zpod, "zbox").ip
+        # Fetch the core component IP from subnet
+        dns_ip = MgmtIp.zpod(zpod, "zcore").ip
 
         # Create dnsmasq configuration
         dnsmasq.add(zpod.domain, dns_ip)

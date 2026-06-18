@@ -39,6 +39,16 @@ def validate_profile(session: Session, profile_obj: list):
         elif components.get(component_uid) != ComponentStatus.ACTIVE:
             errors.append(f"Component is not ACTIVE: {component_uid}")
 
+    # The mandatory core component (zcore-*) must be the first element.
+    first = profile_obj[0] if profile_obj else None
+    if not isinstance(first, dict) or not str(
+        first.get("component_uid", "")
+    ).startswith("zcore-"):
+        errors.append(
+            "Profile must start with a zcore-* core component as its "
+            "first element (legacy zbox profiles must be migrated first)"
+        )
+
     if errors:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

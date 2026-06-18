@@ -28,8 +28,8 @@ def zpod_component_add_deploy(
         print(component)
 
         match component.component_name:
-            case "zbox":
-                print("--- zbox ---")
+            case "zcore":
+                print("--- zcore ---")
 
                 ovf_deployer(zpod_component)
 
@@ -108,7 +108,17 @@ def zpod_component_add_deploy(
                 print("--- Normal Component ---")
                 ovf_deployer(zpod_component)
 
-                with vCenter.auth_by_zpod(zpod=zpod_component.zpod) as vc:
-                    vm = vc.get_vm(name=zpod_component.hostname)
-                    print("Start VM")
-                    vc.poweron_vm(vm)
+                isnested = component.component_json["component_isnested"]
+                print(f"Component Nested: {isnested}")
+
+                if isnested:
+                    with vCenter.auth_by_zpod(zpod=zpod_component.zpod) as vc:
+                        vm = vc.get_vm(name=zpod_component.hostname)
+                        print("Start VM")
+                        vc.poweron_vm(vm)
+                else:
+                    with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
+                        vm = vc.get_vm(name=zpod_component.fqdn)
+                        print("Start VM")
+                        vc.poweron_vm(vm)
+

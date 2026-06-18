@@ -61,13 +61,35 @@ def profile_item_output(profile):
 
 @app.command(name="list")
 @unexpected_status_handler
-def profile_list():
+def profile_list(
+    json_: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
+    ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
+):
     """
     Profile List
     """
     z: ZpodClient = ZpodClient()
     profiles = z.profiles_get_all.sync()
-    generate_table(profiles, "List")
+    if json_:
+        profiles_dict = [profile.to_dict() for profile in profiles]
+        json_print(profiles_dict, no_color=no_color)
+    else:
+        generate_table(profiles, "List")
 
 
 @app.command(name="info", no_args_is_help=True)

@@ -318,7 +318,7 @@ def zpod_create(
             for esxi in component:
                 component_order.append((esxi.component_uid, esxi.hostname))
         else:
-            # Handle single components like zbox
+            # Handle single components like zcore
             component_order.append(component.component_uid)
 
     ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint}")

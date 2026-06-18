@@ -31,8 +31,8 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
 
         # Specific behavior for critical zpod components
         match component.component_name:
-            case "zbox":
-                print("--- zbox ---")
+            case "zcore":
+                print("--- zcore ---")
                 # Add static routes on NSX T1 unless using vyos below
 
                 # Wait until zboxapi is ready
@@ -48,9 +48,9 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                         print(f"Waiting for {e.request.url} to start.")
                         time.sleep(15)
 
-                # Would prefer to raise an error here, but we need to support old
-                # zbox versions
-                print("DNS startup failure.  Skipping...")
+                raise RuntimeError(
+                    "zcore DNS (zboxapi /dns) did not become ready within 180s"
+                )
 
             case "vyos":
                 print("--- vyos ---")
@@ -115,7 +115,7 @@ def zpod_component_add_post_scripts(*, zpod_component_id: int):
                 cmd = (
                     f"/zpodengine/scripts/powershell/post-scripts/esxi_configure.ps1"
                     f" -zPodHostname {zpod_component.fqdn}"
-                    f" -zBoxHostname zbox.{zpod.domain}"
+                    f" -zCoreHostname zcore.{zpod.domain}"
                     f" -zPodFactory {zpodfactory_host}.{zpod.domain}"
                     f" -zPodPassword {zpod.password}"
                 )
