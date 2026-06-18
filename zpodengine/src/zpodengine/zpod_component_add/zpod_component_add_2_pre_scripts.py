@@ -19,7 +19,7 @@ def zpod_component_add_pre_scripts(
         zpod_component = session.get(M.ZpodComponent, zpod_component_id)
 
         c = zpod_component.component
-        if c.component_name != "zbox":
+        if c.component_name != "zcore":
             zb = ZboxApiClient.by_zpod(zpod_component.zpod)
             try:
                 response = zb.post(

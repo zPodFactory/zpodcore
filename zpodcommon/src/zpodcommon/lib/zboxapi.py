@@ -106,7 +106,7 @@ class ZboxApiClient(httpx.Client):
         **kwargs,
     ):
         return cls(
-            zbox_url=f"{protocol}://zbox.{zpod.domain}:{port}{root_path}",
+            zbox_url=f"{protocol}://zcore.{zpod.domain}:{port}{root_path}",
             zbox_password=zpod.password,
             **kwargs,
         )

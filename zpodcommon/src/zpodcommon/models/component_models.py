@@ -75,7 +75,7 @@ class Component(CommonDatesMixin, ModelBase, table=True):
                 usernames.append({"username": "admin", "type": "ui"})
             case "vrops":
                 usernames.append({"username": "admin", "type": "ui"})
-            case "vyos" | "zbox" | _:
+            case "vyos" | "zbox" | "zcore" | _:
                 pass
 
         return usernames

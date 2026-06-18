@@ -242,6 +242,10 @@ zpodcore-start-background $COLUMNS=rich_cols:
 zpodcore-stop:
   docker compose down
 
+# Migrate all profiles from zbox-* to the new zcore component
+zcore-transition:
+  @bash misc/zcore-transition.sh
+
 # Deploy all Flows
 zpodengine-deploy-all:
   just zpodengine-prefect --no-prompt deploy --all

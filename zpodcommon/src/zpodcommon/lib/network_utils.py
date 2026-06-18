@@ -8,7 +8,7 @@ from zpodcommon.lib.zboxapi import RequestError, ZboxApiClient
 class MgmtIp:
     MGMT_HOST_IDS = {
         "gw": 1,
-        "zbox": 2,
+        "zcore": 2,
         "zrdp": 3,
         "hcx-cloud": 7,
         "hcx-connector": 8,

@@ -3,9 +3,7 @@ from ipaddress import IPv4Network
 from typing import Annotated
 
 import typer
-from rich import print
 from rich.console import Group
-from rich.json import JSON
 from rich.panel import Panel
 from rich.table import Table, box
 
@@ -27,12 +25,12 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
                n - Networks
                c - Components
     """
-    # Find zbox component and get its IP once for all networks
-    zbox_component = next(
-        (comp for comp in zpod.components if comp.component.component_name == "zbox"),
+    # Find the zcore component and get its IP once for all networks
+    zcore_component = next(
+        (c for c in zpod.components if c.component.component_name == "zcore"),
         None,
     )
-    zbox_ip = zbox_component.ip if zbox_component else "Not found"
+    zcore_ip = zcore_component.ip if zcore_component else "Not found"
 
     # Get full endpoint information
     z: ZpodClient = ZpodClient()
@@ -113,7 +111,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
             vlan_id = int(network_part.split(".")[-1])
             vlan_display = "None (Untagged)" if vlan_id == 0 else str(vlan_id)
             router = (
-                "zPodFactory Endpoint NSX-T1" if vlan_id == 0 else f"zbox.{zpod.domain}"
+                "zPodFactory Endpoint NSX-T1" if vlan_id == 0 else f"zcore.{zpod.domain}"
             )
             # Calculate netmask from prefix length
             netmask = str(ipv4network.netmask)
@@ -121,33 +119,24 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
                 f"[bold]{network.cidr}[/bold]",
                 f"[cornflower_blue]{netmask}[/cornflower_blue]",
                 gateway,
-                f"{zbox_ip} [sky_blue2](zbox)[/sky_blue2]",
+                f"{zcore_ip} [sky_blue2](zcore)[/sky_blue2]",
                 f"[cornflower_blue]{vlan_display}[/cornflower_blue]",
                 f"[dark_khaki]{router}[/dark_khaki]",
             )
 
-        # Get the first network for NSX-T1 and zbox eth0
+        # Get the first network for NSX-T1 and zcore (eth0)
         nsx_network = zpod.networks[0]
         nsx_ipv4network = IPv4Network(nsx_network.cidr)
         nsx_gateway = str(nsx_ipv4network.network_address + 1)
 
-        # Get zbox IP
-        zbox_component = next(
-            (
-                comp
-                for comp in zpod.components
-                if comp.component.component_name == "zbox"
-            ),
-            None,
-        )
-        zbox_ip = zbox_component.ip if zbox_component else "N/A"
+        # zcore_ip already resolved above
 
         # Create static routes text
         static_routes = []
         for network in zpod.networks:
             if int(network.cidr.split("/")[0].split(".")[-1]) != 0:  # Skip native VLAN
                 static_routes.append(
-                    f"        ║      - [sky_blue2]{network.cidr}[/sky_blue2] to [yellow3]{zbox_ip}[/yellow3] ([yellow3]zbox[/yellow3])"
+                    f"        ║      - [sky_blue2]{network.cidr}[/sky_blue2] to [yellow3]{zcore_ip}[/yellow3] ([yellow3]zcore[/yellow3])"
                 )
 
         # Calculate T0 box width based on T0 value and header text
@@ -183,22 +172,22 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
  └{"─" * t1_width}┘
         ║`- [sky_blue2]{nsx_gateway}/{nsx_ipv4network.prefixlen}[/sky_blue2] (zPod Management Network)
         ║
-        ║     NSX-T1 Static routes to [yellow3]zbox[/yellow3] connected interface ([yellow3]eth0[/yellow3])
+        ║     NSX-T1 Static routes to [yellow3]zcore[/yellow3] connected interface ([yellow3]eth0[/yellow3])
 {chr(10).join(static_routes)}
         ║
         ║ [dark_sea_green4]zPod-{zpod.name}-segment[/dark_sea_green4] ([cyan]{endpoint.endpoints.network.transportzone}[/cyan])
         ║ - This NSX Segment carries VLANs [magenta]\\[0-4094][/magenta] (802.1Q Trunk)
         ║ """
 
-        # Calculate zbox box width based on content
-        zbox_header = "zbox"
+        # Calculate zcore box width based on content
+        zcore_header = "zcore"
         # Calculate width based only on interface names
         interface_names = ["eth0", "eth1.64", "eth1.128", "eth1.192"]
         max_interface_width = (
             max(len(name) for name in interface_names) + 8
         )  # Add padding
-        zbox_width = max(
-            len(zbox_header) + 8,  # Header + padding
+        zcore_width = max(
+            len(zcore_header) + 8,  # Header + padding
             max_interface_width,  # Interface names + padding
             15,  # Minimum width
         )
@@ -209,7 +198,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
             ipv4network = IPv4Network(network.cidr)
             if int(network.cidr.split("/")[0].split(".")[-1]) == 0:
                 # For eth0
-                ip_lengths.append(len(f"{zbox_ip}/{ipv4network.prefixlen}"))
+                ip_lengths.append(len(f"{zcore_ip}/{ipv4network.prefixlen}"))
             else:
                 # For eth1.X
                 gateway = str(ipv4network.network_address + 1)
@@ -223,7 +212,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
             gateway = str(ipv4network.network_address + 1)
             vlan_id = int(network.cidr.split("/")[0].split(".")[-1])
             if vlan_id == 0:
-                ip_str = f"{zbox_ip}/{ipv4network.prefixlen}"
+                ip_str = f"{zcore_ip}/{ipv4network.prefixlen}"
                 interface_info.append(
                     f" │ [yellow3]eth0[/yellow3]           │ - [yellow3]{ip_str}{' ' * (max_ip_length - len(ip_str))}[/yellow3] [cornflower_blue](None - Untagged)[/cornflower_blue]"
                 )
@@ -233,12 +222,12 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
                     f" │ eth1.[cornflower_blue]{vlan_id:<6}[/cornflower_blue]    │ - [sky_blue2]{ip_str}{' ' * (max_ip_length - len(ip_str))}[/sky_blue2] [cornflower_blue](VLAN {vlan_id})[/cornflower_blue]"
                 )
 
-        # Create the zbox box with just the interface names
-        zbox_box = f""" ┌{"─" * zbox_width}┐
- │ {zbox_header:^{zbox_width - 2}} │
- │ {" " * (zbox_width - 2)} │
+        # Create the zcore box with just the interface names
+        zcore_box = f""" ┌{"─" * zcore_width}┐
+ │ {zcore_header:^{zcore_width - 2}} │
+ │ {" " * (zcore_width - 2)} │
 {chr(10).join(interface_info)}
- └{"─" * zbox_width}┘"""
+ └{"─" * zcore_width}┘"""
 
         networks_panel = Panel(
             Group(
@@ -247,7 +236,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
                 "\nzPod Network Diagram:",
                 t0_box,
                 t1_box,
-                zbox_box,
+                zcore_box,
             ),
             title="Networks",
             border_style="yellow",

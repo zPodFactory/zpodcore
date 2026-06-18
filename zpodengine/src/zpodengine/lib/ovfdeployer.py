@@ -26,15 +26,15 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
     zpodfactory_host = DBUtils.get_setting_value("zpodfactory_host")
     zpodfactory_ssh_key = DBUtils.get_setting_value("zpodfactory_ssh_key")
 
-    if component.component_name in ["zbox", "vyos"]:
-        # zpodfactory is the main DNS server for every zpod and links to zbox/vyos
+    if component.component_name in ("zcore", "vyos"):
+        # zpodfactory is the main DNS server for every zpod and links to zcore/vyos
         # as DNS servers for their respective subdomain.
         #
         # For those 2 components, the DNS Server must be the zpodfactory_host.
         zpod_dns = zpodfactory_host
     else:
-        # all other components rely on zbox/vyos as their DNS server.
-        zpod_dns = MgmtIp.zpod(zpod, "zbox").ip
+        # all other components rely on zcore/vyos as their DNS server.
+        zpod_dns = MgmtIp.zpod(zpod, "zcore").ip
 
     isnested = component.component_json["component_isnested"]
     print(f"Component Nested: {isnested}")
@@ -71,8 +71,8 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         zpod_portgroup = "VM Network"
         vm_name = zpod_component.hostname
 
-    # Add zbox as this is a mandatory infrastructure component
-    zpod_zbox_ipaddress = MgmtIp.zpod(zpod, "zbox").ip
+    # Add the core component (zcore) as a mandatory infrastructure component
+    zpod_zcore_ipaddress = MgmtIp.zpod(zpod, "zcore").ip
     url = f"https://{username}:{password}@{hostname}/sdk"
     print(f"Deploying to [https://{username}:XXXXXXXX@{hostname}/sdk]...")
 
@@ -94,7 +94,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         zpod_netprefix=ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,
         zpod_gateway=component_gateway,
         zpod_dns=zpod_dns,
-        zpod_nfs=zpod_zbox_ipaddress,
+        zpod_nfs=zpod_zcore_ipaddress,
         zpod_ntp=zpodfactory_host,
         zpod_domain=zpod.domain,
         zpod_password=zpod.password,

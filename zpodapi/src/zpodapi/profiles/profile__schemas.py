@@ -16,9 +16,9 @@ class D:
     last_modified_date = {"example": example_creation_date}
 
     class profile:
-        component_uid = {"example": "zbox-11.7"}
+        component_uid = {"example": "zcore-13.5"}
         host_id = {"example": 11}
-        hostname = {"example": "zbox"}
+        hostname = {"example": "zcore"}
         vcpu = {"example": 4}
         vmem = {"example": 12}
         vnics = {"example": 4}

@@ -537,7 +537,7 @@ class vCenter:
         # sourcery skip: class-extract-method
         # Fetch VM
         # For this example:
-        # zbox.{instance_name}.{domain}
+        # zcore.{instance_name}.{domain}
         spec = vim.vm.ConfigSpec()
         spec.cpuAllocation = vim.ResourceAllocationInfo()
         spec.cpuAllocation.shares = vim.SharesInfo()

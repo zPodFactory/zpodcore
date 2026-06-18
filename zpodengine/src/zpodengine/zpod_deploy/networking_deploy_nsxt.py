@@ -94,7 +94,7 @@ def networking_deploy_nsxt(zpod: M.Zpod, enet_name: str | None = None):
         )
 
         # Create Segment Security Profile
-        # - Allow DHCP Server on Segment such as zbox/vyos
+        # - Allow DHCP Server on Segment such as zcore/vyos
         segment_security_profile_id = f"{inst_prefix}-segment-security-profile"
         print(f"Create Segment Security Profile: {segment_security_profile_id}")
         nsx.patch(
@@ -138,7 +138,7 @@ def networking_deploy_nsxt(zpod: M.Zpod, enet_name: str | None = None):
                     "network": network.cidr,
                     "next_hops": [
                         {
-                            "ip_address": MgmtIp.zpod(zpod, "zbox").ip,
+                            "ip_address": MgmtIp.zpod(zpod, "zcore").ip,
                             "admin_distance": 1,
                         },
                     ],
