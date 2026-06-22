@@ -111,14 +111,21 @@ def zpod_component_add_deploy(
                 isnested = component.component_json["component_isnested"]
                 print(f"Component Nested: {isnested}")
 
-                if isnested:
-                    with vCenter.auth_by_zpod(zpod=zpod_component.zpod) as vc:
-                        vm = vc.get_vm(name=zpod_component.hostname)
-                        print("Start VM")
-                        vc.poweron_vm(vm)
-                else:
-                    with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
-                        vm = vc.get_vm(name=zpod_component.fqdn)
-                        print("Start VM")
-                        vc.poweron_vm(vm)
+                auth = vCenter.auth_by_zpod if isnested else vCenter.auth_by_zpod_endpoint
+                vm_name = zpod_component.hostname if isnested else zpod_component.fqdn
+
+                with auth(zpod=zpod_component.zpod) as vc:
+                    vm = vc.get_vm(name=vm_name)
+
+                    print("Set VM Configuration")
+                    vc.set_vm_configuration(
+                        vm=vm,
+                        vcpu=vcpu,
+                        vmem_gb=vmem,
+                        vnic_num=vnics,
+                        vdisks_gb=vdisks,
+                    )
+
+                    print("Start VM")
+                    vc.poweron_vm(vm)
 
