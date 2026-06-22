@@ -75,5 +75,26 @@ with database.get_session_ctx() as session:
         )
         session.add(settings_ssh_key)
 
+        setting_esxi_hostname_is_fqdn = M.Setting(
+            name="ff_esxi_hostname_is_fqdn",
+            description="William Lam VMware ESXi OVA Templates support",
+            value="true",
+        )
+        session.add(setting_esxi_hostname_is_fqdn)
+
+        setting_endpoint_ova_staging = M.Setting(
+            name="ff_endpoint_ova_staging",
+            description="Stage L1 OVAs as templates and clone per deployment (Experimental) - Faster & optimized flow when deploying many zPods",
+            value="false",
+        )
+        session.add(setting_endpoint_ova_staging)
+
+        setting_reuse_zpod_password = M.Setting(
+            name="ff_reuse_zpod_password",
+            description="Preserve password on same-name zPod redeploy so browsers and password-managers entries don't need updating. Great for testing/QA/validations use cases",
+            value="false",
+        )
+        session.add(setting_reuse_zpod_password)
+
         # Commit all settings
         session.commit()
