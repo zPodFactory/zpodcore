@@ -61,7 +61,7 @@ def setting_create(
             help="Setting Description",
             show_default=False,
         ),
-    ] = None,
+    ],
 ):
     """
     Create Setting
