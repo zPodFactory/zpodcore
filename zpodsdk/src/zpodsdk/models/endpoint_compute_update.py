@@ -13,10 +13,12 @@ class EndpointComputeUpdate:
     Attributes:
         password (Union[None, Unset, str]):
         username (Union[None, Unset, str]):
+        vds (Union[None, Unset, str]):
     """
 
     password: Union[None, Unset, str] = UNSET
     username: Union[None, Unset, str] = UNSET
+    vds: Union[None, Unset, str] = UNSET
 
     def to_dict(self) -> Dict[str, Any]:
         password: Union[None, Unset, str]
@@ -31,12 +33,20 @@ class EndpointComputeUpdate:
         else:
             username = self.username
 
+        vds: Union[None, Unset, str]
+        if isinstance(self.vds, Unset):
+            vds = UNSET
+        else:
+            vds = self.vds
+
         field_dict: Dict[str, Any] = {}
         field_dict.update({})
         if password is not UNSET:
             field_dict["password"] = password
         if username is not UNSET:
             field_dict["username"] = username
+        if vds is not UNSET:
+            field_dict["vds"] = vds
 
         return field_dict
 
@@ -62,9 +72,19 @@ class EndpointComputeUpdate:
 
         username = _parse_username(d.pop("username", UNSET))
 
+        def _parse_vds(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        vds = _parse_vds(d.pop("vds", UNSET))
+
         endpoint_compute_update = cls(
             password=password,
             username=username,
+            vds=vds,
         )
 
         return endpoint_compute_update

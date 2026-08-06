@@ -1,9 +1,10 @@
-from typing import Any, Dict, List, Type, TypeVar
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.endpoint_compute_drivers import EndpointComputeDrivers
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="EndpointComputeView")
 
@@ -21,6 +22,7 @@ class EndpointComputeView:
         storage_policy (str):
         username (str):
         vmfolder (str):
+        vds (Union[Unset, str]):  Default: ''.
     """
 
     contentlibrary: str
@@ -32,6 +34,7 @@ class EndpointComputeView:
     storage_policy: str
     username: str
     vmfolder: str
+    vds: Union[Unset, str] = ""
     additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -53,6 +56,8 @@ class EndpointComputeView:
 
         vmfolder = self.vmfolder
 
+        vds = self.vds
+
         field_dict: Dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -68,6 +73,8 @@ class EndpointComputeView:
                 "vmfolder": vmfolder,
             }
         )
+        if vds is not UNSET:
+            field_dict["vds"] = vds
 
         return field_dict
 
@@ -92,6 +99,8 @@ class EndpointComputeView:
 
         vmfolder = d.pop("vmfolder")
 
+        vds = d.pop("vds", UNSET)
+
         endpoint_compute_view = cls(
             contentlibrary=contentlibrary,
             datacenter=datacenter,
@@ -102,6 +111,7 @@ class EndpointComputeView:
             storage_policy=storage_policy,
             username=username,
             vmfolder=vmfolder,
+            vds=vds,
         )
 
         endpoint_compute_view.additional_properties = d

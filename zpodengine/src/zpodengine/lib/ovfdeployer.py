@@ -48,11 +48,28 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         password = urllib.parse.quote(epc["password"])
         datacenter = epc["datacenter"]
         datastore = epc["storage_datastore"]
+        vds_name = epc.get("vds", "")
         # FIXME: we might want this in a zcli setting key/value ?
         # if set, then set prefix, else default to normal one.
         site_id = settings.SITE_ID
         resource_pool = f"{site_id}-{zpod.name}"
         zpod_portgroup = f"{site_id}-{zpod.name}-segment"
+        # In environments where multiple clusters share the same NSX-T
+        # overlay transport zone but sit on different VDS's, the zpod
+        # segment portgroup gets created on every one of those VDS's under
+        # the same name (each with its own identifier). `govc import.ova`
+        # then can't tell which of the identically-named portgroups to
+        # attach to and fails. Providing the full inventory path
+        # (datacenter/network/vds/segment) disambiguates it. If no VDS is
+        # configured, there's only one portgroup with that name and govc
+        # resolves it fine by bare name. This only applies to govc's own
+        # object finder (`govc import.ova -options=...`); pyVmomi lookups
+        # elsewhere (vCenter.get_portgroup) match on the bare `name`
+        # property and must keep using `zpod_portgroup` as-is.
+        if vds_name:
+            zpod_portgroup_path = f"/{datacenter}/network/{vds_name}/{zpod_portgroup}"
+        else:
+            zpod_portgroup_path = zpod_portgroup
         vm_name = zpod_component.fqdn
     else:
         print(f"[L2] Deployment for {component.component_name}")
@@ -69,6 +86,8 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         # (maybe vSAN OSA/ESA support in the future instead of NFS-01)
         datastore = "NFS-01"
         zpod_portgroup = "VM Network"
+        # No VDS concept for nested L2 vCenters (standard vSwitch).
+        zpod_portgroup_path = zpod_portgroup
         vm_name = zpod_component.hostname
 
     # Add the core component (zcore) as a mandatory infrastructure component
@@ -99,7 +118,7 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         zpod_domain=zpod.domain,
         zpod_password=zpod.password,
         zpod_sshkey=zpodfactory_ssh_key,
-        zpod_portgroup=zpod_portgroup,
+        zpod_portgroup=zpod_portgroup_path,
     )
 
     print("govc ovf property options generated file")
