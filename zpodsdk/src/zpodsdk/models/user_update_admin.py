@@ -12,11 +12,13 @@ class UserUpdateAdmin:
     """
     Attributes:
         description (Union[None, Unset, str]):
+        email (Union[None, Unset, str]):
         ssh_key (Union[None, Unset, str]):
         superadmin (Union[None, Unset, bool]):
     """
 
     description: Union[None, Unset, str] = UNSET
+    email: Union[None, Unset, str] = UNSET
     ssh_key: Union[None, Unset, str] = UNSET
     superadmin: Union[None, Unset, bool] = UNSET
 
@@ -26,6 +28,12 @@ class UserUpdateAdmin:
             description = UNSET
         else:
             description = self.description
+
+        email: Union[None, Unset, str]
+        if isinstance(self.email, Unset):
+            email = UNSET
+        else:
+            email = self.email
 
         ssh_key: Union[None, Unset, str]
         if isinstance(self.ssh_key, Unset):
@@ -43,6 +51,8 @@ class UserUpdateAdmin:
         field_dict.update({})
         if description is not UNSET:
             field_dict["description"] = description
+        if email is not UNSET:
+            field_dict["email"] = email
         if ssh_key is not UNSET:
             field_dict["ssh_key"] = ssh_key
         if superadmin is not UNSET:
@@ -62,6 +72,15 @@ class UserUpdateAdmin:
             return cast(Union[None, Unset, str], data)
 
         description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_email(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        email = _parse_email(d.pop("email", UNSET))
 
         def _parse_ssh_key(data: object) -> Union[None, Unset, str]:
             if data is None:
@@ -83,6 +102,7 @@ class UserUpdateAdmin:
 
         user_update_admin = cls(
             description=description,
+            email=email,
             ssh_key=ssh_key,
             superadmin=superadmin,
         )

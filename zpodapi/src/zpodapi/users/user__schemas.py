@@ -38,6 +38,7 @@ class UserCreate(SchemaBase):
 
 
 class UserUpdate(SchemaBase):
+    email: EmailStrLower | None = Field(None, D.email)
     description: str | None = Field(None, D.description)
     ssh_key: str | None = Field(None, D.ssh_key)
 

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import typer
 from rich import print
 from rich.table import Table
@@ -7,6 +9,7 @@ from zpodcli.lib.utils import console_print, get_boolean_markdown, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.user_create import UserCreate
 from zpodsdk.models.user_update_admin import UserUpdateAdmin
+from zpodsdk.types import Unset
 
 app = typer.Typer(help="Manage Users")
 
@@ -167,6 +170,15 @@ def user_update(
             show_default=False,
         ),
     ],
+    email: Annotated[
+        Optional[str],
+        typer.Option(
+            "--email",
+            "-e",
+            help="Email",
+            show_default=False,
+        ),
+    ] = None,
     description: Annotated[
         str,
         typer.Option(
@@ -198,6 +210,7 @@ def user_update(
     z.users_update.sync(
         id=f"username={username}",
         body=UserUpdateAdmin(
+            email=email or Unset(),
             description=description,
             ssh_key=ssh_key,
             superadmin=superadmin,
