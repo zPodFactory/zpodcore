@@ -47,6 +47,7 @@ from .user_update import UserUpdate
 from .user_update_admin import UserUpdateAdmin
 from .user_view import UserView
 from .user_view_full import UserViewFull
+from .user_view_full_list import UserViewFullList
 from .user_view_full_plus import UserViewFullPlus
 from .validation_error import ValidationError
 from .zpod_component_create import ZpodComponentCreate
@@ -119,6 +120,7 @@ __all__ = (
     "UserUpdateAdmin",
     "UserView",
     "UserViewFull",
+    "UserViewFullList",
     "UserViewFullPlus",
     "ValidationError",
     "ZpodComponentCreate",

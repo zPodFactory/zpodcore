@@ -11,6 +11,7 @@ from .user__schemas import (
     UserUpdate,
     UserUpdateAdmin,
     UserViewFull,
+    UserViewFullList,
     UserViewFullPlus,
 )
 
@@ -25,14 +26,24 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=list[UserViewFull],
+    response_model=list[UserViewFullList],
 )
 def get_all(
     *,
     user_service: UserAnnotations.UserService,
     all: bool = False,
 ):
-    return user_service.get_all(all=all)
+    # Superadmins see every user's api_token; everyone else only ever sees
+    # their own row here (UserService.get_all scopes non-superadmins to
+    # themselves), and it's their own token — same one they authenticate
+    # with — so there's nothing to hide from them either.
+    views = [
+        UserViewFullList.model_validate(user) for user in user_service.get_all(all=all)
+    ]
+    for view in views:
+        if not (user_service.is_superadmin or view.id == user_service.current_user.id):
+            view.api_token = None
+    return views
 
 
 @router.get(

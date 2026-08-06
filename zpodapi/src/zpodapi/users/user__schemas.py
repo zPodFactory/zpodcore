@@ -73,3 +73,10 @@ class UserViewFull(UserView):
 
 class UserViewFullPlus(UserViewFull):
     api_token: str = Field(..., D.api_token)
+
+
+class UserViewFullList(UserViewFull):
+    # Nullable (unlike UserViewFullPlus.api_token): GET /users masks this
+    # per-row rather than switching response schemas, so non-visible tokens
+    # serialize as null instead of being omitted or raising.
+    api_token: str | None = Field(None, D.api_token)
