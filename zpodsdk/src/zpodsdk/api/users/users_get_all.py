@@ -6,7 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.user_view_full import UserViewFull
+from ...models.user_view_full_list import UserViewFullList
 from ...types import UNSET, Response, Unset
 
 
@@ -35,12 +35,12 @@ class UsersGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Optional[Union[HTTPValidationError, List["UserViewFullList"]]]:
         if response.status_code == HTTPStatus.OK:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
-                response_200_item = UserViewFull.from_dict(response_200_item_data)
+                response_200_item = UserViewFullList.from_dict(response_200_item_data)
 
                 response_200.append(response_200_item)
 
@@ -59,7 +59,7 @@ class UsersGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Response[Union[HTTPValidationError, List["UserViewFullList"]]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -71,7 +71,7 @@ class UsersGetAll:
         self,
         *,
         all_: Union[Unset, bool] = False,
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Response[Union[HTTPValidationError, List["UserViewFullList"]]]:
         """Get All
 
         Args:
@@ -82,7 +82,7 @@ class UsersGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, List['UserViewFullList']]]
         """
 
         kwargs = self._get_kwargs(
@@ -99,7 +99,7 @@ class UsersGetAll:
         self,
         *,
         all_: Union[Unset, bool] = False,
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Optional[Union[HTTPValidationError, List["UserViewFullList"]]]:
         """Get All
 
         Args:
@@ -110,7 +110,7 @@ class UsersGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['UserViewFull']]
+            Union[HTTPValidationError, List['UserViewFullList']]
         """
 
         return self.sync_detailed(
@@ -121,7 +121,7 @@ class UsersGetAll:
         self,
         *,
         all_: Union[Unset, bool] = False,
-    ) -> Response[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Response[Union[HTTPValidationError, List["UserViewFullList"]]]:
         """Get All
 
         Args:
@@ -132,7 +132,7 @@ class UsersGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserViewFull']]]
+            Response[Union[HTTPValidationError, List['UserViewFullList']]]
         """
 
         kwargs = self._get_kwargs(
@@ -147,7 +147,7 @@ class UsersGetAll:
         self,
         *,
         all_: Union[Unset, bool] = False,
-    ) -> Optional[Union[HTTPValidationError, List["UserViewFull"]]]:
+    ) -> Optional[Union[HTTPValidationError, List["UserViewFullList"]]]:
         """Get All
 
         Args:
@@ -158,7 +158,7 @@ class UsersGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['UserViewFull']]
+            Union[HTTPValidationError, List['UserViewFullList']]
         """
 
         return (

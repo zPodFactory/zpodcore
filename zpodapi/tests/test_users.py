@@ -81,6 +81,7 @@ def test_superadmin_get_users(superadmin_client: TestClient):
             "description": "",
             "superadmin": True,
             "status": "ENABLED",
+            "api_token": "APITOKEN_SUPERUSER",
         },
         {
             "username": "normaluser",
@@ -88,6 +89,7 @@ def test_superadmin_get_users(superadmin_client: TestClient):
             "description": "",
             "superadmin": False,
             "status": "ENABLED",
+            "api_token": "APITOKEN_NORMALUSER",
         },
     ]
 
@@ -103,6 +105,7 @@ def test_normaluser_get_users(normaluser_client: TestClient):
             "description": "",
             "superadmin": False,
             "status": "ENABLED",
+            "api_token": "APITOKEN_NORMALUSER",
         },
     ]
 

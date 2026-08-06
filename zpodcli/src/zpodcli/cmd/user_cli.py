@@ -3,7 +3,7 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print, get_boolean_markdown
+from zpodcli.lib.utils import console_print, get_boolean_markdown, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.user_create import UserCreate
 from zpodsdk.models.user_update_admin import UserUpdateAdmin
@@ -20,6 +20,7 @@ def generate_table(users, all=False):
         "Creation Date",
         "Last Connection",
         "Superadmin",
+        "API Token",
         title=title,
         title_style="bold",
         show_header=True,
@@ -34,6 +35,11 @@ def generate_table(users, all=False):
             if user.last_connection_date
             else ""
         )
+        # Only visible for superadmins and for a user's own row (see
+        # GET /users masking in zpodapi); other rows show a placeholder.
+        api_token = (
+            f"[grey58]{user.api_token}[/grey58]" if user.api_token else "[dim]—[/dim]"
+        )
         row = [
             user.username,
             f"[sky_blue2]{user.email}[/sky_blue2]",
@@ -41,6 +47,7 @@ def generate_table(users, all=False):
             f"[tan]{user.creation_date.strftime('%Y-%m-%d %H:%M:%S')}[/tan]",
             f"[magenta]{lcd}[/magenta]",  # noqa: E501
             get_boolean_markdown(user.superadmin),
+            api_token,
         ]
         if all:
             row.append(user.status)
@@ -58,13 +65,33 @@ def user_list(
         bool,
         typer.Option("--all", help="Show all Users"),
     ] = False,
+    json_: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Display using json",
+            is_flag=True,
+        ),
+    ] = False,
+    no_color: Annotated[
+        bool,
+        typer.Option(
+            "--no-color",
+            help="Disable color output",
+            is_flag=True,
+        ),
+    ] = False,
 ):
     """
     List Users
     """
     z: ZpodClient = ZpodClient()
     users = z.users_get_all.sync(all_=all)
-    generate_table(users, all=all)
+    if json_:
+        json_print([user.to_dict() for user in users], no_color=no_color)
+    else:
+        generate_table(users, all=all)
 
 
 @app.command(name="add", no_args_is_help=True)
