@@ -56,6 +56,13 @@ class UserService(ServiceBase):
         if not self.is_superadmin:
             item_in = self.convert_schema(UserUpdate, item_in)
 
+        email = item_in.model_dump(exclude_unset=True).get("email")
+        if email and email != item.email and self.crud.get_all_filtered(email=email):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already in use",
+            )
+
         return self.crud.update(item=item, item_in=item_in)
 
     def delete(self, *, item: M.User):

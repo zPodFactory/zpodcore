@@ -204,6 +204,34 @@ def test_normaluser_patch_user(normaluser_client: TestClient):
     }
 
 
+def test_superadmin_patch_user_email(superadmin_client: TestClient):
+    response = superadmin_client.patch(
+        "/users/username=normaluser",
+        json={"email": "normaluser-new@zpodfactory.io"},
+    )
+    data = response.json()
+    assert response.status_code == 201
+    assert data["email"] == "normaluser-new@zpodfactory.io"
+
+
+def test_normaluser_patch_own_email(normaluser_client: TestClient):
+    response = normaluser_client.patch(
+        "/users/username=normaluser",
+        json={"email": "normaluser-new@zpodfactory.io"},
+    )
+    data = response.json()
+    assert response.status_code == 201
+    assert data["email"] == "normaluser-new@zpodfactory.io"
+
+
+def test_patch_user_email_duplicate(superadmin_client: TestClient):
+    response = superadmin_client.patch(
+        "/users/username=normaluser",
+        json={"email": "superuser@zpodfactory.io"},
+    )
+    assert response.status_code == 409
+
+
 def test_superadmin_patch_user_missing(superadmin_client: TestClient):
     response = superadmin_client.patch(
         "/users/187",
