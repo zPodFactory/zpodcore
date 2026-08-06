@@ -20,6 +20,7 @@ class EndpointComputeCreate:
         storage_datastore (str):
         storage_policy (str):
         username (str):
+        vds (str):
         vmfolder (str):
     """
 
@@ -32,6 +33,7 @@ class EndpointComputeCreate:
     storage_datastore: str
     storage_policy: str
     username: str
+    vds: str
     vmfolder: str
 
     def to_dict(self) -> Dict[str, Any]:
@@ -53,6 +55,8 @@ class EndpointComputeCreate:
 
         username = self.username
 
+        vds = self.vds
+
         vmfolder = self.vmfolder
 
         field_dict: Dict[str, Any] = {}
@@ -67,6 +71,7 @@ class EndpointComputeCreate:
                 "storage_datastore": storage_datastore,
                 "storage_policy": storage_policy,
                 "username": username,
+                "vds": vds,
                 "vmfolder": vmfolder,
             }
         )
@@ -94,6 +99,8 @@ class EndpointComputeCreate:
 
         username = d.pop("username")
 
+        vds = d.pop("vds")
+
         vmfolder = d.pop("vmfolder")
 
         endpoint_compute_create = cls(
@@ -106,6 +113,7 @@ class EndpointComputeCreate:
             storage_datastore=storage_datastore,
             storage_policy=storage_policy,
             username=username,
+            vds=vds,
             vmfolder=vmfolder,
         )
 

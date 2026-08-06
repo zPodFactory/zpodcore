@@ -29,6 +29,7 @@ class D:
         storage_datastore = {"example": "my-datastore"}
         contentlibrary = {"example": "my-contentlibrary"}
         vmfolder = {"example": "my-vmfolder"}
+        vds = {"example": "my-vds"}
 
     class network:
         driver = {"example": "nsxt"}
@@ -53,6 +54,7 @@ class EndpointComputeView(SchemaBase):
     storage_datastore: str = Field(..., D.compute.storage_datastore)
     contentlibrary: str = Field(..., D.compute.contentlibrary)
     vmfolder: str = Field(..., D.compute.vmfolder)
+    vds: str = Field("", D.compute.vds)
 
 
 class EndpointNetworkView(SchemaBase):
@@ -100,6 +102,7 @@ class EndpointComputeCreate(SchemaBase):
     storage_datastore: str = Field(..., D.compute.storage_datastore)
     contentlibrary: str = Field(..., D.compute.contentlibrary)
     vmfolder: str = Field(..., D.compute.vmfolder)
+    vds: str = Field(..., D.compute.vds)
 
 
 class EndpointNetworkCreate(SchemaBase):
@@ -133,6 +136,7 @@ class EndpointCreate(SchemaBase):
 class EndpointComputeUpdate(SchemaBase):
     username: str | None = Field(None, D.compute.username)
     password: str | None = Field(None, D.compute.password)
+    vds: str | None = Field(None, D.compute.vds)
 
 
 class EndpointNetworkUpdate(SchemaBase):

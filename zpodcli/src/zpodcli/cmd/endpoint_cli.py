@@ -69,6 +69,7 @@ def generate_table(endpoints: list, title: str, all_endpoint_keys=False):
         "resource_pool",
         "storage_datastore",
         "vmfolder",
+        "vds",
     ]
     network_endpoint_keys = [
         ("driver", "deep_sky_blue1", "spring_green1"),
@@ -265,6 +266,7 @@ def endpoint_create(
             "storage_datastore": ask("storage_datastore"),
             "contentlibrary": "",
             "vmfolder": ask("vmfolder"),
+            "vds": ask("vds", default=""),
         }
 
         print("\nNetwork Endpoint")
@@ -445,6 +447,7 @@ def endpoint_generate_sample(endpoint_name: str):
             "storage_datastore": "datastore-1",
             "contentlibrary": "",
             "vmfolder": "vm",
+            "vds": "",
         },
         "network": {
             "driver": "nsxt",
