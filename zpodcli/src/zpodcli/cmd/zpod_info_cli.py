@@ -1,5 +1,5 @@
 from datetime import datetime
-from ipaddress import IPv4Network
+from ipaddress import IPv4Address, IPv4Network
 from typing import Annotated
 
 import typer
@@ -9,13 +9,113 @@ from rich.table import Table, box
 
 from zpodcli.lib.utils import console_print, get_status_markdown, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.models.zpod_dns_view import ZpodDnsView
 from zpodsdk.models.zpod_permission import ZpodPermission
 from zpodsdk.models.zpod_view import ZpodView
 
 app = typer.Typer(help="Manage zPod Info", no_args_is_help=True)
 
 
-def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
+def ip_sort_key(ip: str):
+    """Sort key ordering IPv4 addresses numerically, anything else last."""
+    try:
+        return (0, int(IPv4Address(ip)), "")
+    except ValueError:
+        return (1, 0, ip)
+
+
+def get_dns_rows(dns_records: list[ZpodDnsView], domain: str):
+    """Turn raw DNS records into deduplicated (hostname, ip, fqdn) rows.
+
+    The DNS server holds both the short hostname and its fqdn for the same
+    host, so only the short form is kept when both are present.
+    """
+    hostnames_by_ip: dict[str, list[str]] = {}
+    for record in dns_records:
+        if record.hostname == "localhost":
+            continue
+        hostnames = hostnames_by_ip.setdefault(record.ip, [])
+        if record.hostname not in hostnames:
+            hostnames.append(record.hostname)
+
+    rows = []
+    for ip, hostnames in hostnames_by_ip.items():
+        shortnames = {hostname for hostname in hostnames if "." not in hostname}
+        for hostname in sorted(hostnames):
+            if hostname == f"{hostname.split('.')[0]}.{domain}" and (
+                hostname.split(".")[0] in shortnames
+            ):
+                continue
+            fqdn = hostname if "." in hostname else f"{hostname}.{domain}"
+            rows.append((hostname, ip, fqdn))
+    return sorted(rows, key=lambda row: (ip_sort_key(row[1]), row[0]))
+
+
+def print_dns_panel(zpod: ZpodView, z: ZpodClient):
+    """Display the DNS records served by zcore for this zPod."""
+    zcore_active = any(
+        c.component.component_name == "zcore" and c.status == "ACTIVE"
+        for c in zpod.components
+    )
+    dns_content = None
+    if not zcore_active:
+        dns_content = (
+            "[orange3]zcore is not ACTIVE yet, DNS records are unavailable.[/orange3]"
+        )
+    else:
+        try:
+            dns_records: list[ZpodDnsView] = z.zpods_dns_get_all.sync(
+                id=f"name={zpod.name}"
+            )
+        except Exception as e:
+            dns_content = f"[indian_red]Unable to fetch DNS records: {e}[/indian_red]"
+        else:
+            dns_rows = get_dns_rows(dns_records, zpod.domain)
+            if not dns_rows:
+                dns_content = "No DNS records for this zPod yet."
+
+    if dns_content is None:
+        dns_table = Table(
+            show_header=True,
+            header_style="bold cyan",
+            box=box.ROUNDED,
+            padding=(0, 2),
+            show_lines=True,
+            border_style="dim white",
+        )
+        dns_table.add_column("Hostname")
+        dns_table.add_column("IP")
+        dns_table.add_column("FQDN")
+        dns_table.add_column("Component")
+
+        components_by_ip = {c.ip: c for c in zpod.components if c.ip}
+
+        for hostname, ip, fqdn in dns_rows:
+            component = components_by_ip.get(ip)
+            dns_table.add_row(
+                f"[bold]{hostname}[/bold]",
+                ip,
+                f"[sky_blue2]{fqdn}[/sky_blue2]",
+                f"[yellow3]{component.component.component_uid}[/yellow3]"
+                if component
+                else "[grey58]custom[/grey58]",
+            )
+        dns_content = Group(
+            f"DNS records served by [yellow3]zcore[/yellow3] "
+            f"for [sky_blue2]{zpod.domain}[/sky_blue2]:\n",
+            dns_table,
+        )
+
+    dns_panel = Panel(
+        dns_content,
+        title="DNS Records",
+        border_style="magenta",
+        padding=(1, 2),
+    )
+    console_print("DNS Records", dns_panel)
+
+
+def generate_detailed_info(zpod: ZpodView, fields: str = "bncd"):
     """Generate detailed information about a zPod
 
     Args:
@@ -24,6 +124,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
                b - Basic Information
                n - Networks
                c - Components
+               d - DNS Records
     """
     # Find the zcore component and get its IP once for all networks
     zcore_component = next(
@@ -77,17 +178,16 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
         console_print("Basic Information", basic_info_panel)
 
     # Networks Panel
-    if "n" in fields:
-        if not zpod.networks:
-            networks_panel = Panel(
-                "No networks configured for this zPod yet.",
-                title="Networks",
-                border_style="yellow",
-                padding=(1, 2),
-            )
-            console_print("Networks", networks_panel)
-            return
+    if "n" in fields and not zpod.networks:
+        networks_panel = Panel(
+            "No networks configured for this zPod yet.",
+            title="Networks",
+            border_style="yellow",
+            padding=(1, 2),
+        )
+        console_print("Networks", networks_panel)
 
+    if "n" in fields and zpod.networks:
         networks_table = Table(
             show_header=True,
             header_style="bold cyan",
@@ -347,6 +447,10 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bnc"):
         )
         console_print("Components", components_panel)
 
+    # DNS Panel
+    if "d" in fields:
+        print_dns_panel(zpod, z)
+
 
 @app.command(name="info", no_args_is_help=True)
 @unexpected_status_handler
@@ -380,10 +484,10 @@ def zpod_info(
         typer.Option(
             "--fields",
             "-f",
-            help="Display specific information panels (b:Basic, n:Networking, c:Components)",
+            help="Display specific information panels (b:Basic, n:Networking, c:Components, d:DNS)",
             show_default=False,
         ),
-    ] = "bnc",
+    ] = "bncd",
 ):
     """
     Display zPod Detailed information
