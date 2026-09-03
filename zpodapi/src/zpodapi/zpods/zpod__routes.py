@@ -55,7 +55,11 @@ def create(
             detail="zPod already exists",
         )
 
-    zpod_service.validate_profile(profile_name=zpod_in.profile)
+    zpod_service.validate_profile(
+        profile_name=zpod_in.profile,
+        zpod_name=zpod_in.name,
+        domain=zpod_in.domain,
+    )
     return zpod_service.create(
         current_user=current_user,
         item_in=zpod_in,
