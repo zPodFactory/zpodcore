@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from sqlmodel import SQLModel, select
 
 from zpodapi.lib.service_base import ServiceBase
+from zpodapi.profiles.profile__utils import check_fqdn_length, compute_zpod_domain
 from zpodapi.zpods.zpod_component__schemas import ZpodComponentCreate
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus, ZpodComponentStatus
@@ -45,6 +46,13 @@ class ZpodComponentService(ServiceBase):
                 )
             # if hostname is not provided, look up default value
             hostname = component.component_name
+
+        # Same guardrail as POST /zpods: the resulting FQDN must fit the Linux
+        # hostname limit. zpod.domain is set by the deploy prep flow; fall back
+        # to the same derivation for a zPod that has not been prepped yet.
+        check_fqdn_length(
+            f"{hostname}.{compute_zpod_domain(zpod_name=zpod.name, domain=zpod.domain)}"
+        )
 
         # if hostname is already found, raise error
         if self.session.exec(

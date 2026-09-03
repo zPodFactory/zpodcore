@@ -9,7 +9,8 @@ from zpodcommon import models as M
 from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
 
-from ..profiles.profile__utils import validate_profile
+from ..profiles.profile__utils import validate_fqdn_length
+from ..profiles.profile__utils import validate_profile as validate_profile_util
 from . import zpod__utils
 from .zpod__schemas import ZpodCreate
 
@@ -189,13 +190,19 @@ class ZpodService(ServiceBase):
         self.session.commit()
         return zpod
 
-    def validate_profile(self, *, profile_name):
+    def validate_profile(self, *, profile_name, zpod_name, domain):
         if profile := self.session.exec(
             select(M.Profile).where(
                 M.Profile.name == profile_name.lower(),
             )
         ).one_or_none():
-            validate_profile(session=self.session, profile_obj=profile.profile)
+            validate_profile_util(session=self.session, profile_obj=profile.profile)
+            validate_fqdn_length(
+                session=self.session,
+                profile_obj=profile.profile,
+                zpod_name=zpod_name,
+                domain=domain,
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
