@@ -77,4 +77,14 @@ DEFAULT_SETTINGS = [
         ),
         "value": "false",
     },
+    {
+        "name": "ff_nsx_clean_orphan_ports",
+        "description": (
+            "On zPod destroy, delete NSX segment ports whose VM no longer "
+            "exists in vCenter when the segment fails to drain (stale NSX "
+            "inventory, e.g. after a dead host). When false the orphan ports "
+            "are only reported in the task log"
+        ),
+        "value": "false",
+    },
 ]

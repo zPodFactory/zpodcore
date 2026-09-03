@@ -1,8 +1,7 @@
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient, fmt
-
 from zpodengine import settings
-from zpodengine.lib.network import wait_for_segment_to_be_evacuted
+from zpodengine.lib.nsx_orphan_ports import evacuate_segment
 
 
 def networking_destroy_nsxt(zpod: M.Zpod):
@@ -15,7 +14,10 @@ def networking_destroy_nsxt(zpod: M.Zpod):
         # Destroy Connected Items (Segments)
         for connected in nsx.search(connectivity_path=fmt(t1_path)):
             if connected["resource_type"] == "Segment":
-                wait_for_segment_to_be_evacuted(nsx, connected)
+                # Wait for the segment to drain; if it never does, delete the
+                # ports whose VM is gone from vCenter (stale NSX inventory,
+                # see nsx_orphan_ports.py) and wait again.
+                evacuate_segment(nsx, connected, zpod)
 
                 # Destroy Connected Item Children (Segment BindingMaps)
                 for connected_child in nsx.search(parent_path=fmt(connected["path"])):
