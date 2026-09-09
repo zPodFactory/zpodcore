@@ -12,6 +12,8 @@ from zpodcli.cmd import endpoint_permission_cli
 from zpodcli.lib.file import load_json_or_yaml_file
 from zpodcli.lib.prompt import ask
 from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
     console_print,
     exit_with_error,
     json_print,
@@ -109,13 +111,19 @@ def generate_table(endpoints: list, title: str, all_endpoint_keys=False):
 
 @app.command(name="list")
 @unexpected_status_handler
-def endpoint_list():
+def endpoint_list(
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
+):
     """
     List Endpoints
     """
     z = ZpodClient()
     endpoints = z.endpoints_get_all.sync()
-    generate_table(endpoints, "Endpoint List")
+    if json_:
+        json_print([endpoint.to_dict() for endpoint in endpoints])
+    else:
+        generate_table(endpoints, "Endpoint List")
 
 
 @app.command(name="info", no_args_is_help=True)
@@ -128,23 +136,8 @@ def endpoint_info(
             show_default=False,
         ),
     ],
-    json_: Annotated[
-        bool,
-        typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     Endpoint Info
@@ -153,7 +146,7 @@ def endpoint_info(
     endpoint = z.endpoints_get.sync(id=f"name={endpoint_name}")
     if json_:
         endpoint_dict = endpoint.to_dict()
-        json_print(endpoint_dict, no_color=no_color)
+        json_print(endpoint_dict)
     else:
         generate_table([endpoint], title="Endpoint Info", all_endpoint_keys=True)
 

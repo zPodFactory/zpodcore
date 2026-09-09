@@ -4,7 +4,7 @@ from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.cmd import permission_group_user_cli
-from zpodcli.lib.utils import console_print
+from zpodcli.lib.utils import JsonOption, NoColorOption, console_print, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.permission_group_create import PermissionGroupCreate
 from zpodsdk.models.permission_group_update import PermissionGroupUpdate
@@ -37,13 +37,19 @@ def generate_table(
 
 @app.command(name="list")
 @unexpected_status_handler
-def permission_group_list():
+def permission_group_list(
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
+):
     """
     List Permission Groups
     """
     z: ZpodClient = ZpodClient()
-    result = z.permission_groups_get_all.sync()
-    generate_table(result)
+    permission_groups = z.permission_groups_get_all.sync()
+    if json_:
+        json_print([group.to_dict() for group in permission_groups])
+    else:
+        generate_table(permission_groups)
 
 
 @app.command(name="create", no_args_is_help=True)

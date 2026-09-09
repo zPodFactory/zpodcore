@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import List, Optional
 
 import typer
@@ -6,8 +5,15 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print, exit_with_error
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.models.zpod_permission import ZpodPermission
 from zpodsdk.models.zpod_permission_group_add_remove import (
     ZpodPermissionGroupAddRemove,
 )
@@ -17,12 +23,12 @@ from zpodsdk.models.zpod_permission_user_add_remove import (
 from zpodsdk.models.zpod_permission_view import ZpodPermissionView
 from zpodsdk.models.zpod_view import ZpodView
 
-
-class ZpodPermission(str, Enum):
-    OWNER = "OWNER"
-    ADMIN = "ADMIN"
-    USER = "USER"
-
+# Display order for the permission table (the SDK enum is alphabetical).
+PERMISSION_ORDER = (
+    ZpodPermission.OWNER,
+    ZpodPermission.ADMIN,
+    ZpodPermission.USER,
+)
 
 app = typer.Typer(
     help="Manage zPod Permissions",
@@ -49,7 +55,10 @@ def generate_table(
     table.add_column("Groups")
 
     sorted_zpod_permissions = [
-        zp for eip in ZpodPermission for zp in zpod_permissions if zp.permission == eip
+        zp
+        for eip in PERMISSION_ORDER
+        for zp in zpod_permissions
+        if zp.permission == eip
     ]
 
     for zp in sorted_zpod_permissions:
@@ -73,6 +82,8 @@ def zpod_permission_list(
             show_default=False,
         ),
     ],
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List zPod Permissions
@@ -80,8 +91,11 @@ def zpod_permission_list(
 
     z = ZpodClient()
     zpod = z.zpods_get.sync(id=f"name={zpod_name}")
-
-    generate_table(z, zpod)
+    if json_:
+        permissions = z.zpods_permissions_get_all.sync(zpod.id)
+        json_print([permission.to_dict() for permission in permissions])
+    else:
+        generate_table(z, zpod)
 
 
 @app.command(name="add", no_args_is_help=True)

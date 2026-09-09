@@ -5,16 +5,23 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print, get_boolean_markdown, json_print
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    get_boolean_markdown,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.user_create import UserCreate
 from zpodsdk.models.user_update_admin import UserUpdateAdmin
-from zpodsdk.types import Unset
+from zpodsdk.types import UNSET
 
 app = typer.Typer(help="Manage Users")
 
 
-def generate_table(users, all=False):
+def generate_table(users, all_=False):
     title = "User List"
     table = Table(
         "Username",
@@ -29,7 +36,7 @@ def generate_table(users, all=False):
         show_header=True,
         header_style="bold cyan",
     )
-    if all:
+    if all_:
         table.add_column("Status")
 
     for user in sorted(users, key=lambda c: c.username):
@@ -52,7 +59,7 @@ def generate_table(users, all=False):
             get_boolean_markdown(user.superadmin),
             api_token,
         ]
-        if all:
+        if all_:
             row.append(user.status)
         table.add_row(
             *row,
@@ -64,37 +71,26 @@ def generate_table(users, all=False):
 @app.command(name="list")
 @unexpected_status_handler
 def user_list(
-    all: Annotated[
-        bool,
-        typer.Option("--all", help="Show all Users"),
-    ] = False,
-    json_: Annotated[
+    all_: Annotated[
         bool,
         typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
+            "--all",
+            "-a",
+            help="Show all Users",
         ),
     ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List Users
     """
     z: ZpodClient = ZpodClient()
-    users = z.users_get_all.sync(all_=all)
+    users = z.users_get_all.sync(all_=all_)
     if json_:
-        json_print([user.to_dict() for user in users], no_color=no_color)
+        json_print([user.to_dict() for user in users])
     else:
-        generate_table(users, all=all)
+        generate_table(users, all_=all_)
 
 
 @app.command(name="add", no_args_is_help=True)
@@ -180,40 +176,48 @@ def user_update(
         ),
     ] = None,
     description: Annotated[
-        str,
+        Optional[str],
         typer.Option(
             "--description",
             "-d",
             help="Description",
+            show_default=False,
         ),
-    ] = "",
+    ] = None,
     ssh_key: Annotated[
-        str,
+        Optional[str],
         typer.Option(
             "--ssh-key",
             "-s",
             help="SSH Key",
+            show_default=False,
         ),
-    ] = "",
+    ] = None,
     superadmin: Annotated[
-        bool,
+        Optional[bool],
         typer.Option(
-            "--superadmin",
-            help="Superadmin",
+            "--superadmin/--no-superadmin",
+            help="Grant or revoke superadmin",
+            show_default=False,
         ),
-    ] = False,
+    ] = None,
 ):
     """
-    Update User
+    Update User (only the provided fields are changed)
     """
+    if all(value is None for value in (email, description, ssh_key, superadmin)):
+        exit_with_error("No changes specified")
+
+    # Fields left at None are sent as UNSET so the API keeps their current
+    # value instead of overwriting them with an empty default.
     z: ZpodClient = ZpodClient()
     z.users_update.sync(
         id=f"username={username}",
         body=UserUpdateAdmin(
-            email=email or Unset(),
-            description=description,
-            ssh_key=ssh_key,
-            superadmin=superadmin,
+            email=UNSET if email is None else email,
+            description=UNSET if description is None else description,
+            ssh_key=UNSET if ssh_key is None else ssh_key,
+            superadmin=UNSET if superadmin is None else superadmin,
         ),
     )
     print(f"User [magenta]{username}[/magenta] has been updated.")

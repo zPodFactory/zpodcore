@@ -7,15 +7,16 @@ from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.lib.factory_config import FactoryConfig
-from zpodcli.lib.utils import console_print, exit_with_error
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    get_boolean_markdown,
+    json_print,
+)
 
 app = typer.Typer(help="Manage Factories")
-
-
-def get_status_markdown(status: bool):
-    if status:
-        return f"[dark_sea_green4]{status}[/dark_sea_green4]"
-    return f"[indian_red]{status}[/indian_red]"
 
 
 def validate_name(value):
@@ -33,10 +34,27 @@ def validate_server(value):
 
 
 @app.command(name="list")
-def factory_list():
+def factory_list(
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
+):
     """
     List Factories
     """
+    fc = FactoryConfig()
+    factories = [
+        {
+            "name": section,
+            "server": fc.config[section]["zpod_api_url"],
+            "token": fc.config[section]["zpod_api_token"],
+            "active": fc.config[section].getboolean("active", False),
+        }
+        for section in sorted(fc.config.sections())
+    ]
+
+    if json_:
+        json_print(factories)
+        return
 
     title = "Factory List"
     table = Table(
@@ -49,16 +67,12 @@ def factory_list():
         show_header=True,
         header_style="bold cyan",
     )
-
-    fc = FactoryConfig()
-    for section in sorted(fc.config.sections()):
-        factory = fc.config[section]
-        token = factory["zpod_api_token"]
+    for factory in factories:
         table.add_row(
-            f"[tan]{section}[/tan]",
-            f"[sky_blue2]{factory['zpod_api_url']}[/sky_blue2]",
-            f"{token}",
-            get_status_markdown(factory.getboolean("active", False)),
+            f"[tan]{factory['name']}[/tan]",
+            f"[sky_blue2]{factory['server']}[/sky_blue2]",
+            factory["token"],
+            get_boolean_markdown(factory["active"]),
         )
     console_print(title, table)
 

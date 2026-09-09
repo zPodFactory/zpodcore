@@ -7,7 +7,13 @@ from rich import print
 from rich.table import Table
 
 from zpodcli.lib.file import load_json_or_yaml_file
-from zpodcli.lib.utils import console_print, exit_with_error, json_print
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.profile_create import ProfileCreate
 from zpodsdk.models.profile_item_create import ProfileItemCreate
@@ -62,23 +68,8 @@ def profile_item_output(profile):
 @app.command(name="list")
 @unexpected_status_handler
 def profile_list(
-    json_: Annotated[
-        bool,
-        typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     Profile List
@@ -87,7 +78,7 @@ def profile_list(
     profiles = z.profiles_get_all.sync()
     if json_:
         profiles_dict = [profile.to_dict() for profile in profiles]
-        json_print(profiles_dict, no_color=no_color)
+        json_print(profiles_dict)
     else:
         generate_table(profiles, "List")
 
@@ -102,23 +93,8 @@ def profile_info(
             show_default=False,
         ),
     ],
-    json_: Annotated[
-        bool,
-        typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     Profile Info
@@ -127,7 +103,7 @@ def profile_info(
     profile = z.profiles_get.sync(id=f"name={profile_name}")
     if json_:
         profile_dict = profile.to_dict()["profile"]
-        json_print(profile_dict, no_color=no_color)
+        json_print(profile_dict)
     else:
         generate_table([profile], "Info")
 

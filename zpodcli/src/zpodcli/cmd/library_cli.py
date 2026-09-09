@@ -5,7 +5,13 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print, get_boolean_markdown
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    get_boolean_markdown,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.library_create import LibraryCreate
 from zpodsdk.models.library_update import LibraryUpdate
@@ -42,13 +48,19 @@ def generate_table(libraries: list, action: str = None):
 
 @app.command(name="list")
 @unexpected_status_handler
-def library_list():
+def library_list(
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
+):
     """
     List Libraries
     """
     z: ZpodClient = ZpodClient()
     libraries = z.libraries_get_all.sync()
-    generate_table(libraries=libraries, action="List")
+    if json_:
+        json_print([library.to_dict() for library in libraries])
+    else:
+        generate_table(libraries=libraries, action="List")
 
 
 @app.command(name="create", no_args_is_help=True)
@@ -169,13 +181,18 @@ def library_get(
             show_default=False,
         ),
     ],
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     Get Library
     """
     z: ZpodClient = ZpodClient()
     library = z.libraries_get.sync(id=f"name={library_name}")
-    generate_table(libraries=[library], action="Get")
+    if json_:
+        json_print(library.to_dict())
+    else:
+        generate_table(libraries=[library], action="Get")
 
 
 @app.command(name="resync", no_args_is_help=True)

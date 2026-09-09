@@ -3,7 +3,7 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print
+from zpodcli.lib.utils import JsonOption, NoColorOption, console_print, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_enet_create import EndpointENetCreate
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
@@ -37,6 +37,8 @@ def enet_list(
             show_default=False,
         ),
     ],
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List ENets
@@ -45,7 +47,10 @@ def enet_list(
 
     ep: EndpointViewFull = z.endpoints_get.sync(id=f"name={endpoint_name}")
     enets = z.endpoints_enet_get_all.sync(id=ep.id)
-    generate_table(enets)
+    if json_:
+        json_print([enet.to_dict() for enet in enets])
+    else:
+        generate_table(enets)
 
 
 @app.command(name="create", no_args_is_help=True)

@@ -6,7 +6,13 @@ from rich.table import Table
 from typing_extensions import Annotated
 
 from zpodcli.lib.prompt import confirm
-from zpodcli.lib.utils import console_print, exit_with_error
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_dns_create import ZpodDnsCreate
 from zpodsdk.models.zpod_dns_update import ZpodDnsUpdate
@@ -48,14 +54,18 @@ def zpod_dns_list(
             show_default=False,
         ),
     ],
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List DNS records for zPod
     """
-    print(f"Listing {zpod_name} DNS")
     z: ZpodClient = ZpodClient()
     zpod_dns: List[ZpodDnsView] = z.zpods_dns_get_all.sync(id=f"name={zpod_name}")
-    generate_table(zpod_dns)
+    if json_:
+        json_print([item.to_dict() for item in zpod_dns])
+    else:
+        generate_table(zpod_dns)
 
 
 @app.command(name="add", no_args_is_help=True)

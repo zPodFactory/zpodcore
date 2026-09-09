@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import Annotated
 
 import typer
 from rich import print
@@ -8,6 +9,36 @@ from rich.json import JSON
 from rich.terminal_theme import DIMMED_MONOKAI
 
 from zpodcli.lib.global_flags import GLOBAL_FLAGS
+
+
+def _set_no_color(value: bool) -> bool:
+    GLOBAL_FLAGS["no_color"] = value
+    return value
+
+
+# Shared output options for read commands (list/get/info).
+# Usage: `json_: JsonOption = False, no_color: NoColorOption = False`
+JsonOption = Annotated[
+    bool,
+    typer.Option(
+        "--json",
+        "-j",
+        help="Display using json",
+        is_flag=True,
+    ),
+]
+
+# The callback stores the flag in GLOBAL_FLAGS so console_print/json_print
+# honor it without every command threading the value through.
+NoColorOption = Annotated[
+    bool,
+    typer.Option(
+        "--no-color",
+        help="Disable color output",
+        is_flag=True,
+        callback=_set_no_color,
+    ),
+]
 
 
 def exit_with_error(txt, code=1, color="indian_red"):
@@ -48,22 +79,30 @@ def get_status_markdown(status: str):
 
 # Prints Rich Console object.
 # if global SVG flag is True, will generate SVG output file.
+# if --no-color was given, colors are stripped (bold/dim styling is kept).
 def console_print(title, content):
-    console = Console(record=GLOBAL_FLAGS["svg"])
+    console = Console(
+        record=GLOBAL_FLAGS["svg"],
+        no_color=GLOBAL_FLAGS["no_color"],
+    )
     console.print(content)
     if GLOBAL_FLAGS["svg"]:
         filename = title.replace(" ", "_").lower() + ".svg"
         console.save_svg(filename, title="", theme=DIMMED_MONOKAI)
 
 
-def json_print(data, no_color=False):
-    """Print JSON data with optional color formatting
+def json_print(data):
+    """Print JSON data.
+
+    On a terminal, Rich pretty-prints with syntax colors. When stdout is not a
+    TTY (piped to jq, redirected to a file) or --no-color was given, plain
+    json.dumps output is written instead: Rich wraps long values at the console
+    width when not attached to a terminal, which produces invalid JSON.
 
     Args:
         data: The data to print as JSON
-        no_color: If True, print without color formatting
     """
-    if no_color:
+    if GLOBAL_FLAGS["no_color"] or not sys.stdout.isatty():
         sys.stdout.write(json.dumps(data, sort_keys=True) + "\n")
     else:
         print(JSON.from_data(data, sort_keys=True))
