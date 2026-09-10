@@ -7,7 +7,14 @@ from rich.live import Live
 from rich.table import Table
 
 from zpodcli.lib.prompt import confirm
-from zpodcli.lib.utils import console_print, get_status_markdown, json_print
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    get_status_markdown,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView
@@ -114,27 +121,12 @@ def zpod_component_list(
             show_default=False,
         ),
     ],
-    json_: Annotated[
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
+    watch: Annotated[
         bool,
         typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
-    wait: Annotated[
-        bool,
-        typer.Option(
-            "--wait",
+            "--watch",
             "-w",
             help="Refresh list every 5 seconds (Ctrl+C to quit)",
             is_flag=True,
@@ -144,23 +136,23 @@ def zpod_component_list(
     """
     List zPod Components
     """
-    if wait:
+    z: ZpodClient = ZpodClient()
+    if watch:
         if json_:
-            print("Error: Cannot use --wait (-w) with --json (-j) flags together.")
-            raise typer.Exit(1)
-        with Live(refresh_per_second=1, transient=False) as live:
-            while True:
-                z: ZpodClient = ZpodClient()
-                zpod_components: list[ZpodComponentView] = (
-                    z.zpods_components_get_all.sync(id=f"name={zpod_name}")
-                )
-
-                sorted_zpod_components = sort_components_by_ip(zpod_components)
-                table = generate_table(sorted_zpod_components, return_table=True)
-                live.update(table)
-                time.sleep(5)
+            exit_with_error("Cannot use --watch (-w) with --json (-j) together")
+        try:
+            with Live(refresh_per_second=1, transient=False) as live:
+                while True:
+                    zpod_components: list[ZpodComponentView] = (
+                        z.zpods_components_get_all.sync(id=f"name={zpod_name}")
+                    )
+                    sorted_zpod_components = sort_components_by_ip(zpod_components)
+                    table = generate_table(sorted_zpod_components, return_table=True)
+                    live.update(table)
+                    time.sleep(5)
+        except KeyboardInterrupt:
+            raise typer.Exit() from None
     else:
-        z: ZpodClient = ZpodClient()
         zpod_components: list[ZpodComponentView] = z.zpods_components_get_all.sync(
             id=f"name={zpod_name}"
         )
@@ -171,7 +163,7 @@ def zpod_component_list(
             zpod_components_dict = [
                 component.to_dict() for component in sorted_zpod_components
             ]
-            json_print(zpod_components_dict, no_color=no_color)
+            json_print(zpod_components_dict)
         else:
             generate_table(sorted_zpod_components)
 

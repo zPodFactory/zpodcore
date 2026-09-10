@@ -5,7 +5,13 @@ import typer
 from rich.progress import Progress
 from rich.table import Table
 
-from zpodcli.lib.utils import console_print, exit_with_error, json_print
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 CHUNK_SIZE = 1024 * 1024 * 16  # 16MB
@@ -73,23 +79,8 @@ def component_list(
             help="Show all library components",
         ),
     ] = False,
-    json_: Annotated[
-        bool,
-        typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List Components
@@ -114,8 +105,7 @@ def component_list(
         sorted_components = filtered_components
 
     if json_:
-        components_dict = [component.to_dict() for component in components]
-        json_print(components_dict, no_color=no_color)
+        json_print([component.to_dict() for component in sorted_components])
     else:
         generate_table(sorted_components)
 
@@ -154,6 +144,8 @@ def component_get(
             show_default=False,
         ),
     ],
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     Get Specific Component Information
@@ -161,6 +153,10 @@ def component_get(
 
     z: ZpodClient = ZpodClient()
     component = z.components_get.sync(id=f"uid={component_uid}")
+
+    if json_:
+        json_print(component.to_dict())
+        return
 
     generate_table(
         components=[component],

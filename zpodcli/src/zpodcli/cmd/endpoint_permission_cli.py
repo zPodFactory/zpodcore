@@ -5,7 +5,13 @@ from rich import print
 from rich.table import Table
 from typing_extensions import Annotated
 
-from zpodcli.lib.utils import console_print, exit_with_error
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_permission import EndpointPermission
 from zpodsdk.models.endpoint_permission_group_add_remove import (
@@ -63,6 +69,8 @@ def endpoint_permission_list(
             show_default=False,
         ),
     ],
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List endpoint permission
@@ -70,7 +78,11 @@ def endpoint_permission_list(
 
     z = ZpodClient()
     endpoint = z.endpoints_get.sync(id=f"name={endpoint_name}")
-    generate_table(z, endpoint)
+    if json_:
+        permissions = z.endpoints_permissions_get_all.sync(endpoint.id)
+        json_print([permission.to_dict() for permission in permissions])
+    else:
+        generate_table(z, endpoint)
 
 
 @app.command(name="add", no_args_is_help=True)

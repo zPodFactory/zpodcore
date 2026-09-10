@@ -4,7 +4,7 @@ import typer
 from rich import print
 from rich.table import Table
 
-from zpodcli.lib.utils import console_print, json_print
+from zpodcli.lib.utils import JsonOption, NoColorOption, console_print, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.setting_create import SettingCreate
 from zpodsdk.models.setting_update import SettingUpdate
@@ -78,23 +78,8 @@ def setting_create(
 @app.command(name="list")
 @unexpected_status_handler
 def setting_list(
-    json_: Annotated[
-        bool,
-        typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
 ):
     """
     List Settings
@@ -104,7 +89,7 @@ def setting_list(
 
     if json_:
         settings_dict = [setting.to_dict() for setting in settings]
-        json_print(settings_dict, no_color=no_color)
+        json_print(settings_dict)
     else:
         generate_table(settings=settings)
 

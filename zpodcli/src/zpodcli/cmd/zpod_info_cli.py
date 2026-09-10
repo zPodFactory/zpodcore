@@ -7,7 +7,13 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table, box
 
-from zpodcli.lib.utils import console_print, get_status_markdown, json_print
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    get_status_markdown,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_dns_view import ZpodDnsView
 from zpodsdk.models.zpod_permission import ZpodPermission
@@ -462,23 +468,8 @@ def zpod_info(
             show_default=False,
         ),
     ],
-    json_: Annotated[
-        bool,
-        typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
     fields: Annotated[
         str,
         typer.Option(
@@ -497,6 +488,6 @@ def zpod_info(
 
     if json_:
         zpod_dict = zpod.to_dict()
-        json_print(zpod_dict, no_color=no_color)
+        json_print(zpod_dict)
     else:
         generate_detailed_info(zpod, fields)

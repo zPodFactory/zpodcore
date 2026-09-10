@@ -15,7 +15,14 @@ from zpodcli.cmd import (
     zpod_info_cli,
     zpod_permission_cli,
 )
-from zpodcli.lib.utils import console_print, get_status_markdown, json_print
+from zpodcli.lib.utils import (
+    JsonOption,
+    NoColorOption,
+    console_print,
+    exit_with_error,
+    get_status_markdown,
+    json_print,
+)
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
 from zpodsdk.models.zpod_create import ZpodCreate
@@ -23,6 +30,10 @@ from zpodsdk.models.zpod_permission import ZpodPermission
 from zpodsdk.models.zpod_view import ZpodView
 
 app = typer.Typer(help="Manage zPods")
+
+# Statuses that end the `zpod create --wait` polling loop.
+FAILED_STATUSES = ("DEPLOY_FAILED", "DESTROY_FAILED")
+FINAL_STATUSES = ("ACTIVE", *FAILED_STATUSES)
 app.add_typer(zpod_component_cli.app, name="component")
 app.add_typer(zpod_dns_cli.app, name="dns")
 app.add_typer(zpod_info_cli.app)
@@ -121,27 +132,12 @@ def zpod_list(
             show_default=False,
         ),
     ] = "",
-    json_: Annotated[
+    json_: JsonOption = False,
+    no_color: NoColorOption = False,
+    watch: Annotated[
         bool,
         typer.Option(
-            "--json",
-            "-j",
-            help="Display using json",
-            is_flag=True,
-        ),
-    ] = False,
-    no_color: Annotated[
-        bool,
-        typer.Option(
-            "--no-color",
-            help="Disable color output",
-            is_flag=True,
-        ),
-    ] = False,
-    wait: Annotated[
-        bool,
-        typer.Option(
-            "--wait",
+            "--watch",
             "-w",
             help="Refresh list every 5 seconds (Ctrl+C to quit)",
             is_flag=True,
@@ -153,24 +149,26 @@ def zpod_list(
     """
     z: ZpodClient = ZpodClient()
 
-    if wait:
+    if watch:
         if json_:
-            print("Error: Cannot use --wait (-w) with --json (-j) flags together.")
-            raise typer.Exit(1)
-        with Live(refresh_per_second=1, transient=False) as live:
-            while True:
-                zpods = z.zpods_get_all.sync()
-                filtered_zpods = filter_zpods_by_owner(zpods, owner)
-                table = generate_table(filtered_zpods, return_table=True)
-                live.update(table)
-                time.sleep(5)
+            exit_with_error("Cannot use --watch (-w) with --json (-j) together")
+        try:
+            with Live(refresh_per_second=1, transient=False) as live:
+                while True:
+                    zpods = z.zpods_get_all.sync()
+                    filtered_zpods = filter_zpods_by_owner(zpods, owner)
+                    table = generate_table(filtered_zpods, return_table=True)
+                    live.update(table)
+                    time.sleep(5)
+        except KeyboardInterrupt:
+            raise typer.Exit() from None
     else:
         zpods = z.zpods_get_all.sync()
         filtered_zpods = filter_zpods_by_owner(zpods, owner)
 
         if json_:
             zpods_dict = [zpod.to_dict() for zpod in filtered_zpods]
-            json_print(zpods_dict, no_color=no_color)
+            json_print(zpods_dict)
 
         else:
             generate_table(filtered_zpods)
@@ -346,7 +344,7 @@ def zpod_create(
                             f"zPod [magenta]{zpod_name}[/magenta] deployment [green]success[/green]!"
                         )
                         break
-                    elif status in ["DEPLOY_FAILED", "DESTROY_FAILED"]:
+                    elif status in FAILED_STATUSES:
                         print(
                             f"\nzPod [magenta]{zpod_name}[/magenta] deployment [red]failure[/red]!"
                         )
@@ -423,7 +421,7 @@ def zpod_create(
                                             "",
                                         )
 
-                        if status not in ["ACTIVE", "DEPLOY_FAILED"]:
+                        if status not in FINAL_STATUSES:
                             zpod_status_table.add_row(
                                 f"Overall status: {get_status_markdown(status)} [dim]({elapsed_str})[/dim] ",
                                 Spinner("dots", style="yellow"),
@@ -447,7 +445,7 @@ def zpod_create(
                                 f"zPod [magenta]{zpod_name}[/magenta] deployment [green]success[/green]!"
                             )
                             break
-                        elif status == "DEPLOY_FAILED":
+                        elif status in FAILED_STATUSES:
                             live.stop()
                             print(
                                 f"\nzPod [magenta]{zpod_name}[/magenta] deployment [red]failure[/red]!"
