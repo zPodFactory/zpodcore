@@ -1,7 +1,7 @@
 import json
 import re
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from attrs import fields_dict
@@ -180,7 +180,7 @@ def endpoint_create(
         ),
     ] = None,
     endpoints_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--endpoints-file",
             "-ef",
@@ -314,7 +314,7 @@ def endpoint_update(
         ),
     ],
     newname: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--newname",
             help="New endpoint name",

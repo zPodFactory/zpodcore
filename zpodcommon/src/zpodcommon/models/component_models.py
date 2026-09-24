@@ -1,6 +1,5 @@
 import json
 from functools import cached_property
-from typing import Literal
 
 from sqlmodel import Field
 

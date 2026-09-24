@@ -8,9 +8,11 @@ from zpodapi.lib.schema_base import Field, SchemaBase
 # holds the real value (read by zpodengine via DBUtils.get_setting_value) —
 # the masking is only on SettingView serialisation, so clients can see the
 # setting exists but never its content.
-SENSITIVE_SETTINGS = frozenset({
-    "zpodfactory_broadcom_download_token",
-})
+SENSITIVE_SETTINGS = frozenset(
+    {
+        "zpodfactory_broadcom_download_token",
+    }
+)
 
 
 def hide_sensitive(v: str, info: ValidationInfo) -> str:

@@ -1,5 +1,6 @@
+from typing import Annotated
+
 from pydantic import AfterValidator, ConfigDict, StringConstraints
-from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodapi.lib.types import validate_fqdn

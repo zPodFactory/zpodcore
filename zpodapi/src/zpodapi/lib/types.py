@@ -1,8 +1,8 @@
 import re
+from typing import Annotated
 
 from pydantic import AfterValidator, ValidationInfo
 from pydantic_core import PydanticCustomError
-from typing_extensions import Annotated
 
 
 def IdValidator(fields, mapper=None):
@@ -18,7 +18,7 @@ def IdValidator(fields, mapper=None):
         fldtype = fields[column]
         if getattr(fldtype, "validate", None):
             fldtype.validate(value)
-        elif fldtype == int:
+        elif fldtype is int:
             try:
                 int(value)
             except ValueError as e:

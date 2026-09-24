@@ -1,8 +1,7 @@
 from functools import partial
-from typing import Optional
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
 
 from zpodcli import __version__
 from zpodcli.cmd import (
@@ -33,7 +32,7 @@ def version_callback(value: bool):
 @app.callback()
 def main(
     factory: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--factory",
             "-f",
@@ -42,7 +41,7 @@ def main(
         ),
     ] = None,
     svg: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option(
             "--output-svg",
             help="Output an SVG file for any list command.",
@@ -50,7 +49,7 @@ def main(
         ),
     ] = None,
     version: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option(
             "--version",
             "-V",

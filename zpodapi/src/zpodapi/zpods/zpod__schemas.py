@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 
 from pydantic import StringConstraints
-from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon import enums
@@ -27,7 +26,13 @@ class D:
     status = {"example": enums.ZpodStatus.ACTIVE}
     creation_date = {"example": datetime(2023, 1, 1)}
     last_modified_date = {"example": datetime(2023, 1, 1)}
-    features = {"example": {'featureOne': {'option': 'example'}, 'featureTwo': {'property': 'sample'}}}
+    features = {
+        "example": {
+            "featureOne": {"option": "example"},
+            "featureTwo": {"property": "sample"},
+        }
+    }
+
 
 class ZpodCreate(SchemaBase):
     name: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.name)

@@ -71,7 +71,6 @@ def generate_table(
                 # Add port for Proxmox Backup Server UI
                 zc.fqdn = f"{zc.fqdn}:8007"
 
-
         # Join the usernames if there are any; otherwise, an empty string
         usernames = ", ".join(usernames_list)
 

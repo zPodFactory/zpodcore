@@ -99,7 +99,10 @@ def ensure_staged_template(
     waited = 0
     while True:
         template = vc.get_vm(name=uid, root=staging_folder)
-        if template is not None and vc.get_custom_field(template, STATUS_FIELD) == STATUS_READY:
+        if (
+            template is not None
+            and vc.get_custom_field(template, STATUS_FIELD) == STATUS_READY
+        ):
             return template
 
         if try_claim(endpoint_id, uid):
@@ -227,7 +230,9 @@ def try_claim(endpoint_id, uid) -> bool:
 def release_claim(endpoint_id, uid):
     name = lock_name(endpoint_id, uid)
     with database.get_session_ctx() as session:
-        row = session.exec(select(M.Setting).where(M.Setting.name == name)).one_or_none()
+        row = session.exec(
+            select(M.Setting).where(M.Setting.name == name)
+        ).one_or_none()
         if row is not None:
             session.delete(row)
             session.commit()

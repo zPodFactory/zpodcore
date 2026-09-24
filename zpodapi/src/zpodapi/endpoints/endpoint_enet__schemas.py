@@ -1,5 +1,6 @@
+from typing import Annotated
+
 from pydantic import StringConstraints
-from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 

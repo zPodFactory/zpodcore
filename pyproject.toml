@@ -11,6 +11,9 @@ select = [
 ignore = [
     "B008",
     "E501",
+    # ruff 0.16 folds mccabe (C90) into the "C" selector; six existing functions
+    # exceed the default complexity of 10 and refactoring them is not lint work.
+    "C901",
 ]
 
 [tool.ruff.lint.isort]

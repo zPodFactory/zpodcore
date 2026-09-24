@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich import print
@@ -114,7 +114,7 @@ def update(
         ),
     ],
     description: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--description",
             "-d",

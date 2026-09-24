@@ -1,7 +1,8 @@
+from typing import Annotated
+
 import typer
 from rich import print
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import JsonOption, NoColorOption, console_print, json_print
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler

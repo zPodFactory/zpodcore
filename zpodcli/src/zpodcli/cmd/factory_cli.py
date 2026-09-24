@@ -1,10 +1,9 @@
 import re
-from typing import Optional
+from typing import Annotated
 
 import typer
 from rich import print
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.factory_config import FactoryConfig
 from zpodcli.lib.utils import (
@@ -143,7 +142,7 @@ def factory_add(
 def factory_update(
     *,
     factory_name: Annotated[
-        Optional[str],
+        str | None,
         typer.Argument(
             help="Factory name",
             show_default=False,
@@ -151,7 +150,7 @@ def factory_update(
         ),
     ],
     newname: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--newname",
             callback=validate_name,
@@ -159,7 +158,7 @@ def factory_update(
         ),
     ] = "",
     server: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--server",
             "-s",
@@ -168,7 +167,7 @@ def factory_update(
         ),
     ] = "",
     token: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--token",
             "-t",

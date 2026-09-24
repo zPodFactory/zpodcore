@@ -1,9 +1,8 @@
+from zpodapi import settings
+from zpodapi.lib.service_base import ServiceBase
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient
 from zpodcommon.lib.zpodengine_client import ZpodEngineClient
-
-from zpodapi import settings
-from zpodapi.lib.service_base import ServiceBase
 
 
 class EndpointENetService(ServiceBase):

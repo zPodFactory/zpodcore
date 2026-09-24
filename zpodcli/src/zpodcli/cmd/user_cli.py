@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import Annotated
 
 import typer
 from rich import print
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -167,7 +166,7 @@ def user_update(
         ),
     ],
     email: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--email",
             "-e",
@@ -176,7 +175,7 @@ def user_update(
         ),
     ] = None,
     description: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--description",
             "-d",
@@ -185,7 +184,7 @@ def user_update(
         ),
     ] = None,
     ssh_key: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--ssh-key",
             "-s",
@@ -194,7 +193,7 @@ def user_update(
         ),
     ] = None,
     superadmin: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option(
             "--superadmin/--no-superadmin",
             help="Grant or revoke superadmin",

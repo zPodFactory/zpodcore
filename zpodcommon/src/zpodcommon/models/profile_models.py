@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlmodel import JSON, Column, Field
 
 from zpodcommon.models.model_base import ModelBase
@@ -20,7 +18,7 @@ class Profile(CommonDatesMixin, ModelBase, table=True):
         unique=False,
         nullable=False,
     )
-    profile: List = Field(
+    profile: list = Field(
         default=[],
         sa_column=Column(JSON, nullable=False, index=False),
     )

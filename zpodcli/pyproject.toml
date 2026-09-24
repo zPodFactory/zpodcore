@@ -21,7 +21,7 @@ dev = [
     # ipython 9.x needs Python >=3.11; zpodcli still publishes for >=3.10.
     "ipython==8.39.0",
     "pytest==9.1.1",
-    "ruff==0.15.9",
+    "ruff==0.16.4",
 ]
 
 [tool.uv]

@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import List
+from typing import Annotated
 
 from pydantic import StringConstraints
-from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 
@@ -38,7 +37,7 @@ class ProfileItemView(SchemaBase):
 class ProfileView(SchemaBase):
     id: int = Field(..., D.id)
     name: str = Field(..., D.name)
-    profile: List[ProfileItemView | List[ProfileItemView]]
+    profile: list[ProfileItemView | list[ProfileItemView]]
     creation_date: datetime = Field(..., D.creation_date)
     last_modified_date: datetime = Field(..., D.last_modified_date)
 
@@ -55,7 +54,7 @@ class ProfileItemCreate(SchemaBase):
 
 class ProfileCreate(SchemaBase):
     name: Annotated[str, StringConstraints(to_lower=True)] = Field(..., D.name)
-    profile: List[ProfileItemCreate | List[ProfileItemCreate]]
+    profile: list[ProfileItemCreate | list[ProfileItemCreate]]
 
 
 class ProfileItemUpdate(SchemaBase):
@@ -70,4 +69,4 @@ class ProfileItemUpdate(SchemaBase):
 
 class ProfileUpdate(SchemaBase):
     name: Annotated[str, StringConstraints(to_lower=True)] | None = Field(None, D.name)
-    profile: List[ProfileItemUpdate | List[ProfileItemUpdate]] | None = None
+    profile: list[ProfileItemUpdate | list[ProfileItemUpdate]] | None = None

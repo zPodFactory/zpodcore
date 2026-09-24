@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich import print
@@ -119,7 +119,7 @@ def profile_create(
         ),
     ],
     profile_str: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--profile",
             "-p",
@@ -128,7 +128,7 @@ def profile_create(
         ),
     ] = None,
     profile_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--profile-file",
             "-pf",
@@ -175,7 +175,7 @@ def profile_update(
         ),
     ],
     newname: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--newname",
             help="New profile name",
@@ -183,7 +183,7 @@ def profile_update(
         ),
     ] = None,
     profile: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--profile",
             "-p",
@@ -192,7 +192,7 @@ def profile_update(
         ),
     ] = None,
     profile_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--profile-file",
             "-pf",

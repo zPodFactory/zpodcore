@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import Annotated
 
 import typer
 from rich import print
 from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -145,7 +144,7 @@ def library_update(
         ),
     ] = "",
     enabled: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option(
             "--enable/--disable",
             help="Enable or disable library",

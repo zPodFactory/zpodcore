@@ -217,7 +217,9 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bncd"):
             vlan_id = int(network_part.split(".")[-1])
             vlan_display = "None (Untagged)" if vlan_id == 0 else str(vlan_id)
             router = (
-                "zPodFactory Endpoint NSX-T1" if vlan_id == 0 else f"zcore.{zpod.domain}"
+                "zPodFactory Endpoint NSX-T1"
+                if vlan_id == 0
+                else f"zcore.{zpod.domain}"
             )
             # Calculate netmask from prefix length
             netmask = str(ipv4network.netmask)
