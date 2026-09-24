@@ -140,7 +140,6 @@ def zpod_list(
             "--watch",
             "-w",
             help="Refresh list every 5 seconds (Ctrl+C to quit)",
-            is_flag=True,
         ),
     ] = False,
 ):
@@ -256,7 +255,6 @@ def zpod_create(
             "--wait",
             "-w",
             help="Wait for task to complete",
-            is_flag=True,
         ),
     ] = False,
     no_spinner: Annotated[
@@ -264,7 +262,6 @@ def zpod_create(
         typer.Option(
             "--no-spinner",
             help="Disable spinner animation when waiting",
-            is_flag=True,
         ),
     ] = False,
 ):

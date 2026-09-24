@@ -194,7 +194,6 @@ def endpoint_create(
             "--generate-config-sample",
             "-g",
             help="Generate a sample endpoint configuration file",
-            is_flag=True,
         ),
     ] = False,
 ):

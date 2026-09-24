@@ -129,7 +129,6 @@ def zpod_component_list(
             "--watch",
             "-w",
             help="Refresh list every 5 seconds (Ctrl+C to quit)",
-            is_flag=True,
         ),
     ] = False,
 ):

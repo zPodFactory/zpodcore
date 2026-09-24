@@ -24,7 +24,6 @@ JsonOption = Annotated[
         "--json",
         "-j",
         help="Display using json",
-        is_flag=True,
     ),
 ]
 
@@ -35,7 +34,6 @@ NoColorOption = Annotated[
     typer.Option(
         "--no-color",
         help="Disable color output",
-        is_flag=True,
         callback=_set_no_color,
     ),
 ]
