@@ -1,3 +1,9 @@
-FROM postgres:15.2-bullseye
+# Moving from a bullseye to a bookworm image changes glibc (2.31 -> 2.36) and
+# therefore the collation version. Existing data volumes then log
+# "collation version mismatch" on every connection. One-time fix per database
+# (postgres, template1, zpod, prefect), each statement on its own:
+#   REINDEX DATABASE "<db>";
+#   ALTER DATABASE "<db>" REFRESH COLLATION VERSION;
+FROM postgres:15.19-bookworm
 
 COPY /zpodpostgres/db-create.sql /docker-entrypoint-initdb.d/
