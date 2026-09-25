@@ -46,6 +46,11 @@ build:
     dockerfile: ./zpodengine/dockerfile
     path: "{{ zpodcore_path.stdout }}"
     target: dev
+    # BuildKit (same builder as `docker build` / compose). The docker-py
+    # default is the legacy builder with rm=False: every Dockerfile step left
+    # a stopped intermediate container behind (~50 per deploy-all), which
+    # also pinned the intermediate images. 278 of them / ~55 GB by 2026-09-25.
+    build_backend: buildx
 
 push: {}
 
