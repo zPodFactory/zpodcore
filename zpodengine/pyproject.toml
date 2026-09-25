@@ -10,7 +10,6 @@ readme = "README.md"
 requires-python = ">=3.14,<3.15"
 dependencies = [
     "email-validator==2.3.0",
-    "ipython==9.16.1",
     "jinja2==3.1.6",
     "prefect==3.8.3",
     "prefect-docker==0.7.3",
@@ -24,6 +23,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    # Interactive convenience only; never imported by the code.
+    "ipython==9.16.1",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-xdist==3.8.0",

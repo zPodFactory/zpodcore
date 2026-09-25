@@ -15,7 +15,6 @@ dependencies = [
     "gitpython==3.1.59",
     "gunicorn==26.2.0",
     "httpx==0.28.1",
-    "ipython==9.16.1",
     "psycopg2==2.9.12",
     "pydantic-settings==2.15.0",
     "python-dotenv==1.2.3",
@@ -30,6 +29,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    # Interactive convenience only; never imported by the code.
+    "ipython==9.16.1",
     "coverage==7.15.4",
     "debugpy==1.8.21",
     "pytest==9.1.1",

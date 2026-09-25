@@ -3,7 +3,7 @@ revision = 3
 requires-python = "==3.14.*"
 
 [options]
-exclude-newer = "2026-08-26T10:02:40.086091772Z"
+exclude-newer = "2026-08-26T11:36:34.070196011Z"
 exclude-newer-span = "P30D"
 
 [[package]]
@@ -2007,7 +2007,6 @@ version = "0.7.2"
 source = { virtual = "." }
 dependencies = [
     { name = "email-validator" },
-    { name = "ipython" },
     { name = "jinja2" },
     { name = "prefect" },
     { name = "prefect-docker" },
@@ -2021,6 +2020,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "ipython" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
@@ -2030,7 +2030,6 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "email-validator", specifier = "==2.3.0" },
-    { name = "ipython", specifier = "==9.16.1" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "prefect", specifier = "==3.8.3" },
     { name = "prefect-docker", specifier = "==0.7.3" },
@@ -2044,6 +2043,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "ipython", specifier = "==9.16.1" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-xdist", specifier = "==3.8.0" },

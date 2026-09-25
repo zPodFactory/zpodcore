@@ -3,7 +3,7 @@ revision = 3
 requires-python = "==3.14.*"
 
 [options]
-exclude-newer = "2026-08-26T10:02:39.883289734Z"
+exclude-newer = "2026-08-26T11:36:34.417033568Z"
 exclude-newer-span = "P30D"
 
 [[package]]
@@ -869,7 +869,6 @@ dependencies = [
     { name = "gitpython" },
     { name = "gunicorn" },
     { name = "httpx" },
-    { name = "ipython" },
     { name = "psycopg2" },
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
@@ -886,6 +885,7 @@ dependencies = [
 dev = [
     { name = "coverage" },
     { name = "debugpy" },
+    { name = "ipython" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-xdist" },
@@ -900,7 +900,6 @@ requires-dist = [
     { name = "gitpython", specifier = "==3.1.59" },
     { name = "gunicorn", specifier = "==26.2.0" },
     { name = "httpx", specifier = "==0.28.1" },
-    { name = "ipython", specifier = "==9.16.1" },
     { name = "psycopg2", specifier = "==2.9.12" },
     { name = "pydantic-settings", specifier = "==2.15.0" },
     { name = "python-dotenv", specifier = "==1.2.3" },
@@ -917,6 +916,7 @@ requires-dist = [
 dev = [
     { name = "coverage", specifier = "==7.15.4" },
     { name = "debugpy", specifier = "==1.8.21" },
+    { name = "ipython", specifier = "==9.16.1" },
     { name = "pytest", specifier = "==9.1.1" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "pytest-xdist", specifier = "==3.8.0" },

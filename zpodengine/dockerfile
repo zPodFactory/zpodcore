@@ -2,6 +2,10 @@
 ARG UV_VERSION=0.12
 ARG PS_VERSION=7.5.11
 ARG PS_INSTALL_VERSION=7-5-11
+# VCF.PowerCLI is Broadcom's successor to VMware.PowerCLI: the full bundle
+# (37 modules, ~960 MB). The post-scripts only use VimAutomation.Core today,
+# but the rest (Vds, Storage, NSX, VCF SDKs...) is kept on purpose so future
+# scripts can rely on it; the image is rebuilt rarely.
 ARG POWERCLI_VERSION=9.1.1.25718932
 ARG GOVC_VERSION=0.56.0
 
@@ -10,7 +14,6 @@ ARG GOVC_VERSION=0.56.0
 # Base
 FROM python:3.14.7-slim-trixie AS base
 
-COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /usr/local/bin/uv
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
     UV_PROJECT_ENVIRONMENT=/opt/venv
@@ -29,6 +32,10 @@ ARG TARGETPLATFORM
 ARG GOVC_VERSION
 
 WORKDIR /tmp
+
+# uv is only needed to build the venv; keeping it out of `base` keeps 54 MB
+# out of the final image.
+COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /usr/local/bin/uv
 
 RUN apt-get update \
     && apt-get install -y \
@@ -152,9 +159,8 @@ SHELL [ "pwsh", "-command" ]
 # error, so a gallery hiccup used to yield an image silently missing a
 # module. Stop-on-error turns any Install-Module failure into a build failure.
 RUN $ErrorActionPreference = 'Stop'; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-# VCF.PowerCLI is Broadcom's successor to VMware.PowerCLI (same VimAutomation
-# modules underneath). PowerNSX, PowerVCF and Subnet were dropped: no cmdlet
-# from them is used anywhere in zpodengine (NSX is driven from Python).
+# PowerNSX, PowerVCF and Subnet were dropped: no cmdlet from them is used
+# anywhere in zpodengine (NSX is driven from Python).
 RUN $ErrorActionPreference = 'Stop'; Install-Module -Scope AllUsers VCF.PowerCLI -RequiredVersion ${POWERCLI_VERSION}
 
 # On by default to suppress nagging. Set to $false if you don't want to help us make PowerCLI better.
