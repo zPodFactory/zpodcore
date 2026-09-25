@@ -1,12 +1,7 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -26,21 +21,21 @@ class ZpodCreate:
         endpoint_id (int):
         name (str):
         profile (str):
-        description (Union[Unset, str]):  Default: ''.
-        domain (Union[Unset, str]):  Default: ''.
-        enet_name (Union[None, Unset, str]):
-        features (Union['ZpodCreateFeaturesType0', None, Unset]):
+        description (str | Unset):  Default: ''.
+        domain (str | Unset):  Default: ''.
+        enet_name (None | str | Unset):
+        features (None | Unset | ZpodCreateFeaturesType0):
     """
 
     endpoint_id: int
     name: str
     profile: str
-    description: Union[Unset, str] = ""
-    domain: Union[Unset, str] = ""
-    enet_name: Union[None, Unset, str] = UNSET
-    features: Union["ZpodCreateFeaturesType0", None, Unset] = UNSET
+    description: str | Unset = ""
+    domain: str | Unset = ""
+    enet_name: None | str | Unset = UNSET
+    features: None | Unset | ZpodCreateFeaturesType0 = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.zpod_create_features_type_0 import ZpodCreateFeaturesType0
 
         endpoint_id = self.endpoint_id
@@ -53,13 +48,13 @@ class ZpodCreate:
 
         domain = self.domain
 
-        enet_name: Union[None, Unset, str]
+        enet_name: None | str | Unset
         if isinstance(self.enet_name, Unset):
             enet_name = UNSET
         else:
             enet_name = self.enet_name
 
-        features: Union[Dict[str, Any], None, Unset]
+        features: dict[str, Any] | None | Unset
         if isinstance(self.features, Unset):
             features = UNSET
         elif isinstance(self.features, ZpodCreateFeaturesType0):
@@ -67,7 +62,8 @@ class ZpodCreate:
         else:
             features = self.features
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "endpoint_id": endpoint_id,
@@ -87,10 +83,10 @@ class ZpodCreate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.zpod_create_features_type_0 import ZpodCreateFeaturesType0
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         endpoint_id = d.pop("endpoint_id")
 
         name = d.pop("name")
@@ -101,18 +97,16 @@ class ZpodCreate:
 
         domain = d.pop("domain", UNSET)
 
-        def _parse_enet_name(data: object) -> Union[None, Unset, str]:
+        def _parse_enet_name(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         enet_name = _parse_enet_name(d.pop("enet_name", UNSET))
 
-        def _parse_features(
-            data: object,
-        ) -> Union["ZpodCreateFeaturesType0", None, Unset]:
+        def _parse_features(data: object) -> None | Unset | ZpodCreateFeaturesType0:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -123,9 +117,9 @@ class ZpodCreate:
                 features_type_0 = ZpodCreateFeaturesType0.from_dict(data)
 
                 return features_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["ZpodCreateFeaturesType0", None, Unset], data)
+            return cast(None | Unset | ZpodCreateFeaturesType0, data)
 
         features = _parse_features(d.pop("features", UNSET))
 

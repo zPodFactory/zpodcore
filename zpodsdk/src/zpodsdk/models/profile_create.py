@@ -1,12 +1,7 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    TypeVar,
-    Union,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -22,20 +17,20 @@ class ProfileCreate:
     """
     Attributes:
         name (str):
-        profile (List[Union['ProfileItemCreate', List['ProfileItemCreate']]]):
+        profile (list[list[ProfileItemCreate] | ProfileItemCreate]):
     """
 
     name: str
-    profile: List[Union["ProfileItemCreate", List["ProfileItemCreate"]]]
+    profile: list[list[ProfileItemCreate] | ProfileItemCreate]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.profile_item_create import ProfileItemCreate
 
         name = self.name
 
         profile = []
         for profile_item_data in self.profile:
-            profile_item: Union[Dict[str, Any], List[Dict[str, Any]]]
+            profile_item: dict[str, Any] | list[dict[str, Any]]
             if isinstance(profile_item_data, ProfileItemCreate):
                 profile_item = profile_item_data.to_dict()
             else:
@@ -46,7 +41,8 @@ class ProfileCreate:
 
             profile.append(profile_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "name": name,
@@ -57,10 +53,10 @@ class ProfileCreate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.profile_item_create import ProfileItemCreate
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         name = d.pop("name")
 
         profile = []
@@ -69,14 +65,14 @@ class ProfileCreate:
 
             def _parse_profile_item(
                 data: object,
-            ) -> Union["ProfileItemCreate", List["ProfileItemCreate"]]:
+            ) -> list[ProfileItemCreate] | ProfileItemCreate:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
                     profile_item_type_0 = ProfileItemCreate.from_dict(data)
 
                     return profile_item_type_0
-                except:  # noqa: E722
+                except (TypeError, ValueError, AttributeError, KeyError):
                     pass
                 if not isinstance(data, list):
                     raise TypeError()

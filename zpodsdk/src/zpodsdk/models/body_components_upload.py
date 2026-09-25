@@ -1,10 +1,12 @@
-from io import BytesIO
-from typing import Any, Dict, List, Type, TypeVar
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..types import File
+from .. import types
 
 T = TypeVar("T", bound="BodyComponentsUpload")
 
@@ -13,20 +15,20 @@ T = TypeVar("T", bound="BodyComponentsUpload")
 class BodyComponentsUpload:
     """
     Attributes:
-        file (File):
+        file (str):
         file_size (int):
         filename (str):
         offset (int):
     """
 
-    file: File
+    file: str
     file_size: int
     filename: str
     offset: int
-    additional_properties: Dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
-        file = self.file.to_tuple()
+    def to_dict(self) -> dict[str, Any]:
+        file = self.file
 
         file_size = self.file_size
 
@@ -34,7 +36,7 @@ class BodyComponentsUpload:
 
         offset = self.offset
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
@@ -47,34 +49,26 @@ class BodyComponentsUpload:
 
         return field_dict
 
-    def to_multipart(self) -> Dict[str, Any]:
-        file = self.file.to_tuple()
+    def to_multipart(self) -> types.RequestFiles:
+        files: types.RequestFiles = []
 
-        file_size = (None, str(self.file_size).encode(), "text/plain")
+        files.append(("file", (None, str(self.file).encode(), "text/plain")))
 
-        filename = (None, str(self.filename).encode(), "text/plain")
+        files.append(("file_size", (None, str(self.file_size).encode(), "text/plain")))
 
-        offset = (None, str(self.offset).encode(), "text/plain")
+        files.append(("filename", (None, str(self.filename).encode(), "text/plain")))
 
-        field_dict: Dict[str, Any] = {}
+        files.append(("offset", (None, str(self.offset).encode(), "text/plain")))
+
         for prop_name, prop in self.additional_properties.items():
-            field_dict[prop_name] = (None, str(prop).encode(), "text/plain")
+            files.append((prop_name, (None, str(prop).encode(), "text/plain")))
 
-        field_dict.update(
-            {
-                "file": file,
-                "file_size": file_size,
-                "filename": filename,
-                "offset": offset,
-            }
-        )
-
-        return field_dict
+        return files
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
-        file = File(payload=BytesIO(d.pop("file")))
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        file = d.pop("file")
 
         file_size = d.pop("file_size")
 
@@ -93,7 +87,7 @@ class BodyComponentsUpload:
         return body_components_upload
 
     @property
-    def additional_keys(self) -> List[str]:
+    def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
     def __getitem__(self, key: str) -> Any:

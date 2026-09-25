@@ -1,13 +1,7 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -24,31 +18,29 @@ T = TypeVar("T", bound="ProfileUpdate")
 class ProfileUpdate:
     """
     Attributes:
-        name (Union[None, Unset, str]):
-        profile (Union[List[Union['ProfileItemUpdate', List['ProfileItemUpdate']]], None, Unset]):
+        name (None | str | Unset):
+        profile (list[list[ProfileItemUpdate] | ProfileItemUpdate] | None | Unset):
     """
 
-    name: Union[None, Unset, str] = UNSET
-    profile: Union[
-        List[Union["ProfileItemUpdate", List["ProfileItemUpdate"]]], None, Unset
-    ] = UNSET
+    name: None | str | Unset = UNSET
+    profile: list[list[ProfileItemUpdate] | ProfileItemUpdate] | None | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.profile_item_update import ProfileItemUpdate
 
-        name: Union[None, Unset, str]
+        name: None | str | Unset
         if isinstance(self.name, Unset):
             name = UNSET
         else:
             name = self.name
 
-        profile: Union[List[Union[Dict[str, Any], List[Dict[str, Any]]]], None, Unset]
+        profile: list[dict[str, Any] | list[dict[str, Any]]] | None | Unset
         if isinstance(self.profile, Unset):
             profile = UNSET
         elif isinstance(self.profile, list):
             profile = []
             for profile_type_0_item_data in self.profile:
-                profile_type_0_item: Union[Dict[str, Any], List[Dict[str, Any]]]
+                profile_type_0_item: dict[str, Any] | list[dict[str, Any]]
                 if isinstance(profile_type_0_item_data, ProfileItemUpdate):
                     profile_type_0_item = profile_type_0_item_data.to_dict()
                 else:
@@ -66,7 +58,8 @@ class ProfileUpdate:
         else:
             profile = self.profile
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if name is not UNSET:
             field_dict["name"] = name
@@ -76,25 +69,23 @@ class ProfileUpdate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.profile_item_update import ProfileItemUpdate
 
-        d = src_dict.copy()
+        d = dict(src_dict)
 
-        def _parse_name(data: object) -> Union[None, Unset, str]:
+        def _parse_name(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         name = _parse_name(d.pop("name", UNSET))
 
         def _parse_profile(
             data: object,
-        ) -> Union[
-            List[Union["ProfileItemUpdate", List["ProfileItemUpdate"]]], None, Unset
-        ]:
+        ) -> list[list[ProfileItemUpdate] | ProfileItemUpdate] | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -108,7 +99,7 @@ class ProfileUpdate:
 
                     def _parse_profile_type_0_item(
                         data: object,
-                    ) -> Union["ProfileItemUpdate", List["ProfileItemUpdate"]]:
+                    ) -> list[ProfileItemUpdate] | ProfileItemUpdate:
                         try:
                             if not isinstance(data, dict):
                                 raise TypeError()
@@ -117,7 +108,7 @@ class ProfileUpdate:
                             )
 
                             return profile_type_0_item_type_0
-                        except:  # noqa: E722
+                        except (TypeError, ValueError, AttributeError, KeyError):
                             pass
                         if not isinstance(data, list):
                             raise TypeError()
@@ -145,15 +136,10 @@ class ProfileUpdate:
                     profile_type_0.append(profile_type_0_item)
 
                 return profile_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             return cast(
-                Union[
-                    List[Union["ProfileItemUpdate", List["ProfileItemUpdate"]]],
-                    None,
-                    Unset,
-                ],
-                data,
+                list[list[ProfileItemUpdate] | ProfileItemUpdate] | None | Unset, data
             )
 
         profile = _parse_profile(d.pop("profile", UNSET))

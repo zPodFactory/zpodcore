@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -11,17 +12,18 @@ from ...types import Response
 
 
 class ZpodsComponentsGetAll:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/zpods/{id}/components".format(
-                id=id,
+                id=quote(str(id), safe=""),
             ),
         }
 
@@ -29,8 +31,8 @@ class ZpodsComponentsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["ZpodComponentView"]]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> HTTPValidationError | list[ZpodComponentView] | None:
+        if response.status_code == 200:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
@@ -39,13 +41,12 @@ class ZpodsComponentsGetAll:
                 response_200.append(response_200_item)
 
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -53,7 +54,7 @@ class ZpodsComponentsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["ZpodComponentView"]]]:
+    ) -> Response[HTTPValidationError | list[ZpodComponentView]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -64,7 +65,7 @@ class ZpodsComponentsGetAll:
     def sync_detailed(
         self,
         id: str,
-    ) -> Response[Union[HTTPValidationError, List["ZpodComponentView"]]]:
+    ) -> Response[HTTPValidationError | list[ZpodComponentView]]:
         """zPod Component Get All
 
         Args:
@@ -75,7 +76,7 @@ class ZpodsComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['ZpodComponentView']]]
+            Response[HTTPValidationError | list[ZpodComponentView]]
         """
 
         kwargs = self._get_kwargs(
@@ -91,7 +92,7 @@ class ZpodsComponentsGetAll:
     def sync(
         self,
         id: str,
-    ) -> Optional[Union[HTTPValidationError, List["ZpodComponentView"]]]:
+    ) -> HTTPValidationError | list[ZpodComponentView] | None:
         """zPod Component Get All
 
         Args:
@@ -102,7 +103,7 @@ class ZpodsComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['ZpodComponentView']]
+            HTTPValidationError | list[ZpodComponentView]
         """
 
         return self.sync_detailed(
@@ -112,7 +113,7 @@ class ZpodsComponentsGetAll:
     async def asyncio_detailed(
         self,
         id: str,
-    ) -> Response[Union[HTTPValidationError, List["ZpodComponentView"]]]:
+    ) -> Response[HTTPValidationError | list[ZpodComponentView]]:
         """zPod Component Get All
 
         Args:
@@ -123,7 +124,7 @@ class ZpodsComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['ZpodComponentView']]]
+            Response[HTTPValidationError | list[ZpodComponentView]]
         """
 
         kwargs = self._get_kwargs(
@@ -137,7 +138,7 @@ class ZpodsComponentsGetAll:
     async def asyncio(
         self,
         id: str,
-    ) -> Optional[Union[HTTPValidationError, List["ZpodComponentView"]]]:
+    ) -> HTTPValidationError | list[ZpodComponentView] | None:
         """zPod Component Get All
 
         Args:
@@ -148,7 +149,7 @@ class ZpodsComponentsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['ZpodComponentView']]
+            HTTPValidationError | list[ZpodComponentView]
         """
 
         return (

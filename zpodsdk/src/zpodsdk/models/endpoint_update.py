@@ -1,12 +1,7 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -23,25 +18,25 @@ T = TypeVar("T", bound="EndpointUpdate")
 class EndpointUpdate:
     """
     Attributes:
-        description (Union[None, Unset, str]):
-        endpoints (Union['EndpointsUpdate', None, Unset]):
-        name (Union[None, Unset, str]):
+        description (None | str | Unset):
+        endpoints (EndpointsUpdate | None | Unset):
+        name (None | str | Unset):
     """
 
-    description: Union[None, Unset, str] = UNSET
-    endpoints: Union["EndpointsUpdate", None, Unset] = UNSET
-    name: Union[None, Unset, str] = UNSET
+    description: None | str | Unset = UNSET
+    endpoints: EndpointsUpdate | None | Unset = UNSET
+    name: None | str | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.endpoints_update import EndpointsUpdate
 
-        description: Union[None, Unset, str]
+        description: None | str | Unset
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        endpoints: Union[Dict[str, Any], None, Unset]
+        endpoints: dict[str, Any] | None | Unset
         if isinstance(self.endpoints, Unset):
             endpoints = UNSET
         elif isinstance(self.endpoints, EndpointsUpdate):
@@ -49,13 +44,14 @@ class EndpointUpdate:
         else:
             endpoints = self.endpoints
 
-        name: Union[None, Unset, str]
+        name: None | str | Unset
         if isinstance(self.name, Unset):
             name = UNSET
         else:
             name = self.name
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if description is not UNSET:
             field_dict["description"] = description
@@ -67,21 +63,21 @@ class EndpointUpdate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.endpoints_update import EndpointsUpdate
 
-        d = src_dict.copy()
+        d = dict(src_dict)
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         description = _parse_description(d.pop("description", UNSET))
 
-        def _parse_endpoints(data: object) -> Union["EndpointsUpdate", None, Unset]:
+        def _parse_endpoints(data: object) -> EndpointsUpdate | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -92,18 +88,18 @@ class EndpointUpdate:
                 endpoints_type_0 = EndpointsUpdate.from_dict(data)
 
                 return endpoints_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["EndpointsUpdate", None, Unset], data)
+            return cast(EndpointsUpdate | None | Unset, data)
 
         endpoints = _parse_endpoints(d.pop("endpoints", UNSET))
 
-        def _parse_name(data: object) -> Union[None, Unset, str]:
+        def _parse_name(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         name = _parse_name(d.pop("name", UNSET))
 

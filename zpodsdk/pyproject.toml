@@ -4,18 +4,16 @@ version = "0.7.2"
 description = "A client library for accessing zPod API"
 authors = []
 readme = "README.md"
-requires-python = ">=3.8.1"
+requires-python = ">=3.14,<3.15"
 dependencies = [
     "httpx==0.28.1",
-    "attrs==23.2.0",
+    "attrs==26.1.0",
     "python-dateutil==2.9.0.post0",
 ]
 
 [dependency-groups]
 dev = [
-    # pytest 8.4+ requires Python 3.9+; SDK's requires-python is 3.8.1.
-    # Stay on the latest 8.3.x to keep the published Python range unchanged.
-    "pytest==8.3.5",
+    "pytest==9.1.1",
     "ruff==0.16.4",
 ]
 

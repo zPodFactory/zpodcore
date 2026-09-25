@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -12,32 +12,31 @@ from ...types import UNSET, Response, Unset
 
 
 class ProfilesCreate:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         *,
         body: ProfileCreate,
-        force: Union[Unset, Any] = UNSET,
-    ) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
+        force: Any | Unset = False,
+    ) -> dict[str, Any]:
+        headers: dict[str, Any] = {}
 
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
 
         params["force"] = force
 
         params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
-        _kwargs: Dict[str, Any] = {
+        _kwargs: dict[str, Any] = {
             "method": "post",
             "url": "/profiles",
             "params": params,
         }
 
-        _body = body.to_dict()
+        _kwargs["json"] = body.to_dict()
 
-        _kwargs["json"] = _body
         headers["Content-Type"] = "application/json"
 
         _kwargs["headers"] = headers
@@ -45,18 +44,17 @@ class ProfilesCreate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, ProfileView]]:
-        if response.status_code == HTTPStatus.CREATED:
+    ) -> HTTPValidationError | ProfileView | None:
+        if response.status_code == 201:
             response_201 = ProfileView.from_dict(response.json())
 
             return response_201
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -64,7 +62,7 @@ class ProfilesCreate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, ProfileView]]:
+    ) -> Response[HTTPValidationError | ProfileView]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -76,12 +74,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Union[Unset, Any] = UNSET,
-    ) -> Response[Union[HTTPValidationError, ProfileView]]:
+        force: Any | Unset = False,
+    ) -> Response[HTTPValidationError | ProfileView]:
         """Create
 
         Args:
-            force (Union[Unset, Any]):
+            force (Any | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -89,7 +87,7 @@ class ProfilesCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ProfileView]]
+            Response[HTTPValidationError | ProfileView]
         """
 
         kwargs = self._get_kwargs(
@@ -107,12 +105,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Union[Unset, Any] = UNSET,
-    ) -> Optional[Union[HTTPValidationError, ProfileView]]:
+        force: Any | Unset = False,
+    ) -> HTTPValidationError | ProfileView | None:
         """Create
 
         Args:
-            force (Union[Unset, Any]):
+            force (Any | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -120,7 +118,7 @@ class ProfilesCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ProfileView]
+            HTTPValidationError | ProfileView
         """
 
         return self.sync_detailed(
@@ -132,12 +130,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Union[Unset, Any] = UNSET,
-    ) -> Response[Union[HTTPValidationError, ProfileView]]:
+        force: Any | Unset = False,
+    ) -> Response[HTTPValidationError | ProfileView]:
         """Create
 
         Args:
-            force (Union[Unset, Any]):
+            force (Any | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -145,7 +143,7 @@ class ProfilesCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ProfileView]]
+            Response[HTTPValidationError | ProfileView]
         """
 
         kwargs = self._get_kwargs(
@@ -161,12 +159,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Union[Unset, Any] = UNSET,
-    ) -> Optional[Union[HTTPValidationError, ProfileView]]:
+        force: Any | Unset = False,
+    ) -> HTTPValidationError | ProfileView | None:
         """Create
 
         Args:
-            force (Union[Unset, Any]):
+            force (Any | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -174,7 +172,7 @@ class ProfilesCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ProfileView]
+            HTTPValidationError | ProfileView
         """
 
         return (

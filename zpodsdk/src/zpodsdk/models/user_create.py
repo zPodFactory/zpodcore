@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -13,18 +16,18 @@ class UserCreate:
     Attributes:
         email (str):
         username (str):
-        description (Union[Unset, str]):  Default: ''.
-        ssh_key (Union[Unset, str]):  Default: ''.
-        superadmin (Union[Unset, bool]):  Default: False.
+        description (str | Unset):  Default: ''.
+        ssh_key (str | Unset):  Default: ''.
+        superadmin (bool | Unset):  Default: False.
     """
 
     email: str
     username: str
-    description: Union[Unset, str] = ""
-    ssh_key: Union[Unset, str] = ""
-    superadmin: Union[Unset, bool] = False
+    description: str | Unset = ""
+    ssh_key: str | Unset = ""
+    superadmin: bool | Unset = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         email = self.email
 
         username = self.username
@@ -35,7 +38,8 @@ class UserCreate:
 
         superadmin = self.superadmin
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "email": email,
@@ -52,8 +56,8 @@ class UserCreate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         email = d.pop("email")
 
         username = d.pop("username")

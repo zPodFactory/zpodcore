@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -12,30 +15,31 @@ class ZpodDnsUpdate:
     """
     Attributes:
         hostname (str):
-        host_id (Union[None, Unset, int]):
-        ip (Union[None, Unset, str]):
+        host_id (int | None | Unset):
+        ip (None | str | Unset):
     """
 
     hostname: str
-    host_id: Union[None, Unset, int] = UNSET
-    ip: Union[None, Unset, str] = UNSET
+    host_id: int | None | Unset = UNSET
+    ip: None | str | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         hostname = self.hostname
 
-        host_id: Union[None, Unset, int]
+        host_id: int | None | Unset
         if isinstance(self.host_id, Unset):
             host_id = UNSET
         else:
             host_id = self.host_id
 
-        ip: Union[None, Unset, str]
+        ip: None | str | Unset
         if isinstance(self.ip, Unset):
             ip = UNSET
         else:
             ip = self.ip
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "hostname": hostname,
@@ -49,25 +53,25 @@ class ZpodDnsUpdate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         hostname = d.pop("hostname")
 
-        def _parse_host_id(data: object) -> Union[None, Unset, int]:
+        def _parse_host_id(data: object) -> int | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(int | None | Unset, data)
 
         host_id = _parse_host_id(d.pop("host_id", UNSET))
 
-        def _parse_ip(data: object) -> Union[None, Unset, str]:
+        def _parse_ip(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         ip = _parse_ip(d.pop("ip", UNSET))
 

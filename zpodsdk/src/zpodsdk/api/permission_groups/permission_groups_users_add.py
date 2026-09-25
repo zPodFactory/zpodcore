@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -12,7 +13,7 @@ from ...types import Response
 
 
 class PermissionGroupsUsersAdd:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
@@ -20,19 +21,18 @@ class PermissionGroupsUsersAdd:
         id: str,
         *,
         body: PermissionGroupUserAdd,
-    ) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
+    ) -> dict[str, Any]:
+        headers: dict[str, Any] = {}
 
-        _kwargs: Dict[str, Any] = {
+        _kwargs: dict[str, Any] = {
             "method": "post",
             "url": "/permission_groups/{id}/users".format(
-                id=id,
+                id=quote(str(id), safe=""),
             ),
         }
 
-        _body = body.to_dict()
+        _kwargs["json"] = body.to_dict()
 
-        _kwargs["json"] = _body
         headers["Content-Type"] = "application/json"
 
         _kwargs["headers"] = headers
@@ -40,8 +40,8 @@ class PermissionGroupsUsersAdd:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
-        if response.status_code == HTTPStatus.CREATED:
+    ) -> HTTPValidationError | list[UserView] | None:
+        if response.status_code == 201:
             response_201 = []
             _response_201 = response.json()
             for response_201_item_data in _response_201:
@@ -50,13 +50,12 @@ class PermissionGroupsUsersAdd:
                 response_201.append(response_201_item)
 
             return response_201
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -64,7 +63,7 @@ class PermissionGroupsUsersAdd:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
+    ) -> Response[HTTPValidationError | list[UserView]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -77,7 +76,7 @@ class PermissionGroupsUsersAdd:
         id: str,
         *,
         body: PermissionGroupUserAdd,
-    ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
+    ) -> Response[HTTPValidationError | list[UserView]]:
         """Permission Group User Add
 
         Args:
@@ -89,7 +88,7 @@ class PermissionGroupsUsersAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserView']]]
+            Response[HTTPValidationError | list[UserView]]
         """
 
         kwargs = self._get_kwargs(
@@ -108,7 +107,7 @@ class PermissionGroupsUsersAdd:
         id: str,
         *,
         body: PermissionGroupUserAdd,
-    ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
+    ) -> HTTPValidationError | list[UserView] | None:
         """Permission Group User Add
 
         Args:
@@ -120,7 +119,7 @@ class PermissionGroupsUsersAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['UserView']]
+            HTTPValidationError | list[UserView]
         """
 
         return self.sync_detailed(
@@ -133,7 +132,7 @@ class PermissionGroupsUsersAdd:
         id: str,
         *,
         body: PermissionGroupUserAdd,
-    ) -> Response[Union[HTTPValidationError, List["UserView"]]]:
+    ) -> Response[HTTPValidationError | list[UserView]]:
         """Permission Group User Add
 
         Args:
@@ -145,7 +144,7 @@ class PermissionGroupsUsersAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['UserView']]]
+            Response[HTTPValidationError | list[UserView]]
         """
 
         kwargs = self._get_kwargs(
@@ -162,7 +161,7 @@ class PermissionGroupsUsersAdd:
         id: str,
         *,
         body: PermissionGroupUserAdd,
-    ) -> Optional[Union[HTTPValidationError, List["UserView"]]]:
+    ) -> HTTPValidationError | list[UserView] | None:
         """Permission Group User Add
 
         Args:
@@ -174,7 +173,7 @@ class PermissionGroupsUsersAdd:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['UserView']]
+            HTTPValidationError | list[UserView]
         """
 
         return (

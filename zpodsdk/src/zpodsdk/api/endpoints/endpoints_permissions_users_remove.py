@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, cast
+from urllib.parse import quote
 
 import httpx
 
@@ -14,7 +15,7 @@ from ...types import Response
 
 
 class EndpointsPermissionsUsersRemove:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
@@ -23,20 +24,19 @@ class EndpointsPermissionsUsersRemove:
         permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
-    ) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
+    ) -> dict[str, Any]:
+        headers: dict[str, Any] = {}
 
-        _kwargs: Dict[str, Any] = {
+        _kwargs: dict[str, Any] = {
             "method": "delete",
             "url": "/endpoints/{id}/permissions/{permission}/users".format(
-                id=id,
-                permission=permission,
+                id=quote(str(id), safe=""),
+                permission=quote(str(permission), safe=""),
             ),
         }
 
-        _body = body.to_dict()
+        _kwargs["json"] = body.to_dict()
 
-        _kwargs["json"] = _body
         headers["Content-Type"] = "application/json"
 
         _kwargs["headers"] = headers
@@ -44,17 +44,16 @@ class EndpointsPermissionsUsersRemove:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        if response.status_code == HTTPStatus.NO_CONTENT:
+    ) -> Any | HTTPValidationError | None:
+        if response.status_code == 204:
             response_204 = cast(Any, None)
             return response_204
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -62,7 +61,7 @@ class EndpointsPermissionsUsersRemove:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Any | HTTPValidationError]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -76,7 +75,7 @@ class EndpointsPermissionsUsersRemove:
         permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Any | HTTPValidationError]:
         """Endpoint Permission User Remove
 
         Args:
@@ -89,7 +88,7 @@ class EndpointsPermissionsUsersRemove:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Any | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -110,7 +109,7 @@ class EndpointsPermissionsUsersRemove:
         permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
+    ) -> Any | HTTPValidationError | None:
         """Endpoint Permission User Remove
 
         Args:
@@ -123,7 +122,7 @@ class EndpointsPermissionsUsersRemove:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[Any, HTTPValidationError]
+            Any | HTTPValidationError
         """
 
         return self.sync_detailed(
@@ -138,7 +137,7 @@ class EndpointsPermissionsUsersRemove:
         permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Any | HTTPValidationError]:
         """Endpoint Permission User Remove
 
         Args:
@@ -151,7 +150,7 @@ class EndpointsPermissionsUsersRemove:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Any | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -170,7 +169,7 @@ class EndpointsPermissionsUsersRemove:
         permission: EndpointPermission,
         *,
         body: EndpointPermissionUserAddRemove,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
+    ) -> Any | HTTPValidationError | None:
         """Endpoint Permission User Remove
 
         Args:
@@ -183,7 +182,7 @@ class EndpointsPermissionsUsersRemove:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[Any, HTTPValidationError]
+            Any | HTTPValidationError
         """
 
         return (

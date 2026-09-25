@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -12,24 +12,23 @@ from ...types import Response
 
 
 class ZpodsCreate:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         *,
         body: ZpodCreate,
-    ) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
+    ) -> dict[str, Any]:
+        headers: dict[str, Any] = {}
 
-        _kwargs: Dict[str, Any] = {
+        _kwargs: dict[str, Any] = {
             "method": "post",
             "url": "/zpods",
         }
 
-        _body = body.to_dict()
+        _kwargs["json"] = body.to_dict()
 
-        _kwargs["json"] = _body
         headers["Content-Type"] = "application/json"
 
         _kwargs["headers"] = headers
@@ -37,18 +36,17 @@ class ZpodsCreate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, ZpodView]]:
-        if response.status_code == HTTPStatus.CREATED:
+    ) -> HTTPValidationError | ZpodView | None:
+        if response.status_code == 201:
             response_201 = ZpodView.from_dict(response.json())
 
             return response_201
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -56,7 +54,7 @@ class ZpodsCreate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, ZpodView]]:
+    ) -> Response[HTTPValidationError | ZpodView]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -68,7 +66,7 @@ class ZpodsCreate:
         self,
         *,
         body: ZpodCreate,
-    ) -> Response[Union[HTTPValidationError, ZpodView]]:
+    ) -> Response[HTTPValidationError | ZpodView]:
         """Create
 
         Args:
@@ -79,7 +77,7 @@ class ZpodsCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ZpodView]]
+            Response[HTTPValidationError | ZpodView]
         """
 
         kwargs = self._get_kwargs(
@@ -96,7 +94,7 @@ class ZpodsCreate:
         self,
         *,
         body: ZpodCreate,
-    ) -> Optional[Union[HTTPValidationError, ZpodView]]:
+    ) -> HTTPValidationError | ZpodView | None:
         """Create
 
         Args:
@@ -107,7 +105,7 @@ class ZpodsCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ZpodView]
+            HTTPValidationError | ZpodView
         """
 
         return self.sync_detailed(
@@ -118,7 +116,7 @@ class ZpodsCreate:
         self,
         *,
         body: ZpodCreate,
-    ) -> Response[Union[HTTPValidationError, ZpodView]]:
+    ) -> Response[HTTPValidationError | ZpodView]:
         """Create
 
         Args:
@@ -129,7 +127,7 @@ class ZpodsCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ZpodView]]
+            Response[HTTPValidationError | ZpodView]
         """
 
         kwargs = self._get_kwargs(
@@ -144,7 +142,7 @@ class ZpodsCreate:
         self,
         *,
         body: ZpodCreate,
-    ) -> Optional[Union[HTTPValidationError, ZpodView]]:
+    ) -> HTTPValidationError | ZpodView | None:
         """Create
 
         Args:
@@ -155,7 +153,7 @@ class ZpodsCreate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ZpodView]
+            HTTPValidationError | ZpodView
         """
 
         return (

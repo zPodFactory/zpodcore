@@ -28,19 +28,21 @@ from zpodapi.zpods import (
 )
 
 
-def simplify_operation_ids(api: FastAPI) -> None:
+def simple_operation_id(route: APIRoute) -> str:
     """
-    Update operation IDs so that generated API clients have simpler function
-    names.
+    Operation IDs of the form <tag>_<function name> (zpods_get_all), so the
+    generated SDK (zpodsdk) gets readable module and method names. Passed to
+    FastAPI as generate_unique_id_function; an explicit operation_id on a
+    route still wins. This replaces the old post-include patching of
+    api.routes, which FastAPI 0.141 broke by wrapping included routers.
     """
-    for route in api.routes:
-        if isinstance(route, APIRoute) and not route.operation_id:
-            tag = route.tags[0] if route.tags else "default"
-            route.operation_id = f"{tag}_{route.name}"
+    tag = route.tags[0] if route.tags else "default"
+    return f"{tag}_{route.name}"
 
 
 api = FastAPI(
     title="zPod API",
+    generate_unique_id_function=simple_operation_id,
     dependencies=[
         GlobalDepends.ValidateVersion,
         GlobalDepends.UpdateLastConnectionDate,
@@ -76,4 +78,3 @@ api.include_router(permission_group__routes.router)
 api.include_router(profile__routes.router)
 api.include_router(setting__routes.router)
 api.include_router(user__routes.router)
-simplify_operation_ids(api)

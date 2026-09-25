@@ -1,16 +1,10 @@
+from __future__ import annotations
+
 import datetime
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    TypeVar,
-    Union,
-)
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
-from dateutil.parser import isoparse
 
 if TYPE_CHECKING:
     from ..models.profile_item_view import ProfileItemView
@@ -27,16 +21,16 @@ class ProfileView:
         id (int):
         last_modified_date (datetime.datetime):
         name (str):
-        profile (List[Union['ProfileItemView', List['ProfileItemView']]]):
+        profile (list[list[ProfileItemView] | ProfileItemView]):
     """
 
     creation_date: datetime.datetime
     id: int
     last_modified_date: datetime.datetime
     name: str
-    profile: List[Union["ProfileItemView", List["ProfileItemView"]]]
+    profile: list[list[ProfileItemView] | ProfileItemView]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.profile_item_view import ProfileItemView
 
         creation_date = self.creation_date.isoformat()
@@ -49,7 +43,7 @@ class ProfileView:
 
         profile = []
         for profile_item_data in self.profile:
-            profile_item: Union[Dict[str, Any], List[Dict[str, Any]]]
+            profile_item: dict[str, Any] | list[dict[str, Any]]
             if isinstance(profile_item_data, ProfileItemView):
                 profile_item = profile_item_data.to_dict()
             else:
@@ -60,7 +54,8 @@ class ProfileView:
 
             profile.append(profile_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "creation_date": creation_date,
@@ -74,15 +69,17 @@ class ProfileView:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.profile_item_view import ProfileItemView
 
-        d = src_dict.copy()
-        creation_date = isoparse(d.pop("creation_date"))
+        d = dict(src_dict)
+        creation_date = datetime.datetime.fromisoformat(d.pop("creation_date"))
 
         id = d.pop("id")
 
-        last_modified_date = isoparse(d.pop("last_modified_date"))
+        last_modified_date = datetime.datetime.fromisoformat(
+            d.pop("last_modified_date")
+        )
 
         name = d.pop("name")
 
@@ -92,14 +89,14 @@ class ProfileView:
 
             def _parse_profile_item(
                 data: object,
-            ) -> Union["ProfileItemView", List["ProfileItemView"]]:
+            ) -> list[ProfileItemView] | ProfileItemView:
                 try:
                     if not isinstance(data, dict):
                         raise TypeError()
                     profile_item_type_0 = ProfileItemView.from_dict(data)
 
                     return profile_item_type_0
-                except:  # noqa: E722
+                except (TypeError, ValueError, AttributeError, KeyError):
                     pass
                 if not isinstance(data, list):
                     raise TypeError()

@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -11,35 +14,36 @@ T = TypeVar("T", bound="EndpointComputeUpdate")
 class EndpointComputeUpdate:
     """
     Attributes:
-        password (Union[None, Unset, str]):
-        username (Union[None, Unset, str]):
-        vds (Union[None, Unset, str]):
+        password (None | str | Unset):
+        username (None | str | Unset):
+        vds (None | str | Unset):
     """
 
-    password: Union[None, Unset, str] = UNSET
-    username: Union[None, Unset, str] = UNSET
-    vds: Union[None, Unset, str] = UNSET
+    password: None | str | Unset = UNSET
+    username: None | str | Unset = UNSET
+    vds: None | str | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
-        password: Union[None, Unset, str]
+    def to_dict(self) -> dict[str, Any]:
+        password: None | str | Unset
         if isinstance(self.password, Unset):
             password = UNSET
         else:
             password = self.password
 
-        username: Union[None, Unset, str]
+        username: None | str | Unset
         if isinstance(self.username, Unset):
             username = UNSET
         else:
             username = self.username
 
-        vds: Union[None, Unset, str]
+        vds: None | str | Unset
         if isinstance(self.vds, Unset):
             vds = UNSET
         else:
             vds = self.vds
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if password is not UNSET:
             field_dict["password"] = password
@@ -51,33 +55,33 @@ class EndpointComputeUpdate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
 
-        def _parse_password(data: object) -> Union[None, Unset, str]:
+        def _parse_password(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         password = _parse_password(d.pop("password", UNSET))
 
-        def _parse_username(data: object) -> Union[None, Unset, str]:
+        def _parse_username(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         username = _parse_username(d.pop("username", UNSET))
 
-        def _parse_vds(data: object) -> Union[None, Unset, str]:
+        def _parse_vds(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         vds = _parse_vds(d.pop("vds", UNSET))
 

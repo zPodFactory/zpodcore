@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -10,17 +11,18 @@ from ...types import Response
 
 
 class ComponentsUploadFilesize:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         filename: str,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/components/upload/{filename}".format(
-                filename=filename,
+                filename=quote(str(filename), safe=""),
             ),
         }
 
@@ -28,17 +30,16 @@ class ComponentsUploadFilesize:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[Any, HTTPValidationError]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> Any | HTTPValidationError | None:
+        if response.status_code == 200:
             response_200 = response.json()
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -46,7 +47,7 @@ class ComponentsUploadFilesize:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Any | HTTPValidationError]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -57,7 +58,7 @@ class ComponentsUploadFilesize:
     def sync_detailed(
         self,
         filename: str,
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Any | HTTPValidationError]:
         """Upload Filesize
 
         Args:
@@ -68,7 +69,7 @@ class ComponentsUploadFilesize:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Any | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -84,7 +85,7 @@ class ComponentsUploadFilesize:
     def sync(
         self,
         filename: str,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
+    ) -> Any | HTTPValidationError | None:
         """Upload Filesize
 
         Args:
@@ -95,7 +96,7 @@ class ComponentsUploadFilesize:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[Any, HTTPValidationError]
+            Any | HTTPValidationError
         """
 
         return self.sync_detailed(
@@ -105,7 +106,7 @@ class ComponentsUploadFilesize:
     async def asyncio_detailed(
         self,
         filename: str,
-    ) -> Response[Union[Any, HTTPValidationError]]:
+    ) -> Response[Any | HTTPValidationError]:
         """Upload Filesize
 
         Args:
@@ -116,7 +117,7 @@ class ComponentsUploadFilesize:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[Any, HTTPValidationError]]
+            Response[Any | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -130,7 +131,7 @@ class ComponentsUploadFilesize:
     async def asyncio(
         self,
         filename: str,
-    ) -> Optional[Union[Any, HTTPValidationError]]:
+    ) -> Any | HTTPValidationError | None:
         """Upload Filesize
 
         Args:
@@ -141,7 +142,7 @@ class ComponentsUploadFilesize:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[Any, HTTPValidationError]
+            Any | HTTPValidationError
         """
 
         return (

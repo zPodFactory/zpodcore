@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -11,7 +12,7 @@ from ...types import Response
 
 
 class ZpodsDnsGet:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
@@ -19,13 +20,14 @@ class ZpodsDnsGet:
         id: str,
         ip: str,
         hostname: str,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/zpods/{id}/dns/{ip}/{hostname}".format(
-                id=id,
-                ip=ip,
-                hostname=hostname,
+                id=quote(str(id), safe=""),
+                ip=quote(str(ip), safe=""),
+                hostname=quote(str(hostname), safe=""),
             ),
         }
 
@@ -33,18 +35,17 @@ class ZpodsDnsGet:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, ZpodDnsView]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> HTTPValidationError | ZpodDnsView | None:
+        if response.status_code == 200:
             response_200 = ZpodDnsView.from_dict(response.json())
 
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -52,7 +53,7 @@ class ZpodsDnsGet:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, ZpodDnsView]]:
+    ) -> Response[HTTPValidationError | ZpodDnsView]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -65,7 +66,7 @@ class ZpodsDnsGet:
         id: str,
         ip: str,
         hostname: str,
-    ) -> Response[Union[HTTPValidationError, ZpodDnsView]]:
+    ) -> Response[HTTPValidationError | ZpodDnsView]:
         """zPod Dns Get
 
         Args:
@@ -78,7 +79,7 @@ class ZpodsDnsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ZpodDnsView]]
+            Response[HTTPValidationError | ZpodDnsView]
         """
 
         kwargs = self._get_kwargs(
@@ -98,7 +99,7 @@ class ZpodsDnsGet:
         id: str,
         ip: str,
         hostname: str,
-    ) -> Optional[Union[HTTPValidationError, ZpodDnsView]]:
+    ) -> HTTPValidationError | ZpodDnsView | None:
         """zPod Dns Get
 
         Args:
@@ -111,7 +112,7 @@ class ZpodsDnsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ZpodDnsView]
+            HTTPValidationError | ZpodDnsView
         """
 
         return self.sync_detailed(
@@ -125,7 +126,7 @@ class ZpodsDnsGet:
         id: str,
         ip: str,
         hostname: str,
-    ) -> Response[Union[HTTPValidationError, ZpodDnsView]]:
+    ) -> Response[HTTPValidationError | ZpodDnsView]:
         """zPod Dns Get
 
         Args:
@@ -138,7 +139,7 @@ class ZpodsDnsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ZpodDnsView]]
+            Response[HTTPValidationError | ZpodDnsView]
         """
 
         kwargs = self._get_kwargs(
@@ -156,7 +157,7 @@ class ZpodsDnsGet:
         id: str,
         ip: str,
         hostname: str,
-    ) -> Optional[Union[HTTPValidationError, ZpodDnsView]]:
+    ) -> HTTPValidationError | ZpodDnsView | None:
         """zPod Dns Get
 
         Args:
@@ -169,7 +170,7 @@ class ZpodsDnsGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ZpodDnsView]
+            HTTPValidationError | ZpodDnsView
         """
 
         return (

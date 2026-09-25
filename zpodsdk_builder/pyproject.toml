@@ -4,13 +4,11 @@ version = "0.7.2"
 description = "zpodsdk builder from FastAPI openapi spec file"
 authors = [{ name = "Timo Sugliani", email = "timo.sugliani@gmail.com" }]
 license = { text = "MIT" }
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.14,<3.15"
 dependencies = [
-    "openapi-python-client==0.20.0",
-    # openapi-python-client 0.20.0 (via typer<0.13) is incompatible with click>=8.2
-    # (TypeError: Secondary flag is not valid for non-boolean flag).
-    "click<8.2",
-    "ruff>=0.4,<0.5",
+    "openapi-python-client==0.29.0",
+    # Only for the post_hooks in config.yaml; keep in step with the dev groups.
+    "ruff==0.16.4",
 ]
 
 [tool.uv]
