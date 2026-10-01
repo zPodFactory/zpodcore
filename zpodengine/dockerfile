@@ -8,6 +8,9 @@ ARG PS_INSTALL_VERSION=7-5-11
 # scripts can rely on it; the image is rebuilt rarely.
 ARG POWERCLI_VERSION=9.1.1.25718932
 ARG GOVC_VERSION=0.56.0
+# Not used by zpodengine itself; third-party config_scripts run it inside the
+# flow image, so it stays. Newest release older than 30 days at pin time.
+ARG TERRAFORM_VERSION=1.16.0
 
 
 #################################################
@@ -30,6 +33,7 @@ ARG PS_VERSION
 ARG PS_INSTALL_VERSION
 ARG TARGETPLATFORM
 ARG GOVC_VERSION
+ARG TERRAFORM_VERSION
 
 WORKDIR /tmp
 
@@ -68,6 +72,16 @@ RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
     && echo "ARCH=$ARCH" \
     && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz
 
+# Download terraform
+RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
+    "linux/amd64")   echo "amd64" ;; \
+    "linux/arm64")   echo "arm64" ;; \
+    *)               echo ""      ;; esac) \
+    && echo "ARCH=$ARCH" \
+    && curl -o /tmp/terraform.zip -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip \
+    && unzip /tmp/terraform.zip terraform -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/terraform
+
 # Define the folder where we will be installing PowerShell
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION
 
@@ -92,6 +106,7 @@ COPY --from=builder /opt/venv /opt/venv
 
 # Copy other packages
 COPY --from=builder ["/usr/local/bin/govc", "/usr/local/bin/govc"]
+COPY --from=builder ["/usr/local/bin/terraform", "/usr/local/bin/terraform"]
 COPY --from=builder ["/opt/microsoft/powershell", "/opt/microsoft/powershell"]
 
 ENV PS_INSTALL_FOLDER=/opt/microsoft/powershell/$PS_INSTALL_VERSION \
