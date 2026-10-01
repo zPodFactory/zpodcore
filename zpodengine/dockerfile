@@ -7,6 +7,11 @@ ARG PS_INSTALL_VERSION=7-5-11
 # but the rest (Vds, Storage, NSX, VCF SDKs...) is kept on purpose so future
 # scripts can rely on it; the image is rebuilt rarely.
 ARG POWERCLI_VERSION=9.1.1.25718932
+# Not used by zpodengine itself (NSX is driven from Python); third-party
+# config_scripts rely on them inside the flow image, so they stay.
+ARG POWERNSX_VERSION=3.0.1192
+ARG POWERVCF_VERSION=2.4.1.1000
+ARG SUBNET_VERSION=1.0.14
 ARG GOVC_VERSION=0.56.0
 # Not used by zpodengine itself; third-party config_scripts run it inside the
 # flow image, so it stays. Newest release older than 30 days at pin time.
@@ -100,6 +105,9 @@ RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
 FROM base AS main
 ARG PS_INSTALL_VERSION
 ARG POWERCLI_VERSION
+ARG POWERNSX_VERSION
+ARG POWERVCF_VERSION
+ARG SUBNET_VERSION
 
 # Copy python packages
 COPY --from=builder /opt/venv /opt/venv
@@ -173,16 +181,40 @@ SHELL [ "pwsh", "-command" ]
 # Each RUN is a fresh pwsh whose exit code stays 0 on a non-terminating
 # error, so a gallery hiccup used to yield an image silently missing a
 # module. Stop-on-error turns any Install-Module failure into a build failure.
+# Under SHELL pwsh, ${ARG} is NOT expanded: BuildKit only substitutes it in the
+# step title, the process gets the raw string, and pwsh reads it as an undefined
+# variable. "-RequiredVersion ${X}" then meant "latest", so the pins were never
+# honoured (Subnet came out 1.2.0 instead of 1.0.14). ARGs are env vars in RUN,
+# so $env:X is the form that works here. A check below enforces the pins.
 RUN $ErrorActionPreference = 'Stop'; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-# PowerNSX, PowerVCF and Subnet were dropped: no cmdlet from them is used
-# anywhere in zpodengine (NSX is driven from Python).
-RUN $ErrorActionPreference = 'Stop'; Install-Module -Scope AllUsers VCF.PowerCLI -RequiredVersion ${POWERCLI_VERSION}
+RUN $ErrorActionPreference = 'Stop'; Install-Module -Scope AllUsers VCF.PowerCLI -RequiredVersion $env:POWERCLI_VERSION
+RUN $ErrorActionPreference = 'Stop'; Install-Module -Scope AllUsers PowerNSX -RequiredVersion $env:POWERNSX_VERSION
+RUN $ErrorActionPreference = 'Stop'; Install-Module -Scope AllUsers PowerVCF -RequiredVersion $env:POWERVCF_VERSION
+RUN $ErrorActionPreference = 'Stop'; Install-Module -Scope AllUsers Subnet -RequiredVersion $env:SUBNET_VERSION
 
 # On by default to suppress nagging. Set to $false if you don't want to help us make PowerCLI better.
 RUN Set-PowerCLIConfiguration -ParticipateInCeip $true -Confirm:$false
 RUN Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
 SHELL ["/bin/sh", "-c"]
+# PowerNSX (unmaintained since 2021) needs two patches:
+# - drop the "Write-Progress" ascii animation bars, which break without a TTY;
+# - its InternalHttpClientHandler Add-Type lacks a reference to
+#   System.Security.Cryptography, where .NET 9 defines X509Certificate2. In a
+#   fresh session the compile fails (CS0012) and the type is missing.
+RUN sed -i \
+    -e '/Write-Progress/d' \
+    -e 's/System.Security.Cryptography.X509Certificates, System.Net.Primitives/System.Security.Cryptography.X509Certificates, System.Security.Cryptography, System.Net.Primitives/' \
+    /usr/local/share/powershell/Modules/PowerNSX/${POWERNSX_VERSION}/PowerNSX.psm1
+
+# Fail the build if the gallery served a different version than pinned (seen
+# once with Subnet: asked 1.0.14, got 1.2.0) or if PowerNSX no longer imports
+# cleanly in a fresh session.
+SHELL [ "pwsh", "-command" ]
+RUN $ErrorActionPreference = 'Stop'; foreach ($p in @(@('VCF.PowerCLI', $env:POWERCLI_VERSION), @('PowerNSX', $env:POWERNSX_VERSION), @('PowerVCF', $env:POWERVCF_VERSION), @('Subnet', $env:SUBNET_VERSION))) { $have = (Get-Module -ListAvailable $p[0]).Version.ToString(); if ($have -ne $p[1]) { throw ($p[0] + ': installed ' + $have + ', pinned ' + $p[1]) }; Write-Host ($p[0] + ' ' + $have + ' OK') }
+RUN $ErrorActionPreference = 'Stop'; Import-Module PowerNSX; if (-not ('InternalHttpClientHandler' -as [type])) { throw 'PowerNSX InternalHttpClientHandler type missing (Add-Type failed)' }; Write-Host 'PowerNSX import OK'
+SHELL ["/bin/sh", "-c"]
+
 
 WORKDIR /zpodcore/src/zpodengine
 ENV PYTHONPATH=/zpodcore/src
