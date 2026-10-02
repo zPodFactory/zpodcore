@@ -73,6 +73,10 @@ def port(pid, name, vif):
 SEGMENT = {"display_name": "zpod-x-segment", "path": "/infra/segments/zpod-x-segment"}
 P1 = "/policy/api/v1/infra/segments/zpod-x-segment/ports/default:p1"
 P2 = "/policy/api/v1/infra/segments/zpod-x-segment/ports/default:p2"
+P6 = "/policy/api/v1/infra/segments/zpod-x-segment/ports/default:p6"
+# Attachment ids as vCenter mints them (the real ones from the test-vcd1 log).
+DANGLING_ID = "d8e535eb-774e-43d9-99bf-f68610368814"
+DANGLING_ID2 = "ef0b3756-da95-4276-875f-1541c352e38e"
 
 
 @pytest.fixture
@@ -83,7 +87,11 @@ def nsx():
             port("p2", "esxi11.x.zpod.io.vmx@vif2", "vif2"),  # live host, VM gone
             port("p3", "hermes.y.zpod.io.vmx@vif3", "vif3"),  # ghost host, VM exists
             port("p4", "fine.x.zpod.io.vmx@vif4", "vif4"),  # live host, VM exists
-            port("p5", "mystery", "vif5"),  # no VIF record at all
+            port("p5", "mystery", "vif5"),  # no VIF record, name says nothing
+            # Dangling attachments (test-vcd1 shape): vCenter plugged the VM
+            # in, NSX dropped the VIF since; only the port name names the VM.
+            port("p6", f"esxi11.test-vcd1.cloud.lab.vmx@{DANGLING_ID}", DANGLING_ID),
+            port("p7", f"kept.x.zpod.io.vmx@{DANGLING_ID2}", DANGLING_ID2),
         ],
         vifs={
             "vif1": [{"owner_vm_id": "vm1"}],
@@ -126,7 +134,7 @@ def nsx():
 
 @pytest.fixture
 def vc():
-    return FakeVc(existing={"hermes.y.zpod.io", "fine.x.zpod.io"})
+    return FakeVc(existing={"hermes.y.zpod.io", "fine.x.zpod.io", "kept.x.zpod.io"})
 
 
 @pytest.fixture
@@ -172,6 +180,11 @@ def _fake_wait(calls):
 def test_classify_matrix():
     c = orphan.classify
     assert c(has_vif=False, host_live=False, vm_in_vcenter=None) == orphan.NO_VIF
+    # No VIF but the port name gave a VM name that vCenter could check
+    assert (
+        c(has_vif=False, host_live=False, vm_in_vcenter=False) == orphan.ORPHAN_DANGLING
+    )
+    assert c(has_vif=False, host_live=False, vm_in_vcenter=True) == orphan.OK
     assert (
         c(has_vif=True, host_live=False, vm_in_vcenter=False)
         == orphan.ORPHAN_GHOST_HOST
@@ -199,9 +212,19 @@ def test_audit_classifies_silently_and_deletes_nothing(nsx, vc, capsys):
     assert by_name["hermes.y.zpod.io"]["verdict"] == orphan.STALE_INVENTORY
     assert by_name["fine.x.zpod.io"]["verdict"] == orphan.OK
     assert by_name["mystery"]["verdict"] == orphan.NO_VIF
+    assert by_name["mystery"]["vm_name"] is None
+    dangling = by_name["esxi11.test-vcd1.cloud.lab"]
+    assert dangling["verdict"] == orphan.ORPHAN_DANGLING
+    assert dangling["vm_name"] == "esxi11.test-vcd1.cloud.lab"
+    assert dangling["vm_name_source"] == "port_name"
+    assert dangling["vm_in_vcenter"] is False
+    assert by_name["kept.x.zpod.io"]["verdict"] == orphan.OK
+    assert by_name["kept.x.zpod.io"]["vm_name_source"] == "port_name"
+    assert by_name["zcore.x.zpod.io"]["vm_name_source"] == "vif"
     assert [r["port_id"] for r in records if r["deletable"]] == [
         "default:p1",
         "default:p2",
+        "default:p6",
     ]
     assert by_name["zcore.x.zpod.io"]["delete_path"] == P1
     assert nsx.deleted == []
@@ -212,19 +235,26 @@ def test_audit_without_vcenter_marks_nothing_deletable(nsx):
     records = orphan.audit_segment_ports(nsx, SEGMENT, None)
     assert not any(r["deletable"] for r in records)
     assert all(r["vm_in_vcenter"] is None for r in records)
+    # A dangling attachment without vCenter confirmation stays UNKNOWN
+    assert [r["verdict"] for r in records if r["port_id"] == "default:p6"] == [
+        orphan.NO_VIF
+    ]
 
 
 def test_format_reports(nsx, vc):
     records = orphan.audit_segment_ports(nsx, SEGMENT, vc)
     assert orphan.format_orphan_report(records) == (
         f"{TABLE_HEADER}\n- zcore.x.zpod.io (default:p1)\n- esxi11.x.zpod.io (default:p2)"
+        "\n- esxi11.test-vcd1.cloud.lab (default:p6)"
     )
     assert orphan.format_orphan_report([]) == f"{PFX} No orphan ports to delete."
     assert orphan.format_kept_report(records) == (
-        f"{PFX} Ports kept, not orphan (VM still exists in vCenter, or could not be resolved)\n"
+        f"{PFX} Ports kept, not orphan "
+        "(VM still exists in vCenter, or no VIF and no VM name on the port)\n"
         "- hermes.y.zpod.io (default:p3) verdict=STALE\n"
         "- fine.x.zpod.io (default:p4) verdict=OK\n"
-        "- mystery (default:p5) verdict=UNKNOWN"
+        "- mystery (default:p5) verdict=UNKNOWN\n"
+        "- kept.x.zpod.io (default:p7) verdict=OK"
     )
     assert orphan.format_kept_report([r for r in records if r["deletable"]]) == ""
 
@@ -232,13 +262,19 @@ def test_format_reports(nsx, vc):
 def test_delete_orphan_ports_only_touches_deletable(nsx, vc, capsys):
     records = orphan.audit_segment_ports(nsx, SEGMENT, vc)
     deleted = orphan.delete_orphan_ports(nsx, records)
-    assert [r["port_id"] for r in deleted] == ["default:p1", "default:p2"]
-    assert nsx.deleted == [P1, P2]  # STALE / OK / UNKNOWN ports untouched
-    assert {p["id"] for p in nsx.ports} == {"default:p3", "default:p4", "default:p5"}
+    assert [r["port_id"] for r in deleted] == ["default:p1", "default:p2", "default:p6"]
+    assert nsx.deleted == [P1, P2, P6]  # STALE / OK / UNKNOWN ports untouched
+    assert {p["id"] for p in nsx.ports} == {
+        "default:p3",
+        "default:p4",
+        "default:p5",
+        "default:p7",
+    }
     out = capsys.readouterr().out
     assert f"DELETE: {P1}" in out
     assert f"DELETE: {P2}" in out
-    assert f"{PFX} deleted 2/2 orphan port(s)" in out
+    assert f"DELETE: {P6}" in out
+    assert f"{PFX} deleted 3/3 orphan port(s)" in out
 
 
 def test_delete_orphan_ports_reports_failures(nsx, vc, capsys):
@@ -247,7 +283,7 @@ def test_delete_orphan_ports_reports_failures(nsx, vc, capsys):
     assert orphan.delete_orphan_ports(nsx, records) == []
     out = capsys.readouterr().out
     assert f"{PFX} failed to delete default:p1 (HTTP 500): boom" in out
-    assert f"{PFX} deleted 0/2 orphan port(s)" in out
+    assert f"{PFX} deleted 0/3 orphan port(s)" in out
 
 
 def test_evacuate_segment_normal_path_is_silent(monkeypatch, nsx, zpod_and_vc, capsys):
@@ -320,3 +356,55 @@ def test_evacuate_segment_reports_only_when_flag_off(
 def test_clean_orphan_ports_enabled_parsing(flag, value, enabled):
     flag[orphan.FF_CLEAN_ORPHAN_PORTS] = value
     assert orphan.clean_orphan_ports_enabled() is enabled
+
+
+@pytest.mark.parametrize(
+    "name, expected",
+    [
+        (f"esxi11.test-vcd1.cloud.lab.vmx@{DANGLING_ID}", "esxi11.test-vcd1.cloud.lab"),
+        (f"a.vmx@{DANGLING_ID}", "a"),
+        ("esxi11.test-vcd1.cloud.lab.vmx@short", None),  # not a vCenter attachment id
+        ("mystery", None),
+        ("", None),
+        (None, None),
+    ],
+)
+def test_vm_name_from_port_name(name, expected):
+    assert orphan.vm_name_from_port_name(name) == expected
+
+
+def test_evacuate_segment_cleans_dangling_attachments(
+    monkeypatch, nsx, zpod_and_vc, capsys
+):
+    # The test-vcd1 case: the vApp is gone, NSX dropped the VIFs, two policy
+    # ports of the nested ESXi survive with dangling attachment ids.
+    p8 = port("p8", f"esxi11.test-vcd1.cloud.lab.vmx@{DANGLING_ID2}", DANGLING_ID2)
+    nsx.ports = [p for p in nsx.ports if p["id"] == "default:p6"] + [p8]
+    p8_path = f"/policy/api/v1{p8['path']}"
+    calls = []
+    monkeypatch.setattr(orphan, "wait_for_segment_to_be_evacuted", _fake_wait(calls))
+    deleted = orphan.evacuate_segment(nsx, SEGMENT, zpod_and_vc)
+    assert [r["port_id"] for r in deleted] == ["default:p6", "default:p8"]
+    assert all(r["verdict"] == orphan.ORPHAN_DANGLING for r in deleted)
+    assert nsx.deleted == [P6, p8_path]
+    assert calls == [2, 0]
+    out = capsys.readouterr().out
+    assert out.startswith(TABLE_HEADER)
+    assert "- esxi11.test-vcd1.cloud.lab (default:p6)" in out
+    assert "- esxi11.test-vcd1.cloud.lab (default:p8)" in out
+    assert "Ports kept" not in out
+    assert "verdict=UNKNOWN" not in out
+    assert f"{PFX} deleted 2/2 orphan port(s)" in out
+
+
+def test_evacuate_segment_keeps_dangling_port_whose_vm_exists(
+    monkeypatch, nsx, zpod_and_vc, capsys
+):
+    # No VIF, but a VM with the name on the port still exists: never deleted.
+    nsx.ports = [p for p in nsx.ports if p["id"] == "default:p7"]
+    calls = []
+    monkeypatch.setattr(orphan, "wait_for_segment_to_be_evacuted", _fake_wait(calls))
+    with pytest.raises(ValueError, match="connected ports"):
+        orphan.evacuate_segment(nsx, SEGMENT, zpod_and_vc)
+    assert nsx.deleted == [] and calls == [1]
+    assert "- kept.x.zpod.io (default:p7) verdict=OK" in capsys.readouterr().out
