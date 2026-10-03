@@ -7,6 +7,13 @@ re-homed), NSX still attributes the VIF to a ghost host, never receives the
 "VIF removed" event, and the port stays forever. zpod_destroy then fails in
 wait_for_segment_to_be_evacuted with "Segment has connected ports".
 
+A second shape of the same problem: NSX did drop the VIF and VM records from
+its inventory when the VM was deleted, but the policy segment port survived
+with a dangling attachment id (seen on test-vcd1: two ports named
+"esxi11.<domain>.vmx@<attachment id>" and no VIF behind them). There is no
+inventory to walk, but vCenter-created ports are named "<vm name>.vmx@<id>",
+so the VM name is recovered from the port name and checked in vCenter.
+
 Flow (see evacuate_segment):
   1. wait for the segment to drain as before,
   2. only if that wait times out: classify the remaining ports, list the
@@ -15,6 +22,8 @@ Flow (see evacuate_segment):
      more.
 Ports whose VM still exists in vCenter are never deleted, whatever NSX says.
 """
+
+import re
 
 from zpodcommon import models as M
 from zpodcommon.lib.dbutils import DBUtils
@@ -35,10 +44,20 @@ OK = "OK"
 ORPHAN_GHOST_HOST = "ORPHAN"  # NSX host is gone AND VM is gone from vCenter
 ORPHAN_LIVE_HOST = "ORPHAN?"  # host is live but VM is gone (may still be settling)
 STALE_INVENTORY = "STALE"  # NSX host is gone but the VM still exists in vCenter
-NO_VIF = "UNKNOWN"  # port has no VIF record in the NSX fabric inventory
+ORPHAN_DANGLING = "ORPHAN-NOVIF"  # no VIF in NSX inventory AND VM is gone from vCenter
+NO_VIF = "UNKNOWN"  # no VIF record and no way to name the VM (or no vCenter)
 
 # Only ports whose VM is confirmed gone from vCenter may be deleted.
-DELETE_VERDICTS = {ORPHAN_GHOST_HOST, ORPHAN_LIVE_HOST}
+DELETE_VERDICTS = {ORPHAN_GHOST_HOST, ORPHAN_LIVE_HOST, ORPHAN_DANGLING}
+
+# vCenter names the segment port it creates for a VM NIC "<vm name>.vmx@<attachment id>".
+_VC_PORT_NAME = re.compile(r"^(?P<vm>.+)\.vmx@[0-9a-f-]{36}$")
+
+
+def vm_name_from_port_name(display_name: str | None) -> str | None:
+    """VM name encoded in a vCenter-created port name, or None."""
+    m = _VC_PORT_NAME.match(display_name or "")
+    return m.group("vm") if m else None
 
 
 def _results(nsx: NsxClient, path: str, **params) -> list[dict]:
@@ -56,6 +75,13 @@ def get_live_host_ids(nsx: NsxClient) -> dict[str, str]:
 def classify(*, has_vif: bool, host_live: bool, vm_in_vcenter: bool | None) -> str:
     """Pure classification of one port; vm_in_vcenter=None means 'not checked'."""
     if not has_vif:
+        # NSX inventory knows nothing about this port. Deletable only when the
+        # VM named on the port is confirmed absent from vCenter; a VM that
+        # does exist under that name keeps the port, whatever NSX says.
+        if vm_in_vcenter is False:
+            return ORPHAN_DANGLING
+        if vm_in_vcenter is True:
+            return OK
         return NO_VIF
     if vm_in_vcenter is None:
         # No vCenter available: only the NSX host liveness can be judged, and
@@ -104,6 +130,7 @@ def audit_segment_ports(
             "nsx_host_id": None,
             "nsx_host_live": None,
             "vm_in_vcenter": None,
+            "vm_name_source": "vif",
             "delete_path": f"/policy/api/v1{port.get('path') or f'{seg_path}/ports/{port.get('id')}'}",
         }
         if vifs:
@@ -119,8 +146,13 @@ def audit_segment_ports(
             rec["vm_external_id"] = vm.get("external_id")
             rec["nsx_host_id"] = vm.get("host_id")
             rec["nsx_host_live"] = vm.get("host_id") in live_hosts
-            if vc is not None and rec["vm_name"]:
-                rec["vm_in_vcenter"] = vc.get_vm(rec["vm_name"]) is not None
+        elif vif_id and (name := vm_name_from_port_name(rec["port_name"])):
+            # Dangling attachment: vCenter plugged a VM in, NSX has since
+            # dropped the VIF. The port name still carries the VM name.
+            rec["vm_name"] = name
+            rec["vm_name_source"] = "port_name"
+        if vc is not None and rec["vm_name"]:
+            rec["vm_in_vcenter"] = vc.get_vm(rec["vm_name"]) is not None
         rec["verdict"] = classify(
             has_vif=bool(vifs),
             host_live=bool(rec["nsx_host_live"]),
@@ -169,7 +201,7 @@ def format_kept_report(records: list[dict]) -> str:
         return ""
     lines = [
         f"{LOG_PREFIX} Ports kept, not orphan "
-        "(VM still exists in vCenter, or could not be resolved)"
+        "(VM still exists in vCenter, or no VIF and no VM name on the port)"
     ]
     lines += [
         f"- {r['vm_name'] or r['port_name']} ({r['port_id']}) verdict={r['verdict']}"
