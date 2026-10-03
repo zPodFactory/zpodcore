@@ -36,7 +36,6 @@ FROM base AS builder
 ARG INSTALL_DEV=false
 ARG PS_VERSION
 ARG PS_INSTALL_VERSION
-ARG TARGETPLATFORM
 ARG GOVC_VERSION
 ARG TERRAFORM_VERSION
 
@@ -59,31 +58,17 @@ RUN apt-get update \
 COPY ./zpodengine/pyproject.toml ./zpodengine/uv.lock /tmp/
 RUN uv sync --frozen --no-install-project $(test "$INSTALL_DEV" != "true" && echo "--no-dev")
 
-RUN echo "I'm building for $TARGETPLATFORM"
+# The flow image is amd64 only: zPodFactory runs on x86_64 ESXi hosts and the
+# nested workloads it deploys are x86_64, so there is no arm64 target to build for.
 
 # Download powershell
-RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "x64"   ;; \
-    "linux/arm64")   echo "arm64" ;; \
-    *)               echo ""      ;; esac) \
-    && echo "ARCH=$ARCH" \
-    && curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-${ARCH}.tar.gz
+RUN curl -o /tmp/powershell.tar.gz -L https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/powershell-${PS_VERSION}-linux-x64.tar.gz
 
 # Download govc
-RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "x86_64";; \
-    "linux/arm64")   echo "arm64" ;; \
-    *)               echo ""      ;; esac) \
-    && echo "ARCH=$ARCH" \
-    && curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_${ARCH}.tar.gz
+RUN curl -o /tmp/govc.tar.gz -L https://github.com/vmware/govmomi/releases/download/v${GOVC_VERSION}/govc_Linux_x86_64.tar.gz
 
 # Download terraform
-RUN export ARCH=$(case ${TARGETPLATFORM:-linux/amd64} in \
-    "linux/amd64")   echo "amd64" ;; \
-    "linux/arm64")   echo "arm64" ;; \
-    *)               echo ""      ;; esac) \
-    && echo "ARCH=$ARCH" \
-    && curl -o /tmp/terraform.zip -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip \
+RUN curl -o /tmp/terraform.zip -L https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip /tmp/terraform.zip terraform -d /usr/local/bin/ \
     && chmod +x /usr/local/bin/terraform
 
