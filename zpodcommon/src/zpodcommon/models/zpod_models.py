@@ -1,5 +1,5 @@
 from ipaddress import IPv4Network
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 from sqlmodel import JSON, Column, Field, Relationship
 
@@ -52,24 +52,24 @@ class Zpod(CommonDatesMixin, ModelBase, table=True):
         default=...,
         nullable=False,
     )
-    features: Dict[str, Any] = Field(
+    features: dict[str, Any] = Field(
         default={},
         sa_column=Column(JSON, nullable=False, index=False),
     )
 
-    components: List["ZpodComponent"] = Relationship(
+    components: list["ZpodComponent"] = Relationship(
         back_populates="zpod",
         sa_relationship_kwargs={
             "cascade": "all,delete,delete-orphan",
         },
     )
-    networks: List["ZpodNetwork"] = Relationship(
+    networks: list["ZpodNetwork"] = Relationship(
         back_populates="zpod",
         sa_relationship_kwargs={
             "cascade": "all,delete,delete-orphan",
         },
     )
-    permissions: List["ZpodPermission"] = Relationship(
+    permissions: list["ZpodPermission"] = Relationship(
         back_populates="zpod",
         sa_relationship_kwargs={
             "cascade": "all,delete,delete-orphan",
@@ -128,6 +128,7 @@ class ZpodComponent(CommonDatesMixin, ModelBase, table=True):
     zpod: "Zpod" = Relationship(back_populates="components")
     component: "Component" = Relationship()
 
+
 class ZpodNetwork(ModelBase, table=True):
     __tablename__ = "zpod_networks"
 
@@ -168,13 +169,13 @@ class ZpodPermission(ModelBase, table=True):
     )
 
     zpod: "Zpod" = Relationship(back_populates="permissions")
-    users: List["User"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="zpod_permissions",
         sa_relationship_kwargs={
             "secondary": "zpod_permission_user_link",
         },
     )
-    permission_groups: List["PermissionGroup"] = Relationship(
+    permission_groups: list["PermissionGroup"] = Relationship(
         back_populates="zpod_permissions",
         sa_relationship_kwargs={
             "secondary": "zpod_permission_group_link",

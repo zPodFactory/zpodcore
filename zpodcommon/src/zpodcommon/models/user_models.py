@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlmodel import AutoString, Field, Relationship
@@ -61,19 +61,19 @@ class User(CommonDatesMixin, ModelBase, table=True):
         nullable=False,
     )
 
-    zpod_permissions: List["ZpodPermission"] = Relationship(
+    zpod_permissions: list["ZpodPermission"] = Relationship(
         back_populates="users",
         sa_relationship_kwargs={
             "secondary": "zpod_permission_user_link",
         },
     )
-    endpoint_permissions: List["EndpointPermission"] = Relationship(
+    endpoint_permissions: list["EndpointPermission"] = Relationship(
         back_populates="users",
         sa_relationship_kwargs={
             "secondary": "endpoint_permission_user_link",
         },
     )
-    permission_groups: List["PermissionGroup"] = Relationship(
+    permission_groups: list["PermissionGroup"] = Relationship(
         back_populates="users",
         sa_relationship_kwargs={
             "secondary": "permission_group_user_link",

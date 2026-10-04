@@ -43,4 +43,3 @@ async def root():
     response = HTMLResponse(content=html_content, status_code=200)
     response.headers["X-zPod-API"] = "true"
     return response
-

@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, TextIO
+from typing import Any, TextIO
 
 import typer
 from rich import print
@@ -10,13 +10,13 @@ from rich.text import TextType
 def ask(
     prompt: TextType = "",
     *,
-    console: Optional[Console] = None,
+    console: Console | None = None,
     password: bool = False,
-    choices: Optional[List[str]] = None,
+    choices: list[str] | None = None,
     show_default: bool = True,
     show_choices: bool = True,
     default: Any = ...,
-    stream: Optional[TextIO] = None,
+    stream: TextIO | None = None,
     validation: None = None,
 ):
     while 1:

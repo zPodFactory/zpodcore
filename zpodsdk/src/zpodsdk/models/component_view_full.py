@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -21,7 +24,7 @@ class ComponentViewFull:
         jsonfile (str):
         library_name (str):
         status (str):
-        download_status (Union[None, Unset, str]):
+        download_status (None | str | Unset):
     """
 
     component_description: str
@@ -34,9 +37,9 @@ class ComponentViewFull:
     jsonfile: str
     library_name: str
     status: str
-    download_status: Union[None, Unset, str] = UNSET
+    download_status: None | str | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         component_description = self.component_description
 
         component_name = self.component_name
@@ -57,13 +60,14 @@ class ComponentViewFull:
 
         status = self.status
 
-        download_status: Union[None, Unset, str]
+        download_status: None | str | Unset
         if isinstance(self.download_status, Unset):
             download_status = UNSET
         else:
             download_status = self.download_status
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "component_description": component_description,
@@ -84,8 +88,8 @@ class ComponentViewFull:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         component_description = d.pop("component_description")
 
         component_name = d.pop("component_name")
@@ -106,12 +110,12 @@ class ComponentViewFull:
 
         status = d.pop("status")
 
-        def _parse_download_status(data: object) -> Union[None, Unset, str]:
+        def _parse_download_status(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         download_status = _parse_download_status(d.pop("download_status", UNSET))
 

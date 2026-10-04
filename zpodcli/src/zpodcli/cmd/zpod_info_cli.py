@@ -5,7 +5,7 @@ from typing import Annotated
 import typer
 from rich.console import Group
 from rich.panel import Panel
-from rich.table import Table, box
+from rich.table import box
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -14,6 +14,7 @@ from zpodcli.lib.utils import (
     get_status_markdown,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_dns_view import ZpodDnsView
 from zpodsdk.models.zpod_permission import ZpodPermission
@@ -217,7 +218,9 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bncd"):
             vlan_id = int(network_part.split(".")[-1])
             vlan_display = "None (Untagged)" if vlan_id == 0 else str(vlan_id)
             router = (
-                "zPodFactory Endpoint NSX-T1" if vlan_id == 0 else f"zcore.{zpod.domain}"
+                "zPodFactory Endpoint NSX-T1"
+                if vlan_id == 0
+                else f"zcore.{zpod.domain}"
             )
             # Calculate netmask from prefix length
             netmask = str(ipv4network.netmask)

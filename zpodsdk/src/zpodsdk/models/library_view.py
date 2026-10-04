@@ -1,15 +1,10 @@
+from __future__ import annotations
+
 import datetime
-from typing import (
-    Any,
-    Dict,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
@@ -26,7 +21,7 @@ class LibraryView:
         git_url (str):
         id (int):
         name (str):
-        last_modified_date (Union[None, Unset, datetime.datetime]):
+        last_modified_date (datetime.datetime | None | Unset):
     """
 
     creation_date: datetime.datetime
@@ -35,9 +30,9 @@ class LibraryView:
     git_url: str
     id: int
     name: str
-    last_modified_date: Union[None, Unset, datetime.datetime] = UNSET
+    last_modified_date: datetime.datetime | None | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         creation_date = self.creation_date.isoformat()
 
         description = self.description
@@ -50,7 +45,7 @@ class LibraryView:
 
         name = self.name
 
-        last_modified_date: Union[None, Unset, str]
+        last_modified_date: None | str | Unset
         if isinstance(self.last_modified_date, Unset):
             last_modified_date = UNSET
         elif isinstance(self.last_modified_date, datetime.datetime):
@@ -58,7 +53,8 @@ class LibraryView:
         else:
             last_modified_date = self.last_modified_date
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "creation_date": creation_date,
@@ -75,9 +71,9 @@ class LibraryView:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
-        creation_date = isoparse(d.pop("creation_date"))
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        creation_date = datetime.datetime.fromisoformat(d.pop("creation_date"))
 
         description = d.pop("description")
 
@@ -89,9 +85,7 @@ class LibraryView:
 
         name = d.pop("name")
 
-        def _parse_last_modified_date(
-            data: object,
-        ) -> Union[None, Unset, datetime.datetime]:
+        def _parse_last_modified_date(data: object) -> datetime.datetime | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -99,12 +93,12 @@ class LibraryView:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                last_modified_date_type_0 = isoparse(data)
+                last_modified_date_type_0 = datetime.datetime.fromisoformat(data)
 
                 return last_modified_date_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union[None, Unset, datetime.datetime], data)
+            return cast(datetime.datetime | None | Unset, data)
 
         last_modified_date = _parse_last_modified_date(
             d.pop("last_modified_date", UNSET)

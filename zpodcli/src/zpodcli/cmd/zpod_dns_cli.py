@@ -1,9 +1,7 @@
-from typing import List
+from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.prompt import confirm
 from zpodcli.lib.utils import (
@@ -13,6 +11,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.zpod_dns_create import ZpodDnsCreate
 from zpodsdk.models.zpod_dns_update import ZpodDnsUpdate
@@ -61,7 +60,7 @@ def zpod_dns_list(
     List DNS records for zPod
     """
     z: ZpodClient = ZpodClient()
-    zpod_dns: List[ZpodDnsView] = z.zpods_dns_get_all.sync(id=f"name={zpod_name}")
+    zpod_dns: list[ZpodDnsView] = z.zpods_dns_get_all.sync(id=f"name={zpod_name}")
     if json_:
         json_print([item.to_dict() for item in zpod_dns])
     else:

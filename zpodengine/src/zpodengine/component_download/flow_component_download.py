@@ -177,12 +177,8 @@ def download_component(component: Component) -> int:
                 ComponentDownloadStatus.FAILED_AUTHENTICATION,
             )
         else:
-            logger.error(
-                f"Error downloading {component.component_uid}: {stderr or e}"
-            )
-            update_db(
-                component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN
-            )
+            logger.error(f"Error downloading {component.component_uid}: {stderr or e}")
+            update_db(component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN)
         raise e
     except Exception as e:
         logger.error(f"Error downloading {component.component_uid}")
@@ -380,9 +376,7 @@ def update_download_progress(component):
         # Permissive fallback: if the file has stopped growing for a while the
         # download is finished even if percent didn't quite reach 100.
         current_path = Path(dl_path) if Path(dl_path).exists() else Path(tmp_dl_path)
-        current_size = (
-            current_path.stat().st_size if current_path.exists() else -1
-        )
+        current_size = current_path.stat().st_size if current_path.exists() else -1
         if current_size > 0 and current_size == last_size:
             stable_polls += 1
             if stable_polls >= PROGRESS_STABLE_POLLS_DONE:
@@ -468,9 +462,7 @@ def flow_component_download(uid: str):
         # FAILED_UNKNOWN when nothing more specific is on record.
         c = get_component_by_uid(component.component_uid)
         if not (c and str(c.download_status).startswith("FAILED_")):
-            update_db(
-                component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN
-            )
+            update_db(component.component_uid, ComponentDownloadStatus.FAILED_UNKNOWN)
         raise ValueError(f"Unable to download {uid}")
 
     verify = verify_checksum(

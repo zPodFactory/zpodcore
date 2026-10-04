@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -12,7 +13,7 @@ from ...types import Response
 
 
 class ZpodsUpdate:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
@@ -20,19 +21,18 @@ class ZpodsUpdate:
         id: str,
         *,
         body: ZpodUpdate,
-    ) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
+    ) -> dict[str, Any]:
+        headers: dict[str, Any] = {}
 
-        _kwargs: Dict[str, Any] = {
+        _kwargs: dict[str, Any] = {
             "method": "patch",
             "url": "/zpods/{id}".format(
-                id=id,
+                id=quote(str(id), safe=""),
             ),
         }
 
-        _body = body.to_dict()
+        _kwargs["json"] = body.to_dict()
 
-        _kwargs["json"] = _body
         headers["Content-Type"] = "application/json"
 
         _kwargs["headers"] = headers
@@ -40,18 +40,17 @@ class ZpodsUpdate:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, ZpodView]]:
-        if response.status_code == HTTPStatus.CREATED:
+    ) -> HTTPValidationError | ZpodView | None:
+        if response.status_code == 201:
             response_201 = ZpodView.from_dict(response.json())
 
             return response_201
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -59,7 +58,7 @@ class ZpodsUpdate:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, ZpodView]]:
+    ) -> Response[HTTPValidationError | ZpodView]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -72,7 +71,7 @@ class ZpodsUpdate:
         id: str,
         *,
         body: ZpodUpdate,
-    ) -> Response[Union[HTTPValidationError, ZpodView]]:
+    ) -> Response[HTTPValidationError | ZpodView]:
         """Update
 
         Args:
@@ -84,7 +83,7 @@ class ZpodsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ZpodView]]
+            Response[HTTPValidationError | ZpodView]
         """
 
         kwargs = self._get_kwargs(
@@ -103,7 +102,7 @@ class ZpodsUpdate:
         id: str,
         *,
         body: ZpodUpdate,
-    ) -> Optional[Union[HTTPValidationError, ZpodView]]:
+    ) -> HTTPValidationError | ZpodView | None:
         """Update
 
         Args:
@@ -115,7 +114,7 @@ class ZpodsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ZpodView]
+            HTTPValidationError | ZpodView
         """
 
         return self.sync_detailed(
@@ -128,7 +127,7 @@ class ZpodsUpdate:
         id: str,
         *,
         body: ZpodUpdate,
-    ) -> Response[Union[HTTPValidationError, ZpodView]]:
+    ) -> Response[HTTPValidationError | ZpodView]:
         """Update
 
         Args:
@@ -140,7 +139,7 @@ class ZpodsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, ZpodView]]
+            Response[HTTPValidationError | ZpodView]
         """
 
         kwargs = self._get_kwargs(
@@ -157,7 +156,7 @@ class ZpodsUpdate:
         id: str,
         *,
         body: ZpodUpdate,
-    ) -> Optional[Union[HTTPValidationError, ZpodView]]:
+    ) -> HTTPValidationError | ZpodView | None:
         """Update
 
         Args:
@@ -169,7 +168,7 @@ class ZpodsUpdate:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, ZpodView]
+            HTTPValidationError | ZpodView
         """
 
         return (

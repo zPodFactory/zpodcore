@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -11,27 +14,28 @@ T = TypeVar("T", bound="LibraryUpdate")
 class LibraryUpdate:
     """
     Attributes:
-        description (Union[None, Unset, str]):
-        enabled (Union[None, Unset, bool]):
+        description (None | str | Unset):
+        enabled (bool | None | Unset):
     """
 
-    description: Union[None, Unset, str] = UNSET
-    enabled: Union[None, Unset, bool] = UNSET
+    description: None | str | Unset = UNSET
+    enabled: bool | None | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
-        description: Union[None, Unset, str]
+    def to_dict(self) -> dict[str, Any]:
+        description: None | str | Unset
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        enabled: Union[None, Unset, bool]
+        enabled: bool | None | Unset
         if isinstance(self.enabled, Unset):
             enabled = UNSET
         else:
             enabled = self.enabled
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if description is not UNSET:
             field_dict["description"] = description
@@ -41,24 +45,24 @@ class LibraryUpdate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         description = _parse_description(d.pop("description", UNSET))
 
-        def _parse_enabled(data: object) -> Union[None, Unset, bool]:
+        def _parse_enabled(data: object) -> bool | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, bool], data)
+            return cast(bool | None | Unset, data)
 
         enabled = _parse_enabled(d.pop("enabled", UNSET))
 

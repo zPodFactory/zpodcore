@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -19,35 +22,36 @@ class ZpodPermissionView:
     Attributes:
         id (int):
         permission (ZpodPermission):
-        permission_groups (Union[Unset, List['PermissionGroupView']]):
-        users (Union[Unset, List['UserView']]):
+        permission_groups (list[PermissionGroupView] | Unset):
+        users (list[UserView] | Unset):
     """
 
     id: int
     permission: ZpodPermission
-    permission_groups: Union[Unset, List["PermissionGroupView"]] = UNSET
-    users: Union[Unset, List["UserView"]] = UNSET
+    permission_groups: list[PermissionGroupView] | Unset = UNSET
+    users: list[UserView] | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         id = self.id
 
         permission = self.permission.value
 
-        permission_groups: Union[Unset, List[Dict[str, Any]]] = UNSET
+        permission_groups: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.permission_groups, Unset):
             permission_groups = []
             for permission_groups_item_data in self.permission_groups:
                 permission_groups_item = permission_groups_item_data.to_dict()
                 permission_groups.append(permission_groups_item)
 
-        users: Union[Unset, List[Dict[str, Any]]] = UNSET
+        users: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.users, Unset):
             users = []
             for users_item_data in self.users:
                 users_item = users_item_data.to_dict()
                 users.append(users_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "id": id,
@@ -62,30 +66,34 @@ class ZpodPermissionView:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.permission_group_view import PermissionGroupView
         from ..models.user_view import UserView
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         id = d.pop("id")
 
         permission = ZpodPermission(d.pop("permission"))
 
-        permission_groups = []
         _permission_groups = d.pop("permission_groups", UNSET)
-        for permission_groups_item_data in _permission_groups or []:
-            permission_groups_item = PermissionGroupView.from_dict(
-                permission_groups_item_data
-            )
+        permission_groups: list[PermissionGroupView] | Unset = UNSET
+        if _permission_groups is not UNSET:
+            permission_groups = []
+            for permission_groups_item_data in _permission_groups:
+                permission_groups_item = PermissionGroupView.from_dict(
+                    permission_groups_item_data
+                )
 
-            permission_groups.append(permission_groups_item)
+                permission_groups.append(permission_groups_item)
 
-        users = []
         _users = d.pop("users", UNSET)
-        for users_item_data in _users or []:
-            users_item = UserView.from_dict(users_item_data)
+        users: list[UserView] | Unset = UNSET
+        if _users is not UNSET:
+            users = []
+            for users_item_data in _users:
+                users_item = UserView.from_dict(users_item_data)
 
-            users.append(users_item)
+                users.append(users_item)
 
         zpod_permission_view = cls(
             id=id,

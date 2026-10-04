@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -11,27 +14,28 @@ T = TypeVar("T", bound="EndpointPermissionGroupAddRemove")
 class EndpointPermissionGroupAddRemove:
     """
     Attributes:
-        group_id (Union[None, Unset, int]):
-        groupname (Union[None, Unset, str]):
+        group_id (int | None | Unset):
+        groupname (None | str | Unset):
     """
 
-    group_id: Union[None, Unset, int] = UNSET
-    groupname: Union[None, Unset, str] = UNSET
+    group_id: int | None | Unset = UNSET
+    groupname: None | str | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
-        group_id: Union[None, Unset, int]
+    def to_dict(self) -> dict[str, Any]:
+        group_id: int | None | Unset
         if isinstance(self.group_id, Unset):
             group_id = UNSET
         else:
             group_id = self.group_id
 
-        groupname: Union[None, Unset, str]
+        groupname: None | str | Unset
         if isinstance(self.groupname, Unset):
             groupname = UNSET
         else:
             groupname = self.groupname
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if group_id is not UNSET:
             field_dict["group_id"] = group_id
@@ -41,24 +45,24 @@ class EndpointPermissionGroupAddRemove:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
 
-        def _parse_group_id(data: object) -> Union[None, Unset, int]:
+        def _parse_group_id(data: object) -> int | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(int | None | Unset, data)
 
         group_id = _parse_group_id(d.pop("group_id", UNSET))
 
-        def _parse_groupname(data: object) -> Union[None, Unset, str]:
+        def _parse_groupname(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         groupname = _parse_groupname(d.pop("groupname", UNSET))
 

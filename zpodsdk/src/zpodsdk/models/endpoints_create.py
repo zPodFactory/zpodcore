@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING, Any, Dict, Type, TypeVar
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -18,15 +21,16 @@ class EndpointsCreate:
         network (EndpointNetworkCreate):
     """
 
-    compute: "EndpointComputeCreate"
-    network: "EndpointNetworkCreate"
+    compute: EndpointComputeCreate
+    network: EndpointNetworkCreate
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         compute = self.compute.to_dict()
 
         network = self.network.to_dict()
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "compute": compute,
@@ -37,11 +41,11 @@ class EndpointsCreate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.endpoint_compute_create import EndpointComputeCreate
         from ..models.endpoint_network_create import EndpointNetworkCreate
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         compute = EndpointComputeCreate.from_dict(d.pop("compute"))
 
         network = EndpointNetworkCreate.from_dict(d.pop("network"))

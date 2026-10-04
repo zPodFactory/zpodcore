@@ -1,6 +1,7 @@
+from typing import Annotated
+
 import typer
 from rich import print
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import exit_with_error
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler

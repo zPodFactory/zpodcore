@@ -9,5 +9,8 @@ class_overrides:
 
 post_hooks:
   - python /zpodcore/zpodsdk_builder/build_client.py "zpodsdk" --class_name ZpodClient
-  - ruff check --no-cache --fix --extend-select "I" .
-  - ruff format --no-cache .
+  # --isolated: generated code is linted with ruff's defaults plus import
+  # sorting, independent of whatever pyproject.toml ruff finds walking up
+  # (the repo root selects UP, whose UP042/UP046 want unsafe rewrites here).
+  - ruff check --isolated --no-cache --fix --select "E,F,I" --ignore "E501" .
+  - ruff format --isolated --no-cache .

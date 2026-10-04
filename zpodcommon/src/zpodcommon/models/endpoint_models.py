@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from sqlmodel import JSON, Column, Field, Relationship
 
@@ -18,7 +18,7 @@ class Endpoint(ModelBase, table=True):
     endpoints: dict = Field(sa_column=Column(JSON))
     status: str = Field(default="ACTIVE", nullable=False)
 
-    permissions: List["EndpointPermission"] = Relationship(
+    permissions: list["EndpointPermission"] = Relationship(
         back_populates="endpoint",
         sa_relationship_kwargs={
             "cascade": "all,delete,delete-orphan",
@@ -45,13 +45,13 @@ class EndpointPermission(ModelBase, table=True):
     )
 
     endpoint: "Endpoint" = Relationship(back_populates="permissions")
-    users: List["User"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="endpoint_permissions",
         sa_relationship_kwargs={
             "secondary": "endpoint_permission_user_link",
         },
     )
-    permission_groups: List["PermissionGroup"] = Relationship(
+    permission_groups: list["PermissionGroup"] = Relationship(
         back_populates="endpoint_permissions",
         sa_relationship_kwargs={
             "secondary": "endpoint_permission_group_link",

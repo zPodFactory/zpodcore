@@ -7,30 +7,28 @@ authors = [
     { name = "Timo Sugliani", email = "timo.sugliani@gmail.com" },
 ]
 readme = "README.md"
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.14,<3.15"
 dependencies = [
-    "email-validator==2.1.1",
-    # prefect.workers.base imports the importlib_metadata backport without
-    # declaring it (it used to arrive transitively via opentelemetry-api).
-    "importlib-metadata==8.7.1",
-    "ipython==8.39.0",
+    "email-validator==2.3.0",
     "jinja2==3.1.6",
-    "prefect==3.6.29",
-    "prefect-docker==0.7.1",
-    "psycopg2==2.9.11",
+    "prefect==3.8.3",
+    "prefect-docker==0.7.3",
+    "psycopg2==2.9.12",
     "pydantic-settings==2.15.0",
     "pyopenssl==26.4.0",
     "python-dotenv==1.2.3",
-    "pyvmomi==8.0.2.0.1",
-    "sqlmodel==0.0.38",
+    "pyvmomi==9.1.0.0",
+    "sqlmodel==0.0.39",
 ]
 
 [dependency-groups]
 dev = [
+    # Interactive convenience only; never imported by the code.
+    "ipython==9.16.1",
     "pytest==9.1.1",
-    "pytest-cov==4.1.0",
+    "pytest-cov==7.1.0",
     "pytest-xdist==3.8.0",
-    "ruff==0.15.9",
+    "ruff==0.16.4",
 ]
 
 [tool.uv]

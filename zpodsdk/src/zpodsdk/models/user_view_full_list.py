@@ -1,15 +1,10 @@
+from __future__ import annotations
+
 import datetime
-from typing import (
-    Any,
-    Dict,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from dateutil.parser import isoparse
 
 from ..types import UNSET, Unset
 
@@ -27,8 +22,8 @@ class UserViewFullList:
         status (str):
         superadmin (bool):
         username (str):
-        api_token (Union[None, Unset, str]):
-        last_connection_date (Union[None, Unset, datetime.datetime]):
+        api_token (None | str | Unset):
+        last_connection_date (datetime.datetime | None | Unset):
     """
 
     creation_date: datetime.datetime
@@ -38,10 +33,10 @@ class UserViewFullList:
     status: str
     superadmin: bool
     username: str
-    api_token: Union[None, Unset, str] = UNSET
-    last_connection_date: Union[None, Unset, datetime.datetime] = UNSET
+    api_token: None | str | Unset = UNSET
+    last_connection_date: datetime.datetime | None | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         creation_date = self.creation_date.isoformat()
 
         description = self.description
@@ -56,13 +51,13 @@ class UserViewFullList:
 
         username = self.username
 
-        api_token: Union[None, Unset, str]
+        api_token: None | str | Unset
         if isinstance(self.api_token, Unset):
             api_token = UNSET
         else:
             api_token = self.api_token
 
-        last_connection_date: Union[None, Unset, str]
+        last_connection_date: None | str | Unset
         if isinstance(self.last_connection_date, Unset):
             last_connection_date = UNSET
         elif isinstance(self.last_connection_date, datetime.datetime):
@@ -70,7 +65,8 @@ class UserViewFullList:
         else:
             last_connection_date = self.last_connection_date
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "creation_date": creation_date,
@@ -90,9 +86,9 @@ class UserViewFullList:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
-        creation_date = isoparse(d.pop("creation_date"))
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        creation_date = datetime.datetime.fromisoformat(d.pop("creation_date"))
 
         description = d.pop("description")
 
@@ -106,18 +102,18 @@ class UserViewFullList:
 
         username = d.pop("username")
 
-        def _parse_api_token(data: object) -> Union[None, Unset, str]:
+        def _parse_api_token(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         api_token = _parse_api_token(d.pop("api_token", UNSET))
 
         def _parse_last_connection_date(
             data: object,
-        ) -> Union[None, Unset, datetime.datetime]:
+        ) -> datetime.datetime | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -125,12 +121,12 @@ class UserViewFullList:
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                last_connection_date_type_0 = isoparse(data)
+                last_connection_date_type_0 = datetime.datetime.fromisoformat(data)
 
                 return last_connection_date_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union[None, Unset, datetime.datetime], data)
+            return cast(datetime.datetime | None | Unset, data)
 
         last_connection_date = _parse_last_connection_date(
             d.pop("last_connection_date", UNSET)

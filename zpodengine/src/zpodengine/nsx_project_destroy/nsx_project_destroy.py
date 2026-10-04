@@ -1,7 +1,7 @@
 from prefect import task
+
 from zpodcommon import models as M
 from zpodcommon.lib.nsx import NsxClient, fmt
-
 from zpodengine.lib import database
 from zpodengine.lib.network import wait_for_segment_to_be_evacuted
 

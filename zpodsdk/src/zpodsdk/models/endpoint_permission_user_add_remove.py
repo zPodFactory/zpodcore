@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar, Union, cast
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -11,27 +14,28 @@ T = TypeVar("T", bound="EndpointPermissionUserAddRemove")
 class EndpointPermissionUserAddRemove:
     """
     Attributes:
-        user_id (Union[None, Unset, int]):
-        username (Union[None, Unset, str]):
+        user_id (int | None | Unset):
+        username (None | str | Unset):
     """
 
-    user_id: Union[None, Unset, int] = UNSET
-    username: Union[None, Unset, str] = UNSET
+    user_id: int | None | Unset = UNSET
+    username: None | str | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
-        user_id: Union[None, Unset, int]
+    def to_dict(self) -> dict[str, Any]:
+        user_id: int | None | Unset
         if isinstance(self.user_id, Unset):
             user_id = UNSET
         else:
             user_id = self.user_id
 
-        username: Union[None, Unset, str]
+        username: None | str | Unset
         if isinstance(self.username, Unset):
             username = UNSET
         else:
             username = self.username
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if user_id is not UNSET:
             field_dict["user_id"] = user_id
@@ -41,24 +45,24 @@ class EndpointPermissionUserAddRemove:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
 
-        def _parse_user_id(data: object) -> Union[None, Unset, int]:
+        def _parse_user_id(data: object) -> int | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(int | None | Unset, data)
 
         user_id = _parse_user_id(d.pop("user_id", UNSET))
 
-        def _parse_username(data: object) -> Union[None, Unset, str]:
+        def _parse_username(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         username = _parse_username(d.pop("username", UNSET))
 

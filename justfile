@@ -283,9 +283,12 @@ zpodsdk-update: zpodapi-generate-openapi
     zpodfactory/zpodsdk_builder \
     bash -c "\
       cd /zpodcore && \
-      openapi-python-client update \
+      openapi-python-client generate --overwrite \
         --path /zpodcore/zpodsdk_builder/openapi.json \
         --config /zpodcore/zpodsdk_builder/config.yaml \
         --custom-template-path=/zpodcore/zpodsdk_builder/templates && \
+      rm -f /zpodcore/zpodsdk/src/.gitignore \
+        /zpodcore/zpodsdk/src/README.md \
+        /zpodcore/zpodsdk/src/pyproject.toml && \
       chown `id --user`:`id --group` \
         --recursive /zpodcore/zpodsdk/src/zpodsdk"

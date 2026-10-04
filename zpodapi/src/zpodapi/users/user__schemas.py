@@ -1,7 +1,7 @@
 from datetime import datetime
+from typing import Annotated
 
 from pydantic import AfterValidator, EmailStr, StringConstraints, validate_email
-from typing_extensions import Annotated
 
 from zpodapi.lib.schema_base import Field, SchemaBase
 from zpodcommon.enums import UserStatus

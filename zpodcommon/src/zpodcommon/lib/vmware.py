@@ -98,9 +98,7 @@ class vCenter:
                     return info[0]
                 elif li == 0:
                     return None
-                raise Exception(
-                    "Multiple results found when there should only be one"
-                )
+                raise Exception("Multiple results found when there should only be one")
             except vmodl.fault.ManagedObjectNotFound as exc:
                 if attempt >= max_retries:
                     raise
@@ -112,7 +110,7 @@ class vCenter:
                     f"attempt {attempt + 1}/{max_retries + 1}) — "
                     "re-enumerating"
                 )
-                time.sleep(backoff * (2 ** attempt))
+                time.sleep(backoff * (2**attempt))
         # Loop returns or raises on every path; safety belt for type checkers.
         raise RuntimeError("get_obj retry loop exited without returning")
 
@@ -290,9 +288,7 @@ class vCenter:
 
         config = vim.vm.ConfigSpec()
         if vapp_properties:
-            config.vAppConfig = self.vapp_property_overrides(
-                template, vapp_properties
-            )
+            config.vAppConfig = self.vapp_property_overrides(template, vapp_properties)
         if portgroup_name:
             config.deviceChange = self.nic_portgroup_changes(template, portgroup_name)
 
@@ -330,7 +326,9 @@ class vCenter:
             prop = by_key.get(key)
             if prop is None:
                 unmatched.append(key)
-                print(f"  MISS {key!r} ({self.mask_secret(key, value)}) — no template property")
+                print(
+                    f"  MISS {key!r} ({self.mask_secret(key, value)}) — no template property"
+                )
                 continue
             info = vim.vApp.PropertyInfo()
             info.key = prop.key
@@ -465,7 +463,7 @@ class vCenter:
                     f"vSphere VAppTaskInProgress deleting vApp '{vapp_name}' "
                     f"(attempt {attempt + 1}/{max_retries + 1}) — retrying"
                 )
-                time.sleep(backoff * (2 ** attempt))
+                time.sleep(backoff * (2**attempt))
 
     def delete_vm_from_vapp(self, vapp_name: str, vm_name: str):
         print("Delete VM from vApp")

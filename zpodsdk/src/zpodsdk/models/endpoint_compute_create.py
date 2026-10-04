@@ -1,4 +1,7 @@
-from typing import Any, Dict, Type, TypeVar
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any, TypeVar
 
 from attrs import define as _attrs_define
 
@@ -36,7 +39,7 @@ class EndpointComputeCreate:
     vds: str
     vmfolder: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         contentlibrary = self.contentlibrary
 
         datacenter = self.datacenter
@@ -59,7 +62,8 @@ class EndpointComputeCreate:
 
         vmfolder = self.vmfolder
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "contentlibrary": contentlibrary,
@@ -79,8 +83,8 @@ class EndpointComputeCreate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
-        d = src_dict.copy()
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
         contentlibrary = d.pop("contentlibrary")
 
         datacenter = d.pop("datacenter")

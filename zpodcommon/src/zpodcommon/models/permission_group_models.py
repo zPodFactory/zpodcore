@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from sqlmodel import Field, Relationship
 
@@ -24,20 +24,20 @@ class PermissionGroup(ModelBase, table=True):
         unique=True,
     )
 
-    endpoint_permissions: List["EndpointPermission"] = Relationship(
+    endpoint_permissions: list["EndpointPermission"] = Relationship(
         back_populates="permission_groups",
         sa_relationship_kwargs={
             "secondary": "endpoint_permission_group_link",
         },
     )
 
-    zpod_permissions: List["ZpodPermission"] = Relationship(
+    zpod_permissions: list["ZpodPermission"] = Relationship(
         back_populates="permission_groups",
         sa_relationship_kwargs={
             "secondary": "zpod_permission_group_link",
         },
     )
-    users: List["User"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="permission_groups",
         sa_relationship_kwargs={
             "secondary": "permission_group_user_link",

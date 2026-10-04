@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -11,13 +11,14 @@ from ...types import Response
 
 
 class SettingsGetAll:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/settings",
         }
@@ -26,8 +27,8 @@ class SettingsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["SettingView"]]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> HTTPValidationError | list[SettingView] | None:
+        if response.status_code == 200:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
@@ -36,13 +37,12 @@ class SettingsGetAll:
                 response_200.append(response_200_item)
 
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -50,7 +50,7 @@ class SettingsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["SettingView"]]]:
+    ) -> Response[HTTPValidationError | list[SettingView]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -60,7 +60,7 @@ class SettingsGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[Union[HTTPValidationError, List["SettingView"]]]:
+    ) -> Response[HTTPValidationError | list[SettingView]]:
         """Get All
 
         Raises:
@@ -68,7 +68,7 @@ class SettingsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['SettingView']]]
+            Response[HTTPValidationError | list[SettingView]]
         """
 
         kwargs = self._get_kwargs()
@@ -81,7 +81,7 @@ class SettingsGetAll:
 
     def sync(
         self,
-    ) -> Optional[Union[HTTPValidationError, List["SettingView"]]]:
+    ) -> HTTPValidationError | list[SettingView] | None:
         """Get All
 
         Raises:
@@ -89,14 +89,14 @@ class SettingsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['SettingView']]
+            HTTPValidationError | list[SettingView]
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[Union[HTTPValidationError, List["SettingView"]]]:
+    ) -> Response[HTTPValidationError | list[SettingView]]:
         """Get All
 
         Raises:
@@ -104,7 +104,7 @@ class SettingsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['SettingView']]]
+            Response[HTTPValidationError | list[SettingView]]
         """
 
         kwargs = self._get_kwargs()
@@ -115,7 +115,7 @@ class SettingsGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[Union[HTTPValidationError, List["SettingView"]]]:
+    ) -> HTTPValidationError | list[SettingView] | None:
         """Get All
 
         Raises:
@@ -123,7 +123,7 @@ class SettingsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['SettingView']]
+            HTTPValidationError | list[SettingView]
         """
 
         return (await self.asyncio_detailed()).parsed

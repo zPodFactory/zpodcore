@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -11,17 +12,18 @@ from ...types import Response
 
 
 class ComponentsDisable:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "put",
             "url": "/components/{id}/disable".format(
-                id=id,
+                id=quote(str(id), safe=""),
             ),
         }
 
@@ -29,18 +31,17 @@ class ComponentsDisable:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
-        if response.status_code == HTTPStatus.CREATED:
+    ) -> ComponentViewFull | HTTPValidationError | None:
+        if response.status_code == 201:
             response_201 = ComponentViewFull.from_dict(response.json())
 
             return response_201
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -48,7 +49,7 @@ class ComponentsDisable:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
+    ) -> Response[ComponentViewFull | HTTPValidationError]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -59,7 +60,7 @@ class ComponentsDisable:
     def sync_detailed(
         self,
         id: str,
-    ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
+    ) -> Response[ComponentViewFull | HTTPValidationError]:
         """Disable
 
         Args:
@@ -70,7 +71,7 @@ class ComponentsDisable:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[ComponentViewFull, HTTPValidationError]]
+            Response[ComponentViewFull | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -86,7 +87,7 @@ class ComponentsDisable:
     def sync(
         self,
         id: str,
-    ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
+    ) -> ComponentViewFull | HTTPValidationError | None:
         """Disable
 
         Args:
@@ -97,7 +98,7 @@ class ComponentsDisable:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[ComponentViewFull, HTTPValidationError]
+            ComponentViewFull | HTTPValidationError
         """
 
         return self.sync_detailed(
@@ -107,7 +108,7 @@ class ComponentsDisable:
     async def asyncio_detailed(
         self,
         id: str,
-    ) -> Response[Union[ComponentViewFull, HTTPValidationError]]:
+    ) -> Response[ComponentViewFull | HTTPValidationError]:
         """Disable
 
         Args:
@@ -118,7 +119,7 @@ class ComponentsDisable:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[ComponentViewFull, HTTPValidationError]]
+            Response[ComponentViewFull | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -132,7 +133,7 @@ class ComponentsDisable:
     async def asyncio(
         self,
         id: str,
-    ) -> Optional[Union[ComponentViewFull, HTTPValidationError]]:
+    ) -> ComponentViewFull | HTTPValidationError | None:
         """Disable
 
         Args:
@@ -143,7 +144,7 @@ class ComponentsDisable:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[ComponentViewFull, HTTPValidationError]
+            ComponentViewFull | HTTPValidationError
         """
 
         return (

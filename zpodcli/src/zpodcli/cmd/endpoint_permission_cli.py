@@ -1,9 +1,7 @@
-from typing import List, Optional
+from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
-from typing_extensions import Annotated
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -12,6 +10,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_permission import EndpointPermission
 from zpodsdk.models.endpoint_permission_group_add_remove import (
@@ -33,7 +32,7 @@ def generate_table(
     z: ZpodClient,
     endpoint: EndpointView,
 ):
-    endpoint_permissions: List[EndpointPermissionView] = (
+    endpoint_permissions: list[EndpointPermissionView] = (
         z.endpoints_permissions_get_all.sync(endpoint.id)
     )
 
@@ -97,7 +96,7 @@ def endpoint_permission_add(
         ),
     ],
     username: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--username",
             "-u",
@@ -106,7 +105,7 @@ def endpoint_permission_add(
         ),
     ] = None,
     groupname: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--group",
             "-g",
@@ -154,7 +153,7 @@ def endpoint_permission_remove(
         ),
     ],
     username: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--username",
             "-u",
@@ -163,7 +162,7 @@ def endpoint_permission_remove(
         ),
     ] = None,
     groupname: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--group",
             "-g",

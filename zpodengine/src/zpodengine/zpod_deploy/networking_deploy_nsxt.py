@@ -1,7 +1,6 @@
 from zpodcommon import models as M
 from zpodcommon.lib.network_utils import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
-
 from zpodengine import settings
 from zpodengine.lib.network import wait_for_segment_to_realize
 
@@ -66,8 +65,7 @@ def networking_deploy_nsxt(zpod: M.Zpod, enet_name: str | None = None):
         print(f"Create MAC Discovery Profile: {mac_discovery_profile_id}")
         nsx.patch(
             url=(
-                f"{base_path}/infra"
-                f"/mac-discovery-profiles/{mac_discovery_profile_id}"
+                f"{base_path}/infra/mac-discovery-profiles/{mac_discovery_profile_id}"
             ),
             json={
                 "id": mac_discovery_profile_id,

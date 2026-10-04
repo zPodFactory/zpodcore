@@ -7,7 +7,6 @@ from rich import print
 from rich.console import Group
 from rich.live import Live
 from rich.spinner import Spinner
-from rich.table import Table
 
 from zpodcli.cmd import (
     zpod_component_cli,
@@ -23,6 +22,7 @@ from zpodcli.lib.utils import (
     get_status_markdown,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.endpoint_view_full import EndpointViewFull
 from zpodsdk.models.zpod_create import ZpodCreate
@@ -140,7 +140,6 @@ def zpod_list(
             "--watch",
             "-w",
             help="Refresh list every 5 seconds (Ctrl+C to quit)",
-            is_flag=True,
         ),
     ] = False,
 ):
@@ -256,7 +255,6 @@ def zpod_create(
             "--wait",
             "-w",
             help="Wait for task to complete",
-            is_flag=True,
         ),
     ] = False,
     no_spinner: Annotated[
@@ -264,7 +262,6 @@ def zpod_create(
         typer.Option(
             "--no-spinner",
             help="Disable spinner animation when waiting",
-            is_flag=True,
         ),
     ] = False,
 ):

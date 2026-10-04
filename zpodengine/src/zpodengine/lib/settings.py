@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         env_prefix="ZPODENGINE_",
         env_file=Path(__file__).parents[3] / ".env",
         frozen=True,
-        extra='ignore'
+        extra="ignore",
     )
 
     ECHO_POOL: bool | _Debug = False

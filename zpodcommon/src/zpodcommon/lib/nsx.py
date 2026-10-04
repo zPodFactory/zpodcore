@@ -73,7 +73,7 @@ class RetryTransport(httpx.HTTPTransport):
                     f"(attempt {attempt + 1}/{self._max_retries + 1}), "
                     "retrying"
                 )
-                time.sleep(self._backoff * (2 ** attempt))
+                time.sleep(self._backoff * (2**attempt))
                 continue
             if (
                 response.status_code in RETRY_STATUS_CODES
@@ -86,7 +86,7 @@ class RetryTransport(httpx.HTTPTransport):
                     "retrying"
                 )
                 response.close()
-                time.sleep(self._backoff * (2 ** attempt))
+                time.sleep(self._backoff * (2**attempt))
                 continue
             return response
         # Loop body returns or raises on every path; this is just a safety
@@ -128,8 +128,7 @@ def results(response: httpx.Response):
 def event_hook_request(request: httpx.Request):
     # Log Request
     print(
-        f"REQUEST: {request.method.upper()} {request.url}\n"
-        f"{request.content.decode()}"
+        f"REQUEST: {request.method.upper()} {request.url}\n{request.content.decode()}"
     )
 
 
@@ -142,10 +141,7 @@ def event_hook_response(response: httpx.Response):
     response.read()
 
     # Log Response
-    print(
-        f"RESPONSE: {response.status_code}\n"
-        f"{response.text}"
-    )
+    print(f"RESPONSE: {response.status_code}\n{response.text}")
 
 
 def fmt(txt):
@@ -189,10 +185,7 @@ class Auth(httpx.Auth):
         # status NSX returned before any downstream call uses the token.
         # This is the symptom from the original JSONDecodeError traceback,
         # where the actual status was hidden by response.json() crashing.
-        print(
-            f"NSX auth POST {post_args.get('url')} -> "
-            f"HTTP {response.status_code}"
-        )
+        print(f"NSX auth POST {post_args.get('url')} -> HTTP {response.status_code}")
         if response.status_code != 200:
             # Use .text not .json(): a saturated reverse proxy returns an
             # HTML / empty body and json() would mask the real auth failure

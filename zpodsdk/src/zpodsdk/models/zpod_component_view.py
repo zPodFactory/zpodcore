@@ -1,13 +1,7 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -28,52 +22,52 @@ class ZpodComponentView:
     """
     Attributes:
         component (ComponentView):
-        fqdn (Union[None, Unset, str]):
-        hostname (Union[None, Unset, str]):
-        ip (Union[None, Unset, str]):
-        password (Union[None, Unset, str]):
-        status (Union[Unset, str]):
-        usernames (Union[List['ZpodComponentViewUsernamesType0Item'], None, Unset]):
-        vcpu (Union[None, Unset, int]):
-        vdisks (Union[List[int], None, Unset]):
-        vmem (Union[None, Unset, int]):
-        vnics (Union[None, Unset, int]):
+        fqdn (None | str | Unset):
+        hostname (None | str | Unset):
+        ip (None | str | Unset):
+        password (None | str | Unset):
+        status (str | Unset):
+        usernames (list[ZpodComponentViewUsernamesType0Item] | None | Unset):
+        vcpu (int | None | Unset):
+        vdisks (list[int] | None | Unset):
+        vmem (int | None | Unset):
+        vnics (int | None | Unset):
     """
 
-    component: "ComponentView"
-    fqdn: Union[None, Unset, str] = UNSET
-    hostname: Union[None, Unset, str] = UNSET
-    ip: Union[None, Unset, str] = UNSET
-    password: Union[None, Unset, str] = UNSET
-    status: Union[Unset, str] = UNSET
-    usernames: Union[List["ZpodComponentViewUsernamesType0Item"], None, Unset] = UNSET
-    vcpu: Union[None, Unset, int] = UNSET
-    vdisks: Union[List[int], None, Unset] = UNSET
-    vmem: Union[None, Unset, int] = UNSET
-    vnics: Union[None, Unset, int] = UNSET
+    component: ComponentView
+    fqdn: None | str | Unset = UNSET
+    hostname: None | str | Unset = UNSET
+    ip: None | str | Unset = UNSET
+    password: None | str | Unset = UNSET
+    status: str | Unset = UNSET
+    usernames: list[ZpodComponentViewUsernamesType0Item] | None | Unset = UNSET
+    vcpu: int | None | Unset = UNSET
+    vdisks: list[int] | None | Unset = UNSET
+    vmem: int | None | Unset = UNSET
+    vnics: int | None | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         component = self.component.to_dict()
 
-        fqdn: Union[None, Unset, str]
+        fqdn: None | str | Unset
         if isinstance(self.fqdn, Unset):
             fqdn = UNSET
         else:
             fqdn = self.fqdn
 
-        hostname: Union[None, Unset, str]
+        hostname: None | str | Unset
         if isinstance(self.hostname, Unset):
             hostname = UNSET
         else:
             hostname = self.hostname
 
-        ip: Union[None, Unset, str]
+        ip: None | str | Unset
         if isinstance(self.ip, Unset):
             ip = UNSET
         else:
             ip = self.ip
 
-        password: Union[None, Unset, str]
+        password: None | str | Unset
         if isinstance(self.password, Unset):
             password = UNSET
         else:
@@ -81,7 +75,7 @@ class ZpodComponentView:
 
         status = self.status
 
-        usernames: Union[List[Dict[str, Any]], None, Unset]
+        usernames: list[dict[str, Any]] | None | Unset
         if isinstance(self.usernames, Unset):
             usernames = UNSET
         elif isinstance(self.usernames, list):
@@ -93,13 +87,13 @@ class ZpodComponentView:
         else:
             usernames = self.usernames
 
-        vcpu: Union[None, Unset, int]
+        vcpu: int | None | Unset
         if isinstance(self.vcpu, Unset):
             vcpu = UNSET
         else:
             vcpu = self.vcpu
 
-        vdisks: Union[List[int], None, Unset]
+        vdisks: list[int] | None | Unset
         if isinstance(self.vdisks, Unset):
             vdisks = UNSET
         elif isinstance(self.vdisks, list):
@@ -108,19 +102,20 @@ class ZpodComponentView:
         else:
             vdisks = self.vdisks
 
-        vmem: Union[None, Unset, int]
+        vmem: int | None | Unset
         if isinstance(self.vmem, Unset):
             vmem = UNSET
         else:
             vmem = self.vmem
 
-        vnics: Union[None, Unset, int]
+        vnics: int | None | Unset
         if isinstance(self.vnics, Unset):
             vnics = UNSET
         else:
             vnics = self.vnics
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "component": component,
@@ -150,48 +145,48 @@ class ZpodComponentView:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.component_view import ComponentView
         from ..models.zpod_component_view_usernames_type_0_item import (
             ZpodComponentViewUsernamesType0Item,
         )
 
-        d = src_dict.copy()
+        d = dict(src_dict)
         component = ComponentView.from_dict(d.pop("component"))
 
-        def _parse_fqdn(data: object) -> Union[None, Unset, str]:
+        def _parse_fqdn(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         fqdn = _parse_fqdn(d.pop("fqdn", UNSET))
 
-        def _parse_hostname(data: object) -> Union[None, Unset, str]:
+        def _parse_hostname(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         hostname = _parse_hostname(d.pop("hostname", UNSET))
 
-        def _parse_ip(data: object) -> Union[None, Unset, str]:
+        def _parse_ip(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         ip = _parse_ip(d.pop("ip", UNSET))
 
-        def _parse_password(data: object) -> Union[None, Unset, str]:
+        def _parse_password(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         password = _parse_password(d.pop("password", UNSET))
 
@@ -199,7 +194,7 @@ class ZpodComponentView:
 
         def _parse_usernames(
             data: object,
-        ) -> Union[List["ZpodComponentViewUsernamesType0Item"], None, Unset]:
+        ) -> list[ZpodComponentViewUsernamesType0Item] | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -219,24 +214,22 @@ class ZpodComponentView:
                     usernames_type_0.append(usernames_type_0_item)
 
                 return usernames_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(
-                Union[List["ZpodComponentViewUsernamesType0Item"], None, Unset], data
-            )
+            return cast(list[ZpodComponentViewUsernamesType0Item] | None | Unset, data)
 
         usernames = _parse_usernames(d.pop("usernames", UNSET))
 
-        def _parse_vcpu(data: object) -> Union[None, Unset, int]:
+        def _parse_vcpu(data: object) -> int | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(int | None | Unset, data)
 
         vcpu = _parse_vcpu(d.pop("vcpu", UNSET))
 
-        def _parse_vdisks(data: object) -> Union[List[int], None, Unset]:
+        def _parse_vdisks(data: object) -> list[int] | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -244,30 +237,30 @@ class ZpodComponentView:
             try:
                 if not isinstance(data, list):
                     raise TypeError()
-                vdisks_type_0 = cast(List[int], data)
+                vdisks_type_0 = cast(list[int], data)
 
                 return vdisks_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union[List[int], None, Unset], data)
+            return cast(list[int] | None | Unset, data)
 
         vdisks = _parse_vdisks(d.pop("vdisks", UNSET))
 
-        def _parse_vmem(data: object) -> Union[None, Unset, int]:
+        def _parse_vmem(data: object) -> int | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(int | None | Unset, data)
 
         vmem = _parse_vmem(d.pop("vmem", UNSET))
 
-        def _parse_vnics(data: object) -> Union[None, Unset, int]:
+        def _parse_vnics(data: object) -> int | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, int], data)
+            return cast(int | None | Unset, data)
 
         vnics = _parse_vnics(d.pop("vnics", UNSET))
 

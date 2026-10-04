@@ -1,10 +1,9 @@
 import json
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich import print
-from rich.table import Table
 
 from zpodcli.lib.file import load_json_or_yaml_file
 from zpodcli.lib.utils import (
@@ -14,6 +13,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 from zpodsdk.models.profile_create import ProfileCreate
 from zpodsdk.models.profile_item_create import ProfileItemCreate
@@ -119,7 +119,7 @@ def profile_create(
         ),
     ],
     profile_str: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--profile",
             "-p",
@@ -128,7 +128,7 @@ def profile_create(
         ),
     ] = None,
     profile_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--profile-file",
             "-pf",
@@ -175,7 +175,7 @@ def profile_update(
         ),
     ],
     newname: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--newname",
             help="New profile name",
@@ -183,7 +183,7 @@ def profile_update(
         ),
     ] = None,
     profile: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--profile",
             "-p",
@@ -192,7 +192,7 @@ def profile_update(
         ),
     ] = None,
     profile_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--profile-file",
             "-pf",

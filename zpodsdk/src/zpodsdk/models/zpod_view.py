@@ -1,17 +1,10 @@
+from __future__ import annotations
+
 import datetime
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
-from dateutil.parser import isoparse
 
 from ..models.zpod_status import ZpodStatus
 from ..types import UNSET, Unset
@@ -41,28 +34,28 @@ class ZpodView:
         password (str):
         profile (str):
         status (ZpodStatus):
-        components (Union[Unset, List['ZpodComponentView']]):
-        features (Union['ZpodViewFeaturesType0', None, Unset]):
-        networks (Union[Unset, List['ZpodNetworkView']]):
-        permissions (Union[Unset, List['ZpodPermissionView']]):
+        components (list[ZpodComponentView] | Unset):
+        features (None | Unset | ZpodViewFeaturesType0):
+        networks (list[ZpodNetworkView] | Unset):
+        permissions (list[ZpodPermissionView] | Unset):
     """
 
     creation_date: datetime.datetime
     description: str
     domain: str
-    endpoint: "EndpointView"
+    endpoint: EndpointView
     id: int
     last_modified_date: datetime.datetime
     name: str
     password: str
     profile: str
     status: ZpodStatus
-    components: Union[Unset, List["ZpodComponentView"]] = UNSET
-    features: Union["ZpodViewFeaturesType0", None, Unset] = UNSET
-    networks: Union[Unset, List["ZpodNetworkView"]] = UNSET
-    permissions: Union[Unset, List["ZpodPermissionView"]] = UNSET
+    components: list[ZpodComponentView] | Unset = UNSET
+    features: None | Unset | ZpodViewFeaturesType0 = UNSET
+    networks: list[ZpodNetworkView] | Unset = UNSET
+    permissions: list[ZpodPermissionView] | Unset = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.zpod_view_features_type_0 import ZpodViewFeaturesType0
 
         creation_date = self.creation_date.isoformat()
@@ -85,14 +78,14 @@ class ZpodView:
 
         status = self.status.value
 
-        components: Union[Unset, List[Dict[str, Any]]] = UNSET
+        components: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.components, Unset):
             components = []
             for components_item_data in self.components:
                 components_item = components_item_data.to_dict()
                 components.append(components_item)
 
-        features: Union[Dict[str, Any], None, Unset]
+        features: dict[str, Any] | None | Unset
         if isinstance(self.features, Unset):
             features = UNSET
         elif isinstance(self.features, ZpodViewFeaturesType0):
@@ -100,21 +93,22 @@ class ZpodView:
         else:
             features = self.features
 
-        networks: Union[Unset, List[Dict[str, Any]]] = UNSET
+        networks: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.networks, Unset):
             networks = []
             for networks_item_data in self.networks:
                 networks_item = networks_item_data.to_dict()
                 networks.append(networks_item)
 
-        permissions: Union[Unset, List[Dict[str, Any]]] = UNSET
+        permissions: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.permissions, Unset):
             permissions = []
             for permissions_item_data in self.permissions:
                 permissions_item = permissions_item_data.to_dict()
                 permissions.append(permissions_item)
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update(
             {
                 "creation_date": creation_date,
@@ -141,15 +135,15 @@ class ZpodView:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.endpoint_view import EndpointView
         from ..models.zpod_component_view import ZpodComponentView
         from ..models.zpod_network_view import ZpodNetworkView
         from ..models.zpod_permission_view import ZpodPermissionView
         from ..models.zpod_view_features_type_0 import ZpodViewFeaturesType0
 
-        d = src_dict.copy()
-        creation_date = isoparse(d.pop("creation_date"))
+        d = dict(src_dict)
+        creation_date = datetime.datetime.fromisoformat(d.pop("creation_date"))
 
         description = d.pop("description")
 
@@ -159,7 +153,9 @@ class ZpodView:
 
         id = d.pop("id")
 
-        last_modified_date = isoparse(d.pop("last_modified_date"))
+        last_modified_date = datetime.datetime.fromisoformat(
+            d.pop("last_modified_date")
+        )
 
         name = d.pop("name")
 
@@ -169,16 +165,16 @@ class ZpodView:
 
         status = ZpodStatus(d.pop("status"))
 
-        components = []
         _components = d.pop("components", UNSET)
-        for components_item_data in _components or []:
-            components_item = ZpodComponentView.from_dict(components_item_data)
+        components: list[ZpodComponentView] | Unset = UNSET
+        if _components is not UNSET:
+            components = []
+            for components_item_data in _components:
+                components_item = ZpodComponentView.from_dict(components_item_data)
 
-            components.append(components_item)
+                components.append(components_item)
 
-        def _parse_features(
-            data: object,
-        ) -> Union["ZpodViewFeaturesType0", None, Unset]:
+        def _parse_features(data: object) -> None | Unset | ZpodViewFeaturesType0:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -189,25 +185,29 @@ class ZpodView:
                 features_type_0 = ZpodViewFeaturesType0.from_dict(data)
 
                 return features_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["ZpodViewFeaturesType0", None, Unset], data)
+            return cast(None | Unset | ZpodViewFeaturesType0, data)
 
         features = _parse_features(d.pop("features", UNSET))
 
-        networks = []
         _networks = d.pop("networks", UNSET)
-        for networks_item_data in _networks or []:
-            networks_item = ZpodNetworkView.from_dict(networks_item_data)
+        networks: list[ZpodNetworkView] | Unset = UNSET
+        if _networks is not UNSET:
+            networks = []
+            for networks_item_data in _networks:
+                networks_item = ZpodNetworkView.from_dict(networks_item_data)
 
-            networks.append(networks_item)
+                networks.append(networks_item)
 
-        permissions = []
         _permissions = d.pop("permissions", UNSET)
-        for permissions_item_data in _permissions or []:
-            permissions_item = ZpodPermissionView.from_dict(permissions_item_data)
+        permissions: list[ZpodPermissionView] | Unset = UNSET
+        if _permissions is not UNSET:
+            permissions = []
+            for permissions_item_data in _permissions:
+                permissions_item = ZpodPermissionView.from_dict(permissions_item_data)
 
-            permissions.append(permissions_item)
+                permissions.append(permissions_item)
 
         zpod_view = cls(
             creation_date=creation_date,

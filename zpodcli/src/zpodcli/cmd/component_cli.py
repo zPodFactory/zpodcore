@@ -3,7 +3,6 @@ from typing import Annotated
 
 import typer
 from rich.progress import Progress
-from rich.table import Table
 
 from zpodcli.lib.utils import (
     JsonOption,
@@ -12,6 +11,7 @@ from zpodcli.lib.utils import (
     exit_with_error,
     json_print,
 )
+from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
 
 CHUNK_SIZE = 1024 * 1024 * 16  # 16MB

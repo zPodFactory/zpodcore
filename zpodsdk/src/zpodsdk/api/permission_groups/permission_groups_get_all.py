@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -11,13 +11,14 @@ from ...types import Response
 
 
 class PermissionGroupsGetAll:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/permission_groups",
         }
@@ -26,8 +27,8 @@ class PermissionGroupsGetAll:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, List["PermissionGroupView"]]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> HTTPValidationError | list[PermissionGroupView] | None:
+        if response.status_code == 200:
             response_200 = []
             _response_200 = response.json()
             for response_200_item_data in _response_200:
@@ -38,13 +39,12 @@ class PermissionGroupsGetAll:
                 response_200.append(response_200_item)
 
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -52,7 +52,7 @@ class PermissionGroupsGetAll:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, List["PermissionGroupView"]]]:
+    ) -> Response[HTTPValidationError | list[PermissionGroupView]]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -62,7 +62,7 @@ class PermissionGroupsGetAll:
 
     def sync_detailed(
         self,
-    ) -> Response[Union[HTTPValidationError, List["PermissionGroupView"]]]:
+    ) -> Response[HTTPValidationError | list[PermissionGroupView]]:
         """Get All
 
         Raises:
@@ -70,7 +70,7 @@ class PermissionGroupsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['PermissionGroupView']]]
+            Response[HTTPValidationError | list[PermissionGroupView]]
         """
 
         kwargs = self._get_kwargs()
@@ -83,7 +83,7 @@ class PermissionGroupsGetAll:
 
     def sync(
         self,
-    ) -> Optional[Union[HTTPValidationError, List["PermissionGroupView"]]]:
+    ) -> HTTPValidationError | list[PermissionGroupView] | None:
         """Get All
 
         Raises:
@@ -91,14 +91,14 @@ class PermissionGroupsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['PermissionGroupView']]
+            HTTPValidationError | list[PermissionGroupView]
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[Union[HTTPValidationError, List["PermissionGroupView"]]]:
+    ) -> Response[HTTPValidationError | list[PermissionGroupView]]:
         """Get All
 
         Raises:
@@ -106,7 +106,7 @@ class PermissionGroupsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, List['PermissionGroupView']]]
+            Response[HTTPValidationError | list[PermissionGroupView]]
         """
 
         kwargs = self._get_kwargs()
@@ -117,7 +117,7 @@ class PermissionGroupsGetAll:
 
     async def asyncio(
         self,
-    ) -> Optional[Union[HTTPValidationError, List["PermissionGroupView"]]]:
+    ) -> HTTPValidationError | list[PermissionGroupView] | None:
         """Get All
 
         Raises:
@@ -125,7 +125,7 @@ class PermissionGroupsGetAll:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, List['PermissionGroupView']]
+            HTTPValidationError | list[PermissionGroupView]
         """
 
         return (await self.asyncio_detailed()).parsed

@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -11,19 +12,20 @@ from ...types import Response
 
 
 class EndpointsEnetGet:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
         id: str,
         name: str,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/endpoints/{id}/enet/{name}".format(
-                id=id,
-                name=name,
+                id=quote(str(id), safe=""),
+                name=quote(str(name), safe=""),
             ),
         }
 
@@ -31,18 +33,17 @@ class EndpointsEnetGet:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[EndpointENetView, HTTPValidationError]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> EndpointENetView | HTTPValidationError | None:
+        if response.status_code == 200:
             response_200 = EndpointENetView.from_dict(response.json())
 
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -50,7 +51,7 @@ class EndpointsEnetGet:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[EndpointENetView, HTTPValidationError]]:
+    ) -> Response[EndpointENetView | HTTPValidationError]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -62,7 +63,7 @@ class EndpointsEnetGet:
         self,
         id: str,
         name: str,
-    ) -> Response[Union[EndpointENetView, HTTPValidationError]]:
+    ) -> Response[EndpointENetView | HTTPValidationError]:
         """Enet Get
 
         Args:
@@ -74,7 +75,7 @@ class EndpointsEnetGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointENetView, HTTPValidationError]]
+            Response[EndpointENetView | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -92,7 +93,7 @@ class EndpointsEnetGet:
         self,
         id: str,
         name: str,
-    ) -> Optional[Union[EndpointENetView, HTTPValidationError]]:
+    ) -> EndpointENetView | HTTPValidationError | None:
         """Enet Get
 
         Args:
@@ -104,7 +105,7 @@ class EndpointsEnetGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[EndpointENetView, HTTPValidationError]
+            EndpointENetView | HTTPValidationError
         """
 
         return self.sync_detailed(
@@ -116,7 +117,7 @@ class EndpointsEnetGet:
         self,
         id: str,
         name: str,
-    ) -> Response[Union[EndpointENetView, HTTPValidationError]]:
+    ) -> Response[EndpointENetView | HTTPValidationError]:
         """Enet Get
 
         Args:
@@ -128,7 +129,7 @@ class EndpointsEnetGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[EndpointENetView, HTTPValidationError]]
+            Response[EndpointENetView | HTTPValidationError]
         """
 
         kwargs = self._get_kwargs(
@@ -144,7 +145,7 @@ class EndpointsEnetGet:
         self,
         id: str,
         name: str,
-    ) -> Optional[Union[EndpointENetView, HTTPValidationError]]:
+    ) -> EndpointENetView | HTTPValidationError | None:
         """Enet Get
 
         Args:
@@ -156,7 +157,7 @@ class EndpointsEnetGet:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[EndpointENetView, HTTPValidationError]
+            EndpointENetView | HTTPValidationError
         """
 
         return (

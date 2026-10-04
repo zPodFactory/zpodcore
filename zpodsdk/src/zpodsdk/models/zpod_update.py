@@ -1,12 +1,7 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 
@@ -23,23 +18,23 @@ T = TypeVar("T", bound="ZpodUpdate")
 class ZpodUpdate:
     """
     Attributes:
-        description (Union[None, Unset, str]):
-        features (Union['ZpodUpdateFeaturesType0', None, Unset]):
+        description (None | str | Unset):
+        features (None | Unset | ZpodUpdateFeaturesType0):
     """
 
-    description: Union[None, Unset, str] = UNSET
-    features: Union["ZpodUpdateFeaturesType0", None, Unset] = UNSET
+    description: None | str | Unset = UNSET
+    features: None | Unset | ZpodUpdateFeaturesType0 = UNSET
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         from ..models.zpod_update_features_type_0 import ZpodUpdateFeaturesType0
 
-        description: Union[None, Unset, str]
+        description: None | str | Unset
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
 
-        features: Union[Dict[str, Any], None, Unset]
+        features: dict[str, Any] | None | Unset
         if isinstance(self.features, Unset):
             features = UNSET
         elif isinstance(self.features, ZpodUpdateFeaturesType0):
@@ -47,7 +42,8 @@ class ZpodUpdate:
         else:
             features = self.features
 
-        field_dict: Dict[str, Any] = {}
+        field_dict: dict[str, Any] = {}
+
         field_dict.update({})
         if description is not UNSET:
             field_dict["description"] = description
@@ -57,23 +53,21 @@ class ZpodUpdate:
         return field_dict
 
     @classmethod
-    def from_dict(cls: Type[T], src_dict: Dict[str, Any]) -> T:
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.zpod_update_features_type_0 import ZpodUpdateFeaturesType0
 
-        d = src_dict.copy()
+        d = dict(src_dict)
 
-        def _parse_description(data: object) -> Union[None, Unset, str]:
+        def _parse_description(data: object) -> None | str | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            return cast(Union[None, Unset, str], data)
+            return cast(None | str | Unset, data)
 
         description = _parse_description(d.pop("description", UNSET))
 
-        def _parse_features(
-            data: object,
-        ) -> Union["ZpodUpdateFeaturesType0", None, Unset]:
+        def _parse_features(data: object) -> None | Unset | ZpodUpdateFeaturesType0:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -84,9 +78,9 @@ class ZpodUpdate:
                 features_type_0 = ZpodUpdateFeaturesType0.from_dict(data)
 
                 return features_type_0
-            except:  # noqa: E722
+            except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(Union["ZpodUpdateFeaturesType0", None, Unset], data)
+            return cast(None | Unset | ZpodUpdateFeaturesType0, data)
 
         features = _parse_features(d.pop("features", UNSET))
 

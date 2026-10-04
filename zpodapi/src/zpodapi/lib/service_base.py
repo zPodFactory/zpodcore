@@ -17,7 +17,7 @@ class ServiceBase:
 
     def convert_schema(self, schema, item_in):
         # If already proper schema, just return it
-        if type(item_in) == schema:
+        if type(item_in) is schema:
             return item_in
         try:
             return schema(**item_in.model_dump(exclude_unset=True))

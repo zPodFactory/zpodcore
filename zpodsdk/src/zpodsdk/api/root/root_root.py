@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -10,13 +10,14 @@ from ...types import Response
 
 
 class RootRoot:
-    def __init__(self, client: Union[AuthenticatedClient, Client]) -> None:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
         self.client = client
 
     def _get_kwargs(
         self,
-    ) -> Dict[str, Any]:
-        _kwargs: Dict[str, Any] = {
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
             "method": "get",
             "url": "/",
         }
@@ -25,17 +26,16 @@ class RootRoot:
 
     def _parse_response(
         self, *, response: httpx.Response
-    ) -> Optional[Union[HTTPValidationError, str]]:
-        if response.status_code == HTTPStatus.OK:
+    ) -> HTTPValidationError | str | None:
+        if response.status_code == 200:
             response_200 = response.text
             return response_200
-        if (
-            response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-            and not self.client.raise_on_unexpected_status
-        ):
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
             response_422 = HTTPValidationError.from_dict(response.json())
 
             return response_422
+
         if self.client.raise_on_unexpected_status:
             raise errors.UnexpectedStatus(response.status_code, response.content)
         else:
@@ -43,7 +43,7 @@ class RootRoot:
 
     def _build_response(
         self, *, response: httpx.Response
-    ) -> Response[Union[HTTPValidationError, str]]:
+    ) -> Response[HTTPValidationError | str]:
         return Response(
             status_code=HTTPStatus(response.status_code),
             content=response.content,
@@ -53,7 +53,7 @@ class RootRoot:
 
     def sync_detailed(
         self,
-    ) -> Response[Union[HTTPValidationError, str]]:
+    ) -> Response[HTTPValidationError | str]:
         """Root
 
         Raises:
@@ -61,7 +61,7 @@ class RootRoot:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, str]]
+            Response[HTTPValidationError | str]
         """
 
         kwargs = self._get_kwargs()
@@ -74,7 +74,7 @@ class RootRoot:
 
     def sync(
         self,
-    ) -> Optional[Union[HTTPValidationError, str]]:
+    ) -> HTTPValidationError | str | None:
         """Root
 
         Raises:
@@ -82,14 +82,14 @@ class RootRoot:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, str]
+            HTTPValidationError | str
         """
 
         return self.sync_detailed().parsed
 
     async def asyncio_detailed(
         self,
-    ) -> Response[Union[HTTPValidationError, str]]:
+    ) -> Response[HTTPValidationError | str]:
         """Root
 
         Raises:
@@ -97,7 +97,7 @@ class RootRoot:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Response[Union[HTTPValidationError, str]]
+            Response[HTTPValidationError | str]
         """
 
         kwargs = self._get_kwargs()
@@ -108,7 +108,7 @@ class RootRoot:
 
     async def asyncio(
         self,
-    ) -> Optional[Union[HTTPValidationError, str]]:
+    ) -> HTTPValidationError | str | None:
         """Root
 
         Raises:
@@ -116,7 +116,7 @@ class RootRoot:
             httpx.TimeoutException: If the request takes longer than Client.timeout.
 
         Returns:
-            Union[HTTPValidationError, str]
+            HTTPValidationError | str
         """
 
         return (await self.asyncio_detailed()).parsed
