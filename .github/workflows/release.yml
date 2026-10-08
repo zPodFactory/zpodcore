@@ -1,0 +1,168 @@
+name: release
+
+# A tag is not a release note. Pushing `v0.2.5` alone leaves the Releases tab showing a
+# version number with nothing under it, while the changelog for that version sits in the
+# repository, written. So this reads the section `CHANGELOG.md` already has and publishes
+# it as the body of the release, after checking that the tag, the changelog and the shipped
+# version agree.
+#
+# Here rather than only as a local command, because the rule is "every tag gets its notes"
+# and a rule that depends on somebody remembering a second command holds until the first
+# hurried release. Identical in every zPodFactory repository; what differs lives in the
+# configuration block at the top of tools/release.py and tools/release_notes.py.
+#
+# zpodcore also publishes two PyPI packages from the same tag, in order: zpodsdk first,
+# then zpodcli, whose wheel requires the SDK released beside it. The zpodcli job installs
+# its wheel into an empty environment before uploading, which resolves the SDK from PyPI
+# and proves the pair. A manual re-run of the workflow only rewrites notes; it never
+# re-publishes a version.
+on:
+  push:
+    tags: ["v*"]
+  # For fixing a release note after the fact, or backfilling tags that predate this.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to (re)publish, e.g. 0.3.0; blank means every tag"
+        required: false
+        default: ""
+
+permissions:
+  contents: write          # creating and editing a release is a write to the repository
+
+jobs:
+  notes:
+    name: publish the changelog section
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The note ends with a compare link against the previous tag, which needs the
+          # tags; a default checkout fetches none of them.
+          fetch-depth: 0
+          fetch-tags: true
+      # No uv, no dependency tree: both tools are standard library only.
+      - name: check
+        run: |
+          python3 tools/release.py --check
+          python3 tools/release_notes.py --check
+          python3 tools/version_markers.py --check
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Through the environment rather than interpolated into the script, so an input
+          # cannot become shell.
+          VERSION: ${{ inputs.version }}
+          EVENT: ${{ github.event_name }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "push" ]; then
+            python3 tools/release_notes.py "${TAG#v}" --publish
+          elif [ -n "$VERSION" ]; then
+            python3 tools/release_notes.py "$VERSION" --publish
+          else
+            python3 tools/release_notes.py --all --publish
+          fi
+
+  pypi-zpodsdk:
+    name: zpodsdk to PyPI, attached to the release
+    needs: notes
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: write        # attaching the wheel and sdist to the release
+      id-token: write        # PyPI trusted publishing, when no token secret is set
+    defaults:
+      run:
+        working-directory: zpodsdk
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+      - name: the tag names the version pyproject.toml ships
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          shipped="$(uv version --short)"
+          if [ "$shipped" != "${TAG#v}" ]; then
+            echo "zpodsdk/pyproject.toml ships $shipped but the tag is $TAG" >&2
+            exit 1
+          fi
+      - run: uv build
+      - name: publish to PyPI
+        env:
+          # A project-scoped API token in the repository secrets wins; without one, uv uses
+          # trusted publishing (configure the GitHub publisher on pypi.org, see tools/README.md).
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${PYPI_API_TOKEN:-}" ]; then
+            uv publish --token "$PYPI_API_TOKEN"
+          else
+            uv publish --trusted-publishing always
+          fi
+      - name: attach the distributions to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" dist/* --clobber
+
+  pypi-zpodcli:
+    name: zpodcli to PyPI, attached to the release
+    needs: pypi-zpodsdk
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: write
+      id-token: write
+    defaults:
+      run:
+        working-directory: zpodcli
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.14"
+      - name: the tag names the version pyproject.toml ships
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          shipped="$(uv version --short)"
+          if [ "$shipped" != "${TAG#v}" ]; then
+            echo "zpodcli/pyproject.toml ships $shipped but the tag is $TAG" >&2
+            exit 1
+          fi
+      - run: uv build
+      - name: the wheel installs from scratch, with the SDK just published
+        # `uv build` ignores [tool.uv.sources], so the wheel requires zpodsdk from PyPI.
+        # The index can lag the upload by a few seconds; retry before calling it a failure.
+        run: |
+          set -euo pipefail
+          uv venv /tmp/fresh
+          for attempt in 1 2 3 4 5 6 7 8; do
+            if uv pip install --python /tmp/fresh --refresh dist/*.whl; then break; fi
+            [ "$attempt" = 8 ] && exit 1
+            sleep 15
+          done
+          cd /tmp
+          /tmp/fresh/bin/zcli --version
+          /tmp/fresh/bin/zcli --help > /dev/null
+      - name: publish to PyPI
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -n "${PYPI_API_TOKEN:-}" ]; then
+            uv publish --token "$PYPI_API_TOKEN"
+          else
+            uv publish --trusted-publishing always
+          fi
+      - name: attach the distributions to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" dist/* --clobber
