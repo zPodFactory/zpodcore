@@ -40,82 +40,47 @@ alembic-upgrade rev="head":
 zcli *args:
   @uv --project zpodcli run zcli "$@"
 
-# Create a release version
-zpod-release version:
-  #!/usr/bin/env bash
-  set -euo pipefail
+# Cut a release: CHANGELOG heading, nine version markers, pretest, commit, tag, push
+# (tools/README.md). The tag then publishes the note and both PyPI packages from GitHub.
+zpod-release version *args:
+  python3 {{justfile_directory()}}/tools/release.py {{version}} --push {{args}}
 
-  # Verify uv is installed
-  if ! command -v uv >/dev/null 2>&1; then
-      echo 'Install uv first: https://docs.astral.sh/uv/'
-      exit 1
-  fi
+# What a cut checks between releases: changelog, tags, tracked files, version markers
+zpod-release-check:
+  python3 {{justfile_directory()}}/tools/release.py --check
+  python3 {{justfile_directory()}}/tools/version_markers.py --check
 
-  # Verify gh is installed
-  if ! command -v gh >/dev/null 2>&1; then
-      echo 'Install gh first'
-      exit 1
-  fi
-
-  # Verify user is logged into gh
-  if ! gh auth status >/dev/null 2>&1; then
-      echo 'You need to login: gh auth login'
-      exit 1
-  fi
-
-  # Verify that repo is clean
-  cd {{justfile_directory()}}
-  if [[ `git status --porcelain` ]]; then
-    # Dirty repo
-    echo 'Uncommited changes in repo.  Commit or remove changes before creating release.'
-    exit 1
-  fi
-
-  # Bump version across all subprojects + root (see [tool.bumpversion] in pyproject.toml).
-  # bump-my-version commits and tags automatically.
-  uvx bump-my-version bump --new-version {{version}} patch
-  newversion={{version}}
-
-  # Refresh zpodcli's lockfile so the new zpodsdk pin is reflected
-  cd {{justfile_directory()}}/zpodcli
-  uv lock --upgrade-package zpodsdk
-  git commit -am "Update zpodcli/uv.lock for v${newversion}" || true
-
-  git push
-  git push --tags
-
-  # Create github release
-  gh release create v${newversion} --generate-notes
-
-  # Build and publish zpodsdk (uv build reads PyPI creds from
-  # UV_PUBLISH_TOKEN or ~/.pypirc; uv publish ignores [tool.uv.sources])
-  cd {{justfile_directory()}}/zpodsdk
-  uv build
-  uv publish
-
-  # Build and publish zpodcli. `uv build` ignores [tool.uv.sources], so the
-  # wheel pins `zpodsdk==${newversion}` from PyPI — no sed dance needed.
-  cd {{justfile_directory()}}/zpodcli
-  uv build
-  uv publish
-
-# Update to a release version
+# Update the stack to a release version
 zpod-update version:
   #!/usr/bin/env bash
   set -euo pipefail
+  cd {{justfile_directory()}}
 
-  if [[ `git status --porcelain` ]]; then
-    echo 'Uncommited changes in repo.  Commit or remove changes before updating.'
-    exit
+  if [[ `git status --porcelain --untracked-files=no` ]]; then
+    echo 'Uncommitted changes in repo. Commit or stash them before updating.' >&2
+    exit 1
   fi
 
-  cd {{justfile_directory()}}
+  current="$(git describe --tags --abbrev=0 2>/dev/null || echo none)"
+  cat <<EOF
+  Updating zpodcore ${current} -> v{{version}}.
+  Read "Upgrading" in README.md first when crossing a minor version (0.7.x -> 0.8.x needs a
+  database backup, a Prefect volume wipe and the zcore transition).
+  EOF
+
   git fetch origin tag v{{version}} --no-tags
   git checkout tags/v{{version}}
   docker compose build
   docker compose down
   docker compose up -d
-  sleep 10
+
+  # The API answers with X-zPod-API once prestart (migrations, default settings) is done.
+  api="http://localhost:${ZPODAPI_HOSTPORT:-8000}"
+  for i in $(seq 1 60); do
+    if curl -fsI "$api/" 2>/dev/null | grep -qi '^x-zpod-api:'; then break; fi
+    [ "$i" = 60 ] && { echo "zpodapi did not come up at $api" >&2; exit 1; }
+    sleep 2
+  done
   just zpodengine-deploy-all
 
 # Generate coverage docs
