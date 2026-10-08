@@ -6,6 +6,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 
 from ..models.endpoint_compute_drivers import EndpointComputeDrivers
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="EndpointComputeCreate")
 
@@ -23,8 +24,8 @@ class EndpointComputeCreate:
         storage_datastore (str):
         storage_policy (str):
         username (str):
-        vds (str):
         vmfolder (str):
+        vds (str | Unset):  Default: ''.
     """
 
     contentlibrary: str
@@ -36,8 +37,8 @@ class EndpointComputeCreate:
     storage_datastore: str
     storage_policy: str
     username: str
-    vds: str
     vmfolder: str
+    vds: str | Unset = ""
 
     def to_dict(self) -> dict[str, Any]:
         contentlibrary = self.contentlibrary
@@ -58,9 +59,9 @@ class EndpointComputeCreate:
 
         username = self.username
 
-        vds = self.vds
-
         vmfolder = self.vmfolder
+
+        vds = self.vds
 
         field_dict: dict[str, Any] = {}
 
@@ -75,10 +76,11 @@ class EndpointComputeCreate:
                 "storage_datastore": storage_datastore,
                 "storage_policy": storage_policy,
                 "username": username,
-                "vds": vds,
                 "vmfolder": vmfolder,
             }
         )
+        if vds is not UNSET:
+            field_dict["vds"] = vds
 
         return field_dict
 
@@ -103,9 +105,9 @@ class EndpointComputeCreate:
 
         username = d.pop("username")
 
-        vds = d.pop("vds")
-
         vmfolder = d.pop("vmfolder")
+
+        vds = d.pop("vds", UNSET)
 
         endpoint_compute_create = cls(
             contentlibrary=contentlibrary,
@@ -117,8 +119,8 @@ class EndpointComputeCreate:
             storage_datastore=storage_datastore,
             storage_policy=storage_policy,
             username=username,
-            vds=vds,
             vmfolder=vmfolder,
+            vds=vds,
         )
 
         return endpoint_compute_create

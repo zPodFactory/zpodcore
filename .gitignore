@@ -3,6 +3,7 @@ __pycache__/
 .venv
 .coverage
 .pytest_cache/
+.ruff_cache/
 
 # Dist
 **/dist/**
@@ -24,3 +25,19 @@ zpodapi/scripts/openapi/openapi.json
 
 # Config scripts
 zpodengine/src/zpodengine/config_scripts
+
+# The root holds no project (ruff config only); a `uv` run at the root leaves this behind.
+/uv.lock
+
+# Local list of strings that must never enter the history (tools/release.py --check)
+.release-denylist
+
+# Local scratch: planning notes and run transcripts, never committed
+docs/
+runs/
+
+# misc/ keeps the operator tools; everything else there is local scratch
+misc/*
+!misc/zcore-transition.sh
+!misc/zdnsmasqservers-watchdog.py
+!misc/zdnsmasqservers.service

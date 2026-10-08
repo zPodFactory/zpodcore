@@ -4,7 +4,7 @@ version = "0.7.2"
 description = "A client library for accessing zPod API"
 authors = []
 readme = "README.md"
-requires-python = ">=3.14,<3.15"
+requires-python = ">=3.14"
 dependencies = [
     "httpx==0.28.1",
     "attrs==26.1.0",

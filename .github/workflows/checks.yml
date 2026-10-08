@@ -1,0 +1,47 @@
+name: checks
+
+# On every push and pull request: the release-time rules that must hold between releases
+# too. The shipped version equals the newest CHANGELOG.md section, every tag has a section,
+# nothing that must stay local is tracked. The forbidden-string list is local only (it would
+# leak what it guards), so that part runs on the machine that cuts the release.
+#
+# Identical in every zPodFactory repository, except the `tests` job, which exists only where
+# there is an offline suite to run. zpodcore is a monorepo: one version for four packages,
+# so a step also checks that the nine version markers agree.
+on:
+  push:
+  pull_request:
+
+jobs:
+  release-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - run: python3 tools/release.py --check
+      - run: python3 tools/release_notes.py --check
+      - run: python3 tools/version_markers.py --check
+
+  tests:
+    # Four suites, each in its own locked environment. Nothing hits Postgres, Prefect,
+    # vCenter or NSX: zpodapi runs against in-memory SQLite, the rest is import smoke and
+    # pure logic. psycopg2 is a source build, hence gcc and libpq-dev.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [zpodsdk, zpodcli, zpodapi, zpodengine]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.14"
+      - if: matrix.project == 'zpodapi' || matrix.project == 'zpodengine'
+        run: sudo apt-get update -q && sudo apt-get install -y -q gcc libpq-dev
+      - run: uv sync --locked
+      - run: uv run --locked pytest -q
