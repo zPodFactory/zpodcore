@@ -40,8 +40,7 @@ alembic-upgrade rev="head":
 zcli *args:
   @uv --project zpodcli run zcli "$@"
 
-# Cut a release: CHANGELOG heading, nine version markers, pretest, commit, tag, push
-# (tools/README.md). The tag then publishes the note and both PyPI packages from GitHub.
+# Cut a release: changelog heading, version markers, pretest, commit, tag, push (tools/README.md)
 zpod-release version *args:
   python3 {{justfile_directory()}}/tools/release.py {{version}} --push {{args}}
 
