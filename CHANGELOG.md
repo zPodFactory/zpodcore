@@ -29,6 +29,15 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### Stack and operations
+
+- **Release workflow: the zpodcli smoke install runs from outside the project**, because
+  zpodcli's `exclude-newer = "30 days"` applies to `uv pip install` too and hid the zpodsdk
+  uploaded a minute earlier, which left zpodcli 0.8.0 unpublished on the first run. A manual
+  run of the workflow with a version and *publish* ticked now builds both packages from that
+  version's tag and publishes them with `--check-url`, skipping files already on PyPI, so a
+  publish that failed after the tag is completed without moving the tag.
+
 ## [0.8.0] — 2026-10-08
 
 ### Breaking
