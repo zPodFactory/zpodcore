@@ -14,8 +14,10 @@ name: release
 # zpodcore also publishes two PyPI packages from the same tag, in order: zpodsdk first,
 # then zpodcli, whose wheel requires the SDK released beside it. The zpodcli job installs
 # its wheel into an empty environment before uploading, which resolves the SDK from PyPI
-# and proves the pair. A manual re-run of the workflow only rewrites notes; it never
-# re-publishes a version.
+# and proves the pair. A manual run rewrites notes only, unless `publish` is ticked with a
+# version: then the two packages are built from that version's tag and published again,
+# files already on PyPI skipped, which is how a publish that failed after the tag is
+# completed without moving the tag.
 on:
   push:
     tags: ["v*"]
@@ -26,6 +28,11 @@ on:
         description: "Version to (re)publish, e.g. 0.3.0; blank means every tag"
         required: false
         default: ""
+      publish:
+        description: "Also build and publish zpodsdk and zpodcli from that version's tag (needs a version; files already on PyPI are skipped)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write          # creating and editing a release is a write to the repository
@@ -68,21 +75,26 @@ jobs:
   pypi-zpodsdk:
     name: zpodsdk to PyPI, attached to the release
     needs: notes
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (inputs.publish && inputs.version != '')
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
       contents: write        # attaching the wheel and sdist to the release
       id-token: write        # PyPI trusted publishing, when no token secret is set
+    env:
+      # The tag being published: the pushed one, or the one the manual run names.
+      TAG: ${{ github.event_name == 'push' && github.ref_name || format('v{0}', inputs.version) }}
     defaults:
       run:
         working-directory: zpodsdk
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Build what the tag holds, also on a manual run: the workflow file comes from
+          # the branch the run was started on, the sources from the tag.
+          ref: ${{ github.event_name == 'push' && github.ref || format('refs/tags/v{0}', inputs.version) }}
       - uses: astral-sh/setup-uv@v10.2.0
       - name: the tag names the version pyproject.toml ships
-        env:
-          TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           shipped="$(uv version --short)"
@@ -95,40 +107,43 @@ jobs:
         env:
           # A project-scoped API token in the repository secrets wins; without one, uv uses
           # trusted publishing (configure the GitHub publisher on pypi.org, see tools/README.md).
+          # --check-url: a file that is already on the index, byte for byte, is skipped, so
+          # a manual re-publish after a partial failure does not fail on the half that went up.
           PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           set -euo pipefail
           if [ -n "${PYPI_API_TOKEN:-}" ]; then
-            uv publish --token "$PYPI_API_TOKEN"
+            uv publish --token "$PYPI_API_TOKEN" --check-url https://pypi.org/simple/
           else
-            uv publish --trusted-publishing always
+            uv publish --trusted-publishing always --check-url https://pypi.org/simple/
           fi
       - name: attach the distributions to the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: gh release upload "$TAG" dist/* --clobber
 
   pypi-zpodcli:
     name: zpodcli to PyPI, attached to the release
     needs: pypi-zpodsdk
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (inputs.publish && inputs.version != '')
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
       contents: write
       id-token: write
+    env:
+      TAG: ${{ github.event_name == 'push' && github.ref_name || format('v{0}', inputs.version) }}
     defaults:
       run:
         working-directory: zpodcli
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'push' && github.ref || format('refs/tags/v{0}', inputs.version) }}
       - uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: "3.14"
       - name: the tag names the version pyproject.toml ships
-        env:
-          TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           shipped="$(uv version --short)"
@@ -139,16 +154,18 @@ jobs:
       - run: uv build
       - name: the wheel installs from scratch, with the SDK just published
         # `uv build` ignores [tool.uv.sources], so the wheel requires zpodsdk from PyPI.
-        # The index can lag the upload by a few seconds; retry before calling it a failure.
+        # Run from outside the project: zpodcli's `exclude-newer = "30 days"` applies to
+        # `uv pip install` too and would hide an SDK uploaded a minute ago (which is what
+        # the first 0.8.0 run hit). The index can still lag the upload by a few seconds.
+        working-directory: /tmp
         run: |
           set -euo pipefail
           uv venv /tmp/fresh
           for attempt in 1 2 3 4 5 6 7 8; do
-            if uv pip install --python /tmp/fresh --refresh dist/*.whl; then break; fi
+            if uv pip install --python /tmp/fresh --refresh "$GITHUB_WORKSPACE"/zpodcli/dist/*.whl; then break; fi
             [ "$attempt" = 8 ] && exit 1
             sleep 15
           done
-          cd /tmp
           /tmp/fresh/bin/zcli --version
           /tmp/fresh/bin/zcli --help > /dev/null
       - name: publish to PyPI
@@ -157,12 +174,11 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${PYPI_API_TOKEN:-}" ]; then
-            uv publish --token "$PYPI_API_TOKEN"
+            uv publish --token "$PYPI_API_TOKEN" --check-url https://pypi.org/simple/
           else
-            uv publish --trusted-publishing always
+            uv publish --trusted-publishing always --check-url https://pypi.org/simple/
           fi
       - name: attach the distributions to the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: gh release upload "$TAG" dist/* --clobber

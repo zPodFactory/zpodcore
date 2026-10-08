@@ -68,7 +68,13 @@ The workflow publishes with `uv publish`, once per package, zpodsdk first. It us
 
 The repository needs a `pypi` environment (Settings → Environments); a required reviewer on it
 turns a publish into a click-to-approve step. Without a publisher or a token, the `pypi-*` jobs
-fail and the GitHub release still exists with its notes; set one up and re-run the jobs.
+fail and the GitHub release still exists with its notes.
+
+**When a publish fails after the tag** (one package up, the other not): fix the cause on `main`,
+then on GitHub: Actions, release, Run workflow, version `0.8.0`, tick *publish*. The two jobs
+check out that version's tag, build, and `uv publish --check-url` skips the files already on the
+index. The tag never moves. A plain re-run of the failed job would use the workflow file as it
+was at the tag, which is why the manual run exists.
 
 ## What stops a release
 
