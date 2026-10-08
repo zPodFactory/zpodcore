@@ -1,6 +1,6 @@
 [project]
 name = "zpodsdk-builder"
-version = "0.7.2"
+version = "0.8.0"
 description = "zpodsdk builder from FastAPI openapi spec file"
 authors = [{ name = "Timo Sugliani", email = "timo.sugliani@gmail.com" }]
 license = { text = "MIT" }

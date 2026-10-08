@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-09-08T13:03:05.741466098Z"
+exclude-newer = "2026-09-08T13:30:06.523200919Z"
 exclude-newer-span = "P30D"
 
 [[package]]
@@ -191,7 +191,7 @@ wheels = [
 
 [[package]]
 name = "zpodsdk"
-version = "0.7.2"
+version = "0.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "attrs" },

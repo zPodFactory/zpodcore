@@ -29,6 +29,8 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-10-08
+
 ### Breaking
 
 - **The mandatory core component is `zcore`, no longer `zbox`.** A profile must start with a

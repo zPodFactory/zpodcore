@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.14"
 
 [options]
-exclude-newer = "2026-09-08T13:03:05.928098787Z"
+exclude-newer = "2026-09-08T13:30:06.648523446Z"
 exclude-newer-span = "P30D"
 
 [[package]]
@@ -550,7 +550,7 @@ wheels = [
 
 [[package]]
 name = "zpodcli"
-version = "0.7.2"
+version = "0.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
@@ -583,7 +583,7 @@ dev = [
 
 [[package]]
 name = "zpodsdk"
-version = "0.7.2"
+version = "0.8.0"
 source = { editable = "../zpodsdk" }
 dependencies = [
     { name = "attrs" },

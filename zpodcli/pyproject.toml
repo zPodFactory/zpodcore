@@ -1,6 +1,6 @@
 [project]
 name = "zpodcli"
-version = "0.7.2"
+version = "0.8.0"
 description = ""
 authors = [{ name = "Timo Sugliani", email = "timo.sugliani@gmail.com" }]
 license = { text = "MIT" }
@@ -12,7 +12,7 @@ dependencies = [
     "pyyaml==6.0.3",
     # Compatible release: this version or a later patch of it, never the next minor. Moved by
     # tools/release.py at every stack cut; left alone by a zpodcli-only patch release.
-    "zpodsdk~=0.7.2",
+    "zpodsdk~=0.8.0",
 ]
 
 [project.scripts]
