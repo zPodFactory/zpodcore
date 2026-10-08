@@ -94,8 +94,13 @@ own later without an SDK upload; lockstep is the default.
 | You run | Use | Why |
 |---|---|---|
 | zPod API 0.8.x | zcli 0.8.x, zpodsdk 0.8.x | same endpoints and schemas; patch digits may differ |
-| zPod API 0.7.2 | zcli 0.7.2, zpodsdk 0.7.2 | zcli 0.8 calls endpoints 0.7.2 does not have |
-| a mix | upgrade the stack first, then the CLI | the API tolerates an older CLI; the reverse is not true |
+| zPod API 0.7.2 | zcli 0.7.2, zpodsdk 0.7.2 | the API rejects any other `major.minor` |
+| several factories on different minors | one zcli per minor (`uv tool install zpodcli==X.Y.Z` into separate tool names, or a venv each) | `zcli` sends its version with every request |
+
+The API enforces this: every request carries the CLI's version in a `version` header, and
+`major.minor` must equal the API's own or the request is refused with 417 and the message
+names the version to install (`zpodcli version 0.7.2 is required. Current zpodcli version
+is 0.8.0`). Patch digits are not compared, which is what lets a zcli-only patch ship.
 
 Cutting a release is one command, `just zpod-release X.Y.Z`, which runs
 `python3 tools/release.py X.Y.Z --push`: the `[Unreleased]` section of `CHANGELOG.md`
