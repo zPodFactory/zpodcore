@@ -5,4 +5,4 @@ RUN apt-get update \
     curl \
     git
 
-RUN pip install "prefect-docker==0.7.3"
+RUN pip install "prefect-docker==0.7.4"

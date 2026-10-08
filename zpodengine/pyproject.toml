@@ -12,7 +12,7 @@ dependencies = [
     "email-validator==2.3.0",
     "jinja2==3.1.6",
     "prefect==3.8.8",
-    "prefect-docker==0.7.3",
+    "prefect-docker==0.7.4",
     "psycopg2==2.9.12",
     "pydantic-settings==2.15.0",
     "pyopenssl==26.4.0",
@@ -36,9 +36,9 @@ package = false
 # Supply-chain mitigation: ignore packages published in the last 30 days.
 exclude-newer = "30 days"
 # Prefect 3.8.8 (uploaded 2026-10-06) is needed now; this waives the 30-day quarantine for
-# prefect, and for python-slugify 9.0.0 (2026-09-08) which 3.8.8 requires. Remove both once
-# they are older than 30 days (after 2026-11-05).
-exclude-newer-package = { prefect = "2026-10-07T00:00:00Z", python-slugify = "2026-09-09T00:00:00Z" }
+# prefect, for python-slugify 9.0.0 (2026-09-08) which 3.8.8 requires, and for prefect-docker
+# 0.7.4 (2026-09-08). Remove all three once they are older than 30 days (after 2026-11-05).
+exclude-newer-package = { prefect = "2026-10-07T00:00:00Z", python-slugify = "2026-09-09T00:00:00Z", prefect-docker = "2026-09-09T00:00:00Z" }
 
 # Allow pytest to find zpodengine + zpodcommon, and pick up zpodcommon's own
 # tests/ since zpodcommon has no venv of its own.

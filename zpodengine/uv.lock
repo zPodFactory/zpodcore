@@ -3,12 +3,13 @@ revision = 3
 requires-python = "==3.14.*"
 
 [options]
-exclude-newer = "2026-09-08T19:31:37.174626665Z"
+exclude-newer = "2026-09-08T19:41:32.956070199Z"
 exclude-newer-span = "P30D"
 
 [options.exclude-newer-package]
 python-slugify = "2026-09-09T00:00:00Z"
 prefect = "2026-10-07T00:00:00Z"
+prefect-docker = "2026-09-09T00:00:00Z"
 
 [[package]]
 name = "aiosqlite"
@@ -1077,7 +1078,7 @@ wheels = [
 
 [[package]]
 name = "prefect-docker"
-version = "0.7.3"
+version = "0.7.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "docker" },
@@ -1085,9 +1086,9 @@ dependencies = [
     { name = "prefect" },
     { name = "python-on-whales" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/71/0d/3cca530e35ecfa604d519e203721ce55ca702b900bbb5532ffea89bf3d2f/prefect_docker-0.7.3.tar.gz", hash = "sha256:be9e826343e0128f8d4a35ec6411e3af7866474bedb0c493ad150c2c503c7e13", size = 48384, upload-time = "2026-07-15T18:15:53.542Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6c/55/35e245d41e091bf87207a9e6ee0049620fdb18a6420094ea639f71bac31f/prefect_docker-0.7.4.tar.gz", hash = "sha256:cfd4bd5f36d493472a4aa33b48695330a1ba70d022fdf8efc9aba8f9eea20cb3", size = 50648, upload-time = "2026-09-08T18:33:13.371Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5f/be/96281100923c9c09927ab1cf5768fd573475b2f4d3f86252faa8f1f21836/prefect_docker-0.7.3-py3-none-any.whl", hash = "sha256:6c0106e0c8284b72ee54ee65ccd4efa3c4ca3205d8b5c65d647d30423aefa968", size = 32263, upload-time = "2026-07-15T18:15:52.424Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/bf/ac92a81ba57ab290455e662efe0c2af1d39b81dc47c8048fb7d41ee6266f/prefect_docker-0.7.4-py3-none-any.whl", hash = "sha256:93d743696b79739ce24990796cb9d366516236dd81f3350e57b7f6205af58dc8", size = 32463, upload-time = "2026-09-08T18:33:12.248Z" },
 ]
 
 [[package]]
@@ -2036,7 +2037,7 @@ requires-dist = [
     { name = "email-validator", specifier = "==2.3.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "prefect", specifier = "==3.8.8" },
-    { name = "prefect-docker", specifier = "==0.7.3" },
+    { name = "prefect-docker", specifier = "==0.7.4" },
     { name = "psycopg2", specifier = "==2.9.12" },
     { name = "pydantic-settings", specifier = "==2.15.0" },
     { name = "pyopenssl", specifier = "==26.4.0" },

@@ -38,9 +38,10 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   server already finished on SIGTERM, cancellation cleanup and pause-expiration monitors page
   through all runs, the worker healthcheck stays healthy while the API is in maintenance, the
   event persister survives a database `CancelledError`, runner names with dots are no longer
-  truncated, and a scheduled-run polling fix from 3.8.5. python-slugify moves to 9.0.0 with it.
-  Prefect and python-slugify carry a dated `exclude-newer-package` waiver in
-  `zpodengine/pyproject.toml` until they are older than the 30-day quarantine (2026-11-05).
+  truncated, and a scheduled-run polling fix from 3.8.5. python-slugify moves to 9.0.0 with it,
+  and prefect-docker 0.7.3 → 0.7.4 in the flow environment and the worker image. The three carry
+  a dated `exclude-newer-package` waiver in `zpodengine/pyproject.toml` until they are older than
+  the 30-day quarantine (2026-11-05).
 
 ### Stack and operations
 
