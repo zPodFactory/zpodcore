@@ -8,7 +8,7 @@ small helpers sit beside them.
 |---|---|
 | `release.py` | cuts a version: changelog heading, version bump in all nine markers, pretest, commit, tag, push. Also `--check` and `--draft`. |
 | `release_notes.py` | turns a version's `CHANGELOG.md` section into the GitHub release note. Run by the workflow. |
-| `release_pretest.sh` | what `release.py` runs before the commit: lockfiles, the four test suites, both wheels, the zpodcli → zpodsdk requirement. |
+| `release_pretest.sh` | what `release.py` runs before the commit: the four lockfiles, the four test suites, both wheels, the zpodcli → zpodsdk requirement. |
 | `version_markers.py` | the nine places the version is written; `--check` fails if they disagree. CI runs it. |
 
 ## One version, four packages
@@ -31,9 +31,9 @@ python3 tools/release.py 0.8.1 --push
 
 - turns `[Unreleased]` into `## [0.8.1] — <today>` and opens a fresh empty `[Unreleased]`
 - sets the version in the nine markers and the `zpodsdk~=` requirement in `zpodcli/pyproject.toml`
-- runs `tools/release_pretest.sh`: `uv lock` in zpodsdk and zpodcli, the four suites, `uv build`
-  of both wheels, and a check that the zpodcli wheel requires `zpodsdk~=0.8.1`; a failure
-  restores the files and releases nothing
+- runs `tools/release_pretest.sh`: `uv lock` in each of the four subprojects (every `uv.lock`
+  records its project's version), the four suites, `uv build` of both wheels, and a check that
+  the zpodcli wheel requires `zpodsdk~=0.8.1`; a failure restores the files and releases nothing
 - commits `Release 0.8.1`, tags `v0.8.1`, pushes `main` and the tag
 
 GitHub then runs `.github/workflows/release.yml` on the tag: the same checks, the `[0.8.1]`

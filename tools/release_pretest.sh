@@ -28,9 +28,12 @@ say "above every scoped tag"
 
 [ "${1:-}" = "--quick" ] && exit 0
 
-# 3. The lockfiles follow the version fields (zpodcli also records the zpodsdk path source).
-( cd zpodsdk && uv lock )
-( cd zpodcli && uv lock )
+# 3. The lockfiles follow the version fields. Every subproject's uv.lock records its own
+#    version (zpodapi and zpodengine too, although they are `package = false`), and zpodcli's
+#    also records the zpodsdk path source; `uv run --locked` below refuses a stale one.
+for project in zpodsdk zpodcli zpodapi zpodengine; do
+  ( cd "$project" && uv lock )
+done
 say "lockfiles refreshed"
 
 # 4. The four suites, each in its own environment.
