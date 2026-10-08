@@ -103,7 +103,8 @@ class EndpointComputeCreate(SchemaBase):
     storage_datastore: str = Field(..., D.compute.storage_datastore)
     contentlibrary: str = Field(..., D.compute.contentlibrary)
     vmfolder: str = Field(..., D.compute.vmfolder)
-    vds: str = Field(..., D.compute.vds)
+    # Optional: empty means govc resolves the zPod segment by bare name, as before #61.
+    vds: str = Field("", D.compute.vds)
 
 
 class EndpointNetworkCreate(SchemaBase):

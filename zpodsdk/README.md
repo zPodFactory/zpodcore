@@ -1,99 +1,72 @@
 # zpodsdk
-A client library for accessing zPod API
+
+A Python client for the [zPodFactory](https://zpodfactory.github.io) zPod API, generated from
+the API's OpenAPI document with [openapi-python-client](https://github.com/openapi-generators/openapi-python-client).
+`zpodsdk` carries the version of the API it was generated from: use the SDK whose `major.minor`
+matches your zPod API (`zpodsdk 0.8.x` for API `0.8.x`).
+
+```
+uv add zpodsdk          # or: pip install zpodsdk
+```
+
+Python 3.14 or newer.
 
 ## Usage
-First, create a client:
+
+The API authenticates with an `access_token` header. `ZpodClient` wraps the generated client
+and exposes one attribute per operation:
 
 ```python
-from zpod import Client
+from zpodsdk.zpod_client import ZpodClient
 
-client = Client(base_url="https://api.example.com")
-```
-
-If the endpoints you're going to hit require authentication, use `AuthenticatedClient` instead:
-
-```python
-from zpod import AuthenticatedClient
-
-client = AuthenticatedClient(base_url="https://api.example.com", token="SuperSecretToken")
-```
-
-Now call your endpoint and use your models:
-
-```python
-from zpod.models import MyDataModel
-from zpod.api.my_tag import get_my_data_model
-from zpod.types import Response
-
-my_data: MyDataModel = get_my_data_model.sync(client=client)
-# or if you need more info (e.g. status_code)
-response: Response[MyDataModel] = get_my_data_model.sync_detailed(client=client)
-```
-
-Or do the same thing with an async version:
-
-```python
-from zpod.models import MyDataModel
-from zpod.api.my_tag import get_my_data_model
-from zpod.types import Response
-
-my_data: MyDataModel = await get_my_data_model.asyncio(client=client)
-response: Response[MyDataModel] = await get_my_data_model.asyncio_detailed(client=client)
-```
-
-By default, when you're calling an HTTPS API it will attempt to verify that SSL is working correctly. Using certificate verification is highly recommended most of the time, but sometimes you may need to authenticate to a server (especially an internal server) using a custom certificate bundle.
-
-```python
-client = AuthenticatedClient(
-    base_url="https://internal_api.example.com", 
-    token="SuperSecretToken",
-    verify_ssl="/path/to/certificate_bundle.pem",
+zpod = ZpodClient(
+    base_url="https://zpodfactory.example.com:8000",
+    headers={"access_token": "your-api-token"},
 )
+
+for z in zpod.zpods_get_all.sync():
+    print(z.name, z.status)
+
+detail = zpod.zpods_get.sync_detailed(id="name=my-zpod")
+print(detail.status_code, detail.parsed)
 ```
 
-You can also disable certificate validation altogether, but beware that **this is a security risk**.
+Every operation has four callables: `sync` (parsed result, or `None`), `sync_detailed` (a
+`Response` with `status_code`, `headers`, `content` and `parsed`), and their `asyncio` and
+`asyncio_detailed` counterparts. Path and query parameters and request bodies are keyword
+arguments; request and response models live in `zpodsdk.models`.
+
+The generated `Client` and `AuthenticatedClient` are available too, for callers that prefer the
+plain generated modules under `zpodsdk.api.<tag>`:
 
 ```python
-client = AuthenticatedClient(
-    base_url="https://internal_api.example.com", 
-    token="SuperSecretToken", 
-    verify_ssl=False
-)
+from zpodsdk import Client
+from zpodsdk.api.zpods import zpods_get_all
+
+client = Client(base_url="https://zpodfactory.example.com:8000", headers={"access_token": "your-api-token"})
+zpods = zpods_get_all.ZpodsGetAll(client).sync()
 ```
 
-There are more settings on the generated `Client` class which let you control more runtime behavior, check out the docstring on that class for more info.
+Certificate verification is on by default; pass `verify_ssl="/path/to/bundle.pem"` or, for a
+lab you control, `verify_ssl=False` to the client.
 
-Things to know:
-1. Every path/method combo becomes a Python module with four functions:
-    1. `sync`: Blocking request that returns parsed data (if successful) or `None`
-    1. `sync_detailed`: Blocking request that always returns a `Request`, optionally with `parsed` set if the request was successful.
-    1. `asyncio`: Like `sync` but async instead of blocking
-    1. `asyncio_detailed`: Like `sync_detailed` but async instead of blocking
+`raise_on_unexpected_status` is `True` in `ZpodClient`: a status the OpenAPI document does not
+declare raises `zpodsdk.errors.UnexpectedStatus` instead of returning `None`.
 
-1. All path/query params, and bodies become method arguments.
-1. If your endpoint had any tags on it, the first tag will be used as a module name for the function (my_tag above)
-1. Any endpoint which did not have a tag will be in `zpod.api.default`
+## Regenerating
 
-## Building / publishing this Client
-This project uses [uv](https://docs.astral.sh/uv/) to manage dependencies and packaging. Here are the basics:
-1. Update the metadata in `pyproject.toml` (e.g. authors, version)
-2. Build the distribution artifacts with `uv build` (produces both sdist and wheel under `dist/`)
-3. Publish with `uv publish` — credentials come from `UV_PUBLISH_TOKEN` or `~/.pypirc`.
-   For a private repository, set `UV_PUBLISH_URL` (or pass `--publish-url`).
+The source of truth is the running API. From the repository root, with the dev stack up:
 
-If you want to install this client into another project without publishing it (e.g. for development) then:
-1. If that project **is using uv**, add a source override in the consumer's `pyproject.toml`:
-   ```toml
-   [tool.uv.sources]
-   zpodsdk = { path = "../zpodsdk", editable = true }
-   ```
-   This is exactly what `zpodcli/pyproject.toml` does for local dev — the released
-   wheel still pins `zpodsdk` from PyPI because `uv build` ignores `[tool.uv.sources]`.
-2. If that project is not using uv:
-   1. Build a wheel with `uv build --wheel`
-   1. Install that wheel from the other project: `pip install <path-to-wheel>`
+```
+just zpodsdk-update
+```
 
-> Note: this README is auto-generated by `openapi-python-client` on first generation but
-> is **not** overwritten by `openapi-python-client update` (which only touches generated
-> code under `src/zpodsdk/`), so manual edits here are preserved across
-> `just zpodsdk-update` runs.
+That exports `openapi.json` from the API container, runs `openapi-python-client` in the
+`zpodsdk_builder` image with the templates and `config.yaml` there, and rewrites
+`src/zpodsdk/`. This README and `pyproject.toml` are not generated; edit them by hand.
+
+## Releasing
+
+`zpodsdk` is released from the zpodcore monorepo together with the API, the engine and `zcli`:
+one tag, one version, published to PyPI by the release workflow. See `tools/README.md` at the
+repository root. Nothing here is published by hand.

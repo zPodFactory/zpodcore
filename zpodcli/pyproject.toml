@@ -5,12 +5,14 @@ description = ""
 authors = [{ name = "Timo Sugliani", email = "timo.sugliani@gmail.com" }]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.14,<3.15"
+requires-python = ">=3.14"
 dependencies = [
     "pydantic==2.13.4",
     "typer==0.27.1",
     "pyyaml==6.0.3",
-    "zpodsdk==0.7.2",
+    # Compatible release: this version or a later patch of it, never the next minor. Moved by
+    # tools/release.py at every stack cut; left alone by a zpodcli-only patch release.
+    "zpodsdk~=0.7.2",
 ]
 
 [project.scripts]
@@ -31,7 +33,7 @@ exclude-newer = "30 days"
 pythonpath = ["src"]
 testpaths = ["tests"]
 
-# Dev-only path override. Released wheels still pin zpodsdk==0.7.2 from
+# Dev-only path override. Released wheels still require zpodsdk~=<version> from
 # PyPI because `uv build` ignores [tool.uv.sources].
 [tool.uv.sources]
 zpodsdk = { path = "../zpodsdk", editable = true }
