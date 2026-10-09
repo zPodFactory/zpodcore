@@ -29,6 +29,26 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod Engine
+
+#### Changed
+
+- **Prefect 3.8.3 → 3.8.8** (server image, worker image base, flow environment,
+  `prefect.yaml`), for the fixes between the two: a runner no longer reschedules a flow run the
+  server already finished on SIGTERM, cancellation cleanup and pause-expiration monitors page
+  through all runs, the worker healthcheck stays healthy while the API is in maintenance, the
+  event persister survives a database `CancelledError`, runner names with dots are no longer
+  truncated, and a scheduled-run polling fix from 3.8.5. python-slugify moves to 9.0.0 with it,
+  and prefect-docker 0.7.3 → 0.7.4 in the flow environment and the worker image. The three carry
+  a dated `exclude-newer-package` waiver in `zpodengine/pyproject.toml` until they are older than
+  the 30-day quarantine (2026-11-05).
+- **Flow image: the Python environment is the last layer**, after the PowerShell module
+  installs, in both the builder and the main stage of `zpodengine/dockerfile`. A dependency
+  bump used to invalidate every later layer and re-download VCF.PowerCLI, PowerNSX, PowerVCF and
+  Subnet from the PowerShell Gallery (25 minutes when the gallery is slow, as on 2026-10-08);
+  now it rebuilds only the environment. Same image content, different layer order; the first
+  build after this change rebuilds the main stage once.
+
 ### Stack and operations
 
 - **Release workflow: the zpodcli smoke install runs from outside the project**, because

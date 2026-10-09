@@ -55,9 +55,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./zpodengine/pyproject.toml ./zpodengine/uv.lock /tmp/
-RUN uv sync --frozen --no-install-project $(test "$INSTALL_DEV" != "true" && echo "--no-dev")
-
 # The flow image is amd64 only: zPodFactory runs on x86_64 ESXi hosts and the
 # nested workloads it deploys are x86_64, so there is no arm64 target to build for.
 
@@ -85,6 +82,11 @@ RUN tar zxf /tmp/powershell.tar.gz -C ${PS_INSTALL_FOLDER}
 RUN tar zxf /tmp/govc.tar.gz -C /usr/local/bin/ \
     && chmod +x /usr/local/bin/govc
 
+# Last, because it changes most often: a dependency bump re-runs only this step, not
+# the tool downloads above.
+COPY ./zpodengine/pyproject.toml ./zpodengine/uv.lock /tmp/
+RUN uv sync --frozen --no-install-project $(test "$INSTALL_DEV" != "true" && echo "--no-dev")
+
 #################################################
 # MAIN
 FROM base AS main
@@ -93,9 +95,6 @@ ARG POWERCLI_VERSION
 ARG POWERNSX_VERSION
 ARG POWERVCF_VERSION
 ARG SUBNET_VERSION
-
-# Copy python packages
-COPY --from=builder /opt/venv /opt/venv
 
 # Copy other packages
 COPY --from=builder ["/usr/local/bin/govc", "/usr/local/bin/govc"]
@@ -200,6 +199,11 @@ RUN $ErrorActionPreference = 'Stop'; foreach ($p in @(@('VCF.PowerCLI', $env:POW
 RUN $ErrorActionPreference = 'Stop'; Import-Module PowerNSX; if (-not ('InternalHttpClientHandler' -as [type])) { throw 'PowerNSX InternalHttpClientHandler type missing (Add-Type failed)' }; Write-Host 'PowerNSX import OK'
 SHELL ["/bin/sh", "-c"]
 
+# The Python environment comes last: it is what changes most often (every dependency
+# bump rewrites uv.lock), and placing it after the PowerShell module layers means such a
+# change never re-downloads VCF.PowerCLI, PowerNSX, PowerVCF and Subnet from the gallery.
+# Only a module pin, the apt list or the base image rebuilds those.
+COPY --from=builder /opt/venv /opt/venv
 
 WORKDIR /zpodcore/src/zpodengine
 ENV PYTHONPATH=/zpodcore/src
