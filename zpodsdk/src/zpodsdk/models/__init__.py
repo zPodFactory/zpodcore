@@ -61,6 +61,14 @@ from .zpod_create_features_type_0 import ZpodCreateFeaturesType0
 from .zpod_dns_create import ZpodDnsCreate
 from .zpod_dns_update import ZpodDnsUpdate
 from .zpod_dns_view import ZpodDnsView
+from .zpod_network_create import ZpodNetworkCreate
+from .zpod_network_kind import ZpodNetworkKind
+from .zpod_network_masquerade import ZpodNetworkMasquerade
+from .zpod_network_routing import ZpodNetworkRouting
+from .zpod_network_routing_run_view import ZpodNetworkRoutingRunView
+from .zpod_network_routing_update import ZpodNetworkRoutingUpdate
+from .zpod_network_routing_view import ZpodNetworkRoutingView
+from .zpod_network_status import ZpodNetworkStatus
 from .zpod_network_view import ZpodNetworkView
 from .zpod_permission import ZpodPermission
 from .zpod_permission_group_add_remove import ZpodPermissionGroupAddRemove
@@ -133,6 +141,14 @@ __all__ = (
     "ZpodDnsCreate",
     "ZpodDnsUpdate",
     "ZpodDnsView",
+    "ZpodNetworkCreate",
+    "ZpodNetworkKind",
+    "ZpodNetworkMasquerade",
+    "ZpodNetworkRouting",
+    "ZpodNetworkRoutingRunView",
+    "ZpodNetworkRoutingUpdate",
+    "ZpodNetworkRoutingView",
+    "ZpodNetworkStatus",
     "ZpodNetworkView",
     "ZpodPermission",
     "ZpodPermissionGroupAddRemove",

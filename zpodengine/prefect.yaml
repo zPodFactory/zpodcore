@@ -94,3 +94,8 @@ deployments:
   entrypoint: src/zpodengine/nsx_project_destroy/flow_nsx_project_destroy.py:flow_nsx_project_destroy
   schedule: {}
   work_pool: *zpodengine_work_pool
+
+- name: zpod_network_routing
+  entrypoint: src/zpodengine/zpod_network_routing/flow_zpod_network_routing.py:flow_zpod_network_routing
+  schedule: {}
+  work_pool: *zpodengine_work_pool

@@ -502,6 +502,62 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_network_add(self):
+        from zpodsdk.api.zpods import zpods_network_add
+
+        return zpods_network_add.ZpodsNetworkAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_disable(self):
+        from zpodsdk.api.zpods import zpods_network_disable
+
+        return zpods_network_disable.ZpodsNetworkDisable(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_enable(self):
+        from zpodsdk.api.zpods import zpods_network_enable
+
+        return zpods_network_enable.ZpodsNetworkEnable(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_get(self):
+        from zpodsdk.api.zpods import zpods_network_get
+
+        return zpods_network_get.ZpodsNetworkGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_masquerade(self):
+        from zpodsdk.api.zpods import zpods_network_masquerade
+
+        return zpods_network_masquerade.ZpodsNetworkMasquerade(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_remove(self):
+        from zpodsdk.api.zpods import zpods_network_remove
+
+        return zpods_network_remove.ZpodsNetworkRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_routing(self):
+        from zpodsdk.api.zpods import zpods_network_routing
+
+        return zpods_network_routing.ZpodsNetworkRouting(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_network_routing_run(self):
+        from zpodsdk.api.zpods import zpods_network_routing_run
+
+        return zpods_network_routing_run.ZpodsNetworkRoutingRun(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_networks_get_all(self):
         from zpodsdk.api.zpods import zpods_networks_get_all
 

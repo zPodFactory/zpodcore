@@ -29,6 +29,104 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod API
+
+#### Added
+
+- **User networks on a zPod's zcore: `/zpods/{id}/networks`.** A zPod owner or admin adds a
+  VLAN interface with its own subnet on zcore through zboxapi (`POST`, body `name`, `vlan`,
+  `gateway` such as `10.42.111.1/24`, `masquerade`, `routing`), lists them with a live status
+  (`GET`, `ACTIVE`, `DISABLED`, `MISSING`, or `UNKNOWN` when zcore is unreachable), brings the
+  interface down and up (`PUT …/disable`, `…/enable`), toggles source translation on zcore
+  (`PUT …/masquerade`, needs zboxapi 0.2.0 on the zcore; on an older zcore the API answers 501
+  up front, detected from zboxapi's own VLAN listing, and `add` with `masquerade` creates
+  nothing) and removes it
+  (`DELETE`). Refused up front, nothing created: an id or name already used on the zPod, a
+  subnet overlapping one of the zPod's own networks or the endpoint's zPod pool (409/422); the
+  VLAN ids zboxapi reserves on zcore (10, 20, 30 and 64, 128, 192) come back as its own 403. The four deploy-time networks are `kind: zpod` and refuse
+  every mutation (403). Removing is refused while the network is `routing: GLOBAL` or while
+  zPod DNS records point into the subnet (409).
+- **The list shows zcore's own VLANs too.** VLAN 10, 20 and 30, configured by the zcore image for
+  the nested VCF (172.16.10/20/30.0/24), appear as `kind: zcore` rows read live from zboxapi
+  (no database row, no `id`), between the management network and the routed /26s, so the list
+  is the whole box. Every mutation on them answers 403.
+- **Routing of a user network, `PUT /zpods/{id}/networks/{name}/routing`** (superadmin only):
+  `routing: global` advertises the subnet to the NSX fabric through a T1 static route to zcore,
+  `local` withdraws it; the row is `PENDING` while the `zpod_network_routing` flow runs and the
+  call answers 202 with the flow run id. `dry_run: true` runs the fabric checks only. The
+  previous `GET /zpods/{id}/networks` had no permission guard; it now needs zPod read access.
+
+#### Changed
+
+- **`GET /zpods/{id}/networks/{name}/routing/{flow_run_id}`** (zPod readers): the state of a
+  routing change, read from zpodengine: Prefect's state, the run name and its message, which for
+  a failed run is the failing check (`FAIL: 10.42.111.0/24 overlaps ...`), plus the network as it
+  is now. 404 unless the run is this network's. `ZpodEngineClient.get_flow_run` is the generic
+  read behind it, usable by any flow that returns its run id.
+- **`zpod_networks` gains `name`, `vlan_id`, `gateway`, `kind`, `masquerade`, `routing`**
+  (migration `9a1c4e7b2d3f`, applied by prestart). Existing rows are backfilled from their CIDR:
+  the VLAN id is the last octet of a `/26` inside the zPod's `/24`, so the four deploy rows become
+  `mgmt` (0), `vlan64`, `vlan128`, `vlan192`, all `kind: zpod` and `routing: GLOBAL`. A unique
+  constraint on `(zpod_id, vlan_id)` is added. The zPod view embeds the new fields.
+
+### zPod Engine
+
+#### Added
+
+- **`zpod_network_routing` flow**, one per routing change, named `advertise <zpod>/<network> by
+  <user>` or `withdraw …`. For `global` it checks, with the full inventory printed before each
+  verdict, that the VLAN is up on zcore and that the subnet overlaps nothing the fabric routes:
+  the T0 routing table of the zPod's endpoint, every T1 static route of every zPod, every segment
+  subnet, every user network in the database (deleted zPods excluded), and that it is a
+  unicast subnet between `/8` and `/30`. It then writes the T1 static
+  route `<zpod>-<network>` with next hop zcore and a description naming who advertised it and
+  when, waits for it to realize, turns masquerading off on zcore as its last step, and sets the
+  row to `GLOBAL`. `local` deletes that route (only if the description says zPodFactory wrote it)
+  and sets the row to `LOCAL`. A markdown artifact `advertisement-<zpod>-<network>` keeps the check
+  table and the inventories. Any failure puts the row back to its previous routing. The fabric
+  reads, the checks and the route write run in one task under the engine's existing
+  `atomic_operation` concurrency limit, the same lock deploy prep, networking deploy and destroy
+  take, so no other NSX inventory change can slip in between the checks and the write.
+- `lib/nsx_routes.py`: the T1 static route helpers the deploy and the routing flow share (put,
+  get, delete, realization wait), plus readers for the T0 routing table, every T1's static
+  routes and every segment's subnets.
+
+#### Changed
+
+- **zPod deploy writes the four networks with their name, VLAN id, gateway, kind and routing**
+  (`ZpodNetwork.deploy_row`), and creates the T1 static routes through the shared helper; the
+  route ids are unchanged. zPod destroy sets any user network of the soft-deleted zPod back to
+  `LOCAL` and masquerade off, since the rows outlive the zPod.
+- `MgmtIp.zpod` reads the management network by kind and VLAN id instead of by position.
+
+### zPod CLI
+
+#### Added
+
+- `zcli zpod network routing` follows the zpodengine run by default and prints the verdict: the
+  final routing and masquerade on success, the failing check in red and exit code 1 on failure.
+  `--no-wait` keeps the fire-and-forget behaviour, Ctrl-C leaves the run going.
+- **`zcli zpod network`**: `list`, `add --name --vlan --gateway [--masquerade] [--routing
+  local|global]`, `remove`, `masquerade on|off`, `enable`, `disable`, `routing <zpod> <name>
+  local|global [--dry-run]`. The list shows Name, VLAN, CIDR, Gateway, Kind, Masquerade, Routing
+  (`GLOBAL` in orange: it is reachable from the whole fabric) and the live Status. `list --kind zpod|zcore|user`
+  (repeatable, or comma-separated) shows only those kinds.
+- `zcli zpod info` reads the VLAN id, gateway and routing of each network from the API instead
+  of deriving them from the last octet of the CIDR, so user networks show correctly; the static
+  routes box lists the global networks.
+
+#### Fixed
+
+- A 422 whose `detail` is a plain message (not a validation list) is printed instead of
+  crashing the CLI.
+
+### zPod SDK
+
+- Regenerated: `ZpodNetworkView` with the new fields, `ZpodNetworkCreate`,
+  `ZpodNetworkMasquerade`, `ZpodNetworkRoutingUpdate`, `ZpodNetworkRoutingView`, the enums
+  `ZpodNetworkKind`, `ZpodNetworkRouting`, `ZpodNetworkStatus`, and the `zpods_network_*`
+  methods.
+
 ### zPod Engine
 
 #### Changed

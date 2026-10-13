@@ -1,0 +1,194 @@
+from http import HTTPStatus
+from typing import Any
+from urllib.parse import quote
+
+import httpx
+
+from ... import errors
+from ...client import AuthenticatedClient, Client
+from ...models.http_validation_error import HTTPValidationError
+from ...models.zpod_network_routing_run_view import ZpodNetworkRoutingRunView
+from ...types import Response
+
+
+class ZpodsNetworkRoutingRun:
+    def __init__(self, client: AuthenticatedClient | Client) -> None:
+        self.client = client
+
+    def _get_kwargs(
+        self,
+        id: str,
+        name: str,
+        flow_run_id: str,
+    ) -> dict[str, Any]:
+
+        _kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": "/zpods/{id}/networks/{name}/routing/{flow_run_id}".format(
+                id=quote(str(id), safe=""),
+                name=quote(str(name), safe=""),
+                flow_run_id=quote(str(flow_run_id), safe=""),
+            ),
+        }
+
+        return _kwargs
+
+    def _parse_response(
+        self, *, response: httpx.Response
+    ) -> HTTPValidationError | ZpodNetworkRoutingRunView | None:
+        if response.status_code == 200:
+            response_200 = ZpodNetworkRoutingRunView.from_dict(response.json())
+
+            return response_200
+
+        if response.status_code == 422 and not self.client.raise_on_unexpected_status:
+            response_422 = HTTPValidationError.from_dict(response.json())
+
+            return response_422
+
+        if self.client.raise_on_unexpected_status:
+            raise errors.UnexpectedStatus(response.status_code, response.content)
+        else:
+            return None
+
+    def _build_response(
+        self, *, response: httpx.Response
+    ) -> Response[HTTPValidationError | ZpodNetworkRoutingRunView]:
+        return Response(
+            status_code=HTTPStatus(response.status_code),
+            content=response.content,
+            headers=response.headers,
+            parsed=self._parse_response(response=response),
+        )
+
+    def sync_detailed(
+        self,
+        id: str,
+        name: str,
+        flow_run_id: str,
+    ) -> Response[HTTPValidationError | ZpodNetworkRoutingRunView]:
+        """zPod Network Routing Run
+
+         The state of a routing change started with PUT .../routing: the run's state
+        and message (the failing check when it failed) and the network as it is now.
+
+        Args:
+            id (str):
+            name (str):
+            flow_run_id (str):
+
+        Raises:
+            errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+            httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+        Returns:
+            Response[HTTPValidationError | ZpodNetworkRoutingRunView]
+        """
+
+        kwargs = self._get_kwargs(
+            id=id,
+            name=name,
+            flow_run_id=flow_run_id,
+        )
+
+        response = self.client.get_httpx_client().request(
+            **kwargs,
+        )
+
+        return self._build_response(response=response)
+
+    def sync(
+        self,
+        id: str,
+        name: str,
+        flow_run_id: str,
+    ) -> HTTPValidationError | ZpodNetworkRoutingRunView | None:
+        """zPod Network Routing Run
+
+         The state of a routing change started with PUT .../routing: the run's state
+        and message (the failing check when it failed) and the network as it is now.
+
+        Args:
+            id (str):
+            name (str):
+            flow_run_id (str):
+
+        Raises:
+            errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+            httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+        Returns:
+            HTTPValidationError | ZpodNetworkRoutingRunView
+        """
+
+        return self.sync_detailed(
+            id=id,
+            name=name,
+            flow_run_id=flow_run_id,
+        ).parsed
+
+    async def asyncio_detailed(
+        self,
+        id: str,
+        name: str,
+        flow_run_id: str,
+    ) -> Response[HTTPValidationError | ZpodNetworkRoutingRunView]:
+        """zPod Network Routing Run
+
+         The state of a routing change started with PUT .../routing: the run's state
+        and message (the failing check when it failed) and the network as it is now.
+
+        Args:
+            id (str):
+            name (str):
+            flow_run_id (str):
+
+        Raises:
+            errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+            httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+        Returns:
+            Response[HTTPValidationError | ZpodNetworkRoutingRunView]
+        """
+
+        kwargs = self._get_kwargs(
+            id=id,
+            name=name,
+            flow_run_id=flow_run_id,
+        )
+
+        response = await self.client.get_async_httpx_client().request(**kwargs)
+
+        return self._build_response(response=response)
+
+    async def asyncio(
+        self,
+        id: str,
+        name: str,
+        flow_run_id: str,
+    ) -> HTTPValidationError | ZpodNetworkRoutingRunView | None:
+        """zPod Network Routing Run
+
+         The state of a routing change started with PUT .../routing: the run's state
+        and message (the failing check when it failed) and the network as it is now.
+
+        Args:
+            id (str):
+            name (str):
+            flow_run_id (str):
+
+        Raises:
+            errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+            httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+        Returns:
+            HTTPValidationError | ZpodNetworkRoutingRunView
+        """
+
+        return (
+            await self.asyncio_detailed(
+                id=id,
+                name=name,
+                flow_run_id=flow_run_id,
+            )
+        ).parsed

@@ -23,6 +23,21 @@ class ZpodEngineBase:
             return {}
 
 
+def _flow_run_summary(run: dict) -> dict:
+    """The few fields callers need about a run: identity, state and Prefect's
+    one-line state message (for a failed run, the exception text)."""
+    state = run.get("state") or {}
+    return {
+        "id": run.get("id"),
+        "name": run.get("name"),
+        "state": state.get("type"),
+        "message": state.get("message"),
+        "parameters": run.get("parameters") or {},
+        "start_time": run.get("start_time"),
+        "end_time": run.get("end_time"),
+    }
+
+
 class ZpodEngineClientAsync(ZpodEngineBase):
     def __init__(self):
         self.aclient = httpx.AsyncClient(
@@ -67,6 +82,12 @@ class ZpodEngineClientAsync(ZpodEngineBase):
             },
         )
         return self._json(response)
+
+    async def get_flow_run(self, flow_run_id) -> dict | None:
+        response = await self.aclient.get(url=f"/flow_runs/{flow_run_id}")
+        if response.status_code == 404:
+            return None
+        return _flow_run_summary(self._json(response))
 
     async def create_flow_run_by_name(
         self,
@@ -131,6 +152,13 @@ class ZpodEngineClient(ZpodEngineBase):
             },
         )
         return self._json(response)
+
+    def get_flow_run(self, flow_run_id) -> dict | None:
+        """A run by id, or None when Prefect does not know it."""
+        response = self.client.get(url=f"/flow_runs/{flow_run_id}")
+        if response.status_code == 404:
+            return None
+        return _flow_run_summary(self._json(response))
 
     def create_flow_run_by_name(
         self,

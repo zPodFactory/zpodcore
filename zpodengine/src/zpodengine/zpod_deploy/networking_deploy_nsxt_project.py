@@ -3,6 +3,7 @@ from zpodcommon.lib.network_utils import MgmtIp
 from zpodcommon.lib.nsx import NsxClient
 from zpodengine import settings
 from zpodengine.lib.network import wait_for_segment_to_realize
+from zpodengine.lib.nsx_routes import static_route_put
 
 
 #######################################################################################
@@ -169,23 +170,17 @@ def networking_deploy_nsxt_project(zpod: M.Zpod, enet_name: str | None = None):
                 },
             )
 
-        # Add Default Static Routes
-        for network in zpod.networks[1:]:
-            id_host = network.cidr.split("/")[0].split(".")[3]
-            nsx.patch(
-                url=(
-                    f"{base_path}/infra/tier-1s/{tier1_id}"
-                    f"/static-routes/{zpod.name}-vlan{id_host}"
-                ),
-                json={
-                    "network": network.cidr,
-                    "next_hops": [
-                        {
-                            "ip_address": MgmtIp.zpod(zpod, "zcore").ip,
-                            "admin_distance": 1,
-                        },
-                    ],
-                },
+        # Add Default Static Routes: the three VLAN /26s are routed to zcore.
+        # The route id is "{zpod}-vlan{vlan_id}" (the VLAN id is the last
+        # octet of the /26), unchanged so existing zPods keep their routes.
+        for network in zpod.routed_networks:
+            static_route_put(
+                nsx=nsx,
+                tier1_id=tier1_id,
+                route_id=f"{zpod.name}-vlan{network.vlan_id}",
+                network=str(network.cidr),
+                next_hop_ip=MgmtIp.zpod(zpod, "zcore").ip,
+                base_path=base_path,
             )
 
         wait_for_segment_to_realize(

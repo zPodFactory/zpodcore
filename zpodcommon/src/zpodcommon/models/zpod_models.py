@@ -1,8 +1,9 @@
 from ipaddress import IPv4Network
 from typing import TYPE_CHECKING, Any
 
-from sqlmodel import JSON, Column, Field, Relationship
+from sqlmodel import JSON, Column, Field, Relationship, UniqueConstraint
 
+from zpodcommon import enums
 from zpodcommon.models.model_base import ModelBase
 
 from .mixins import CommonDatesMixin
@@ -67,8 +68,37 @@ class Zpod(CommonDatesMixin, ModelBase, table=True):
         back_populates="zpod",
         sa_relationship_kwargs={
             "cascade": "all,delete,delete-orphan",
+            # The four deploy-time rows come first, in creation order; user
+            # networks append after them.
+            "order_by": "ZpodNetwork.id",
         },
     )
+
+    @property
+    def mgmt_network(self) -> "ZpodNetwork":
+        """The management /26 (native VLAN): every component address derives from it."""
+        for network in self.networks:
+            if network.kind == enums.ZpodNetworkKind.ZPOD and network.vlan_id == 0:
+                return network
+        return self.networks[0]
+
+    @property
+    def routed_networks(self) -> list["ZpodNetwork"]:
+        """The deploy-time VLAN /26s the T1 routes to zcore (64/128/192)."""
+        return [
+            network
+            for network in self.networks
+            if network.kind == enums.ZpodNetworkKind.ZPOD and network.vlan_id != 0
+        ]
+
+    @property
+    def user_networks(self) -> list["ZpodNetwork"]:
+        return [
+            network
+            for network in self.networks
+            if network.kind == enums.ZpodNetworkKind.USER
+        ]
+
     permissions: list["ZpodPermission"] = Relationship(
         back_populates="zpod",
         sa_relationship_kwargs={
@@ -131,6 +161,11 @@ class ZpodComponent(CommonDatesMixin, ModelBase, table=True):
 
 class ZpodNetwork(ModelBase, table=True):
     __tablename__ = "zpod_networks"
+    __table_args__ = (
+        UniqueConstraint(
+            "zpod_id", "vlan_id", name="zpod_networks_zpod_id_vlan_id_key"
+        ),
+    )
 
     id: int | None = Field(
         default=None,
@@ -146,8 +181,58 @@ class ZpodNetwork(ModelBase, table=True):
         default=...,
         nullable=False,
     )
+    # "mgmt", "vlan64", "vlan128", "vlan192" for the deploy rows; user-chosen otherwise.
+    name: str = Field(
+        default="",
+        nullable=False,
+    )
+    # 0 is the native (untagged) VLAN, the management network.
+    vlan_id: int = Field(
+        default=0,
+        nullable=False,
+    )
+    # The gateway address with its prefix, as given: "10.10.100.1/24".
+    gateway: str = Field(
+        default="",
+        nullable=False,
+    )
+    # Stored as plain text like Zpod.status (an Enum-typed field would make
+    # SQLModel store the member name); values are enums.ZpodNetworkKind.
+    kind: str = Field(
+        default=enums.ZpodNetworkKind.ZPOD.value,
+        nullable=False,
+    )
+    # Source translation on zcore for this subnet (zboxapi masquerade); the live
+    # value is read from zboxapi on every list, this is what was asked for.
+    masquerade: bool = Field(
+        default=False,
+        nullable=False,
+    )
+    # Values are enums.ZpodNetworkRouting (LOCAL, GLOBAL, PENDING), stored as text.
+    routing: str = Field(
+        default=enums.ZpodNetworkRouting.LOCAL.value,
+        nullable=False,
+    )
 
     zpod: "Zpod" = Relationship(back_populates="networks")
+
+    @classmethod
+    def deploy_row(cls, cidr: IPv4Network) -> "ZpodNetwork":
+        """One of the four deploy-time rows, named and typed from its /26."""
+        vlan_id = int(str(cidr.network_address).split(".")[-1])
+        return cls(
+            # Stored as text (AutoString); readers wrap it in IPv4Network.
+            cidr=str(cidr),
+            name="mgmt" if vlan_id == 0 else f"vlan{vlan_id}",
+            vlan_id=vlan_id,
+            gateway=f"{cidr.network_address + 1}/{cidr.prefixlen}",
+            kind=enums.ZpodNetworkKind.ZPOD.value,
+            masquerade=False,
+            # The native /26 is the T1 segment itself, the other three are
+            # routed to zcore by static routes: all four are reachable from
+            # the fabric.
+            routing=enums.ZpodNetworkRouting.GLOBAL.value,
+        )
 
 
 class ZpodPermission(ModelBase, table=True):

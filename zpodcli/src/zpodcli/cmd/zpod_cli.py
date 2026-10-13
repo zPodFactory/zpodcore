@@ -12,6 +12,7 @@ from zpodcli.cmd import (
     zpod_component_cli,
     zpod_dns_cli,
     zpod_info_cli,
+    zpod_network_cli,
     zpod_permission_cli,
 )
 from zpodcli.lib.utils import (
@@ -36,6 +37,7 @@ FAILED_STATUSES = ("DEPLOY_FAILED", "DESTROY_FAILED")
 FINAL_STATUSES = ("ACTIVE", *FAILED_STATUSES)
 app.add_typer(zpod_component_cli.app, name="component")
 app.add_typer(zpod_dns_cli.app, name="dns")
+app.add_typer(zpod_network_cli.app, name="network")
 app.add_typer(zpod_info_cli.app)
 app.add_typer(zpod_permission_cli.app, name="permission")
 
