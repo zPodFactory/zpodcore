@@ -131,3 +131,21 @@ def json_print(data):
         sys.stdout.write(json.dumps(data, sort_keys=True) + "\n")
     else:
         print(JSON.from_data(data, sort_keys=True))
+
+
+GIB = 1024**3
+
+
+def format_gib(size_bytes: int | None = None, *, gib: int | None = None) -> str:
+    """Capacities in GiB, binary, everywhere (D17): whole GiB for sizes (500 GiB,
+    1024 GiB, never 1.0 TiB), one decimal for used space (49.0 GiB, <0.1 GiB)."""
+    if gib is not None:
+        return f"{gib} GiB"
+    if size_bytes is None:
+        return "?"
+    value = size_bytes / GIB
+    if value == int(value):
+        return f"{int(value)} GiB"
+    if 0 < value < 0.1:
+        return "<0.1 GiB"
+    return f"{value:.1f} GiB"

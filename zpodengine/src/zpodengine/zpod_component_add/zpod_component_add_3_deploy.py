@@ -8,6 +8,9 @@ from zpodengine.lib.vcsadeployer import vcsa_deployer
 from zpodengine.zpod_component_add.zpod_component_add_utils import (
     handle_zpod_component_add_failure,
 )
+from zpodengine.zpod_disk.common import ensure_deploy_rows
+
+ZCORE_FILER_DISK_GB = 1024
 
 
 @task
@@ -35,11 +38,14 @@ def zpod_component_add_deploy(
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
-                    # Add second disk for NFS filer to VM
-                    # 100GB = 104,857,600 KB
-                    # 1TB = 1,073,741,824 KB
-                    print("Add Second Disk")
-                    vc.add_disk_to_vm(vm=vm, disk_size_in_kb=1073741824)
+                    # Each disk's UUID becomes its serial in zcore, which is how the
+                    # disk flows find a disk there; read at the first power-on.
+                    if vc.set_disk_enable_uuid(vm):
+                        print("Set disk.EnableUUID (not in the OVA)")
+                    # The filer disk, formatted by zcore-init as STORAGE01.
+                    print("Add Second Disk (1024 GiB, SCSI 0:1)")
+                    vc.add_vdisk(vm, ZCORE_FILER_DISK_GB, unit=1)
+                    ensure_deploy_rows(session, zpod_component.zpod, vc, vm)
                     # Power On VM
                     print("PowerOn VM")
                     vc.poweron_vm(vm)

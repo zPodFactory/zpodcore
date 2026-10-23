@@ -453,6 +453,48 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_disk_add(self):
+        from zpodsdk.api.zpods import zpods_disk_add
+
+        return zpods_disk_add.ZpodsDiskAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_get(self):
+        from zpodsdk.api.zpods import zpods_disk_get
+
+        return zpods_disk_get.ZpodsDiskGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_grow(self):
+        from zpodsdk.api.zpods import zpods_disk_grow
+
+        return zpods_disk_grow.ZpodsDiskGrow(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_remove(self):
+        from zpodsdk.api.zpods import zpods_disk_remove
+
+        return zpods_disk_remove.ZpodsDiskRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_run(self):
+        from zpodsdk.api.zpods import zpods_disk_run
+
+        return zpods_disk_run.ZpodsDiskRun(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disks_get_all(self):
+        from zpodsdk.api.zpods import zpods_disks_get_all
+
+        return zpods_disks_get_all.ZpodsDisksGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_dns_add(self):
         from zpodsdk.api.zpods import zpods_dns_add
 

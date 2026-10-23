@@ -87,4 +87,21 @@ DEFAULT_SETTINGS = [
         ),
         "value": "false",
     },
+    {
+        "name": "zpodfactory_zpod_disk_max_gb",
+        "description": (
+            "Largest disk, in GiB, a zPod owner may add to zcore or grow a "
+            "disk of zcore to (superadmin may exceed it)"
+        ),
+        "value": "2048",
+    },
+    {
+        "name": "zpodfactory_datastore_min_free_pct",
+        "description": (
+            "Free space, in percent of the datastore, that a zcore disk add "
+            "or grow must leave on the zcore VM's datastore; hard limit for "
+            "everyone"
+        ),
+        "value": "15",
+    },
 ]

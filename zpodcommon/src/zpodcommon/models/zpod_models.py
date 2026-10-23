@@ -74,6 +74,14 @@ class Zpod(CommonDatesMixin, ModelBase, table=True):
         },
     )
 
+    disks: list["ZpodDisk"] = Relationship(
+        back_populates="zpod",
+        sa_relationship_kwargs={
+            "cascade": "all,delete,delete-orphan",
+            "order_by": "ZpodDisk.id",
+        },
+    )
+
     @property
     def mgmt_network(self) -> "ZpodNetwork":
         """The management /26 (native VLAN): every component address derives from it."""
@@ -233,6 +241,79 @@ class ZpodNetwork(ModelBase, table=True):
             # the fabric.
             routing=enums.ZpodNetworkRouting.GLOBAL.value,
         )
+
+
+def normalise_disk_uuid(uuid: str | None) -> str | None:
+    """vSphere's backing.uuid (6000C29d-7e62-...) and the guest's lsblk serial
+    (6000c29d7e62...) compare equal once reduced to lowercase hex."""
+    if not uuid:
+        return None
+    return "".join(c for c in uuid.lower() if c in "0123456789abcdef") or None
+
+
+class ZpodDisk(ModelBase, table=True):
+    """A virtual disk of the zPod's zcore VM.
+
+    The row holds the vSphere handles (device key, SCSI unit, disk UUID) and the
+    size asked for; the device name (/dev/sdX) is never stored, it is matched live
+    by serial = disk_uuid (disk.EnableUUID). What is on the disk is zboxapi's.
+    """
+
+    __tablename__ = "zpod_disks"
+    __table_args__ = (
+        UniqueConstraint(
+            "zpod_id", "scsi_unit", name="zpod_disks_zpod_id_scsi_unit_key"
+        ),
+        UniqueConstraint(
+            "zpod_id", "disk_uuid", name="zpod_disks_zpod_id_disk_uuid_key"
+        ),
+    )
+
+    id: int | None = Field(
+        default=None,
+        primary_key=True,
+        nullable=False,
+    )
+    zpod_id: int = Field(
+        default=...,
+        nullable=False,
+        foreign_key="zpods.id",
+    )
+    # enums.ZpodDiskKind, stored as text.
+    kind: str = Field(
+        default=enums.ZpodDiskKind.USER.value,
+        nullable=False,
+    )
+    # ACTIVE or PENDING (enums.ZpodDiskStatus), stored as text.
+    status: str = Field(
+        default=enums.ZpodDiskStatus.PENDING.value,
+        nullable=False,
+    )
+    # GiB, binary: the size asked for, then the size vCenter reports.
+    size_gb: int = Field(
+        default=...,
+        nullable=False,
+    )
+    # Unit on the zcore VM's first SCSI controller; None until the add flow
+    # picks it.
+    scsi_unit: int | None = Field(
+        default=None,
+        nullable=True,
+    )
+    # VirtualDevice.key; vCenter gives a freed key to the next disk added, so it
+    # is only trusted together with disk_uuid.
+    vm_disk_key: int | None = Field(
+        default=None,
+        nullable=True,
+    )
+    # VirtualDisk.backing.uuid, normalised (normalise_disk_uuid): the guest's
+    # serial of the disk.
+    disk_uuid: str | None = Field(
+        default=None,
+        nullable=True,
+    )
+
+    zpod: "Zpod" = Relationship(back_populates="disks")
 
 
 class ZpodPermission(ModelBase, table=True):

@@ -10,6 +10,7 @@ from rich.spinner import Spinner
 
 from zpodcli.cmd import (
     zpod_component_cli,
+    zpod_disk_cli,
     zpod_dns_cli,
     zpod_info_cli,
     zpod_network_cli,
@@ -37,6 +38,7 @@ app = typer.Typer(help="Manage zPods")
 FAILED_STATUSES = ("DEPLOY_FAILED", "DESTROY_FAILED")
 FINAL_STATUSES = ("ACTIVE", *FAILED_STATUSES)
 app.add_typer(zpod_component_cli.app, name="component")
+app.add_typer(zpod_disk_cli.app, name="disk")
 app.add_typer(zpod_dns_cli.app, name="dns")
 app.add_typer(zpod_network_cli.app, name="network")
 app.add_typer(zpod_nfs_cli.app, name="nfs")

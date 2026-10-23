@@ -99,3 +99,18 @@ deployments:
   entrypoint: src/zpodengine/zpod_network_routing/flow_zpod_network_routing.py:flow_zpod_network_routing
   schedule: {}
   work_pool: *zpodengine_work_pool
+
+- name: zpod_disk_add
+  entrypoint: src/zpodengine/zpod_disk/flow_zpod_disk_add.py:flow_zpod_disk_add
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: zpod_disk_grow
+  entrypoint: src/zpodengine/zpod_disk/flow_zpod_disk_grow.py:flow_zpod_disk_grow
+  schedule: {}
+  work_pool: *zpodengine_work_pool
+
+- name: zpod_disk_remove
+  entrypoint: src/zpodengine/zpod_disk/flow_zpod_disk_remove.py:flow_zpod_disk_remove
+  schedule: {}
+  work_pool: *zpodengine_work_pool

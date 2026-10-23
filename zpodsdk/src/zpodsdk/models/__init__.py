@@ -58,6 +58,12 @@ from .zpod_component_view_usernames_type_0_item import (
 )
 from .zpod_create import ZpodCreate
 from .zpod_create_features_type_0 import ZpodCreateFeaturesType0
+from .zpod_disk_create import ZpodDiskCreate
+from .zpod_disk_grow import ZpodDiskGrow
+from .zpod_disk_kind import ZpodDiskKind
+from .zpod_disk_run_view import ZpodDiskRunView
+from .zpod_disk_status import ZpodDiskStatus
+from .zpod_disk_view import ZpodDiskView
 from .zpod_dns_create import ZpodDnsCreate
 from .zpod_dns_update import ZpodDnsUpdate
 from .zpod_dns_view import ZpodDnsView
@@ -146,6 +152,12 @@ __all__ = (
     "ZpodComponentViewUsernamesType0Item",
     "ZpodCreate",
     "ZpodCreateFeaturesType0",
+    "ZpodDiskCreate",
+    "ZpodDiskGrow",
+    "ZpodDiskKind",
+    "ZpodDiskRunView",
+    "ZpodDiskStatus",
+    "ZpodDiskView",
     "ZpodDnsCreate",
     "ZpodDnsUpdate",
     "ZpodDnsView",

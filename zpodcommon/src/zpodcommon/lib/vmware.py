@@ -697,48 +697,155 @@ class vCenter:
                 print(f"Resize Hard disk {disk_number} to {vdisk_gb}GB")
                 self.set_vm_vdisk(vm=vm, vdisk_gb=vdisk_gb, disk_number=disk_number)
 
-    def add_disk_to_vm(self, vm: vim.VirtualMachine, disk_size_in_kb: int):
-        #
-        # Method to add a disk to a vm with specific disk_size_in_kb
-        #
+    # ── virtual disks by device key and disk UUID (zcore storage capabilities) ──
 
-        #
-        # Prepare spec for second disk
-        #
-        spec = vim.vm.ConfigSpec()
-        spec_deviceChange = vim.vm.device.VirtualDeviceSpec()
-        spec_deviceChange.fileOperation = "create"
-        spec_deviceChange.device = vim.vm.device.VirtualDisk()
-        spec_deviceChange.device.capacityInBytes = disk_size_in_kb * 1024
-        spec_deviceChange.device.storageIOAllocation = (
-            vim.StorageResourceManager.IOAllocationInfo()
+    # The first SCSI controller every OVA here brings; unit 7 is its own.
+    SCSI_CONTROLLER_KEY = 1000
+    SCSI_CONTROLLER_UNIT = 7
+    SCSI_UNITS = 16
+
+    @staticmethod
+    def vdisks(vm: vim.VirtualMachine) -> list[vim.vm.device.VirtualDisk]:
+        return [
+            d
+            for d in vm.config.hardware.device
+            if isinstance(d, vim.vm.device.VirtualDisk)
+        ]
+
+    def next_free_scsi_unit(self, vm: vim.VirtualMachine) -> int:
+        """The lowest unit of the first SCSI controller no device uses."""
+        used = {
+            d.unitNumber
+            for d in vm.config.hardware.device
+            if d.controllerKey == self.SCSI_CONTROLLER_KEY
+        }
+        used.add(self.SCSI_CONTROLLER_UNIT)
+        for unit in range(self.SCSI_UNITS):
+            if unit not in used:
+                return unit
+        raise ValueError(
+            f"{vm.name}: no free unit left on SCSI controller {self.SCSI_CONTROLLER_KEY}"
         )
-        spec_deviceChange.device.storageIOAllocation.shares = vim.SharesInfo()
-        spec_deviceChange.device.storageIOAllocation.shares.shares = 1000
-        spec_deviceChange.device.storageIOAllocation.shares.level = "normal"
-        spec_deviceChange.device.storageIOAllocation.limit = -1
-        spec_deviceChange.device.backing = (
-            vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+
+    def vdisk(
+        self, vm: vim.VirtualMachine, disk_uuid: str, key: int | None = None
+    ) -> vim.vm.device.VirtualDisk:
+        """The VirtualDisk of `vm` whose backing UUID is `disk_uuid` (normalised).
+
+        vCenter gives a freed device key to the next disk added, so the key alone is
+        no identity: when given, it must match too, or this refuses.
+        """
+        for d in self.vdisks(vm):
+            if M.normalise_disk_uuid(d.backing.uuid) == disk_uuid:
+                if key is not None and d.key != key:
+                    raise ValueError(
+                        f"{vm.name}: disk {disk_uuid} has device key {d.key}, "
+                        f"expected {key}"
+                    )
+                return d
+        raise LookupError(f"{vm.name}: no virtual disk with UUID {disk_uuid}")
+
+    def add_vdisk(
+        self, vm: vim.VirtualMachine, size_gb: int, unit: int
+    ) -> vim.vm.device.VirtualDisk:
+        """Add a thin disk of `size_gb` GiB on `unit` of the first SCSI controller,
+        in the VM's folder; answers the disk as the VM now has it (key, UUID)."""
+        disk = vim.vm.device.VirtualDisk()
+        disk.key = -101
+        disk.controllerKey = self.SCSI_CONTROLLER_KEY
+        disk.unitNumber = unit
+        disk.capacityInBytes = size_gb * 1024**3
+        disk.backing = vim.vm.device.VirtualDisk.FlatVer2BackingInfo()
+        disk.backing.fileName = ""
+        disk.backing.thinProvisioned = True
+        disk.backing.diskMode = "persistent"
+        spec = vim.vm.ConfigSpec(
+            deviceChange=[
+                vim.vm.device.VirtualDeviceSpec(
+                    operation=vim.vm.device.VirtualDeviceSpec.Operation.add,
+                    fileOperation=vim.vm.device.VirtualDeviceSpec.FileOperation.create,
+                    device=disk,
+                )
+            ]
         )
-        spec_deviceChange.device.backing.fileName = ""
-        spec_deviceChange.device.backing.thinProvisioned = True
-        spec_deviceChange.device.backing.diskMode = "persistent"
-        spec_deviceChange.device.controllerKey = 1000
-        spec_deviceChange.device.unitNumber = 1
-        spec_deviceChange.device.capacityInKB = disk_size_in_kb
-        spec_deviceChange.device.deviceInfo = vim.Description()
-        spec_deviceChange.device.deviceInfo.summary = "New Hard disk"
-        spec_deviceChange.device.deviceInfo.label = "New Hard disk"
-        # Really not sure about this one ... (from code capture)
-        spec_deviceChange.device.key = -102
+        task.WaitForTask(vm.ReconfigVM_Task(spec))
+        for d in self.vdisks(vm):
+            if d.controllerKey == self.SCSI_CONTROLLER_KEY and d.unitNumber == unit:
+                return d
+        raise LookupError(f"{vm.name}: the disk added on SCSI 0:{unit} is not there")
 
-        spec_deviceChange.operation = "add"
-        spec.deviceChange = [spec_deviceChange]
-        spec.virtualNuma = vim.vm.VirtualNuma()
+    def grow_vdisk(
+        self, vm: vim.VirtualMachine, disk_uuid: str, key: int | None, size_gb: int
+    ) -> vim.vm.device.VirtualDisk:
+        disk = self.vdisk(vm, disk_uuid, key)
+        if disk.capacityInBytes > size_gb * 1024**3:
+            raise ValueError(
+                f"{vm.name}: disk {disk.key} has {disk.capacityInBytes // 1024**3} GiB; "
+                "a virtual disk cannot shrink"
+            )
+        disk.capacityInBytes = size_gb * 1024**3
+        disk.capacityInKB = size_gb * 1024**2
+        spec = vim.vm.ConfigSpec(
+            deviceChange=[
+                vim.vm.device.VirtualDeviceSpec(
+                    operation=vim.vm.device.VirtualDeviceSpec.Operation.edit,
+                    device=disk,
+                )
+            ]
+        )
+        task.WaitForTask(vm.ReconfigVM_Task(spec))
+        return self.vdisk(vm, disk_uuid)
 
-        # Reconfigure VM with new spec
-        task_id = vm.ReconfigVM_Task(spec)
-        task.WaitForTask(task_id)
+    def remove_vdisk(self, vm: vim.VirtualMachine, disk_uuid: str, key: int | None):
+        """Detach the disk from the VM and delete its file."""
+        disk = self.vdisk(vm, disk_uuid, key)
+        spec = vim.vm.ConfigSpec(
+            deviceChange=[
+                vim.vm.device.VirtualDeviceSpec(
+                    operation=vim.vm.device.VirtualDeviceSpec.Operation.remove,
+                    fileOperation=vim.vm.device.VirtualDeviceSpec.FileOperation.destroy,
+                    device=disk,
+                )
+            ]
+        )
+        task.WaitForTask(vm.ReconfigVM_Task(spec))
+
+    @staticmethod
+    def disk_enable_uuid(vm: vim.VirtualMachine) -> bool:
+        return any(
+            o.key == "disk.EnableUUID" and str(o.value).upper() == "TRUE"
+            for o in vm.config.extraConfig
+        )
+
+    def set_disk_enable_uuid(self, vm: vim.VirtualMachine) -> bool:
+        """disk.EnableUUID=TRUE, so the guest sees each disk's UUID as its serial.
+        Read at power-on. Answers whether it had to be set."""
+        if self.disk_enable_uuid(vm):
+            return False
+        spec = vim.vm.ConfigSpec(
+            extraConfig=[vim.option.OptionValue(key="disk.EnableUUID", value="TRUE")]
+        )
+        task.WaitForTask(vm.ReconfigVM_Task(spec))
+        return True
+
+    @staticmethod
+    def vm_datastore(vm: vim.VirtualMachine) -> vim.Datastore:
+        """The datastore of the VM's folder, where add_vdisk puts new disks."""
+        path = vm.config.files.vmPathName  # "[vsanDatastore] 2180db6a-.../x.vmx"
+        name = path[1 : path.index("]")]
+        for ds in vm.datastore:
+            if ds.name == name:
+                return ds
+        return vm.datastore[0]
+
+    @staticmethod
+    def datastore_space(ds: vim.Datastore) -> tuple[int, int]:
+        """(capacity, free) in bytes, refreshed first."""
+        try:
+            ds.RefreshDatastore()
+        except vmodl.MethodFault:
+            pass  # vSAN refuses a refresh; its summary is current anyway
+        return ds.summary.capacity, ds.summary.freeSpace
 
     def wait_for_tools(self, vm_name, timeout=120):
         tools_running = False
