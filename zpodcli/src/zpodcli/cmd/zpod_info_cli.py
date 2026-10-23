@@ -12,11 +12,13 @@ from zpodcli.lib.utils import (
     JsonOption,
     NoColorOption,
     console_print,
+    format_gib,
     get_status_markdown,
     json_print,
 )
 from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.errors import UnexpectedStatus
 from zpodsdk.models.zpod_dns_view import ZpodDnsView
 from zpodsdk.models.zpod_permission import ZpodPermission
 from zpodsdk.models.zpod_view import ZpodView
@@ -123,7 +125,61 @@ def print_dns_panel(zpod: ZpodView, z: ZpodClient):
     console_print("DNS Records", dns_panel)
 
 
-def generate_detailed_info(zpod: ZpodView, fields: str = "bncd"):
+def print_storage_panel(zpod: ZpodView, z: ZpodClient):
+    """zcore's storages and NFS exports, as clients mount them; a short notice
+    when zcore cannot tell (older zboxapi, zcore down)."""
+    import json
+
+    title = "Storage"
+    try:
+        storages = z.zpods_storages_get_all.sync(id=f"name={zpod.name}")
+        exports = z.zpods_nfs_get_all.sync(id=f"name={zpod.name}")
+    except UnexpectedStatus as e:
+        try:
+            detail = json.loads(e.content).get("detail")
+        except (ValueError, AttributeError):
+            detail = None
+        console_print(
+            title,
+            Panel(
+                f"[grey50]not available: {detail or e.status_code}[/grey50]",
+                title=title,
+                border_style="green",
+                padding=(1, 2),
+            ),
+        )
+        return
+
+    table = Table(box=box.ROUNDED, header_style="bold cyan")
+    table.add_column("Storage")
+    table.add_column("Size", justify="right")
+    table.add_column("Used", justify="right")
+    table.add_column("Disk")
+    table.add_column("NFS Exports (clients)")
+    for s in storages:
+        lines = [
+            f"[sky_blue2]{e.path}[/sky_blue2] "
+            f"[grey63]({', '.join(c.client for c in e.clients)})[/grey63]"
+            for e in exports
+            if e.path.startswith(s.mountpoint + "/")
+        ]
+        table.add_row(
+            f"[bold magenta]{s.name}[/bold magenta]",
+            format_gib(s.size_bytes, whole=True),
+            format_gib(s.used_bytes),
+            f"/dev/{s.disk}",
+            "\n".join(lines) or "[grey50]none[/grey50]",
+        )
+    content = Group(
+        f"Storages of zcore, NFS server [magenta]zcore.{zpod.domain}[/magenta]:\n",
+        table,
+    )
+    console_print(
+        title, Panel(content, title=title, border_style="green", padding=(1, 2))
+    )
+
+
+def generate_detailed_info(zpod: ZpodView, fields: str = "bncsd"):
     """Generate detailed information about a zPod
 
     Args:
@@ -132,6 +188,7 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bncd"):
                b - Basic Information
                n - Networks
                c - Components
+               s - Storage (zcore's storages and NFS exports)
                d - DNS Records
     """
     # Find the zcore component and get its IP once for all networks
@@ -461,6 +518,10 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bncd"):
         )
         console_print("Components", components_panel)
 
+    # Storage Panel
+    if "s" in fields:
+        print_storage_panel(zpod, z)
+
     # DNS Panel
     if "d" in fields:
         print_dns_panel(zpod, z)
@@ -483,10 +544,10 @@ def zpod_info(
         typer.Option(
             "--fields",
             "-f",
-            help="Display specific information panels (b:Basic, n:Networking, c:Components, d:DNS)",
+            help="Display specific information panels (b:Basic, n:Networking, c:Components, s:Storage, d:DNS)",
             show_default=False,
         ),
-    ] = "bncd",
+    ] = "bncsd",
 ):
     """
     Display zPod Detailed information

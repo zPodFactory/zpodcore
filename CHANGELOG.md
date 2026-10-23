@@ -181,6 +181,8 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `grow <name> --size` (disk grow, then storage grow), `remove <name> [-y]` (storage delete,
   then disk remove with its data, one confirmation).
 - A failed zboxapi storage plan prints its message, the failed step and what was rolled back.
+- `zcli zpod info` has a Storage panel (`--fields s`, on by default): zcore's storages with
+  size, usage, disk and NFS exports with their clients; on an older zcore it says why not.
 
 #### Fixed
 
