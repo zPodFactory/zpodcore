@@ -160,8 +160,37 @@ VLANs 10, 20 and 30 included (`kind: zcore`, read-only).
 Appliance compatibility: everything except masquerade works on the deployed zcore 13.5
 appliances (zboxapi 0.1.1 already has `/vlan`), the routing flow included. Masquerade needs
 zboxapi 0.2.0 (zcore 13.7); on an older zcore the API answers 501 up front, `add --masquerade`
-creates nothing, and the row never claims a translation zcore did not set up. Storages and NFS
-exports (later phases) need zcore 13.7 as well.
+creates nothing, and the row never claims a translation zcore did not set up.
+
+### zcore storage (disks, storages, NFS exports)
+
+A zPod owner manages the storage zcore serves, in three levels that mirror zboxapi:
+
+- **Disks** are virtual disks of the zcore VM: `zcli zpod disk add <zpod> --size 500` adds a
+  thin 500 GiB disk through a zpodengine flow (which the command follows), `disk grow
+  <zpod> /dev/sdc --size 1000` grows one (the filer disk `/dev/sdb` included), `disk remove`
+  deletes a blank or foreign disk with its data. A disk is matched to its device in zcore by
+  serial, its vSphere UUID (`disk.EnableUUID`), so device names that shift after a reboot
+  change nothing. Each change first checks that the zcore VM's datastore keeps
+  `zpodfactory_datastore_min_free_pct` free (default 15); a disk is at most
+  `zpodfactory_zpod_disk_max_gb` (default 2048 GiB, superadmin may exceed it).
+- **Storages** are filesystems zcore mounts under `/FILER`: `zcli zpod storage create <zpod>
+  --disk /dev/sdc [--lvm]` formats and mounts a blank disk as `STORAGE02`, `storage grow`
+  uses the space a disk grow made, online, `storage delete` unmounts it and keeps the data
+  (`storage adopt` mounts it again), `storage folder add|set|remove` manages its folders.
+  `STORAGE01`, built by zcore on the filer disk, only grows.
+- **NFS exports** share a folder: `zcli zpod nfs add <zpod> STORAGE02 DATASTORE01` exports it
+  to `*` (any host that reaches zcore) unless `--clients` narrows it; `nfs client add|remove`,
+  `nfs set`, `nfs remove`, and `nfs status` shows who has each export mounted. NFS-01, the
+  nested ESXi datastore, and zcore's own `/etc/exports` lines are never changed.
+
+`zcli zpod storage add <zpod> --size 500`, `storage grow <name> --size N` and `storage remove
+<name>` do the disk step and the storage step in one command; `zcli zpod storage list` shows
+each storage with its folders and their exports. Sizes are GiB everywhere. Data is destroyed
+only by `storage folder remove --force`, `disk remove` and `storage remove`, each confirmed.
+
+Appliance compatibility: all of it needs zboxapi 0.2.1 (zcore 13.7), read from zboxapi on every
+call; an older zcore answers 501 and nothing is changed.
 
 ### Tests
 
