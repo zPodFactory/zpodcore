@@ -707,6 +707,69 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_storage_adopt(self):
+        from zpodsdk.api.zpods import zpods_storage_adopt
+
+        return zpods_storage_adopt.ZpodsStorageAdopt(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_create(self):
+        from zpodsdk.api.zpods import zpods_storage_create
+
+        return zpods_storage_create.ZpodsStorageCreate(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_delete(self):
+        from zpodsdk.api.zpods import zpods_storage_delete
+
+        return zpods_storage_delete.ZpodsStorageDelete(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_folder_add(self):
+        from zpodsdk.api.zpods import zpods_storage_folder_add
+
+        return zpods_storage_folder_add.ZpodsStorageFolderAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_folder_remove(self):
+        from zpodsdk.api.zpods import zpods_storage_folder_remove
+
+        return zpods_storage_folder_remove.ZpodsStorageFolderRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_folder_set(self):
+        from zpodsdk.api.zpods import zpods_storage_folder_set
+
+        return zpods_storage_folder_set.ZpodsStorageFolderSet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_get(self):
+        from zpodsdk.api.zpods import zpods_storage_get
+
+        return zpods_storage_get.ZpodsStorageGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_grow(self):
+        from zpodsdk.api.zpods import zpods_storage_grow
+
+        return zpods_storage_grow.ZpodsStorageGrow(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storages_get_all(self):
+        from zpodsdk.api.zpods import zpods_storages_get_all
+
+        return zpods_storages_get_all.ZpodsStoragesGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_update(self):
         from zpodsdk.api.zpods import zpods_update
 

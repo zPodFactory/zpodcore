@@ -109,6 +109,12 @@ class ZpodDiskStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class ZpodStorageKind(str, Enum):
+    # STORAGE01, built by zcore-init on the filer disk: grow only.
+    ZCORE = "zcore"
+    USER = "user"
+
+
 class ZpodPermission(str, Enum):
     OWNER = "OWNER"
     ADMIN = "ADMIN"

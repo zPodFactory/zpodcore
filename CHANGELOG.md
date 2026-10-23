@@ -82,6 +82,16 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   (`disk.EnableUUID`), so a device name that shifts after a reboot changes nothing. An
   existing zPod's two deploy disks are recorded by its first disk change.
 - Settings `zpodfactory_zpod_disk_max_gb` (2048) and `zpodfactory_datastore_min_free_pct` (15).
+- **Storages of a zPod's zcore: `/zpods/{id}/storages`**, the filesystems zcore mounts under
+  `/FILER`, read live from zboxapi (no table). Readers list them with their folders (kind
+  `zcore` for STORAGE01, `user`); maintainers create one on a blank disk of the zPod (`POST`,
+  `disk`, `lvm`, `name`; raw by default), adopt an existing filesystem again (`POST …/adopt`),
+  grow one online into the space a disk grow made (`PUT …/{name}/grow`, STORAGE01 included),
+  delete one (`DELETE`, the filesystem stays on the disk; 409 while exported), and add,
+  change (`owner`, `mode`, `recursive`) and remove folders (`…/folders/{folder}`, `force` for
+  a folder that is not empty). `dry_run` and `verbose` pass through; the answer is zboxapi's
+  step table. A disk is formatted or adopted only when a `zpod_disks` row of the zPod has its
+  serial (403 otherwise).
 
 #### Changed
 
@@ -160,6 +170,14 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 - **`zcli zpod disk`**: `list [--kind zpod,user]`, `add --size`, `grow <device> --size`,
   `remove <device> [-y]`; changes follow the zpodengine run (`--no-wait` returns at once) and
   print how it ended, exit code 1 on failure. Sizes in GiB everywhere (`format_gib`).
+- **`zcli zpod storage`**: `list [--kind zcore,user]` (one table: each storage with its
+  usage, mount, size, partition, layout and disk, its folders as a tree under it with their
+  export, clients and access; the NFS server in the caption), `create --disk [--lvm] [--name]
+  [--dry-run]`, `adopt --device`, `grow <name>`, `delete <name>`, `folder
+  list|add|set|remove`. Composed: `add --size [--lvm]` (disk add, then storage create),
+  `grow <name> --size` (disk grow, then storage grow), `remove <name> [-y]` (storage delete,
+  then disk remove with its data, one confirmation).
+- A failed zboxapi storage plan prints its message, the failed step and what was rolled back.
 
 #### Fixed
 
@@ -172,8 +190,8 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `ZpodNetworkMasquerade`, `ZpodNetworkRoutingUpdate`, `ZpodNetworkRoutingView`, the enums
   `ZpodNetworkKind`, `ZpodNetworkRouting`, `ZpodNetworkStatus`, and the `zpods_network_*`
   methods.
-- Regenerated: the `ZpodNfs*` and `ZpodDisk*` models, the `zpods_nfs_*` and `zpods_disk*`
-  methods.
+- Regenerated: the `ZpodNfs*`, `ZpodDisk*` and `ZpodStorage*` models, the `zpods_nfs_*`,
+  `zpods_disk*` and `zpods_storage*` methods.
 
 ### zPod Engine
 

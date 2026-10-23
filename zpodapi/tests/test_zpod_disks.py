@@ -141,8 +141,16 @@ def test_list_matches_rows_by_serial_and_derives_missing(
     normaluser_client, lab, session
 ):
     with_user_disk(session, lab)
-    add_row(session, lab, kind="user", status="ACTIVE", size_gb=300, scsi_unit=3,
-            vm_disk_key=2003, disk_uuid="6000c29d" + "0" * 24)
+    add_row(
+        session,
+        lab,
+        kind="user",
+        status="ACTIVE",
+        size_gb=300,
+        scsi_unit=3,
+        vm_disk_key=2003,
+        disk_uuid="6000c29d" + "0" * 24,
+    )
     r = normaluser_client.get(URL)
     got = [(d["device"], d["scsi"], d["size_gb"], d["status"]) for d in r.json()]
     assert got == [
@@ -153,8 +161,9 @@ def test_list_matches_rows_by_serial_and_derives_missing(
     ]
 
 
-def test_list_with_zcore_not_answering_is_unknown(normaluser_client, lab, session,
-                                                   monkeypatch):
+def test_list_with_zcore_not_answering_is_unknown(
+    normaluser_client, lab, session, monkeypatch
+):
     with_user_disk(session, lab)
     from zpodcommon.lib.zboxapi import RequestError
 
@@ -182,9 +191,7 @@ def test_add_writes_a_pending_row_and_starts_the_flow(normaluser_client, lab, se
     assert (row.kind, row.status, row.size_gb) == ("user", "PENDING", 500)
 
 
-def test_add_above_the_cap_is_422_but_not_for_superadmin(
-    normaluser_client, lab, fakes
-):
+def test_add_above_the_cap_is_422_but_not_for_superadmin(normaluser_client, lab, fakes):
     r = normaluser_client.post(URL, json={"size_gb": 5000})
     assert r.status_code == 422, r.text
     assert "above the limit of 2048 GiB" in r.json()["detail"]
@@ -265,10 +272,15 @@ def test_remove_refused_while_in_use(normaluser_client, lab, session):
     with_user_disk(session, lab, "in-use", "STORAGE02")
     r = normaluser_client.delete(f"{URL}/sdc")
     assert r.status_code == 409, r.text
-    assert r.json()["detail"] == "/dev/sdc is in-use by STORAGE02. Delete the storage first."
+    assert (
+        r.json()["detail"]
+        == "/dev/sdc is in-use by STORAGE02. Delete the storage first."
+    )
 
 
-@pytest.mark.parametrize("device, text", [("sda", "system disk"), ("sdb", "filer disk")])
+@pytest.mark.parametrize(
+    "device, text", [("sda", "system disk"), ("sdb", "filer disk")]
+)
 def test_the_deploy_disks_are_never_removed(normaluser_client, lab, device, text):
     r = normaluser_client.delete(f"{URL}/{device}")
     assert r.status_code == 403, r.text

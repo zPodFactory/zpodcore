@@ -27,6 +27,7 @@ from zpodapi.zpods import (
     zpod_network__routes,
     zpod_nfs__routes,
     zpod_permission__routes,
+    zpod_storage__routes,
 )
 
 
@@ -77,6 +78,7 @@ api.include_router(zpod_dns__routes.router)
 api.include_router(zpod_network__routes.router)
 api.include_router(zpod_nfs__routes.router)
 api.include_router(zpod_permission__routes.router)
+api.include_router(zpod_storage__routes.router)
 api.include_router(library__routes.router)
 api.include_router(permission_group__routes.router)
 api.include_router(profile__routes.router)

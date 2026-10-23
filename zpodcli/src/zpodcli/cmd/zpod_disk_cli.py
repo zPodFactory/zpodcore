@@ -180,7 +180,9 @@ def disk_add(zpod_name: str, size: int, wait: bool = True) -> ZpodDiskView | Non
     return value(run.disk) if wait else None
 
 
-def disk_grow(zpod_name: str, device: str, size: int, wait: bool = True):
+def disk_grow(
+    zpod_name: str, device: str, size: int, wait: bool = True, hint: bool = True
+):
     name = device_name(device)
     z: ZpodClient = ZpodClient()
     current = z.zpods_disk_get.sync(id=f"name={zpod_name}", device=name)
@@ -197,7 +199,7 @@ def disk_grow(zpod_name: str, device: str, size: int, wait: bool = True):
         return None
     disk = value(run.disk)
     print(disk_line(disk))
-    if disk and value(disk.storage):
+    if hint and disk and value(disk.storage):
         print(
             f"  [yellow3]{disk.storage} still has its previous size: run zcli zpod "
             f"storage grow {zpod_name} {disk.storage} to use the space[/yellow3]"

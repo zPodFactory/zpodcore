@@ -16,6 +16,7 @@ from zpodcli.cmd import (
     zpod_network_cli,
     zpod_nfs_cli,
     zpod_permission_cli,
+    zpod_storage_cli,
 )
 from zpodcli.lib.utils import (
     JsonOption,
@@ -44,6 +45,7 @@ app.add_typer(zpod_network_cli.app, name="network")
 app.add_typer(zpod_nfs_cli.app, name="nfs")
 app.add_typer(zpod_info_cli.app)
 app.add_typer(zpod_permission_cli.app, name="permission")
+app.add_typer(zpod_storage_cli.app, name="storage")
 
 
 def generate_table(zpods: list[ZpodView], return_table=False):

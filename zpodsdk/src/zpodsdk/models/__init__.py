@@ -90,6 +90,18 @@ from .zpod_permission_mine_view import ZpodPermissionMineView
 from .zpod_permission_user_add_remove import ZpodPermissionUserAddRemove
 from .zpod_permission_view import ZpodPermissionView
 from .zpod_status import ZpodStatus
+from .zpod_storage_adopt import ZpodStorageAdopt
+from .zpod_storage_create import ZpodStorageCreate
+from .zpod_storage_folder_create import ZpodStorageFolderCreate
+from .zpod_storage_folder_removed import ZpodStorageFolderRemoved
+from .zpod_storage_folder_update import ZpodStorageFolderUpdate
+from .zpod_storage_folder_view import ZpodStorageFolderView
+from .zpod_storage_kind import ZpodStorageKind
+from .zpod_storage_operation import ZpodStorageOperation
+from .zpod_storage_operation_after_type_0 import ZpodStorageOperationAfterType0
+from .zpod_storage_operation_before_type_0 import ZpodStorageOperationBeforeType0
+from .zpod_storage_step import ZpodStorageStep
+from .zpod_storage_view import ZpodStorageView
 from .zpod_update import ZpodUpdate
 from .zpod_update_features_type_0 import ZpodUpdateFeaturesType0
 from .zpod_view import ZpodView
@@ -184,6 +196,18 @@ __all__ = (
     "ZpodPermissionUserAddRemove",
     "ZpodPermissionView",
     "ZpodStatus",
+    "ZpodStorageAdopt",
+    "ZpodStorageCreate",
+    "ZpodStorageFolderCreate",
+    "ZpodStorageFolderRemoved",
+    "ZpodStorageFolderUpdate",
+    "ZpodStorageFolderView",
+    "ZpodStorageKind",
+    "ZpodStorageOperation",
+    "ZpodStorageOperationAfterType0",
+    "ZpodStorageOperationBeforeType0",
+    "ZpodStorageStep",
+    "ZpodStorageView",
     "ZpodUpdate",
     "ZpodUpdateFeaturesType0",
     "ZpodView",

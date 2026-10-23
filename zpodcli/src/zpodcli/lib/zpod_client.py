@@ -68,6 +68,18 @@ def exit_if_status(status_code, content):
             detail = json.loads(content).get("detail")
         except (json.JSONDecodeError, TypeError, AttributeError):
             detail = None
+        if isinstance(detail, dict) and "message" in detail:
+            # A zboxapi storage plan that failed: its message, then the step that
+            # failed and what was rolled back.
+            lines = [detail["message"]]
+            for step in detail.get("steps", []):
+                if step.get("status") not in ("done", "skipped", "planned"):
+                    lines.append(
+                        f"failed step: {step.get('step')} {step.get('target')}"
+                    )
+            if rolled := [r.get("step") for r in detail.get("rollback", [])]:
+                lines.append(f"rolled back: {' · '.join(rolled)}")
+            exit_with_error("\n  ".join(lines) + f" [{status_code}]")
         exit_with_error(f"{detail or content} [{status_code}]")
 
 
