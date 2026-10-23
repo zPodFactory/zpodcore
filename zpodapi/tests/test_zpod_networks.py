@@ -8,7 +8,6 @@ from ipaddress import IPv4Network
 
 import pytest
 from fastapi import HTTPException
-from sqlmodel import Session
 
 from zpodcommon import models as M
 from zpodcommon.enums import ZpodNetworkRouting
@@ -186,61 +185,6 @@ def fakes(monkeypatch):
         "zpodapi.zpods.zpod_network__services.ZpodEngineClient", FakeZpodEngineClient
     )
     return values
-
-
-@pytest.fixture
-def lab(session: Session):
-    """An ACTIVE zPod 'lab' owned by normaluser, with its four deploy rows."""
-    endpoint = M.Endpoint(
-        name="ep",
-        endpoints={
-            "network": {
-                "t0": "edge-t0",
-                "networks": "10.60.0.0/16",
-                "hostname": "nsx",
-                "username": "u",
-                "password": "p",
-            }
-        },
-        status="ACTIVE",
-    )
-    zcore = M.Component(
-        component_uid="zcore-13.5",
-        component_name="zcore",
-        component_version="13.5",
-        component_description="zcore",
-        filename="zcore.ova",
-        jsonfile="/library/zcore.json",
-        status="ACTIVE",
-        download_status="COMPLETED",
-        file_checksum="abc",
-    )
-    session.add_all([endpoint, zcore])
-    session.flush()
-    normal_user = session.get(M.User, 2)
-    zpod = M.Zpod(
-        name="lab",
-        domain="lab.example.com",
-        endpoint_id=endpoint.id,
-        profile="sddc",
-        status="ACTIVE",
-        password="pw",
-        permissions=[M.ZpodPermission(permission="OWNER", users=[normal_user])],
-    )
-    for subnet in ZPOD_SUBNET.subnets(new_prefix=26):
-        zpod.networks.append(M.ZpodNetwork.deploy_row(subnet))
-    zpod.components.append(
-        M.ZpodComponent(
-            component_id=zcore.id,
-            status="ACTIVE",
-            ip="10.60.60.2",
-            hostname="zcore",
-            fqdn="zcore.lab.example.com",
-        )
-    )
-    session.add(zpod)
-    session.commit()
-    return zpod
 
 
 def add(client, **body):

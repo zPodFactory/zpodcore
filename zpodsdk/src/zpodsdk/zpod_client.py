@@ -565,6 +565,62 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_nfs_add(self):
+        from zpodsdk.api.zpods import zpods_nfs_add
+
+        return zpods_nfs_add.ZpodsNfsAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_client_add(self):
+        from zpodsdk.api.zpods import zpods_nfs_client_add
+
+        return zpods_nfs_client_add.ZpodsNfsClientAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_client_remove(self):
+        from zpodsdk.api.zpods import zpods_nfs_client_remove
+
+        return zpods_nfs_client_remove.ZpodsNfsClientRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_get(self):
+        from zpodsdk.api.zpods import zpods_nfs_get
+
+        return zpods_nfs_get.ZpodsNfsGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_get_all(self):
+        from zpodsdk.api.zpods import zpods_nfs_get_all
+
+        return zpods_nfs_get_all.ZpodsNfsGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_remove(self):
+        from zpodsdk.api.zpods import zpods_nfs_remove
+
+        return zpods_nfs_remove.ZpodsNfsRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_set(self):
+        from zpodsdk.api.zpods import zpods_nfs_set
+
+        return zpods_nfs_set.ZpodsNfsSet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_status(self):
+        from zpodsdk.api.zpods import zpods_nfs_status
+
+        return zpods_nfs_status.ZpodsNfsStatus(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_permissions_get_all(self):
         from zpodsdk.api.zpods import zpods_permissions_get_all
 

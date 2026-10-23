@@ -55,6 +55,18 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `local` withdraws it; the row is `PENDING` while the `zpod_network_routing` flow runs and the
   call answers 202 with the flow run id. `dry_run: true` runs the fabric checks only. The
   previous `GET /zpods/{id}/networks` had no permission guard; it now needs zPod read access.
+- **NFS exports of a zPod's zcore: `/zpods/{id}/nfs`**, the first of the zcore storage
+  capabilities. Readers list the exports (`GET`, zcore's own `/etc/exports` lines as owner
+  `system`, NFS-01 `protected`) and the server with who has each export mounted
+  (`GET …/status`); maintainers export a folder of a storage (`POST`, body `storage`, `folder`,
+  `clients`, `options`; no `clients` means `*`, any host that reaches zcore), replace an export
+  whole (`PUT …/{storage}/{folder}`, 201 when created, 200 when replaced), add or remove one
+  client (`POST …/clients`, `DELETE …/clients/{client}`, the last one removes the export) and
+  stop exporting (`DELETE`); folders and data always stay. zboxapi's refusals come back as they
+  are (403 for NFS-01 and the `/etc/exports` lines, 400 for a storage that is not mounted).
+- **Every zcore storage route checks zboxapi first**: 409 when the zcore component is not
+  ACTIVE, 501 below zboxapi 0.2.1 (zcore 13.7, read from zboxapi's `/openapi.json` on every
+  call, never cached), 503 when zcore does not answer.
 
 #### Changed
 
@@ -114,6 +126,10 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 - `zcli zpod info` reads the VLAN id, gateway and routing of each network from the API instead
   of deriving them from the last octet of the CIDR, so user networks show correctly; the static
   routes box lists the global networks.
+- **`zcli zpod nfs`**: `list`, `status` (the server on one line, then each export with the
+  hosts mounted on it), `add <zpod> <storage> <folder> [--clients] [--options]`, `set` (clients
+  and options replaced), `remove`, `client add|remove`. `no_root_squash` is shown in orange;
+  removing the last client of an export asks first.
 
 #### Fixed
 
@@ -126,6 +142,7 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `ZpodNetworkMasquerade`, `ZpodNetworkRoutingUpdate`, `ZpodNetworkRoutingView`, the enums
   `ZpodNetworkKind`, `ZpodNetworkRouting`, `ZpodNetworkStatus`, and the `zpods_network_*`
   methods.
+- Regenerated: the `ZpodNfs*` models and the `zpods_nfs_*` methods.
 
 ### zPod Engine
 
