@@ -204,6 +204,7 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   with the new disk helpers and records both disks in `zpod_disks`;
   `vCenter.add_disk_to_vm` is replaced by `add_vdisk`, `grow_vdisk`, `remove_vdisk` (by disk
   UUID and device key).
+- zPod destroy deletes the zPod's `zpod_disks` rows (the disks go with the zcore VM).
 
 - **Prefect 3.8.3 → 3.8.8** (server image, worker image base, flow environment,
   `prefect.yaml`), for the fixes between the two: a runner no longer reschedules a flow run the

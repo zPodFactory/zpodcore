@@ -17,5 +17,8 @@ def zpod_destroy_finalize(zpod_id: int):
             network.routing = ZpodNetworkRouting.LOCAL
             network.masquerade = False
             session.add(network)
+        # The disks went with the zcore VM; their rows describe nothing any more.
+        for disk in list(zpod.disks):
+            session.delete(disk)
         session.add(zpod)
         session.commit()
