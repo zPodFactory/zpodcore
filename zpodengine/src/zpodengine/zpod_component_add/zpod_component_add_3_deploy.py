@@ -3,6 +3,7 @@ from prefect import task
 from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.lib import database
+from zpodengine.lib.datastore_floor import check_endpoint_datastore_floor
 from zpodengine.lib.ovfdeployer import ovf_deployer
 from zpodengine.lib.vcsadeployer import vcsa_deployer
 from zpodengine.zpod_component_add.zpod_component_add_utils import (
@@ -29,6 +30,13 @@ def zpod_component_add_deploy(
 
         component = zpod_component.component
         print(component)
+
+        # L1 components land on the endpoint's datastore: its floor first (D11).
+        if not (component.component_json or {}).get("component_isnested", False):
+            check_endpoint_datastore_floor(
+                zpod_component.zpod,
+                f"component add {zpod_component.zpod.name}/{zpod_component.hostname}",
+            )
 
         match component.component_name:
             case "zcore":

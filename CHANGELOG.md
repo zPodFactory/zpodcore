@@ -120,7 +120,10 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `ACTIVE`, and a new attempt repeats the steps.
 - **Datastore floor**: disk add and grow fail before any change when the zcore VM's
   datastore would keep less than `zpodfactory_datastore_min_free_pct` free (the full size
-  counts, thin or not), for everyone; every check is one line in the run's log.
+  counts, thin or not), for everyone; every check is one line in the run's log. zPod deploy
+  and every L1 component add check the endpoint's storage datastore the same way, first, with
+  nothing to add (no reliable size before an OVA import): a datastore already under the floor
+  fails the deploy before anything is created.
 
 - **`zpod_network_routing` flow**, one per routing change, named `advertise <zpod>/<network> by
   <user>` or `withdraw …`. For `global` it checks, with the full inventory printed before each
