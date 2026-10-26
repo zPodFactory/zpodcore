@@ -124,9 +124,13 @@ these steps are not:
    `uv sync` of `zpodapi` or `zpodengine` needs `gcc` and `libpq-dev` for `psycopg2`.
 3. **Prefect 2 → 3**: stop the stack, remove the Prefect volume, start, then
    `just zpodengine-deploy-all`. Flow-run history is lost; the deployments are re-registered.
-4. **zbox → zcore**: once the API is up, `just zcore-transition` (needs `jq`). It resyncs
-   the library, enables `zcore-13.5`, waits for it to be `ACTIVE` and rewrites every profile
-   whose first component is `zbox-*`. Existing zPods are untouched.
+4. **zbox → zcore**: after `git pull`, `just zcore-transition` (needs `jq` and `curl`). It
+   stops the stack, rebuilds the images with `--no-cache`, starts it in the background, waits
+   for zpodapi and the Prefect server, runs `just zpodengine-deploy-all`, and only then resyncs
+   the library, enables `zcore-13.7`, waits for it to be `ACTIVE` and rewrites every profile
+   whose first component is `zbox-*`; on a stack that was not rebuilt first the last part
+   breaks. `SKIP_REBUILD=1 just zcore-transition` reruns it on a stack already rebuilt.
+   Existing zPods are untouched.
 5. **Broadcom downloads**: set the `zpodfactory_broadcom_download_token` setting; library
    entries still using the removed `customerconnect` or `avipulse` engines end in
    `FAILED_UNSUPPORTED_ENGINE` until their URL is changed.

@@ -29,6 +29,15 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### Breaking
+
+- **`GET /zpods/{id}/networks` needs read access to the zPod.** It had no permission check;
+  a caller who is neither superadmin nor holds a permission on the zPod now gets 404.
+- **A zPod deploy and every L1 component add stop when the endpoint's datastore is low.** They
+  check `zpodfactory_datastore_min_free_pct` (default 15) first and fail, with nothing created,
+  when the datastore already has less free space than that; a deploy that ran on 0.8 can fail
+  here. Lower the setting to keep the 0.8 behaviour.
+
 ### zPod API
 
 #### Added
@@ -150,6 +159,27 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   route ids are unchanged. zPod destroy sets any user network of the soft-deleted zPod back to
   `LOCAL` and masquerade off, since the rows outlive the zPod.
 - `MgmtIp.zpod` reads the management network by kind and VLAN id instead of by position.
+- **zcore's deploy sets `disk.EnableUUID` and records its two disks**: the VM gets
+  `disk.EnableUUID` when the OVA lacks it, so zcore sees each disk's serial, the filer disk is
+  added with the new disk helpers, and both disks get a `zpod_disks` row.
+  `vCenter.add_disk_to_vm` is replaced by `add_vdisk`, `grow_vdisk`, `remove_vdisk` (by disk
+  UUID and device key).
+- **zPod destroy deletes the zPod's `zpod_disks` rows**, since the disks go with the zcore VM.
+- **Prefect 3.8.3 → 3.8.8** (server image, worker image base, flow environment,
+  `prefect.yaml`), for the fixes between the two: a runner no longer reschedules a flow run the
+  server already finished on SIGTERM, cancellation cleanup and pause-expiration monitors page
+  through all runs, the worker healthcheck stays healthy while the API is in maintenance, the
+  event persister survives a database `CancelledError`, runner names with dots are no longer
+  truncated, and a scheduled-run polling fix from 3.8.5. python-slugify moves to 9.0.0 with it,
+  and prefect-docker 0.7.3 → 0.7.4 in the flow environment and the worker image. The three carry
+  a dated `exclude-newer-package` waiver in `zpodengine/pyproject.toml` until they are older than
+  the 30-day quarantine (2026-11-05).
+- **Flow image: the Python environment is the last layer**, after the PowerShell module
+  installs, in both the builder and the main stage of `zpodengine/dockerfile`. A dependency
+  bump used to invalidate every later layer and re-download VCF.PowerCLI, PowerNSX, PowerVCF and
+  Subnet from the PowerShell Gallery (25 minutes when the gallery is slow, as on 2026-10-08);
+  now it rebuilds only the environment. Same image content, different layer order; the first
+  build after this change rebuilds the main stage once.
 
 ### zPod CLI
 
@@ -198,34 +228,15 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 - Regenerated: the `ZpodNfs*`, `ZpodDisk*` and `ZpodStorage*` models, the `zpods_nfs_*`,
   `zpods_disk*` and `zpods_storage*` methods.
 
-### zPod Engine
-
-#### Changed
-
-- zcore's deploy sets `disk.EnableUUID` on the VM when the OVA lacks it, adds the filer disk
-  with the new disk helpers and records both disks in `zpod_disks`;
-  `vCenter.add_disk_to_vm` is replaced by `add_vdisk`, `grow_vdisk`, `remove_vdisk` (by disk
-  UUID and device key).
-- zPod destroy deletes the zPod's `zpod_disks` rows (the disks go with the zcore VM).
-
-- **Prefect 3.8.3 → 3.8.8** (server image, worker image base, flow environment,
-  `prefect.yaml`), for the fixes between the two: a runner no longer reschedules a flow run the
-  server already finished on SIGTERM, cancellation cleanup and pause-expiration monitors page
-  through all runs, the worker healthcheck stays healthy while the API is in maintenance, the
-  event persister survives a database `CancelledError`, runner names with dots are no longer
-  truncated, and a scheduled-run polling fix from 3.8.5. python-slugify moves to 9.0.0 with it,
-  and prefect-docker 0.7.3 → 0.7.4 in the flow environment and the worker image. The three carry
-  a dated `exclude-newer-package` waiver in `zpodengine/pyproject.toml` until they are older than
-  the 30-day quarantine (2026-11-05).
-- **Flow image: the Python environment is the last layer**, after the PowerShell module
-  installs, in both the builder and the main stage of `zpodengine/dockerfile`. A dependency
-  bump used to invalidate every later layer and re-download VCF.PowerCLI, PowerNSX, PowerVCF and
-  Subnet from the PowerShell Gallery (25 minutes when the gallery is slow, as on 2026-10-08);
-  now it rebuilds only the environment. Same image content, different layer order; the first
-  build after this change rebuilds the main stage once.
-
 ### Stack and operations
 
+- **The appliance bootstrap enables `zcore-13.7`** (was `zcore-13.5`), the zcore with
+  zboxapi 0.2.1 that the zcore storage capabilities need, so a new appliance deploys it.
+- **`just zcore-transition` rebuilds the stack before touching profiles.** It stops the stack,
+  rebuilds the images with `--no-cache`, starts it, waits for zpodapi and the Prefect server,
+  re-registers the flows, then resyncs the library, enables `zcore-13.7` (was `zcore-13.5`) and
+  rewrites the `zbox-*` profiles, because running those steps against a stack not yet rebuilt
+  broke them. `SKIP_REBUILD=1` reruns it on a stack already rebuilt.
 - **Release workflow: the zpodcli smoke install runs from outside the project**, because
   zpodcli's `exclude-newer = "30 days"` applies to `uv pip install` too and hid the zpodsdk
   uploaded a minute earlier, which left zpodcli 0.8.0 unpublished on the first run. A manual
