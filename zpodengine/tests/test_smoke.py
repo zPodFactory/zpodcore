@@ -13,6 +13,7 @@ def test_import_flow_modules():
     from zpodengine.component_download import flow_component_download  # noqa: F401
     from zpodengine.zpod_deploy import flow_zpod_deploy  # noqa: F401
     from zpodengine.zpod_destroy import flow_zpod_destroy  # noqa: F401
+    from zpodengine.zpod_network_routing import flow_zpod_network_routing  # noqa: F401
 
 
 def test_import_prefect_docker():

@@ -53,7 +53,7 @@ class MgmtIp:
         """Load from zpod"""
         if host_id is None:
             host_id = cls.MGMT_HOST_IDS[component_name]
-        ipv4network = IPv4Network(zpod.networks[0].cidr)
+        ipv4network = IPv4Network(zpod.mgmt_network.cidr)
         return cls(ipv4network=ipv4network, host_id=host_id)
 
     @property

@@ -43,5 +43,5 @@ exclude-newer-package = { prefect = "2026-10-07T00:00:00Z", python-slugify = "20
 # Allow pytest to find zpodengine + zpodcommon, and pick up zpodcommon's own
 # tests/ since zpodcommon has no venv of its own.
 [tool.pytest.ini_options]
-pythonpath = ["src", "../zpodcommon/src"]
+pythonpath = ["src", "../zpodcommon/src", "tests"]
 testpaths = ["tests", "../zpodcommon/tests"]

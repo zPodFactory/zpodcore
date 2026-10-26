@@ -140,6 +140,29 @@ these steps are not:
 API and redeploys the flows; it prints which versions it crosses and points here.
 PyPI users: `uv tool install zpodcli==X.Y.Z` (uv provisions Python 3.14).
 
+### zPod networks (user VLANs on zcore)
+
+Besides the four networks a deploy creates (the management `/26` on the native VLAN and the
+routed `/26`s on VLANs 64, 128 and 192), a zPod owner can add VLAN networks on the zPod's
+zcore: `zcli zpod network add <zpod> --name LOCALNET111 --vlan 111 --gateway 10.42.111.1/24`.
+The VLAN id is the user's choice outside the ids zboxapi reserves on zcore (10, 20, 30 and
+64, 128, 192), the subnet too as long as it overlaps nothing of the zPod or the endpoint's pool. By default the network is `routing: LOCAL`, reachable inside the zPod only;
+`--masquerade` (or `zcli zpod network masquerade on`) gives it egress through source
+translation on zcore, which needs zboxapi 0.2.0 on the zcore. A superadmin can make it
+`GLOBAL`, advertised to the NSX fabric through a T1 static route, with
+`zcli zpod network routing <zpod> <name> global [--dry-run]`; that runs the audited
+`zpod_network_routing` flow in zpodengine, whose checks and evidence are in the Prefect run.
+The command follows the run and prints its verdict: the failing check when a guardrail refuses
+the subnet (it already exists or overlaps on the fabric), and the network goes back to `LOCAL`.
+`zcli zpod network list <zpod>` shows every network with its live status from zcore, zcore's own
+VLANs 10, 20 and 30 included (`kind: zcore`, read-only).
+
+Appliance compatibility: everything except masquerade works on the deployed zcore 13.5
+appliances (zboxapi 0.1.1 already has `/vlan`), the routing flow included. Masquerade needs
+zboxapi 0.2.0 (zcore 13.7); on an older zcore the API answers 501 up front, `add --masquerade`
+creates nothing, and the row never claims a translation zcore did not set up. Storages and NFS
+exports (later phases) need zcore 13.7 as well.
+
 ### Tests
 
 `just zpod-runtests` runs the four suites with a summary; or, per subproject,

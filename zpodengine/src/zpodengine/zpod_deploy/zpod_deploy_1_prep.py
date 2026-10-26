@@ -53,7 +53,7 @@ def zpod_deploy_prep(zpod_id: int):
 
         # Add networks to zPod
         for zpod_subnet in zpod_subnets:
-            zpod.networks.append(M.ZpodNetwork(cidr=zpod_subnet))
+            zpod.networks.append(M.ZpodNetwork.deploy_row(zpod_subnet))
 
         session.add(zpod)
         session.commit()

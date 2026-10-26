@@ -54,7 +54,7 @@ def exit_if_status(status_code, content):
                 "Run the following command to upgrade your zpodcli to the proper version:\n"  # noqa: E501
                 f"    pip install zpodcli=={expected_version}\n"
             )
-        elif status_code == 422:
+        elif status_code == 422 and isinstance(content_json.get("detail"), list):
             messages = [
                 rf"{error['msg']} \[{', '.join(error['loc'][1:])}]"
                 for error in content_json["detail"]
@@ -63,7 +63,12 @@ def exit_if_status(status_code, content):
         else:
             exit_with_error(f"{content_json['detail']} [{status_code}]")
     elif 500 <= status_code < 600:
-        exit_with_error(f"{content} [{status_code}]")
+        # A 501/503 from the API carries a message in `detail` like a 4xx does.
+        try:
+            detail = json.loads(content).get("detail")
+        except (json.JSONDecodeError, TypeError, AttributeError):
+            detail = None
+        exit_with_error(f"{detail or content} [{status_code}]")
 
 
 def unexpected_status_handler(func):
