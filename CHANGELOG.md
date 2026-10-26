@@ -29,6 +29,8 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-10-26
+
 ### Breaking
 
 - **`GET /zpods/{id}/networks` needs read access to the zPod.** It had no permission check;

@@ -1,15 +1,15 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.14.*"
 
 [options]
-exclude-newer = "2026-09-08T19:41:32.956070199Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P30D"
 
 [options.exclude-newer-package]
-python-slugify = "2026-09-09T00:00:00Z"
 prefect = "2026-10-07T00:00:00Z"
 prefect-docker = "2026-09-09T00:00:00Z"
+python-slugify = "2026-09-09T00:00:00Z"
 
 [[package]]
 name = "aiosqlite"
@@ -2008,7 +2008,7 @@ wheels = [
 
 [[package]]
 name = "zpodengine"
-version = "0.8.0"
+version = "0.9.0"
 source = { virtual = "." }
 dependencies = [
     { name = "email-validator" },
