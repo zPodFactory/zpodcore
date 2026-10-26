@@ -58,6 +58,12 @@ from .zpod_component_view_usernames_type_0_item import (
 )
 from .zpod_create import ZpodCreate
 from .zpod_create_features_type_0 import ZpodCreateFeaturesType0
+from .zpod_disk_create import ZpodDiskCreate
+from .zpod_disk_grow import ZpodDiskGrow
+from .zpod_disk_kind import ZpodDiskKind
+from .zpod_disk_run_view import ZpodDiskRunView
+from .zpod_disk_status import ZpodDiskStatus
+from .zpod_disk_view import ZpodDiskView
 from .zpod_dns_create import ZpodDnsCreate
 from .zpod_dns_update import ZpodDnsUpdate
 from .zpod_dns_view import ZpodDnsView
@@ -70,12 +76,32 @@ from .zpod_network_routing_update import ZpodNetworkRoutingUpdate
 from .zpod_network_routing_view import ZpodNetworkRoutingView
 from .zpod_network_status import ZpodNetworkStatus
 from .zpod_network_view import ZpodNetworkView
+from .zpod_nfs_client_add import ZpodNfsClientAdd
+from .zpod_nfs_client_view import ZpodNfsClientView
+from .zpod_nfs_create import ZpodNfsCreate
+from .zpod_nfs_export_removed import ZpodNfsExportRemoved
+from .zpod_nfs_export_view import ZpodNfsExportView
+from .zpod_nfs_mounted_client import ZpodNfsMountedClient
+from .zpod_nfs_status import ZpodNfsStatus
+from .zpod_nfs_update import ZpodNfsUpdate
 from .zpod_permission import ZpodPermission
 from .zpod_permission_group_add_remove import ZpodPermissionGroupAddRemove
 from .zpod_permission_mine_view import ZpodPermissionMineView
 from .zpod_permission_user_add_remove import ZpodPermissionUserAddRemove
 from .zpod_permission_view import ZpodPermissionView
 from .zpod_status import ZpodStatus
+from .zpod_storage_adopt import ZpodStorageAdopt
+from .zpod_storage_create import ZpodStorageCreate
+from .zpod_storage_folder_create import ZpodStorageFolderCreate
+from .zpod_storage_folder_removed import ZpodStorageFolderRemoved
+from .zpod_storage_folder_update import ZpodStorageFolderUpdate
+from .zpod_storage_folder_view import ZpodStorageFolderView
+from .zpod_storage_kind import ZpodStorageKind
+from .zpod_storage_operation import ZpodStorageOperation
+from .zpod_storage_operation_after_type_0 import ZpodStorageOperationAfterType0
+from .zpod_storage_operation_before_type_0 import ZpodStorageOperationBeforeType0
+from .zpod_storage_step import ZpodStorageStep
+from .zpod_storage_view import ZpodStorageView
 from .zpod_update import ZpodUpdate
 from .zpod_update_features_type_0 import ZpodUpdateFeaturesType0
 from .zpod_view import ZpodView
@@ -138,6 +164,12 @@ __all__ = (
     "ZpodComponentViewUsernamesType0Item",
     "ZpodCreate",
     "ZpodCreateFeaturesType0",
+    "ZpodDiskCreate",
+    "ZpodDiskGrow",
+    "ZpodDiskKind",
+    "ZpodDiskRunView",
+    "ZpodDiskStatus",
+    "ZpodDiskView",
     "ZpodDnsCreate",
     "ZpodDnsUpdate",
     "ZpodDnsView",
@@ -150,12 +182,32 @@ __all__ = (
     "ZpodNetworkRoutingView",
     "ZpodNetworkStatus",
     "ZpodNetworkView",
+    "ZpodNfsClientAdd",
+    "ZpodNfsClientView",
+    "ZpodNfsCreate",
+    "ZpodNfsExportRemoved",
+    "ZpodNfsExportView",
+    "ZpodNfsMountedClient",
+    "ZpodNfsStatus",
+    "ZpodNfsUpdate",
     "ZpodPermission",
     "ZpodPermissionGroupAddRemove",
     "ZpodPermissionMineView",
     "ZpodPermissionUserAddRemove",
     "ZpodPermissionView",
     "ZpodStatus",
+    "ZpodStorageAdopt",
+    "ZpodStorageCreate",
+    "ZpodStorageFolderCreate",
+    "ZpodStorageFolderRemoved",
+    "ZpodStorageFolderUpdate",
+    "ZpodStorageFolderView",
+    "ZpodStorageKind",
+    "ZpodStorageOperation",
+    "ZpodStorageOperationAfterType0",
+    "ZpodStorageOperationBeforeType0",
+    "ZpodStorageStep",
+    "ZpodStorageView",
     "ZpodUpdate",
     "ZpodUpdateFeaturesType0",
     "ZpodView",

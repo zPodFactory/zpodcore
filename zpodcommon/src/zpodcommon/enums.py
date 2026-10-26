@@ -91,6 +91,30 @@ class ZpodNetworkStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class ZpodDiskKind(str, Enum):
+    # The two disks every zPod deploy gives zcore: the system disk (SCSI 0:0) and
+    # the filer disk STORAGE01 lives on (SCSI 0:1). Grown, never removed.
+    ZPOD = "zpod"
+    # Added by a user through POST /zpods/{id}/disks.
+    USER = "user"
+
+
+class ZpodDiskStatus(str, Enum):
+    # Stored: ACTIVE, or PENDING while a disk flow runs on it (one per zPod).
+    ACTIVE = "ACTIVE"
+    PENDING = "PENDING"
+    # Derived on every list: a row whose disk zboxapi does not see, or a zcore
+    # that does not answer.
+    MISSING = "MISSING"
+    UNKNOWN = "UNKNOWN"
+
+
+class ZpodStorageKind(str, Enum):
+    # STORAGE01, built by zcore-init on the filer disk: grow only.
+    ZCORE = "zcore"
+    USER = "user"
+
+
 class ZpodPermission(str, Enum):
     OWNER = "OWNER"
     ADMIN = "ADMIN"

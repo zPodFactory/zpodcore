@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import sys
 import types
 
@@ -110,3 +111,54 @@ class ZboxApiClient(httpx.Client):
             zbox_password=zpod.password,
             **kwargs,
         )
+
+
+# zcore storage capabilities (disks, storages, NFS exports) need this zboxapi: the
+# /disk, /storage and /nfs routers came with 0.2.0, the disk inventory in the
+# rescan answer with 0.2.1 (zcore 13.7).
+ZBOXAPI_STORAGE_MIN = "0.2.1"
+
+
+class ZboxApiTooOld(Exception):
+    """zboxapi on a zPod's zcore is older than a feature needs."""
+
+    def __init__(self, zpod_name: str, found: str, minimum: str):
+        self.zpod_name, self.found, self.minimum = zpod_name, found, minimum
+        super().__init__(
+            f"zPod {zpod_name} runs zboxapi {found}; storage needs ≥ {minimum} "
+            "(zcore ≥ 13.7)."
+        )
+
+
+def version_tuple(version: str) -> tuple[int, int, int] | None:
+    """0.2.1, 0.2.1.dev3 or 0.2.1+local → (0, 2, 1); None when not a version."""
+    m = re.match(r"(\d+)\.(\d+)\.(\d+)", version or "")
+    return (int(m[1]), int(m[2]), int(m[3])) if m else None
+
+
+def zboxapi_version(zb: httpx.Client) -> str:
+    """The version zboxapi publishes in its OpenAPI document, which FastAPI serves
+    without the access token. "unknown" when it does not say."""
+    response = zb.get(url="/openapi.json")
+    if response.status_code != 200:
+        return "unknown"
+    try:
+        version = response.json().get("info", {}).get("version")
+    except (json.JSONDecodeError, AttributeError):
+        return "unknown"
+    return str(version) if version else "unknown"
+
+
+def require_zboxapi(
+    zb: httpx.Client, zpod_name: str, minimum: str = ZBOXAPI_STORAGE_MIN
+) -> str:
+    """Raise ZboxApiTooOld unless zboxapi is at least `minimum`; return its version.
+
+    Asked on every storage operation, never cached: zboxapi can be upgraded in place.
+    RequestError (zcore does not answer) is left to the caller.
+    """
+    found = zboxapi_version(zb)
+    have = version_tuple(found)
+    if have is None or have < version_tuple(minimum):
+        raise ZboxApiTooOld(zpod_name, found, minimum)
+    return found

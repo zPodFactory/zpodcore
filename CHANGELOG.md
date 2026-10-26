@@ -55,6 +55,43 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `local` withdraws it; the row is `PENDING` while the `zpod_network_routing` flow runs and the
   call answers 202 with the flow run id. `dry_run: true` runs the fabric checks only. The
   previous `GET /zpods/{id}/networks` had no permission guard; it now needs zPod read access.
+- **NFS exports of a zPod's zcore: `/zpods/{id}/nfs`**, the first of the zcore storage
+  capabilities. Readers list the exports (`GET`, zcore's own `/etc/exports` lines as owner
+  `system`, NFS-01 `protected`) and the server with who has each export mounted
+  (`GET …/status`); maintainers export a folder of a storage (`POST`, body `storage`, `folder`,
+  `clients`, `options`; no `clients` means `*`, any host that reaches zcore), replace an export
+  whole (`PUT …/{storage}/{folder}`, 201 when created, 200 when replaced), add or remove one
+  client (`POST …/clients`, `DELETE …/clients/{client}`, the last one removes the export) and
+  stop exporting (`DELETE`); folders and data always stay. zboxapi's refusals come back as they
+  are (403 for NFS-01 and the `/etc/exports` lines, 400 for a storage that is not mounted).
+- **Every zcore storage route checks zboxapi first**: 409 when the zcore component is not
+  ACTIVE, 501 below zboxapi 0.2.1 (zcore 13.7, read from zboxapi's `/openapi.json` on every
+  call, never cached), 503 when zcore does not answer.
+- **Virtual disks of a zPod's zcore: `/zpods/{id}/disks`.** Readers list the disks of the
+  zcore VM (`GET`): device, SCSI unit, size in GiB, what zcore sees on it (`system`,
+  `protected`, `blank`, `foreign`, `in-use` and the storage), kind (`zpod` for the deploy's
+  system and filer disks, `user`) and status (`ACTIVE`, `PENDING`, or derived: `MISSING`,
+  `UNKNOWN`). Maintainers add a thin disk (`POST`, `size_gb`), grow one (`PUT
+  …/{device}/grow`, the filer disk included, never the system disk) and remove a blank or
+  foreign disk they added (`DELETE …/{device}`, 409 while in use, 403 for the deploy's disks),
+  each answering 202 with a zpodengine run, followed with `GET …/disks/runs/{flow_run_id}`.
+  One disk change at a time per zPod (409); a disk is at most `zpodfactory_zpod_disk_max_gb`
+  (default 2048 GiB, 422; superadmin may exceed it).
+- **`zpod_disks` table** (migration `4d2e8b1c9f6a`): device key, SCSI unit, disk UUID and size
+  per disk. A row is matched to its device in zcore by serial, the disk's vSphere UUID
+  (`disk.EnableUUID`), so a device name that shifts after a reboot changes nothing. An
+  existing zPod's two deploy disks are recorded by its first disk change.
+- Settings `zpodfactory_zpod_disk_max_gb` (2048) and `zpodfactory_datastore_min_free_pct` (15).
+- **Storages of a zPod's zcore: `/zpods/{id}/storages`**, the filesystems zcore mounts under
+  `/FILER`, read live from zboxapi (no table). Readers list them with their folders (kind
+  `zcore` for STORAGE01, `user`); maintainers create one on a blank disk of the zPod (`POST`,
+  `disk`, `lvm`, `name`; raw by default), adopt an existing filesystem again (`POST …/adopt`),
+  grow one online into the space a disk grow made (`PUT …/{name}/grow`, STORAGE01 included),
+  delete one (`DELETE`, the filesystem stays on the disk; 409 while exported), and add,
+  change (`owner`, `mode`, `recursive`) and remove folders (`…/folders/{folder}`, `force` for
+  a folder that is not empty). `dry_run` and `verbose` pass through; the answer is zboxapi's
+  step table. A disk is formatted or adopted only when a `zpod_disks` row of the zPod has its
+  serial (403 otherwise).
 
 #### Changed
 
@@ -72,6 +109,21 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 ### zPod Engine
 
 #### Added
+
+- **`zpod_disk_add`, `zpod_disk_grow`, `zpod_disk_remove` flows**, one per disk change,
+  named `add disk <zpod>/<size>GiB by <user>` and alike. Each checks zboxapi ≥ 0.2.1 before
+  touching vSphere. Add puts a thin disk on the next free SCSI unit and finds it in zcore by
+  serial in the rescan answer (no serial: the disk is removed and the run asks for one power
+  cycle of zcore); grow and remove find the disk by UUID and refuse a device key vCenter
+  reused for another disk; remove detaches the device in zcore first, then deletes the disk
+  with its file. A failed add leaves nothing behind; a failed grow or remove leaves the row
+  `ACTIVE`, and a new attempt repeats the steps.
+- **Datastore floor**: disk add and grow fail before any change when the zcore VM's
+  datastore would keep less than `zpodfactory_datastore_min_free_pct` free (the full size
+  counts, thin or not), for everyone; every check is one line in the run's log. zPod deploy
+  and every L1 component add check the endpoint's storage datastore the same way, first, with
+  nothing to add (no reliable size before an OVA import): a datastore already under the floor
+  fails the deploy before anything is created.
 
 - **`zpod_network_routing` flow**, one per routing change, named `advertise <zpod>/<network> by
   <user>` or `withdraw …`. For `global` it checks, with the full inventory printed before each
@@ -114,6 +166,23 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 - `zcli zpod info` reads the VLAN id, gateway and routing of each network from the API instead
   of deriving them from the last octet of the CIDR, so user networks show correctly; the static
   routes box lists the global networks.
+- **`zcli zpod nfs`**: `list`, `status` (the server on one line, then each export with the
+  hosts mounted on it), `add <zpod> <storage> <folder> [--clients] [--options]`, `set` (clients
+  and options replaced), `remove`, `client add|remove`. `no_root_squash` is shown in orange;
+  removing the last client of an export asks first.
+- **`zcli zpod disk`**: `list [--kind zpod,user]`, `add --size`, `grow <device> --size`,
+  `remove <device> [-y]`; changes follow the zpodengine run (`--no-wait` returns at once) and
+  print how it ended, exit code 1 on failure. Sizes in GiB everywhere (`format_gib`).
+- **`zcli zpod storage`**: `list [--kind zcore,user]` (one table: each storage with its
+  usage, mount, size, partition, layout and disk, its folders as a tree under it with their
+  export, clients and access; the NFS server in the caption), `create --disk [--lvm] [--name]
+  [--dry-run]`, `adopt --device`, `grow <name>`, `delete <name>`, `folder
+  list|add|set|remove`. Composed: `add --size [--lvm]` (disk add, then storage create),
+  `grow <name> --size` (disk grow, then storage grow), `remove <name> [-y]` (storage delete,
+  then disk remove with its data, one confirmation).
+- A failed zboxapi storage plan prints its message, the failed step and what was rolled back.
+- `zcli zpod info` has a Storage panel (`--fields s`, on by default): zcore's storages with
+  size, usage, disk and NFS exports with their clients; on an older zcore it says why not.
 
 #### Fixed
 
@@ -126,10 +195,18 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `ZpodNetworkMasquerade`, `ZpodNetworkRoutingUpdate`, `ZpodNetworkRoutingView`, the enums
   `ZpodNetworkKind`, `ZpodNetworkRouting`, `ZpodNetworkStatus`, and the `zpods_network_*`
   methods.
+- Regenerated: the `ZpodNfs*`, `ZpodDisk*` and `ZpodStorage*` models, the `zpods_nfs_*`,
+  `zpods_disk*` and `zpods_storage*` methods.
 
 ### zPod Engine
 
 #### Changed
+
+- zcore's deploy sets `disk.EnableUUID` on the VM when the OVA lacks it, adds the filer disk
+  with the new disk helpers and records both disks in `zpod_disks`;
+  `vCenter.add_disk_to_vm` is replaced by `add_vdisk`, `grow_vdisk`, `remove_vdisk` (by disk
+  UUID and device key).
+- zPod destroy deletes the zPod's `zpod_disks` rows (the disks go with the zcore VM).
 
 - **Prefect 3.8.3 → 3.8.8** (server image, worker image base, flow environment,
   `prefect.yaml`), for the fixes between the two: a runner no longer reschedules a flow run the

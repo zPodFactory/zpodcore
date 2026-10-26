@@ -453,6 +453,48 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_disk_add(self):
+        from zpodsdk.api.zpods import zpods_disk_add
+
+        return zpods_disk_add.ZpodsDiskAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_get(self):
+        from zpodsdk.api.zpods import zpods_disk_get
+
+        return zpods_disk_get.ZpodsDiskGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_grow(self):
+        from zpodsdk.api.zpods import zpods_disk_grow
+
+        return zpods_disk_grow.ZpodsDiskGrow(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_remove(self):
+        from zpodsdk.api.zpods import zpods_disk_remove
+
+        return zpods_disk_remove.ZpodsDiskRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disk_run(self):
+        from zpodsdk.api.zpods import zpods_disk_run
+
+        return zpods_disk_run.ZpodsDiskRun(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_disks_get_all(self):
+        from zpodsdk.api.zpods import zpods_disks_get_all
+
+        return zpods_disks_get_all.ZpodsDisksGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_dns_add(self):
         from zpodsdk.api.zpods import zpods_dns_add
 
@@ -565,6 +607,62 @@ class ZpodClient:
 
     @property
     @cache  # noqa: B019
+    def zpods_nfs_add(self):
+        from zpodsdk.api.zpods import zpods_nfs_add
+
+        return zpods_nfs_add.ZpodsNfsAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_client_add(self):
+        from zpodsdk.api.zpods import zpods_nfs_client_add
+
+        return zpods_nfs_client_add.ZpodsNfsClientAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_client_remove(self):
+        from zpodsdk.api.zpods import zpods_nfs_client_remove
+
+        return zpods_nfs_client_remove.ZpodsNfsClientRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_get(self):
+        from zpodsdk.api.zpods import zpods_nfs_get
+
+        return zpods_nfs_get.ZpodsNfsGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_get_all(self):
+        from zpodsdk.api.zpods import zpods_nfs_get_all
+
+        return zpods_nfs_get_all.ZpodsNfsGetAll(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_remove(self):
+        from zpodsdk.api.zpods import zpods_nfs_remove
+
+        return zpods_nfs_remove.ZpodsNfsRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_set(self):
+        from zpodsdk.api.zpods import zpods_nfs_set
+
+        return zpods_nfs_set.ZpodsNfsSet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_nfs_status(self):
+        from zpodsdk.api.zpods import zpods_nfs_status
+
+        return zpods_nfs_status.ZpodsNfsStatus(self._client)
+
+    @property
+    @cache  # noqa: B019
     def zpods_permissions_get_all(self):
         from zpodsdk.api.zpods import zpods_permissions_get_all
 
@@ -606,6 +704,69 @@ class ZpodClient:
         from zpodsdk.api.zpods import zpods_permissions_users_remove
 
         return zpods_permissions_users_remove.ZpodsPermissionsUsersRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_adopt(self):
+        from zpodsdk.api.zpods import zpods_storage_adopt
+
+        return zpods_storage_adopt.ZpodsStorageAdopt(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_create(self):
+        from zpodsdk.api.zpods import zpods_storage_create
+
+        return zpods_storage_create.ZpodsStorageCreate(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_delete(self):
+        from zpodsdk.api.zpods import zpods_storage_delete
+
+        return zpods_storage_delete.ZpodsStorageDelete(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_folder_add(self):
+        from zpodsdk.api.zpods import zpods_storage_folder_add
+
+        return zpods_storage_folder_add.ZpodsStorageFolderAdd(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_folder_remove(self):
+        from zpodsdk.api.zpods import zpods_storage_folder_remove
+
+        return zpods_storage_folder_remove.ZpodsStorageFolderRemove(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_folder_set(self):
+        from zpodsdk.api.zpods import zpods_storage_folder_set
+
+        return zpods_storage_folder_set.ZpodsStorageFolderSet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_get(self):
+        from zpodsdk.api.zpods import zpods_storage_get
+
+        return zpods_storage_get.ZpodsStorageGet(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storage_grow(self):
+        from zpodsdk.api.zpods import zpods_storage_grow
+
+        return zpods_storage_grow.ZpodsStorageGrow(self._client)
+
+    @property
+    @cache  # noqa: B019
+    def zpods_storages_get_all(self):
+        from zpodsdk.api.zpods import zpods_storages_get_all
+
+        return zpods_storages_get_all.ZpodsStoragesGetAll(self._client)
 
     @property
     @cache  # noqa: B019

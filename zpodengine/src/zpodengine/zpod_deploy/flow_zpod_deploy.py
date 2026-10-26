@@ -3,6 +3,7 @@ from prefect import flow
 from zpodcommon import models as M
 from zpodcommon.enums import ZpodStatus
 from zpodengine.lib import database
+from zpodengine.lib.datastore_floor import zpod_datastore_floor
 from zpodengine.lib.options import task_options_setup
 from zpodengine.zpod_component_add.zpod_component_add import (
     zpod_component_add,
@@ -50,6 +51,12 @@ def flow_zpod_deploy(
     enet_name: str | None,
 ):
     options = task_options_setup(prefix=zpod_name)
+
+    # The endpoint's datastore keeps its free-space floor (D11): checked before
+    # anything is created, so a full datastore fails the deploy at once.
+    zpod_datastore_floor.with_options(
+        **options(name="datastore floor"),
+    ).submit(zpod_id=zpod_id, what=f"zpod deploy {zpod_name}").result()
 
     # Prep
     prep = zpod_deploy_prep.with_options(

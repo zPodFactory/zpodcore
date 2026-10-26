@@ -10,10 +10,13 @@ from rich.spinner import Spinner
 
 from zpodcli.cmd import (
     zpod_component_cli,
+    zpod_disk_cli,
     zpod_dns_cli,
     zpod_info_cli,
     zpod_network_cli,
+    zpod_nfs_cli,
     zpod_permission_cli,
+    zpod_storage_cli,
 )
 from zpodcli.lib.utils import (
     JsonOption,
@@ -36,10 +39,13 @@ app = typer.Typer(help="Manage zPods")
 FAILED_STATUSES = ("DEPLOY_FAILED", "DESTROY_FAILED")
 FINAL_STATUSES = ("ACTIVE", *FAILED_STATUSES)
 app.add_typer(zpod_component_cli.app, name="component")
+app.add_typer(zpod_disk_cli.app, name="disk")
 app.add_typer(zpod_dns_cli.app, name="dns")
 app.add_typer(zpod_network_cli.app, name="network")
+app.add_typer(zpod_nfs_cli.app, name="nfs")
 app.add_typer(zpod_info_cli.app)
 app.add_typer(zpod_permission_cli.app, name="permission")
+app.add_typer(zpod_storage_cli.app, name="storage")
 
 
 def generate_table(zpods: list[ZpodView], return_table=False):
