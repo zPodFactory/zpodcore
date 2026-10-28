@@ -29,6 +29,8 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+## [0.9.1] — 2026-10-28
+
 ### zPod API
 
 #### Fixed

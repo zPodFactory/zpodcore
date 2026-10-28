@@ -1,6 +1,6 @@
 [project]
 name = "zpodengine"
-version = "0.9.0"
+version = "0.9.1"
 description = ""
 authors = [
     { name = "Kelby Valenti", email = "kelby.valenti@gmail.com" },

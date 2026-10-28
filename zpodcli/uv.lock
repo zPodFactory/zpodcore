@@ -550,7 +550,7 @@ wheels = [
 
 [[package]]
 name = "zpodcli"
-version = "0.9.0"
+version = "0.9.1"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
@@ -583,7 +583,7 @@ dev = [
 
 [[package]]
 name = "zpodsdk"
-version = "0.9.0"
+version = "0.9.1"
 source = { editable = "../zpodsdk" }
 dependencies = [
     { name = "attrs" },
