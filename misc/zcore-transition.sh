@@ -39,7 +39,7 @@ done
 # HOST:PORT from .env (just loads it); 0.0.0.0 means the local host.
 local_url() { echo "http://${1/0.0.0.0/127.0.0.1}$2"; }
 API_URL="$(local_url "${ZPODAPI_HOSTPORT:-0.0.0.0:8000}" /openapi.json)"
-PREFECT_URL="$(local_url "${ZPODENGINE_HOSTPORT:-0.0.0.0:8060}" /api/health)"
+PREFECT_URL="$(local_url "${ZPODENGINE_ADMIN_HOSTPORT:-127.0.0.1:8061}" /api/health)"
 
 wait_for() {  # wait_for <name> <url>
   local deadline=$(( SECONDS + STACK_TIMEOUT ))

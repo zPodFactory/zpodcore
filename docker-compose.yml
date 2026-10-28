@@ -60,10 +60,24 @@ services:
       - PREFECT_SERVER_API_HOST=0.0.0.0
       - TELEMETRY_ENABLED=false
     ports:
-      - ${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}:4200
+      # Full access, for host tooling (just zpodengine-cmd); the public port is zpodengineproxy.
+      - ${ZPODENGINE_ADMIN_HOSTPORT:-127.0.0.1:8061}:4200
     restart: always
     volumes:
       - zpod_vol_prefect:/root/.prefect
+
+  # Prefect UI and API, read-only except for cancelling runs
+  zpodengineproxy:
+    container_name: ${COMPOSE_PROJECT_NAME}-zpodengineproxy
+    image: nginx:1.28-alpine
+    depends_on:
+      - zpodengineserver
+    ports:
+      - ${ZPODENGINE_HOSTPORT:-127.0.0.1:4200}:4200
+    restart: always
+    volumes:
+      - ./zpodengine/proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./zpodengine/proxy/prefect_ro.js:/etc/nginx/prefect_ro.js:ro
 
   # Prefect Worker
   zpodengineworker:
