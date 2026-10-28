@@ -3,7 +3,7 @@ from ipaddress import IPv4Network
 from prefect import task
 
 from zpodcommon import models as M
-from zpodcommon.enums import ZpodStatus
+from zpodcommon.enums import ZpodNetworkKind, ZpodStatus
 from zpodcommon.lib.dbutils import DBUtils
 from zpodengine.lib import database
 from zpodengine.lib.network import (
@@ -23,6 +23,22 @@ def zpod_deploy_prep(zpod_id: int):
         if not zpod.domain:
             domain = DBUtils.get_setting_value("zpodfactory_default_domain")
             zpod.domain = f"{zpod.name}.{domain}"
+
+        # Idempotent: a re-run of this flow run (Retry in Prefect, a crashed run
+        # run again) keeps the /24 the first run allocated. Allocating again gave
+        # the zPod a second /24 and 4 more rows, which the (zpod_id, vlan_id)
+        # unique constraint of 0.9.0 now refuses.
+        deploy_networks = [
+            n for n in zpod.networks if n.kind == ZpodNetworkKind.ZPOD.value
+        ]
+        if deploy_networks:
+            print(
+                f"zPod {zpod.name} already has its networks "
+                f"({', '.join(str(n.cidr) for n in deploy_networks)}): reusing them"
+            )
+            session.add(zpod)
+            session.commit()
+            return
 
         # Check for custom subnet feature flag
         custom_subnet = DBUtils.get_setting_value(f"ff_zpod_{zpod.name}_subnet")

@@ -29,6 +29,42 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod API
+
+#### Fixed
+
+- **The upgrade to 0.9.0 no longer fails on zPods with duplicate networks.** A zPod deploy
+  whose flow run ran again (a Retry in Prefect, or a crashed run run again) took a new /24 each
+  time. The 0.9.0 network migration (`9a1c4e7b2d3f`) failed on those zPods and left the API
+  answering 500. It now keeps each zPod's first /24, the one zpodcore used, and removes the
+  others. Instances already at `4d2e8b1c9f6a` need nothing.
+- `prestart.sh` stops at a failed migration instead of loading data into an old schema.
+- Downgrading `9a1c4e7b2d3f` refuses while live zPods have user VLANs, which the 0.8 schema
+  cannot hold, and lists the `zcli zpod network remove` to run first: removing them that way
+  also cleans their NSX routes and zcore interfaces. Before, they were kept and broke the
+  next upgrade.
+
+### zPod Engine
+
+#### Fixed
+
+- **Deploy prep reuses the zPod's networks when its flow run runs again** instead of
+  allocating another /24.
+
+### Stack and operations
+
+#### Added
+
+- `just zpodcore-db-dump` writes a full dump of the database to
+  `./zpodcore-db-<UTC timestamp>.sql`, readable by its owner only and ignored by git.
+- `just zpod-update` also takes `main` (the default: checks out main and pulls it) or any git
+  ref, such as the `git describe --tags` it prints to come back to, besides a release version.
+- `just zpodcore-db-restore <dump>` replaces the database with a dump, after asking to type the
+  database name. It dumps the current database first and leaves the stack stopped.
+- `just zpodcore-logs-dump` bundles the logs of every stack service, with the release and the
+  containers' state, into `./zpodcore-logs-<UTC timestamp>.tar.gz` for a support request.
+  `just zpodcore-logs-dump 24h` keeps only the last day.
+
 ## [0.9.0] — 2026-10-26
 
 ### Breaking

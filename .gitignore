@@ -41,3 +41,9 @@ misc/*
 !misc/zcore-transition.sh
 !misc/zdnsmasqservers-watchdog.py
 !misc/zdnsmasqservers.service
+
+# Database dumps (just zpodcore-db-dump): they hold passwords and API tokens
+zpodcore-db-*.sql*
+
+# Log bundles (just zpodcore-logs-dump): logs can hold tokens
+zpodcore-logs-*.tar.gz*

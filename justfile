@@ -35,6 +35,64 @@ alembic-upgrade rev="head":
     cd /zpodcore/scripts/alembic && \
     alembic upgrade {{rev}}"
 
+# Dump the whole database to ./zpodcore-db-<UTC timestamp>.sql (holds secrets)
+zpodcore-db-dump:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  db="${ZPODCORE_POSTGRES_DSN##*/}"
+  docker compose exec -T zpodpostgres pg_isready -q -h 127.0.0.1 -U postgres -d "$db" 2>/dev/null \
+    || { echo "zpodpostgres is not running: start it with docker compose up -d zpodpostgres" >&2; exit 1; }
+  file="zpodcore-db-$(date -u +%Y%m%dT%H%M%SZ).sql"
+  # Written aside first, so a failed dump never leaves a file that looks complete.
+  docker compose exec -T zpodpostgres pg_dump -U postgres -d "$db" > "$file.partial"
+  mv "$file.partial" "$file"
+  chmod 600 "$file"
+  echo "$file ($(du -h "$file" | cut -f1)): restore it with just zpodcore-db-restore $file"
+
+# Replace the database with a dump from zpodcore-db-dump (asks first, dumps the current one)
+zpodcore-db-restore file:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  file="$1"
+  db="${ZPODCORE_POSTGRES_DSN##*/}"
+  [ -s "$file" ] || { echo "$file: no such dump" >&2; exit 1; }
+  grep -q '^-- PostgreSQL database dump complete' "$file" \
+    || { echo "$file is incomplete: pg_dump did not finish writing it" >&2; exit 1; }
+  # The schema revision is the row right after the alembic_version COPY header.
+  dumped="$(awk 'f { print; exit } /^COPY public.alembic_version /{ f = 1 }' "$file")"
+  head="$(cd zpodapi/scripts/alembic/versions && python3 -c 'import re, sys
+  revs, downs = set(), set()
+  for f in sys.argv[1:]:
+      t = open(f).read()
+      revs |= set(re.findall(r"^revision = \"(\w+)\"", t, re.M))
+      downs |= set(re.findall(r"^down_revision = \"(\w+)\"", t, re.M))
+  print(" ".join(sorted(revs - downs)))' *.py)"
+  echo "Dump schema: ${dumped:-unknown}; this checkout needs: $head"
+  echo "This replaces the whole '$db' database. zpodapi and the zPod Engine stop."
+  read -r -p "Type the database name ($db) to go on: " answer
+  [ "$answer" = "$db" ] || { echo "Nothing changed." >&2; exit 1; }
+  # The database may be stopped with the rest of the stack: start it, wait until it answers.
+  docker compose up -d zpodpostgres
+  for i in $(seq 1 30); do
+    docker compose exec -T zpodpostgres pg_isready -q -h 127.0.0.1 -U postgres -d "$db" 2>/dev/null && break
+    [ "$i" = 30 ] && { echo "zpodpostgres did not answer: nothing changed" >&2; exit 1; }
+    sleep 2
+  done
+  just zpodcore-db-dump
+  services="$(docker compose config --services | grep -vx zpodpostgres)"
+  docker compose stop $services
+  psql() { docker compose exec -T zpodpostgres psql -U postgres -v ON_ERROR_STOP=1 "$@"; }
+  psql -q -d postgres -c "DROP DATABASE \"$db\" WITH (FORCE)" -c "CREATE DATABASE \"$db\""
+  psql -q -d "$db" < "$file" > /dev/null
+  echo "Restored $file. The stack is still stopped."
+  if [ "$dumped" = "$head" ]; then
+    echo "The dump matches this checkout: just zpodcore-start-background"
+  else
+    echo "The dump is at $dumped, not $head: go back to the code it was taken on"
+    echo "(just zpod-update <git describe --tags noted then>). Starting this checkout"
+    echo "would migrate it again."
+  fi
+
 # Run zcli command
 [no-exit-message]
 zcli *args:
@@ -49,8 +107,8 @@ zpod-release-check:
   python3 {{justfile_directory()}}/tools/release.py --check
   python3 {{justfile_directory()}}/tools/version_markers.py --check
 
-# Update the stack to a release version
-zpod-update version:
+# Update the stack to main, a release (0.9.1) or any git ref (v0.9.0-2-g3f85190)
+zpod-update target="main":
   #!/usr/bin/env bash
   set -euo pipefail
   cd {{justfile_directory()}}
@@ -60,15 +118,24 @@ zpod-update version:
     exit 1
   fi
 
-  current="$(git describe --tags --abbrev=0 2>/dev/null || echo none)"
+  target="{{target}}"
+  current="$(git describe --tags 2>/dev/null || echo none)"
   cat <<EOF
-  Updating zpodcore ${current} -> v{{version}}.
+  Updating zpodcore ${current} -> ${target}. To come back here: just zpod-update ${current}
   Read "Upgrading" in README.md first when crossing a minor version (0.7.x -> 0.8.x needs a
   database backup, a Prefect volume wipe and the zcore transition).
   EOF
 
-  git fetch origin tag v{{version}} --no-tags
-  git checkout tags/v{{version}}
+  if [ "$target" = main ]; then
+    git checkout main
+    git pull --ff-only origin main
+  elif [[ "$target" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    git fetch origin tag "v$target" --no-tags
+    git checkout "tags/v$target"
+  else
+    git fetch origin --tags
+    git checkout "$target"
+  fi
   docker compose build
   docker compose down
   docker compose up -d
@@ -205,6 +272,36 @@ zpodcore-start-background $COLUMNS=rich_cols:
 # Stop Docker Environment
 zpodcore-stop:
   docker compose down
+
+# Bundle the stack's logs into ./zpodcore-logs-<UTC timestamp>.tar.gz, for a support request (since: 24h, 2026-10-28, ...)
+zpodcore-logs-dump since="":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  since="$1"
+  name="zpodcore-logs-$(date -u +%Y%m%dT%H%M%SZ)"
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+  mkdir "$tmp/$name"
+  services="$(docker compose config --services)"
+  for service in $services; do
+    docker compose logs --no-color --timestamps ${since:+--since "$since"} "$service" \
+      > "$tmp/$name/$service.log" 2>&1 || true
+  done
+  {
+    echo "zpodcore $(git describe --tags 2>/dev/null || echo unknown), logs since: ${since:-the start}"
+    git status --short
+    echo
+    docker compose ps -a
+    echo
+    docker version --format 'docker {{{{.Server.Version}}'
+    docker compose version
+  } > "$tmp/$name/stack.txt" 2>&1
+  # Written aside first, so a failed run never leaves a file that looks complete.
+  tar -czf "$name.tar.gz.partial" -C "$tmp" "$name"
+  mv "$name.tar.gz.partial" "$name.tar.gz"
+  chmod 600 "$name.tar.gz"
+  echo "$name.tar.gz ($(du -h "$name.tar.gz" | cut -f1)): logs of $(wc -w <<<"$services") services."
+  echo "Logs can hold tokens or passwords: check it before sharing it."
 
 # Migrate all profiles from zbox-* to the new zcore component
 zcore-transition:
