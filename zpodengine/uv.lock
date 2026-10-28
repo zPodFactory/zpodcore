@@ -2020,6 +2020,7 @@ dependencies = [
     { name = "pyopenssl" },
     { name = "python-dotenv" },
     { name = "pyvmomi" },
+    { name = "pyyaml" },
     { name = "sqlmodel" },
 ]
 
@@ -2043,6 +2044,7 @@ requires-dist = [
     { name = "pyopenssl", specifier = "==26.4.0" },
     { name = "python-dotenv", specifier = "==1.2.3" },
     { name = "pyvmomi", specifier = "==9.1.0.0" },
+    { name = "pyyaml", specifier = "==6.0.3" },
     { name = "sqlmodel", specifier = "==0.0.39" },
 ]
 
