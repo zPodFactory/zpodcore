@@ -20,7 +20,6 @@ caller falls back to a plain ``govc import.ova`` if anything raises.
 import json
 import time
 
-from jinja2 import Template
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
@@ -28,6 +27,7 @@ from zpodcommon import models as M
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.lib import database
 from zpodengine.lib.commands import cmd_execute
+from zpodengine.lib.deploy_spec import render_deploy_spec
 
 STAGING_FOLDER = "components-staging"
 STATUS_FIELD = "zpodfactory_staging_status"
@@ -198,7 +198,7 @@ def build_staging_options(govc_spec: dict, staging_network: str) -> dict:
         "zpod_sshkey": "",
         "zpod_portgroup": staging_network,
     }
-    options = json.loads(Template(json.dumps(govc_spec)).render(**neutral))
+    options = render_deploy_spec(govc_spec, **neutral)
     options["PowerOn"] = False
     options["MarkAsTemplate"] = True
     options["InjectOvfEnv"] = False

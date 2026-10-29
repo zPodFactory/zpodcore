@@ -822,11 +822,19 @@ class vCenter:
         Read at power-on. Answers whether it had to be set."""
         if self.disk_enable_uuid(vm):
             return False
+        self.set_extra_config(vm, {"disk.EnableUUID": "TRUE"})
+        return True
+
+    @staticmethod
+    def set_extra_config(vm: vim.VirtualMachine, values: dict[str, str]) -> None:
+        """Set VMX extraConfig keys (guestinfo.*, ...) in one reconfigure."""
         spec = vim.vm.ConfigSpec(
-            extraConfig=[vim.option.OptionValue(key="disk.EnableUUID", value="TRUE")]
+            extraConfig=[
+                vim.option.OptionValue(key=key, value=value)
+                for key, value in values.items()
+            ]
         )
         task.WaitForTask(vm.ReconfigVM_Task(spec))
-        return True
 
     @staticmethod
     def vm_datastore(vm: vim.VirtualMachine) -> vim.Datastore:

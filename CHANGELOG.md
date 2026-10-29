@@ -29,6 +29,23 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod Engine
+
+#### Added
+
+- **Library components can set `guestinfo.*` keys on the VM before its first power-on**, with
+  a new optional `component_deploy_extra_config` in the library JSON. The guest reads them at
+  boot, so stock OVAs come up with their zPod IP, FQDN, DNS and SSH key: Talos, cloud-init
+  images (Ubuntu, Photon OS) through the VMware datasource, and Ignition images (Fedora CoreOS,
+  Red Hat CoreOS, Flatcar). A value is a Jinja
+  string, or a YAML, JSON or `#cloud-config` document written as nested JSON, which zpodengine
+  renders, base64-encodes and pairs with its `.encoding` key. Only `guestinfo.*` keys are
+  accepted, and a bad value fails the deploy before a VM exists. It works with
+  `ff_endpoint_ova_staging`: each clone gets its own keys, the staged template none. Components
+  without the key deploy exactly as before. A library entry that uses it needs this release:
+  an older zpodengine ignores the key.
+- Deploy spec templates have a `b64encode` Jinja filter (`{% filter b64encode %}…{% endfilter %}`).
+
 ## [0.9.1] — 2026-10-28
 
 ### zPod API

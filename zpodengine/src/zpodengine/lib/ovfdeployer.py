@@ -1,13 +1,13 @@
 import json
 import urllib.parse
 
-from jinja2 import Template
-
 from zpodcommon import models as M
 from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network_utils import MgmtIp
+from zpodcommon.lib.vmware import vCenter
 from zpodengine import settings
 from zpodengine.lib.commands import cmd_execute
+from zpodengine.lib.deploy_spec import render_deploy_spec, render_extra_config
 from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN
 
 
@@ -105,29 +105,39 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         )
         zpod_component_hostname = zpod_component.fqdn
 
-    t = Template(json.dumps(govc_spec))
-    govc_spec_render = t.render(
-        zpod_hostname=zpod_component_hostname,
-        zpod_ipaddress=zpod_component.ip,
-        zpod_netmask=zpod_netmask,
-        zpod_netprefix=ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,
-        zpod_gateway=component_gateway,
-        zpod_dns=zpod_dns,
-        zpod_nfs=zpod_zcore_ipaddress,
-        zpod_ntp=zpodfactory_host,
-        zpod_domain=zpod.domain,
-        zpod_password=zpod.password,
-        zpod_sshkey=zpodfactory_ssh_key,
-        zpod_portgroup=zpod_portgroup_path,
+    variables = {
+        "zpod_hostname": zpod_component_hostname,
+        "zpod_ipaddress": zpod_component.ip,
+        "zpod_netmask": zpod_netmask,
+        "zpod_netprefix": ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,
+        "zpod_gateway": component_gateway,
+        "zpod_dns": zpod_dns,
+        "zpod_nfs": zpod_zcore_ipaddress,
+        "zpod_ntp": zpodfactory_host,
+        "zpod_domain": zpod.domain,
+        "zpod_password": zpod.password,
+        "zpod_sshkey": zpodfactory_ssh_key,
+        "zpod_portgroup": zpod_portgroup_path,
+    }
+    govc_spec_render = render_deploy_spec(govc_spec, **variables)
+
+    # guestinfo.* keys set before the first power-on (component_deploy_extra_config).
+    # Rendered first, so a bad value fails the deploy before any VM exists. The VM
+    # must come up powered off: the deploy step powers it on afterwards.
+    extra_config = render_extra_config(
+        component.component_json.get("component_deploy_extra_config"), **variables
     )
+    if extra_config:
+        govc_spec_render["PowerOn"] = False
 
     print("govc ovf property options generated file")
-    print(json.dumps(json.loads(govc_spec_render), indent=2))
+    print(json.dumps(govc_spec_render, indent=2))
 
     # FF (Feature Flag): stage the OVA once into a VM Template and clone it for
     # every subsequent L1 deployment instead of re-uploading it each time.
     # Only L1 components (component_isnested is False) land on the endpoint
     # vCenter. Any failure falls back to the direct OVA import below.
+    deployed = False
     if (
         isnested is False
         and DBUtils.get_setting_value("ff_endpoint_ova_staging") == "true"
@@ -142,23 +152,58 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
                 govc_spec=govc_spec,
                 real_property_values={
                     pm["Key"]: pm["Value"]
-                    for pm in json.loads(govc_spec_render).get("PropertyMapping", [])
+                    for pm in govc_spec_render.get("PropertyMapping", [])
                 },
                 vm_name=vm_name,
                 vapp_pool_name=resource_pool,
                 portgroup_name=zpod_portgroup,
                 govc_url=url,
             )
-            return
+            deployed = True
         except Exception as e:
             print(
                 "[ff_endpoint_ova_staging] staging/clone failed, falling back to "
                 f"direct OVA import: {e}"
             )
 
-    options_filename = f"/tmp/{zpod_component.fqdn}.json"
+    if not deployed:
+        govc_import(
+            vm_name=vm_name,
+            url=url,
+            resource_pool=resource_pool,
+            datastore=datastore,
+            datacenter=datacenter,
+            component=component,
+            options=govc_spec_render,
+            options_filename=f"/tmp/{zpod_component.fqdn}.json",
+        )
+
+    if extra_config:
+        auth = vCenter.auth_by_zpod if isnested else vCenter.auth_by_zpod_endpoint
+        with auth(zpod=zpod) as vc:
+            vm = vc.get_vm(name=vm_name)
+            if vm is None:
+                raise RuntimeError(f"{vm_name} not found to set its extra config")
+            # Key names and sizes only: userdata can hold the zPod password.
+            for key, value in extra_config.items():
+                print(f"Set extraConfig {key} ({len(value)} chars)")
+            vc.set_extra_config(vm, extra_config)
+
+
+def govc_import(
+    *,
+    vm_name,
+    url,
+    resource_pool,
+    datastore,
+    datacenter,
+    component,
+    options,
+    options_filename,
+):
+    """Import the OVA with govc, the rendered spec as its options file."""
     with open(options_filename, "w") as f:
-        f.write(govc_spec_render)
+        json.dump(options, f)
 
     cmd = (
         "govc import.ova"
