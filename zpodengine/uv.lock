@@ -2008,7 +2008,7 @@ wheels = [
 
 [[package]]
 name = "zpodengine"
-version = "0.9.1"
+version = "0.9.2"
 source = { virtual = "." }
 dependencies = [
     { name = "email-validator" },
