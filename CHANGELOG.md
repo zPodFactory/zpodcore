@@ -56,16 +56,16 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   profile item: `--host-id 71 --vlan-id 64` gives 10.x.y.71 on vlan64, with that network's mask
   and gateway, and ESXi tags its management interface with VLAN 64 (`guestinfo.vlan`). Any
   component whose library JSON uses the new `{{zpod_vlan}}` deploy variable accepts it; the
-  ESXi entries need the zPodLibrary update that sets `"guestinfo.vlan": "{{zpod_vlan}}"`, and
-  are refused (`422`) until then. The guest tags its own frames, so its portgroup must be a trunk:
-  on the endpoint it is the zPod segment (VLAN 0-4094); a nested component takes `vlan_id`
-  together with `network.portgroup` set to a trunk (`gateway` and `dns` combine too, `ip`
-  doesn't).
+  zPodLibrary ESXi entries do (`"guestinfo.vlan": "{{zpod_vlan}}"`), and a library entry
+  without it is refused (`422`). The guest tags its own frames, so its portgroup must be a
+  trunk: on the endpoint it is the zPod segment (VLAN 0-4094); a nested component takes
+  `vlan_id` together with `network.portgroup` set to a trunk (`gateway` and `dns` combine too,
+  `ip` doesn't).
 - `host_id` on a tagged network (from the portgroup's VLAN or `vlan_id`) is the last octet in
-  the /24 holding that network, the zPod's /24 for the deploy networks: vlan64 holds host ids 66 to 126; a
-  host_id outside the network is refused with the range that fits. Profiles are checked
-  against the deploy networks (mgmt, vlan64, vlan128, vlan192) when they are saved, since
-  their layout is the same in every zPod; user networks are checked at deploy.
+  the /24 holding that network, the zPod's /24 for the deploy networks: vlan64 holds host ids
+  66 to 126; a host_id outside the network is refused with the range that fits. Profiles are
+  checked against the deploy networks (mgmt, vlan64, vlan128, vlan192) when they are saved,
+  since their layout is the same in every zPod; user networks are checked at deploy.
 
 #### Changed
 
@@ -88,14 +88,14 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   a new optional `component_deploy_extra_config` in the library JSON. The guest reads them at
   boot, so stock OVAs come up with their zPod IP, FQDN, DNS and SSH key: Talos, cloud-init
   images (Ubuntu, Photon OS) through the VMware datasource, and Ignition images (Fedora CoreOS,
-  Red Hat CoreOS, Flatcar). A value is a Jinja
-  string, or a YAML, JSON or `#cloud-config` document written as nested JSON, which zpodengine
-  renders, base64-encodes and pairs with its `.encoding` key. Only `guestinfo.*` keys are
-  accepted, and a bad value fails the deploy before a VM exists. It works with
-  `ff_endpoint_ova_staging`: each clone gets its own keys, the staged template none. Components
-  without the key deploy exactly as before. A library entry that uses it needs this release:
-  an older zpodengine ignores the key.
-- Deploy spec templates have a `b64encode` Jinja filter (`{% filter b64encode %}…{% endfilter %}`).
+  Red Hat CoreOS, Flatcar). A value is a Jinja string, or a YAML, JSON or `#cloud-config`
+  document written as nested JSON, which zpodengine renders, base64-encodes and pairs with its
+  `.encoding` key. Only `guestinfo.*` keys are accepted, and a bad value fails the deploy
+  before a VM exists. It works with `ff_endpoint_ova_staging`: each clone gets its own keys,
+  the staged template none. Components without the key deploy exactly as before. A library
+  entry that uses it needs this release: an older zpodengine ignores the key.
+- Deploy spec templates have a `b64encode` Jinja filter
+  (`{% filter b64encode %}…{% endfilter %}`).
 
 ### zPod CLI
 
