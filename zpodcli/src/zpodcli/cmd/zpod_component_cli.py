@@ -1,4 +1,5 @@
 import time
+from enum import StrEnum
 from typing import Annotated
 
 import typer
@@ -16,6 +17,7 @@ from zpodcli.lib.utils import (
 )
 from zpodcli.lib.utils import ZcliTable as Table
 from zpodcli.lib.zpod_client import ZpodClient, unexpected_status_handler
+from zpodsdk.models.component_network_spec import ComponentNetworkSpec
 from zpodsdk.models.zpod_component_create import ZpodComponentCreate
 from zpodsdk.models.zpod_component_view import ZpodComponentView
 
@@ -166,6 +168,11 @@ def zpod_component_list(
             generate_table(sorted_zpod_components)
 
 
+class Nested(StrEnum):
+    TRUE = "true"
+    FALSE = "false"
+
+
 @app.command(name="add", no_args_is_help=True)
 @unexpected_status_handler
 def zpod_component_add(
@@ -233,6 +240,60 @@ def zpod_component_add(
             show_default=False,
         ),
     ] = None,
+    vlan_id: Annotated[
+        int,
+        typer.Option(
+            "--vlan-id",
+            help="Put the component on the zPod network with this VLAN, its "
+            "interface tagged (ESXi); --host-id is the last octet in its /24",
+            show_default=False,
+        ),
+    ] = None,
+    nested: Annotated[
+        Nested | None,
+        typer.Option(
+            "--nested",
+            case_sensitive=False,
+            help="true: deploy nested in the zPod, false: on the endpoint "
+            "(default: the component's own setting)",
+            show_default=False,
+        ),
+    ] = None,
+    ip: Annotated[
+        str,
+        typer.Option(
+            "--ip",
+            help="Nested only: address with its prefix, like 192.168.50.10/24, for a "
+            "subnet the portgroup's VLAN can't give",
+            show_default=False,
+        ),
+    ] = None,
+    gateway: Annotated[
+        str,
+        typer.Option(
+            "--gateway",
+            help="Nested only: gateway (default: the zPod network's)",
+            show_default=False,
+        ),
+    ] = None,
+    dns: Annotated[
+        str,
+        typer.Option(
+            "--dns",
+            help="Nested only: DNS server (default: zcore)",
+            show_default=False,
+        ),
+    ] = None,
+    portgroup: Annotated[
+        str,
+        typer.Option(
+            "--portgroup",
+            help="Nested only: an existing portgroup of the zPod's vCenter, every NIC "
+            "goes on it; its VLAN picks the network --host-id is on "
+            "(default: VM Network)",
+            show_default=False,
+        ),
+    ] = None,
 ):
     """
     Add Component to zPod
@@ -250,8 +311,23 @@ def zpod_component_add(
             vmem=vmem,
             vnics=vnics,
             vdisks=vdisks,
+            nested=None if nested is None else nested == Nested.TRUE,
+            vlan_id=vlan_id,
+            network=component_network(
+                ip=ip,
+                gateway=gateway,
+                dns=dns,
+                portgroup=portgroup,
+            ),
         ),
     )
+
+
+def component_network(**fields) -> ComponentNetworkSpec | None:
+    """The --ip/--gateway/--dns/--portgroup options that are set."""
+    if not any(fields.values()):
+        return None
+    return ComponentNetworkSpec(**{k: v for k, v in fields.items() if v})
 
 
 @app.command(name="remove", no_args_is_help=True)

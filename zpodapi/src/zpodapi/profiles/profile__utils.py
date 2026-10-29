@@ -3,6 +3,11 @@ from sqlmodel import Session, select
 
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus
+from zpodcommon.lib.component_network import (
+    deploy_network_host_id_error,
+    network_static_error,
+)
+from zpodcommon.lib.component_placement import component_options_error
 from zpodcommon.lib.dbutils import DBUtils
 
 # Linux caps the system hostname (sethostname(2), hostnamectl) at 64 chars,
@@ -24,17 +29,14 @@ def validate_profile(session: Session, profile_obj: list):
     # Get all component_uids in profile
     component_uids = {x["component_uid"] for x in walk_profile(profile_obj)}
 
-    # Get component_uid and status for db
-    components = dict(
-        session.exec(
-            select(
-                M.Component.component_uid,
-                M.Component.status,
-            ).where(
-                M.Component.component_uid.in_(component_uids),
-            )
-        ).fetchall()
-    )
+    # Get the components from db
+    db_components = {
+        c.component_uid: c
+        for c in session.exec(
+            select(M.Component).where(M.Component.component_uid.in_(component_uids))
+        ).all()
+    }
+    components = {uid: c.status for uid, c in db_components.items()}
 
     # Validate
     errors = []
@@ -45,6 +47,34 @@ def validate_profile(session: Session, profile_obj: list):
         # Validate that component is active
         elif components.get(component_uid) != ComponentStatus.ACTIVE:
             errors.append(f"Component is not ACTIVE: {component_uid}")
+
+    for item in walk_profile(profile_obj):
+        # The deploy networks are laid out the same in every zPod.
+        if error := deploy_network_host_id_error(
+            item.get("host_id"), item.get("vlan_id"), item.get("network")
+        ):
+            errors.append(f"{item['component_uid']}: {error}")
+        component = db_components.get(item["component_uid"])
+        # Only items with deploy options need the component's library JSON.
+        if component is None or not any(
+            item.get(key) is not None
+            for key in ("nested", "network", "vnics", "vlan_id")
+        ):
+            continue
+        # The zPod does not exist yet: its networks are checked at deploy.
+        if error := component_options_error(
+            component.component_name,
+            component.component_json,
+            nested=item.get("nested"),
+            network=item.get("network"),
+            vnics=item.get("vnics"),
+            vlan_id=item.get("vlan_id"),
+        ) or network_static_error(item.get("network"), item.get("host_id")):
+            errors.append(f"{item['component_uid']}: {error}")
+        elif item.get("vlan_id") is not None and item.get("host_id") is None:
+            errors.append(
+                f"{item['component_uid']}: vlan_id needs host_id, the address on it"
+            )
 
     # The mandatory core component (zcore-*) must be the first element.
     first = profile_obj[0] if profile_obj else None

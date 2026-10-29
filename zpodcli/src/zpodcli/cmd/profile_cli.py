@@ -56,6 +56,16 @@ def profile_item_output(profile):
         if vdisks := profile_item.vdisks:
             vdisks_txt = ", ".join([f"{vdisk}GB" for vdisk in vdisks])
             data_values.append(f"Disks: {vdisks_txt}")
+        if isinstance(nested := profile_item.nested, bool):
+            data_values.append("Nested" if nested else "Not nested")
+        if isinstance(vlan_id := profile_item.vlan_id, int):
+            data_values.append(f"VLAN: {vlan_id}")
+        if network := profile_item.network:
+            data_values.extend(
+                f"{key}: {value}"
+                for key, value in network.to_dict().items()
+                if value is not None
+            )
         profile_item_txt = f"[yellow3]{profile_item.component_uid}[/yellow3]"
         if data_values:
             profile_item_txt += (

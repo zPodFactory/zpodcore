@@ -1,6 +1,7 @@
 """Contains all the data models used in inputs/outputs"""
 
 from .body_components_upload import BodyComponentsUpload
+from .component_network_spec import ComponentNetworkSpec
 from .component_view import ComponentView
 from .component_view_full import ComponentViewFull
 from .endpoint_compute_create import EndpointComputeCreate
@@ -109,6 +110,7 @@ from .zpod_view_features_type_0 import ZpodViewFeaturesType0
 
 __all__ = (
     "BodyComponentsUpload",
+    "ComponentNetworkSpec",
     "ComponentView",
     "ComponentViewFull",
     "EndpointComputeCreate",

@@ -114,6 +114,9 @@ def flow_zpod_deploy(
                     vmem=sub_profile_item.get("vmem"),
                     vnics=sub_profile_item.get("vnics"),
                     vdisks=sub_profile_item.get("vdisks"),
+                    nested=sub_profile_item.get("nested"),
+                    network=sub_profile_item.get("network"),
+                    vlan_id=sub_profile_item.get("vlan_id"),
                     wait_for=wait_for,
                 )
                 for sub_profile_item in profile_item
@@ -130,6 +133,9 @@ def flow_zpod_deploy(
                 vmem=profile_item.get("vmem"),
                 vnics=profile_item.get("vnics"),
                 vdisks=profile_item.get("vdisks"),
+                nested=profile_item.get("nested"),
+                network=profile_item.get("network"),
+                vlan_id=profile_item.get("vlan_id"),
                 wait_for=wait_for,
             )
         wait_for = [last_component_item]

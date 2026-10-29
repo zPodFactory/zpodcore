@@ -29,6 +29,57 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod API
+
+#### Added
+
+- **A component add or a profile item can choose where the component is deployed**, with
+  `nested`: `true` puts it nested in the zPod's vCenter, `false` on the endpoint; left out, the
+  library JSON's `component_isnested` decides as before. A nested deploy needs the zPod's vCenter
+  to exist already, and an L1 deploy checks the endpoint's datastore floor. Components with
+  their own deploy path (zcore, vyos, vcsa, esxi, proxmox, proxmox-dm, proxmox-bs, cloudbuilder,
+  vcfinstaller) accept only their own default (vcsa `true`, esxi `false`), and refuse a change
+  of placement: `422` on a component add, `400` on a profile.
+- **A nested component can choose its own network**, with an optional `network` object on a
+  component add or a profile item: `portgroup`, `ip`, `gateway` and `dns`. Every field is
+  optional; left out, the zPod's defaults apply as before. The portgroup must already exist in
+  the zPod's vCenter (zPodFactory never creates one), by name or inventory path, `VM Network`
+  included, and every NIC of the OVA goes on it. Its VLAN picks the zPod network `host_id` is on
+  (untagged: mgmt; VLAN N: the zPod network on VLAN N), so the address always matches the wire.
+  `ip` (with its prefix) is for a subnet the portgroup's VLAN can't give, such as an isolated
+  lab. It reaches both OVF-property OVAs and extraConfig images, since both read the same
+  `zpod_*` deploy variables. A missing or ambiguous portgroup, a standard one absent from some
+  cluster hosts, a trunk without `vlan_id`, or a VLAN with no zPod network is refused (`422` on
+  a component add, the component fails before the import on a profile deploy). `network` on a
+  component deployed on the endpoint, or on a protected component, is refused.
+- **An ESXi host can sit on a tagged zPod network**, with `vlan_id` on a component add or a
+  profile item: `--host-id 71 --vlan-id 64` gives 10.x.y.71 on vlan64, with that network's mask
+  and gateway, and ESXi tags its management interface with VLAN 64 (`guestinfo.vlan`). Any
+  component whose library JSON uses the new `{{zpod_vlan}}` deploy variable accepts it; the
+  ESXi entries need the zPodLibrary update that sets `"guestinfo.vlan": "{{zpod_vlan}}"`, and
+  are refused (`422`) until then. The guest tags its own frames, so its portgroup must be a trunk:
+  on the endpoint it is the zPod segment (VLAN 0-4094); a nested component takes `vlan_id`
+  together with `network.portgroup` set to a trunk (`gateway` and `dns` combine too, `ip`
+  doesn't).
+- `host_id` on a tagged network (from the portgroup's VLAN or `vlan_id`) is the last octet in
+  the /24 holding that network, the zPod's /24 for the deploy networks: vlan64 holds host ids 66 to 126; a
+  host_id outside the network is refused with the range that fits. Profiles are checked
+  against the deploy networks (mgmt, vlan64, vlan128, vlan192) when they are saved, since
+  their layout is the same in every zPod; user networks are checked at deploy.
+
+#### Changed
+
+- `vnics` is refused on a component deployed nested (`422` on a component add, `400` on a
+  profile): its NICs all share one portgroup. It used to fail mid-deploy, after the import.
+- A component address outside its network is refused (`422`): a `host_id` beyond the zPod's
+  /26 mgmt network used to deploy with an address its netmask and gateway could not reach.
+
+#### Fixed
+
+- Profiles created through zcli or zpodsdk are validated again: both send `?force=false`,
+  which the API read as a truthy string and skipped every check, unknown components included.
+- A component add with an unknown or inactive `component_uid` answers `404` instead of `500`.
+
 ### zPod Engine
 
 #### Added
@@ -45,6 +96,13 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   without the key deploy exactly as before. A library entry that uses it needs this release:
   an older zpodengine ignores the key.
 - Deploy spec templates have a `b64encode` Jinja filter (`{% filter b64encode %}…{% endfilter %}`).
+
+### zPod CLI
+
+#### Added
+
+- `zcli zpod component add --nested=true|false`, `--vlan-id`, and `--portgroup`, `--ip`,
+  `--gateway`, `--dns` for a nested component's network; `zcli profile list` shows them.
 
 ## [0.9.1] — 2026-10-28
 

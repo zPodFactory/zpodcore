@@ -1,0 +1,40 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 11,
+      "hostname": "esxi11",
+      "vcpu": 8,
+      "vmem": 64,
+      "vnics": 4
+    },
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 12,
+      "hostname": "esxi12",
+      "vcpu": 8,
+      "vmem": 64,
+      "vnics": 4
+    }
+  ],
+  {
+    "component_uid": "vcsa-9.1.1.0"
+  },
+  [
+    {
+      "component_uid": "nsx-4.2.4.1",
+      "nested": false
+    },
+    {
+      "component_uid": "vrops-8.18.7",
+      "nested": false
+    },
+    {
+      "component_uid": "vrli-8.18.7",
+      "nested": false
+    }
+  ]
+]

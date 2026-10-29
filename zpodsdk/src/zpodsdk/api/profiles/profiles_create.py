@@ -19,7 +19,7 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Any | Unset = False,
+        force: bool | Unset = False,
     ) -> dict[str, Any]:
         headers: dict[str, Any] = {}
 
@@ -74,12 +74,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Any | Unset = False,
+        force: bool | Unset = False,
     ) -> Response[HTTPValidationError | ProfileView]:
         """Create
 
         Args:
-            force (Any | Unset):  Default: False.
+            force (bool | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -105,12 +105,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Any | Unset = False,
+        force: bool | Unset = False,
     ) -> HTTPValidationError | ProfileView | None:
         """Create
 
         Args:
-            force (Any | Unset):  Default: False.
+            force (bool | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -130,12 +130,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Any | Unset = False,
+        force: bool | Unset = False,
     ) -> Response[HTTPValidationError | ProfileView]:
         """Create
 
         Args:
-            force (Any | Unset):  Default: False.
+            force (bool | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:
@@ -159,12 +159,12 @@ class ProfilesCreate:
         self,
         *,
         body: ProfileCreate,
-        force: Any | Unset = False,
+        force: bool | Unset = False,
     ) -> HTTPValidationError | ProfileView | None:
         """Create
 
         Args:
-            force (Any | Unset):  Default: False.
+            force (bool | Unset):  Default: False.
             body (ProfileCreate):
 
         Raises:

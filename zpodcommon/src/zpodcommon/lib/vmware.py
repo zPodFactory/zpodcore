@@ -131,6 +131,76 @@ class vCenter:
     def get_portgroup(self, name, props=None):
         return self.get_obj(vim.Network, "name", name, props=props)
 
+    @staticmethod
+    def portgroup_vlan(network) -> int | str | None:
+        """The VLAN a portgroup puts its VMs on: a VLAN id (0: untagged), "trunk",
+        or None when there is none to read (NSX segment, private VLAN)."""
+        if isinstance(network, vim.OpaqueNetwork):
+            return None
+        if isinstance(network, vim.dvs.DistributedVirtualPortgroup):
+            if getattr(network.config, "backingType", "standard") == "nsx":
+                return None
+            vlan = getattr(network.config.defaultPortConfig, "vlan", None)
+            vlan_id = getattr(vlan, "vlanId", None)
+            if isinstance(vlan_id, int):
+                return vlan_id
+            # A trunk spec carries ranges; a private VLAN spec has pvlanId instead.
+            return "trunk" if vlan_id else None
+        # A standard portgroup's VLAN lives in each host's spec (4095: trunk).
+        for host in network.host:
+            for pg in host.config.network.portgroup:
+                if pg.spec.name == network.name:
+                    return "trunk" if pg.spec.vlanId == 4095 else pg.spec.vlanId
+        return None
+
+    def list_networks(self) -> list[dict]:
+        """Every VM network of every type (standard, distributed, NSX opaque), with
+        the inventory paths govc accepts for it, its VLAN and, for a standard
+        vSwitch portgroup, the hosts that have it."""
+        networks = []
+        for network in self.get_obj_list(vim.Network):
+            # A VDS uplink portgroup carries the hosts' uplinks, never a VM NIC.
+            if isinstance(network, vim.dvs.DistributedVirtualPortgroup) and getattr(
+                network.config, "uplink", False
+            ):
+                continue
+            path = self.inventory_path(network)
+            paths = {path}
+            standard = not isinstance(
+                network, (vim.dvs.DistributedVirtualPortgroup, vim.OpaqueNetwork)
+            )
+            if isinstance(network, vim.dvs.DistributedVirtualPortgroup):
+                # govc also takes /<datacenter>/network/<vds>/<portgroup>, the
+                # only way to tell same-named portgroups of two switches apart.
+                dc = network
+                while dc is not None and not isinstance(dc, vim.Datacenter):
+                    dc = dc.parent
+                vds = network.config.distributedVirtualSwitch.name
+                if dc is not None:
+                    path = f"/{dc.name}/network/{vds}/{network.name}"
+                    paths.add(path)
+            networks.append(
+                {
+                    "name": network.name,
+                    "path": path,
+                    "paths": paths,
+                    "standard": standard,
+                    "hosts": [h.name for h in network.host] if standard else [],
+                    "vlan": self.portgroup_vlan(network),
+                }
+            )
+        return networks
+
+    def find_networks(self, name_or_path: str) -> list[dict]:
+        """The networks a portgroup name, or an inventory path, designates."""
+        if name_or_path.startswith("/"):
+            return [n for n in self.list_networks() if name_or_path in n["paths"]]
+        return [n for n in self.list_networks() if n["name"] == name_or_path]
+
+    def get_cluster_host_names(self, cluster_name: str) -> list[str]:
+        cluster = self.get_obj(vim.ClusterComputeResource, "name", cluster_name)
+        return [h.name for h in cluster.host] if cluster else []
+
     def get_props(self, data, props):
         if not data:
             return []

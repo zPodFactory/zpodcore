@@ -2,6 +2,12 @@ import json
 import urllib.parse
 
 from zpodcommon import models as M
+from zpodcommon.lib.component_network import (
+    clean_network,
+    resolve_component_network,
+    select_portgroup,
+)
+from zpodcommon.lib.component_placement import component_isnested
 from zpodcommon.lib.dbutils import DBUtils
 from zpodcommon.lib.network_utils import MgmtIp
 from zpodcommon.lib.vmware import vCenter
@@ -11,7 +17,12 @@ from zpodengine.lib.deploy_spec import render_deploy_spec, render_extra_config
 from zpodengine.lib.network import ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN
 
 
-def ovf_deployer(zpod_component: M.ZpodComponent):
+def ovf_deployer(
+    zpod_component: M.ZpodComponent,
+    nested: bool | None = None,
+    network: dict | None = None,
+    vlan_id: int | None = None,
+):
     component = zpod_component.component
     zpod = zpod_component.zpod
 
@@ -36,8 +47,27 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         # all other components rely on zcore/vyos as their DNS server.
         zpod_dns = MgmtIp.zpod(zpod, "zcore").ip
 
-    isnested = component.component_json["component_isnested"]
+    isnested = component_isnested(component.component_json, nested)
     print(f"Component Nested: {isnested}")
+
+    # Nested components only (the API refuses it otherwise): the network object
+    # replaces the address, gateway, DNS and portgroup computed above.
+    # vlan_id (any placement, for guests told their VLAN, like ESXi): the address
+    # is on the zPod network with that VLAN, and zpod_vlan carries the tag.
+    net = None
+    if (isnested and clean_network(network)) or vlan_id is not None:
+        net = resolve_component_network(
+            zpod,
+            component.component_name,
+            network=network if isnested else None,
+            ip=zpod_component.ip,
+            vlan_id=vlan_id,
+        )
+        print(
+            f"Component network: {net.ip}/{net.prefixlen} gw {net.gateway} "
+            f"dns {net.dns} portgroup {net.portgroup or 'default'} "
+            f"vlan {net.vlan_id or 'untagged'}"
+        )
 
     if isnested is False:
         print(f"[L1] Deployment for {component.component_name}")
@@ -85,10 +115,13 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         # For now this is hardcoded unless anything changes
         # (maybe vSAN OSA/ESA support in the future instead of NFS-01)
         datastore = "NFS-01"
-        zpod_portgroup = "VM Network"
+        zpod_portgroup = (net and net.portgroup) or "VM Network"
         # No VDS concept for nested L2 vCenters (standard vSwitch).
         zpod_portgroup_path = zpod_portgroup
         vm_name = zpod_component.hostname
+        if net and net.portgroup:
+            # Never created: it must already exist in the zPod's vCenter.
+            check_nested_portgroup(zpod, net.portgroup)
 
     # Add the core component (zcore) as a mandatory infrastructure component
     zpod_zcore_ipaddress = MgmtIp.zpod(zpod, "zcore").ip
@@ -105,11 +138,14 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         )
         zpod_component_hostname = zpod_component.fqdn
 
+    if net:
+        zpod_netmask, component_gateway, zpod_dns = net.netmask, net.gateway, net.dns
+
     variables = {
         "zpod_hostname": zpod_component_hostname,
         "zpod_ipaddress": zpod_component.ip,
         "zpod_netmask": zpod_netmask,
-        "zpod_netprefix": ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,
+        "zpod_netprefix": net.prefixlen if net else ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN,
         "zpod_gateway": component_gateway,
         "zpod_dns": zpod_dns,
         "zpod_nfs": zpod_zcore_ipaddress,
@@ -118,6 +154,8 @@ def ovf_deployer(zpod_component: M.ZpodComponent):
         "zpod_password": zpod.password,
         "zpod_sshkey": zpodfactory_ssh_key,
         "zpod_portgroup": zpod_portgroup_path,
+        # ESXi's guestinfo.vlan: the VLAN its management interface tags.
+        "zpod_vlan": str(net.vlan_id) if net and net.vlan_id else "",
     }
     govc_spec_render = render_deploy_spec(govc_spec, **variables)
 
@@ -222,3 +260,12 @@ def govc_import(
     print(cmd)
 
     cmd_execute(cmd)
+
+
+def check_nested_portgroup(zpod: M.Zpod, portgroup: str):
+    """Fail before the import unless `portgroup` is exactly one network of the
+    zPod's vCenter, present on every host of its cluster when it is a standard
+    vSwitch portgroup."""
+    with vCenter.auth_by_zpod(zpod=zpod) as vc:
+        match = select_portgroup(vc, portgroup, f"vcsa.{zpod.domain}")
+    print(f"Portgroup {portgroup!r}: {match['path']} (VLAN {match['vlan']})")

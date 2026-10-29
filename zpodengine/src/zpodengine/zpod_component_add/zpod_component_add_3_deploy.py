@@ -1,6 +1,7 @@
 from prefect import task
 
 from zpodcommon import models as M
+from zpodcommon.lib.component_placement import component_isnested
 from zpodcommon.lib.vmware import vCenter
 from zpodengine.lib import database
 from zpodengine.lib.datastore_floor import check_endpoint_datastore_floor
@@ -23,6 +24,9 @@ def zpod_component_add_deploy(
     vmem: int | None = None,
     vnics: int | None = None,
     vdisks: list[int] | None = None,
+    nested: bool | None = None,
+    network: dict | None = None,
+    vlan_id: int | None = None,
 ):
     print("Deploy OVA")
     with database.get_session_ctx() as session:
@@ -32,7 +36,7 @@ def zpod_component_add_deploy(
         print(component)
 
         # L1 components land on the endpoint's datastore: its floor first (D11).
-        if not (component.component_json or {}).get("component_isnested", False):
+        if not component_isnested(component.component_json, nested):
             check_endpoint_datastore_floor(
                 zpod_component.zpod,
                 f"component add {zpod_component.zpod.name}/{zpod_component.hostname}",
@@ -42,7 +46,7 @@ def zpod_component_add_deploy(
             case "zcore":
                 print("--- zcore ---")
 
-                ovf_deployer(zpod_component)
+                ovf_deployer(zpod_component, vlan_id=vlan_id)
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
@@ -65,7 +69,7 @@ def zpod_component_add_deploy(
             case "cloudbuilder" | "vcfinstaller":
                 print(f"--- {component.component_name} ---")
 
-                ovf_deployer(zpod_component)
+                ovf_deployer(zpod_component, vlan_id=vlan_id)
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
@@ -83,7 +87,7 @@ def zpod_component_add_deploy(
                 print("--- hypervisor ---")
                 # post configuration (sizing / disks, etc)
 
-                ovf_deployer(zpod_component)
+                ovf_deployer(zpod_component, vlan_id=vlan_id)
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
@@ -101,7 +105,7 @@ def zpod_component_add_deploy(
             case "proxmox-dm" | "proxmox-bs":
                 print("--- proxmox components ---")
 
-                ovf_deployer(zpod_component)
+                ovf_deployer(zpod_component, vlan_id=vlan_id)
 
                 with vCenter.auth_by_zpod_endpoint(zpod=zpod_component.zpod) as vc:
                     vm = vc.get_vm(name=zpod_component.fqdn)
@@ -120,9 +124,11 @@ def zpod_component_add_deploy(
 
             case _:
                 print("--- Normal Component ---")
-                ovf_deployer(zpod_component)
+                ovf_deployer(
+                    zpod_component, nested=nested, network=network, vlan_id=vlan_id
+                )
 
-                isnested = component.component_json["component_isnested"]
+                isnested = component_isnested(component.component_json, nested)
                 print(f"Component Nested: {isnested}")
 
                 auth = (

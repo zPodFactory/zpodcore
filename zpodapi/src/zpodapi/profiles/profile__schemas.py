@@ -4,6 +4,7 @@ from typing import Annotated
 from pydantic import StringConstraints
 
 from zpodapi.lib.schema_base import Field, SchemaBase
+from zpodapi.zpods.zpod_component__schemas import ComponentNetworkSpec
 
 example_creation_date = datetime(2023, 1, 1)
 
@@ -22,6 +23,21 @@ class D:
         vmem = {"example": 12}
         vnics = {"example": 4}
         vdisk = {"example": [40, 800]}
+        nested = {
+            "example": True,
+            "description": "Deploy nested in the zPod (true) or on the endpoint "
+            "(false). Default: the component's component_isnested.",
+        }
+        network = {
+            "description": "Nested components only: the network to deploy with. "
+            "Every field is optional; left out, the zPod's defaults apply.",
+        }
+        vlan_id = {
+            "example": 64,
+            "description": "Put the component on the zPod network with this VLAN, "
+            "its interface tagged (ESXi). host_id is the last octet in that "
+            "network's /24.",
+        }
 
 
 class ProfileItemView(SchemaBase):
@@ -32,6 +48,9 @@ class ProfileItemView(SchemaBase):
     vmem: int | None = Field(None, D.profile.vmem)
     vnics: int | None = Field(None, D.profile.vnics)
     vdisks: list[int] | None = Field(None, D.profile.vdisk)
+    nested: bool | None = Field(None, D.profile.nested)
+    network: ComponentNetworkSpec | None = Field(None, D.profile.network)
+    vlan_id: int | None = Field(None, D.profile.vlan_id)
 
 
 class ProfileView(SchemaBase):
@@ -50,6 +69,9 @@ class ProfileItemCreate(SchemaBase):
     vmem: int | None = Field(None, D.profile.vmem)
     vnics: int | None = Field(None, D.profile.vnics)
     vdisks: list[int] | None = Field(None, D.profile.vdisk)
+    nested: bool | None = Field(None, D.profile.nested)
+    network: ComponentNetworkSpec | None = Field(None, D.profile.network)
+    vlan_id: int | None = Field(None, D.profile.vlan_id)
 
 
 class ProfileCreate(SchemaBase):
@@ -65,6 +87,9 @@ class ProfileItemUpdate(SchemaBase):
     vmem: int | None = Field(None, D.profile.vmem)
     vnics: int | None = Field(None, D.profile.vnics)
     vdisks: list[int] | None = Field(None, D.profile.vdisk)
+    nested: bool | None = Field(None, D.profile.nested)
+    network: ComponentNetworkSpec | None = Field(None, D.profile.network)
+    vlan_id: int | None = Field(None, D.profile.vlan_id)
 
 
 class ProfileUpdate(SchemaBase):

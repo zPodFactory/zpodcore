@@ -1,0 +1,60 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 11,
+      "hostname": "esxi11",
+      "vcpu": 8,
+      "vmem": 64,
+      "vnics": 4
+    },
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 12,
+      "hostname": "esxi12",
+      "vcpu": 8,
+      "vmem": 64,
+      "vnics": 4
+    }
+  ],
+  {
+    "component_uid": "vcsa-9.1.1.0"
+  },
+  [
+    {
+      "component_uid": "ubuntu-24.04-dev",
+      "hostname": "lab10",
+      "nested": true,
+      "network": {
+        "ip": "192.168.50.10/24",
+        "gateway": "192.168.50.1",
+        "dns": "192.168.50.1",
+        "portgroup": "VM Network"
+      }
+    },
+    {
+      "component_uid": "photon-5.0-dev",
+      "host_id": 51,
+      "hostname": "photon51",
+      "nested": true,
+      "network": {
+        "dns": "1.1.1.1"
+      }
+    },
+    {
+      "component_uid": "zbox-13.5",
+      "host_id": 52,
+      "hostname": "zbox52",
+      "nested": true
+    },
+    {
+      "component_uid": "flatcar-4757.2.2-dev",
+      "host_id": 53,
+      "hostname": "flatcar53",
+      "nested": true
+    }
+  ]
+]

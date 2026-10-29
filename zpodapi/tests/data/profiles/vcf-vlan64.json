@@ -1,0 +1,46 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 71,
+      "hostname": "esxi71",
+      "vcpu": 16,
+      "vmem": 128,
+      "vnics": 4,
+      "vlan_id": 64
+    },
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 72,
+      "hostname": "esxi72",
+      "vcpu": 16,
+      "vmem": 128,
+      "vnics": 4,
+      "vlan_id": 64
+    },
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 73,
+      "hostname": "esxi73",
+      "vcpu": 16,
+      "vmem": 128,
+      "vnics": 4,
+      "vlan_id": 64
+    },
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 74,
+      "hostname": "esxi74",
+      "vcpu": 16,
+      "vmem": 128,
+      "vnics": 4,
+      "vlan_id": 64
+    }
+  ],
+  {
+    "component_uid": "vcfinstaller-9.1.1.0"
+  }
+]
