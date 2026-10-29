@@ -104,6 +104,13 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 - `zcli zpod component add --nested=true|false`, `--vlan-id`, and `--portgroup`, `--ip`,
   `--gateway`, `--dns` for a nested component's network; `zcli profile list` shows them.
 
+#### Changed
+
+- **Component credentials show the image's own login user.** `zcli zpod component list` and
+  `zcli zpod info` showed `root` for every component; Ubuntu now shows `ubuntu` and `root`,
+  zbox `zadmin` and `root`, RHCOS `core` (the only user Ignition provisions), and Talos, which
+  has no SSH, shows `talosctl` with the command to reach its API.
+
 ## [0.9.1] — 2026-10-28
 
 ### zPod API

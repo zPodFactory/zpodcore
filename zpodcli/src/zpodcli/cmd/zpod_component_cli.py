@@ -50,6 +50,8 @@ def generate_table(
                 usernames_list.append(
                     f"[light_pink1]{username['username']}[/light_pink1]"
                 )
+            elif username["type"] == "api-talos":
+                usernames_list.append("[light_pink1]talosctl[/light_pink1]")
             elif username["type"] == "ui":
                 usernames_list.append(
                     f"[dark_khaki]{username['username']}[/dark_khaki]"

@@ -482,6 +482,11 @@ def generate_detailed_info(zpod: ZpodView, fields: str = "bncsd"):
                         access_urls.append(
                             f"[light_pink1]SSH:[/light_pink1] [sky_blue2]ssh://{component.fqdn}[/sky_blue2]"
                         )
+                    elif username.additional_properties["type"] == "api-talos":
+                        cred_lines.append("[light_pink1]API:[/light_pink1] talosctl")
+                        access_urls.append(
+                            f"[light_pink1]API:[/light_pink1] [sky_blue2]talosctl -n {component.fqdn} get version --insecure[/sky_blue2]"
+                        )
 
             # Join multiple lines with newlines if they exist, otherwise show N/A
             credentials = "\n".join(cred_lines) if cred_lines else "N/A"
