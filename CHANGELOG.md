@@ -29,6 +29,12 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### Breaking
+
+- **The Prefect port (`ZPODENGINE_HOSTPORT`) is read-only, except for cancelling runs.** A
+  script or `prefect` CLI that started, retried, deleted or edited anything through it now gets
+  403; full access is on `ZPODENGINE_ADMIN_HOSTPORT` (default `127.0.0.1:8061`), from the host.
+
 ### zPod API
 
 #### Added
@@ -110,6 +116,14 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   `zcli zpod info` showed `root` for every component; Ubuntu now shows `ubuntu` and `root`,
   zbox `zadmin` and `root`, RHCOS `core` (the only user Ignition provisions), and Talos, which
   has no SSH, shows `talosctl` with the command to reach its API.
+
+### Stack and operations
+
+- **New `zpodengineproxy` service (nginx) in front of the Prefect server**, so anyone who can
+  reach the Prefect UI can read runs and logs and cancel a run, but not start, retry or change
+  one. Both UIs (`/` and `/v2`) work through it. zpodapi and the worker still reach the server
+  directly on the Docker network; `just zpodengine-cmd`, `just zpodengine-deploy-all` and
+  `just zcore-transition` use `ZPODENGINE_ADMIN_HOSTPORT`.
 
 ## [0.9.1] — 2026-10-28
 
