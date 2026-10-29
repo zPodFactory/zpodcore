@@ -1,10 +1,12 @@
+from ipaddress import IPv4Address
+
 from prefect import task
 from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus, ZpodComponentStatus
+from zpodcommon.lib.component_network import resolve_new_component_network
 from zpodcommon.lib.network_utils import (
-    MgmtIp,
     get_all_active_addresses,
     get_zpod_reserved_addresses,
 )
@@ -17,6 +19,9 @@ def zpod_component_add_prep(
     component_uid: str,
     host_id: int | None = None,
     hostname: str | None = None,
+    network: dict | None = None,
+    vlan_id: int | None = None,
+    nested: bool | None = None,
 ):
     with database.get_session_ctx() as session:
         component = session.exec(
@@ -30,11 +35,16 @@ def zpod_component_add_prep(
         if not hostname:
             hostname = component.component_name
 
-        component_ip = MgmtIp.zpod(
-            zpod,
-            host_id=host_id,
-            component_name=component.component_name,
-        ).ipv4address
+        component_ip = IPv4Address(
+            resolve_new_component_network(
+                zpod,
+                component,
+                network=network,
+                host_id=host_id,
+                vlan_id=vlan_id,
+                nested=nested,
+            ).ip
+        )
 
         if component_ip in get_zpod_reserved_addresses(zpod):
             raise ValueError(

@@ -30,6 +30,9 @@ def zpod_component_add(
     vmem: int | None = None,
     vnics: int | None = None,
     vdisks: list[int] | None = None,
+    nested: bool | None = None,
+    network: dict | None = None,
+    vlan_id: int | None = None,
     wait_for=None,
 ):
     prefix = f"{zpod_name} {component_uid}"
@@ -41,6 +44,9 @@ def zpod_component_add(
         component_uid=component_uid,
         host_id=host_id,
         hostname=hostname,
+        network=network,
+        vlan_id=vlan_id,
+        nested=nested,
         wait_for=wait_for,
     )
     options = task_options_setup(
@@ -62,6 +68,9 @@ def zpod_component_add(
         vmem=vmem,
         vnics=vnics,
         vdisks=vdisks,
+        nested=nested,
+        network=network,
+        vlan_id=vlan_id,
         wait_for=[pre_scripts],
     )
 

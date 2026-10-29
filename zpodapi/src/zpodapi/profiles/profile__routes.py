@@ -48,7 +48,7 @@ def create(
     *,
     profile_service: ProfileAnnotations.ProfileService,
     profile_in: ProfileCreate,
-    force=False,
+    force: bool = False,
 ):
     if profile_service.crud.get_all_filtered(name=profile_in.name):
         raise HTTPException(

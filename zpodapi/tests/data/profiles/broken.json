@@ -1,0 +1,57 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 11,
+      "hostname": "esxi11",
+      "vcpu": 8,
+      "vmem": 64,
+      "vnics": 4
+    },
+    {
+      "component_uid": "esxi-9.1.1.0",
+      "host_id": 60,
+      "hostname": "esxi60",
+      "vcpu": 8,
+      "vmem": 64,
+      "vnics": 4,
+      "vlan_id": 64
+    }
+  ],
+  {
+    "component_uid": "vcsa-9.1.1.0",
+    "nested": false
+  },
+  [
+    {
+      "component_uid": "zbox-13.5",
+      "host_id": 52,
+      "hostname": "zbox52",
+      "network": {
+        "dns": "1.1.1.1"
+      }
+    },
+    {
+      "component_uid": "ubuntu-24.04-dev",
+      "host_id": 20,
+      "hostname": "web20",
+      "nested": true,
+      "network": {
+        "ip": "192.168.50.20/24"
+      }
+    },
+    {
+      "component_uid": "vrops-8.18.7",
+      "vnics": 2
+    },
+    {
+      "component_uid": "zbox-13.5",
+      "host_id": 53,
+      "hostname": "zbox53",
+      "vlan_id": 64
+    }
+  ]
+]

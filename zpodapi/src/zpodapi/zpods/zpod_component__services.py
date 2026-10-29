@@ -1,3 +1,5 @@
+from ipaddress import IPv4Address
+
 from fastapi import HTTPException, status
 from sqlmodel import SQLModel, select
 
@@ -6,8 +8,12 @@ from zpodapi.profiles.profile__utils import check_fqdn_length, compute_zpod_doma
 from zpodapi.zpods.zpod_component__schemas import ZpodComponentCreate
 from zpodcommon import models as M
 from zpodcommon.enums import ComponentStatus, ZpodComponentStatus
+from zpodcommon.lib.component_network import (
+    ComponentNetworkError,
+    resolve_new_component_network,
+)
+from zpodcommon.lib.component_placement import component_options_error
 from zpodcommon.lib.network_utils import (
-    MgmtIp,
     get_all_active_addresses,
     get_zpod_reserved_addresses,
 )
@@ -25,8 +31,17 @@ class ZpodComponentService(ServiceBase):
     ):
         hostname = component_in.hostname
         host_id = component_in.host_id
+        network = (
+            component_in.network.model_dump(exclude_none=True)
+            if component_in.network
+            else None
+        ) or None
 
-        if (hostname and not host_id) or (not hostname and host_id):
+        # An explicit network.ip gives the address: hostname alone is enough then.
+        explicit_ip = bool(network and network.get("ip"))
+        if not explicit_ip and (
+            (hostname and not host_id) or (not hostname and host_id)
+        ):
             raise HTTPException(
                 status_code=status.HTTP_406_NOT_ACCEPTABLE,
                 detail="Must provide both hostname and host-id when either is provided.",  # noqa: E501
@@ -37,7 +52,28 @@ class ZpodComponentService(ServiceBase):
                 M.Component.component_uid == component_in.component_uid,
                 M.Component.status == ComponentStatus.ACTIVE,
             )
-        ).one()
+        ).one_or_none()
+        if component is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No ACTIVE component {component_in.component_uid}",
+            )
+        # Only deploy options need the component's library JSON.
+        options = {
+            "nested": component_in.nested,
+            "network": network,
+            "vnics": component_in.vnics,
+            "vlan_id": component_in.vlan_id,
+        }
+        if any(v is not None for v in options.values()) and (
+            error := component_options_error(
+                component.component_name, component.component_json, **options
+            )
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=error,
+            )
         if not hostname:
             if component.component_name == "esxi":
                 raise HTTPException(
@@ -72,11 +108,21 @@ class ZpodComponentService(ServiceBase):
                 detail="Conflicting hostname found",
             )
 
-        component_ip = MgmtIp.zpod(
-            zpod,
-            host_id=host_id,
-            component_name=component.component_name,
-        ).ipv4address
+        try:
+            component_ip = IPv4Address(
+                resolve_new_component_network(
+                    zpod,
+                    component,
+                    network=network,
+                    host_id=host_id,
+                    vlan_id=component_in.vlan_id,
+                    nested=component_in.nested,
+                ).ip
+            )
+        except ComponentNetworkError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
+            ) from e
 
         if component_ip in get_zpod_reserved_addresses(zpod):
             raise HTTPException(
@@ -103,6 +149,9 @@ class ZpodComponentService(ServiceBase):
             vmem=component_in.vmem,
             vnics=component_in.vnics,
             vdisks=component_in.vdisks,
+            nested=component_in.nested,
+            network=network,
+            vlan_id=component_in.vlan_id,
         )
 
     def remove(

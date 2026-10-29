@@ -11,6 +11,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from zpodcommon.lib.component_network import ComponentNetworkError
 from zpodengine.lib import ova_staging, ovfdeployer
 from zpodengine.lib.deploy_spec import ExtraConfigError
 
@@ -74,6 +75,7 @@ def world(tmp_path, monkeypatch):
         options_file = cmd.split("-options=")[1].split()[0]
         with open(options_file) as f:
             options = json.load(f)
+        w.options, w.cmd = options, cmd
         w.events.append(("import", options["PowerOn"]))
         w.vm_exists = True
 
@@ -122,7 +124,12 @@ def zpod_component(extra=None):
     }
     if extra is not None:
         component_json["component_deploy_extra_config"] = extra
+    mgmt = SimpleNamespace(
+        name="mgmt", cidr="10.42.111.0/26", gateway="10.42.111.1/26", vlan_id=0
+    )
     zpod = SimpleNamespace(
+        networks=[mgmt],
+        mgmt_network=mgmt,
         name="lab",
         domain="lab.zpod.example",
         password="secret",
@@ -197,3 +204,201 @@ def test_bad_extra_config_fails_before_any_vm(world):
     with pytest.raises(ExtraConfigError):
         ovfdeployer.ovf_deployer(zpod_component({"disk.EnableUUID": "TRUE"}))
     assert world.events == []
+
+
+# --- nested components: the network object ---------------------------------
+
+NET_EXTRA = {
+    "guestinfo.net": "{{zpod_ipaddress}}/{{zpod_netprefix}} via {{zpod_gateway}}"
+}
+
+
+@pytest.fixture
+def portgroup_checks(monkeypatch):
+    checked = []
+    monkeypatch.setattr(
+        ovfdeployer,
+        "check_nested_portgroup",
+        lambda zpod, portgroup: checked.append(portgroup),
+    )
+    return checked
+
+
+def test_nested_without_network_is_unchanged(world, portgroup_checks):
+    ovfdeployer.ovf_deployer(zpod_component(), nested=True)
+    assert world.options["NetworkMapping"][0]["Network"] == "VM Network"
+    assert "-pool=Cluster/Resources" in world.cmd
+    assert portgroup_checks == []
+
+
+def test_nested_network_reaches_spec_and_extra_config(world, portgroup_checks):
+    zc = zpod_component(NET_EXTRA)
+    zc.ip = "192.168.10.20"  # what the prep task stored from network.ip
+    network = {
+        "ip": "192.168.10.20/24",
+        "gateway": "192.168.10.1",
+        "portgroup": "VM Network",
+    }
+    ovfdeployer.ovf_deployer(zc, nested=True, network=network)
+    assert portgroup_checks == ["VM Network"]
+    assert world.options["NetworkMapping"][0]["Network"] == "VM Network"
+    _, vm_name, values = extra_event(world)
+    assert vm_name == "node1"
+    assert values["guestinfo.net"] == "192.168.10.20/24 via 192.168.10.1"
+
+
+def test_network_is_ignored_on_the_endpoint(world, portgroup_checks):
+    # The API refuses it; the engine still never applies it to an L1 deploy.
+    ovfdeployer.ovf_deployer(
+        zpod_component(), nested=False, network={"portgroup": "pg"}
+    )
+    assert portgroup_checks == []
+    assert world.options["NetworkMapping"][0]["Network"].endswith("-lab-segment")
+
+
+# --- check_nested_portgroup ---------------------------------------------------
+
+
+def net(name, path, standard=True, hosts=("esxi11", "esxi12"), vlan=0):
+    return {
+        "name": name,
+        "path": path,
+        "paths": {path},
+        "standard": standard,
+        "hosts": list(hosts),
+        "vlan": vlan,
+    }
+
+
+NETWORKS = [
+    net("VM Network", "/Datacenter/network/VM Network"),
+    net("pg-a", "/Datacenter/network/pg-a", hosts=("esxi11",)),
+    net("dup", "/Datacenter/network/DSwitch/dup", standard=False),
+    net("dup", "/Datacenter/network/DSwitch2/dup", standard=False),
+]
+
+
+@pytest.fixture
+def fake_zpod_vc(monkeypatch):
+    class Vc:
+        def list_networks(self):
+            return NETWORKS
+
+        def find_networks(self, name_or_path):
+            if name_or_path.startswith("/"):
+                return [n for n in NETWORKS if name_or_path in n["paths"]]
+            return [n for n in NETWORKS if n["name"] == name_or_path]
+
+        def get_cluster_host_names(self, name):
+            assert name == "Cluster"
+            return ["esxi11", "esxi12"]
+
+    @contextmanager
+    def auth(cls, zpod):
+        yield Vc()
+
+    monkeypatch.setattr(ovfdeployer.vCenter, "auth_by_zpod", classmethod(auth))
+    return SimpleNamespace(domain="lab.zpod.example")
+
+
+def test_portgroup_found(fake_zpod_vc):
+    ovfdeployer.check_nested_portgroup(fake_zpod_vc, "VM Network")
+    ovfdeployer.check_nested_portgroup(fake_zpod_vc, "/Datacenter/network/DSwitch/dup")
+
+
+def test_portgroup_missing(fake_zpod_vc):
+    with pytest.raises(
+        ComponentNetworkError, match="'nope' not found in vcsa.lab.zpod.example"
+    ):
+        ovfdeployer.check_nested_portgroup(fake_zpod_vc, "nope")
+
+
+def test_portgroup_ambiguous(fake_zpod_vc):
+    with pytest.raises(ComponentNetworkError) as e:
+        ovfdeployer.check_nested_portgroup(fake_zpod_vc, "dup")
+    assert (
+        "/Datacenter/network/DSwitch/dup (distributed), "
+        "/Datacenter/network/DSwitch2/dup (distributed). "
+        "Use the distributed portgroup's path." in str(e.value)
+    )
+
+
+def test_ambiguous_with_a_standard_portgroup(fake_zpod_vc):
+    NETWORKS.append(net("VM Network", "/Datacenter/network/DSwitch/VM Network", False))
+    try:
+        with pytest.raises(ComponentNetworkError, match="rename one of them"):
+            ovfdeployer.check_nested_portgroup(fake_zpod_vc, "VM Network")
+    finally:
+        NETWORKS.pop()
+
+
+def test_standard_portgroup_missing_on_a_host(fake_zpod_vc):
+    with pytest.raises(
+        ComponentNetworkError, match="present on esxi11 only; missing on esxi12"
+    ):
+        ovfdeployer.check_nested_portgroup(fake_zpod_vc, "pg-a")
+
+
+# --- vlan_id (ESXi on a tagged zPod network) ------------------------------------
+
+
+def test_vlan_id_sets_zpod_vlan_and_the_vlan_network(world, monkeypatch):
+    zc = zpod_component()
+    zc.ip = "10.42.111.71"
+    vlan64 = SimpleNamespace(
+        name="vlan64", cidr="10.42.111.64/26", gateway="10.42.111.65/26", vlan_id=64
+    )
+    zc.zpod.networks.append(vlan64)
+    zc.component.component_json["component_deploy_govc_spec"] = {
+        **GOVC_SPEC,
+        "PropertyMapping": [
+            {"Key": "guestinfo.ipaddress", "Value": "{{zpod_ipaddress}}"},
+            {"Key": "guestinfo.netmask", "Value": "{{zpod_netmask}}"},
+            {"Key": "guestinfo.gateway", "Value": "{{zpod_gateway}}"},
+            {"Key": "guestinfo.vlan", "Value": "{{zpod_vlan}}"},
+        ],
+    }
+    ovfdeployer.ovf_deployer(zc, vlan_id=64)
+    props = {p["Key"]: p["Value"] for p in world.options["PropertyMapping"]}
+    assert props == {
+        "guestinfo.ipaddress": "10.42.111.71",
+        "guestinfo.netmask": "255.255.255.192",
+        "guestinfo.gateway": "10.42.111.65",
+        "guestinfo.vlan": "64",
+    }
+    # Still on the endpoint, on the zPod segment (a trunk).
+    assert world.options["NetworkMapping"][0]["Network"].endswith("-lab-segment")
+
+
+def test_without_vlan_id_zpod_vlan_is_empty(world):
+    zc = zpod_component()
+    zc.component.component_json["component_deploy_govc_spec"] = {
+        **GOVC_SPEC,
+        "PropertyMapping": [{"Key": "guestinfo.vlan", "Value": "{{zpod_vlan}}"}],
+    }
+    ovfdeployer.ovf_deployer(zc)
+    assert world.options["PropertyMapping"] == [{"Key": "guestinfo.vlan", "Value": ""}]
+
+
+def test_vlan_id_nested_on_a_trunk_portgroup(world, portgroup_checks):
+    # A guest that tags its own frames, nested on a trunk portgroup.
+    zc = zpod_component()
+    zc.ip = "10.42.111.71"
+    zc.zpod.networks.append(
+        SimpleNamespace(
+            name="vlan64", cidr="10.42.111.64/26", gateway="10.42.111.65/26", vlan_id=64
+        )
+    )
+    zc.component.component_json["component_deploy_govc_spec"] = {
+        **GOVC_SPEC,
+        "PropertyMapping": [{"Key": "guestinfo.vlan", "Value": "{{zpod_vlan}}"}],
+    }
+    ovfdeployer.ovf_deployer(
+        zc, nested=True, network={"portgroup": "TRUNK"}, vlan_id=64
+    )
+    assert portgroup_checks == ["TRUNK"]
+    assert world.options["NetworkMapping"][0]["Network"] == "TRUNK"
+    assert world.options["PropertyMapping"] == [
+        {"Key": "guestinfo.vlan", "Value": "64"}
+    ]
+    assert "-pool=Cluster/Resources" in world.cmd

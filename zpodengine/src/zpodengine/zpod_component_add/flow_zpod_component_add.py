@@ -19,6 +19,9 @@ def flow_zpod_component_add(
     vmem: int | None = None,
     vnics: int | None = None,
     vdisks: list[int] | None = None,
+    nested: bool | None = None,
+    network: dict | None = None,
+    vlan_id: int | None = None,
 ):
     # Call .result() on the returned future so the flow waits for all
     # tasks to complete. Without this, Prefect 3 marks the flow as
@@ -33,6 +36,9 @@ def flow_zpod_component_add(
         vmem=vmem,
         vnics=vnics,
         vdisks=vdisks,
+        nested=nested,
+        network=network,
+        vlan_id=vlan_id,
     ).result()
 
 
