@@ -45,8 +45,22 @@ class Component(CommonDatesMixin, ModelBase, table=True):
         """
         usernames = []
 
-        # Always add SSH user
-        usernames.append({"username": "root", "type": "ssh"})
+        # SSH usernames (root unless the image ships its own login user)
+        match self.component_name.lower():
+            case "rhcos":
+                # Ignition only provisions core (SSH key, NOPASSWD sudo)
+                usernames.append({"username": "core", "type": "ssh"})
+            case "talos":
+                # No SSH on Talos, managed through its API with talosctl
+                usernames.append({"username": None, "type": "api-talos"})
+            case "ubuntu":
+                usernames.append({"username": "ubuntu", "type": "ssh"})
+                usernames.append({"username": "root", "type": "ssh"})
+            case "zbox":
+                usernames.append({"username": "zadmin", "type": "ssh"})
+                usernames.append({"username": "root", "type": "ssh"})
+            case _:
+                usernames.append({"username": "root", "type": "ssh"})
 
         # UI usernames
         match self.component_name.lower():
