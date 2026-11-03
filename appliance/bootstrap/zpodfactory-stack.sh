@@ -344,13 +344,7 @@ appliance_config_zpod_vcf_deployer() {
         log "Set ZPODFACTORY_ACCESS_TOKEN from ZPOD_API_TOKEN."
     fi
 
-    # Start deployer stack if docker-compose is present
-    if [[ -f "docker-compose.yml" ]]; then
-        log "Starting zpod-vcf-deployer Docker Compose stack..."
-        docker compose up -d &>> "$ZPODFACTORY_CONFIG_FILE" || log "Failed to start zpod-vcf-deployer Docker Compose stack."
-    else
-        log "No docker-compose.yml found for zpod-vcf-deployer, skipping stack startup."
-    fi
+    log "zpod-vcf-deployer ready."
 }
 
 appliance_config_wireguard() {

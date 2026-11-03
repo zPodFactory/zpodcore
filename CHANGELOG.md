@@ -44,6 +44,11 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   zPods it deploys with the factory key to check zcore itself: VLAN interfaces, masquerade rules,
   storages and their mount units, NFS exports mounted for real. `just selfservice` in `e2e/`.
 
+#### Removed
+
+- The appliance bootstrap no longer looks for a Docker Compose file in zpod-vcf-deployer, which
+  is a `uv run` script and never had one; first boot stops logging that the file is missing.
+
 ## [0.9.2] — 2026-10-29
 
 ### zPod API
