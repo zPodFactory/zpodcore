@@ -35,6 +35,12 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 - Enabling a Broadcom-gated component without `zpodfactory_broadcom_download_token` ends in
   `FAILED_AUTHENTICATION` instead of staying `SCHEDULED` forever.
+- vCenter calls survive a dropped connection. `connect()` retries with backoff (2, 4, 8, 16 s),
+  calls that are safe to repeat (property reads, `WaitForUpdates`, property filters and container
+  views) are replayed after a transport error, and an expired session logs in again once. Tasks
+  such as clones and power-ons are only replayed when the connection was refused, since a dropped
+  connection doesn't say whether vCenter ran them. zPod deploys no longer fail mid-flow on
+  `RemoteDisconnected` or "Unable to connect to host" when vCenter closes its connections under load.
 
 ### Stack and operations
 

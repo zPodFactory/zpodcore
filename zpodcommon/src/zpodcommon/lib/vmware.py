@@ -1,5 +1,6 @@
 import atexit
 import datetime
+import http.client
 import logging
 import ssl
 import time
@@ -12,6 +13,38 @@ from zpodcommon import models as M
 from zpodcommon.lib import database
 
 logger = logging.getLogger(__name__)
+
+# vCenter (or the reverse proxy in front of it) sometimes drops every open
+# connection at once under load: RemoteDisconnected, ConnectionResetError
+# and friends. Retry with backoff: 2, 4, 8, 16s, ~30s in total.
+VCENTER_RETRIES = 4
+VCENTER_RETRY_BACKOFF = 2.0
+
+# Calls that only read, or that create/destroy session-scoped helpers
+# (property filters, container views). Replaying them after a dropped
+# connection cannot change anything in the inventory. Accessors such as
+# task.info go through the "Fetch" pseudo-method.
+VCENTER_REPLAYABLE_METHODS = frozenset(
+    {
+        "Fetch",
+        "RetrieveServiceContent",
+        "RetrieveProperties",
+        "RetrievePropertiesEx",
+        "ContinueRetrievePropertiesEx",
+        "CheckForUpdates",
+        "WaitForUpdates",
+        "WaitForUpdatesEx",
+        "CreateFilter",
+        "DestroyFilter",
+        "CreateContainerView",
+        "DestroyView",
+        "CurrentTime",
+    }
+)
+
+
+def _is_vcenter_transport_error(exc):
+    return isinstance(exc, (OSError, http.client.HTTPException))
 
 
 class vCenter:
@@ -30,19 +63,87 @@ class vCenter:
 
     def connect(self):
         self.si = None
-        try:
-            print(f"Initializing vCenter connection {self.host} with user {self.user}")
-            self.si = connect.SmartConnect(
-                host=self.host,
-                user=self.user,
-                pwd=self.pwd,
-                sslContext=ssl._create_unverified_context(),
-            )
-            atexit.register(connect.Disconnect, self.si)
-        except vim.fault.InvalidLogin as e:
-            raise ConnectionError("Invalid username or password.") from e
-        except OSError as e:
-            raise ConnectionError(f"Unable to connect to host: {self.host}.") from e
+        for attempt in range(VCENTER_RETRIES + 1):
+            try:
+                print(
+                    f"Initializing vCenter connection {self.host} with user {self.user}"
+                )
+                self.si = connect.SmartConnect(
+                    host=self.host,
+                    user=self.user,
+                    pwd=self.pwd,
+                    sslContext=ssl._create_unverified_context(),
+                )
+                break
+            except vim.fault.InvalidLogin as e:
+                raise ConnectionError("Invalid username or password.") from e
+            except OSError as e:
+                if attempt >= VCENTER_RETRIES:
+                    raise ConnectionError(
+                        f"Unable to connect to host: {self.host}."
+                    ) from e
+                self._wait_before_retry("connect", e, attempt)
+        atexit.register(connect.Disconnect, self.si)
+        self._install_retrying_stub()
+
+    def _wait_before_retry(self, what, exc, attempt):
+        delay = VCENTER_RETRY_BACKOFF * (2**attempt)
+        # print() rather than logger.warning so Prefect's log_prints=True
+        # picks it up into the task-run logs.
+        print(
+            f"vCenter {self.host}: {what} failed with {type(exc).__name__}: {exc} "
+            f"(attempt {attempt + 1}/{VCENTER_RETRIES + 1}), retrying in {delay:g}s"
+        )
+        time.sleep(delay)
+
+    def _install_retrying_stub(self):
+        # Every managed object (VMs, tasks, ...) keeps a reference to this
+        # same stub, so wrapping its InvokeMethod covers every call made
+        # through this connection, including property reads (accessors call
+        # InvokeMethod with the "Fetch" pseudo-method). pyVmomi already
+        # drops its pooled HTTP connections on a transport error, so a retry
+        # opens a fresh one and reuses the session cookie.
+        stub = self.si._stub
+        invoke = stub.InvokeMethod
+
+        def invoke_with_retry(mo, info, args, outerStub=None):
+            method = info.wsdlName
+            relogged = False
+            attempt = 0
+            while True:
+                try:
+                    return invoke(mo, info, args, outerStub)
+                except vim.fault.NotAuthenticated:
+                    # vCenter restarted or dropped the session: log in again
+                    # on the same stub (it stores the new cookie), once.
+                    if relogged or method == "Login":
+                        raise
+                    print(f"vCenter {self.host}: session lost, logging in again")
+                    self.si.RetrieveContent().sessionManager.Login(self.user, self.pwd)
+                    relogged = True
+                except vmodl.fault.ManagedObjectNotFound:
+                    # A replayed Destroy* whose first attempt went through.
+                    if attempt and method in ("DestroyFilter", "DestroyView"):
+                        return None
+                    raise
+                except Exception as e:
+                    # A dropped connection does not tell whether vCenter ran
+                    # the call, so only replay calls that are safe to repeat,
+                    # or a refused connection (nothing was sent). Tasks such
+                    # as CloneVM_Task or PowerOnVM_Task are not replayed.
+                    replayable = method in VCENTER_REPLAYABLE_METHODS or isinstance(
+                        e, ConnectionRefusedError
+                    )
+                    if (
+                        not _is_vcenter_transport_error(e)
+                        or not replayable
+                        or attempt >= VCENTER_RETRIES
+                    ):
+                        raise
+                    self._wait_before_retry(method, e, attempt)
+                    attempt += 1
+
+        stub.InvokeMethod = invoke_with_retry
 
     def create_filter_spec(self, pc, data, props, vimtype):
         filterSpec = vmodl.query.PropertyCollector.FilterSpec()
