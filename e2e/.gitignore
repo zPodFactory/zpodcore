@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+report.html
+scripts/report_preview.html
+report_svgs/

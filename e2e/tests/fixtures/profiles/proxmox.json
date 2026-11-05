@@ -1,0 +1,60 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "proxmox-9.1.4",
+      "host_id": 11,
+      "hostname": "prox11",
+      "vcpu": 4,
+      "vdisks": [
+        100,
+        100
+      ],
+      "vmem": 32
+    },
+    {
+      "component_uid": "proxmox-9.1.4",
+      "host_id": 12,
+      "hostname": "prox12",
+      "vcpu": 4,
+      "vdisks": [
+        100,
+        100
+      ],
+      "vmem": 32
+    },
+    {
+      "component_uid": "proxmox-9.1.4",
+      "host_id": 13,
+      "hostname": "prox13",
+      "vcpu": 4,
+      "vdisks": [
+        100,
+        100
+      ],
+      "vmem": 32
+    }
+  ],
+  [
+    {
+      "component_uid": "proxmox-dm-1.0.2",
+      "host_id": 10,
+      "hostname": "proxmgr"
+    },
+    {
+      "component_uid": "proxmox-bs-4.1.2",
+      "host_id": 9,
+      "hostname": "proxbkp",
+      "vcpu": 4,
+      "vdisks": [
+        100,
+        100,
+        100,
+        100
+      ],
+      "vmem": 8
+    }
+  ]
+]

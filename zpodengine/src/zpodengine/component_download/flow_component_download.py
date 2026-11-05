@@ -194,9 +194,20 @@ def get_component(request: dict, uid: str):
     component = Component(**request)
 
     if component.component_download_engine == "https":
-        component.component_dl_url = _resolve_broadcom_token(
-            component.component_download_file
-        )
+        try:
+            component.component_dl_url = _resolve_broadcom_token(
+                component.component_download_file
+            )
+        except ValueError as e:
+            # _resolve_broadcom_token raises when the depot URL needs a
+            # Broadcom token and zpodfactory_broadcom_download_token isn't
+            # set. This happens before download_component ever runs, so
+            # without this the flow crashes with an unhandled exception
+            # and the component silently sits at whatever download_status
+            # it already had (typically SCHEDULED) forever.
+            logger.error(str(e))
+            update_db(uid, ComponentDownloadStatus.FAILED_AUTHENTICATION)
+            raise
         download_file = urlparse(component.component_download_file).path.split("/")[-1]
         component.component_download_file = download_file
 
