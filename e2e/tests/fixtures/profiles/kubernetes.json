@@ -1,0 +1,46 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "zbox-13.7.1",
+      "host_id": 11,
+      "hostname": "zbox11"
+    },
+    {
+      "component_uid": "zbox-13.7.1",
+      "host_id": 12,
+      "hostname": "zbox12"
+    },
+    {
+      "component_uid": "zbox-13.7.1",
+      "host_id": 13,
+      "hostname": "zbox13"
+    },
+    {
+      "component_uid": "zbox-13.7.1",
+      "host_id": 14,
+      "hostname": "zbox14",
+      "vcpu": 4,
+      "vmem": 16,
+      "vnics": 2
+    },
+    {
+      "component_uid": "zbox-13.7.1",
+      "host_id": 15,
+      "hostname": "zbox15",
+      "vcpu": 4,
+      "vmem": 16,
+      "vnics": 2
+    },
+    {
+      "component_uid": "zbox-13.7.1",
+      "host_id": 16,
+      "hostname": "zbox16",
+      "vcpu": 4,
+      "vmem": 16,
+      "vnics": 2
+    }
+  ]
+]

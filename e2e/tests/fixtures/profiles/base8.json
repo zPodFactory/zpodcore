@@ -1,0 +1,24 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "esxi-8.0u3c",
+      "host_id": 11,
+      "hostname": "esxi11",
+      "vcpu": 6,
+      "vmem": 32
+    },
+    {
+      "component_uid": "esxi-8.0u3c",
+      "host_id": 12,
+      "hostname": "esxi12",
+      "vcpu": 6,
+      "vmem": 32
+    }
+  ],
+  {
+    "component_uid": "vcsa-8.0u3i"
+  }
+]

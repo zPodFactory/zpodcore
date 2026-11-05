@@ -1,0 +1,37 @@
+[
+  {
+    "component_uid": "zcore-13.7"
+  },
+  [
+    {
+      "component_uid": "esxi-8.0u3c",
+      "host_id": 11,
+      "hostname": "esxi11",
+      "vcpu": 6,
+      "vmem": 48
+    },
+    {
+      "component_uid": "esxi-8.0u3c",
+      "host_id": 12,
+      "hostname": "esxi12",
+      "vcpu": 6,
+      "vmem": 48
+    },
+    {
+      "component_uid": "esxi-8.0u3c",
+      "host_id": 13,
+      "hostname": "esxi13",
+      "vcpu": 6,
+      "vmem": 48
+    }
+  ],
+  {
+    "component_uid": "vcsa-8.0u3j"
+  },
+  {
+    "component_uid": "nsx-4.2.3.3"
+  },
+  {
+    "component_uid": "vcd-10.6.1.2"
+  }
+]

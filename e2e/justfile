@@ -1,0 +1,54 @@
+set dotenv-load
+
+@_default:
+  just --list
+
+# Install/refresh the e2e venv
+sync:
+  uv sync --group dev
+
+# Check connectivity/auth against the target zPodFactory before running anything
+preflight:
+  uv run python scripts/preflight.py
+
+# Fast single minimal-zpod sanity pass
+smoke:
+  uv run pytest -m smoke
+
+# Everything except the slow concurrency batch (vcsa/nsx-heavy profiles,
+# ~1h - opt-in via `just concurrency-slow`). The fast concurrency batch
+# (zcore/proxmox/kubernetes/vcf902/vcf910) runs as part of this by default.
+full:
+  uv run pytest -m "not (concurrency and slow)"
+
+# zcore self-service on one shared zcore zPod: baseline, networks, storage/NFS, component options (on-host checks over SSH)
+selfservice:
+  uv run pytest tests/test_zcore_access.py tests/test_zpod_networks.py tests/test_zpod_storage.py tests/test_zpod_component_options.py
+
+# Same, without the slow parts (VM on a user VLAN, extraConfig image, nested placement, fabric routing)
+selfservice-fast:
+  uv run pytest -m "not slow" tests/test_zcore_access.py tests/test_zpod_networks.py tests/test_zpod_storage.py tests/test_zpod_component_options.py
+
+# Concurrent multi-zpod batch test - fast profiles only (zcore/proxmox/kubernetes/vcf902/vcf910)
+concurrency:
+  uv run pytest -m "concurrency and not slow"
+
+# Concurrent multi-zpod batch test - slow/vcsa-nsx-heavy profiles only (vcd-prod/base8), opt-in
+concurrency-slow:
+  uv run pytest -m "concurrency and slow"
+
+# Everything, including concurrency and destructive settings tests
+all:
+  uv run pytest
+
+# Sweep orphaned e2e-* resources left behind by an interrupted run
+cleanup:
+  uv run python scripts/cleanup.py
+
+# Render a report.html preview from every real test's name/docstring, no live server needed
+report-preview:
+  uv run python scripts/preview_report.py
+
+# Lint
+lint:
+  uv run ruff check .

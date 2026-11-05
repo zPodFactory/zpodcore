@@ -29,6 +29,21 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod Engine
+
+#### Fixed
+
+- Enabling a Broadcom-gated component without `zpodfactory_broadcom_download_token` ends in
+  `FAILED_AUTHENTICATION` instead of staying `SCHEDULED` forever.
+
+### Stack and operations
+
+#### Added
+
+- `e2e/`: a live end-to-end suite that drives `zcli` against a running stack and logs into the
+  zPods it deploys with the factory key to check zcore itself: VLAN interfaces, masquerade rules,
+  storages and their mount units, NFS exports mounted for real. `just selfservice` in `e2e/`.
+
 ## [0.9.2] — 2026-10-29
 
 ### zPod API
