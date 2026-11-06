@@ -41,6 +41,11 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   such as clones and power-ons are only replayed when the connection was refused, since a dropped
   connection doesn't say whether vCenter ran them. zPod deploys no longer fail mid-flow on
   `RemoteDisconnected` or "Unable to connect to host" when vCenter closes its connections under load.
+- zPods deployed at the same time no longer get the same /24. Deploy prep only skipped subnets
+  that already had an NSX segment, and a zPod's segment is created by its networking task, seconds
+  after prep: two preps close together could pick the same subnet, their zcore shared an IP and one
+  deploy failed waiting for zboxapi. Prep now also skips the subnets other zPods (not yet deleted)
+  hold in the database.
 
 ### Stack and operations
 

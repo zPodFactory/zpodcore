@@ -22,7 +22,13 @@ ZPOD_PUBLIC_SUB_NETWORKS_PREFIXLEN = 26
 #
 
 
-def get_zpod_primary_subnet(endpoint: str):
+def get_zpod_primary_subnet(endpoint: str, taken: list[IPv4Network] = ()):
+    """A free /24 of the endpoint network.
+
+    `taken`: subnets other zPods already hold in the database. NSX alone isn't
+    enough: a zPod's segment is only created by its networking task, after
+    prep, so a concurrent deploy would not see its /24 there yet.
+    """
     endpoint_network = ipaddress.ip_network(endpoint.endpoints["network"]["networks"])
     with NsxClient.auth_by_endpoint(endpoint=endpoint) as nsx:
         segments = nsx.search(resource_type="Segment")
@@ -34,7 +40,7 @@ def get_zpod_primary_subnet(endpoint: str):
             for subnet in segment.get("subnets", [])
             if subnet.get("network")
             and isinstance(ip_network(subnet["network"], strict=False), IPv4Network)
-        ]
+        ] + list(taken)
 
         # Get all possible subnets
         possible_subnets = list(
