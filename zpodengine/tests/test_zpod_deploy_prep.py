@@ -31,8 +31,8 @@ def world(monkeypatch):
     allocated = iter(["10.42.132.0/24", "10.42.181.0/24", "10.42.172.0/24"])
     calls = []
 
-    def primary_subnet(endpoint):
-        calls.append(1)
+    def primary_subnet(endpoint, taken=()):
+        calls.append(sorted(str(t) for t in taken))
         return IPv4Network(next(allocated))
 
     monkeypatch.setattr(engine_database, "get_session_ctx", ctx)
@@ -70,7 +70,7 @@ def test_first_run_allocates_one_slash24(world):
     engine, zpod_id, calls = world
     prep_mod.zpod_deploy_prep.fn(zpod_id=zpod_id)
     assert cidrs(engine, zpod_id) == [f"10.42.132.{o}/26" for o in (0, 64, 128, 192)]
-    assert calls == [1]
+    assert len(calls) == 1
 
 
 def test_a_rerun_reuses_the_networks(world):
@@ -78,8 +78,56 @@ def test_a_rerun_reuses_the_networks(world):
     for _ in range(3):
         prep_mod.zpod_deploy_prep.fn(zpod_id=zpod_id)
     assert cidrs(engine, zpod_id) == [f"10.42.132.{o}/26" for o in (0, 64, 128, 192)]
-    assert calls == [1]
+    assert len(calls) == 1
     with Session(engine) as session:
         zpod = session.get(M.Zpod, zpod_id)
         assert zpod.status == "BUILDING"
         assert zpod.domain == "lab.zpod.example"
+
+
+def test_other_live_zpods_subnets_are_taken(world):
+    """A concurrent deploy has its rows in the database before its NSX segment
+    exists: prep must hand them to the allocator. DELETED zPods free theirs."""
+    engine, zpod_id, calls = world
+    with Session(engine) as session:
+        for name, status, cidr in (
+            ("busy", "BUILDING", "10.60.40.0/26"),
+            ("kept", "DEPLOY_FAILED", "10.60.41.0/26"),
+            ("gone", "DELETED", "10.60.42.0/26"),
+        ):
+            other = M.Zpod(name=name, endpoint_id=1, status=status, profile="p")
+            other.networks.append(M.ZpodNetwork.deploy_row(IPv4Network(cidr)))
+            session.add(other)
+        session.commit()
+
+    prep_mod.zpod_deploy_prep.fn(zpod_id=zpod_id)
+    assert calls == [["10.60.40.0/26", "10.60.41.0/26"]]
+
+
+def test_allocator_skips_taken_subnets(monkeypatch):
+    """With no NSX segment yet, a /24 held in the database is never handed out."""
+    from zpodengine.lib import network
+
+    class FakeNsx:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def search(self, resource_type):
+            return []
+
+    monkeypatch.setattr(
+        network.NsxClient,
+        "auth_by_endpoint",
+        classmethod(lambda cls, endpoint: FakeNsx()),
+    )
+    endpoint = type(
+        "E", (), {"endpoints": {"network": {"networks": "10.60.40.0/23"}}}
+    )()
+    for _ in range(20):  # the candidate order is random
+        subnet = network.get_zpod_primary_subnet(
+            endpoint, taken=[IPv4Network("10.60.40.0/26")]
+        )
+        assert subnet == IPv4Network("10.60.41.0/24")

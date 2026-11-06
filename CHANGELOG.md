@@ -35,6 +35,17 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 - Enabling a Broadcom-gated component without `zpodfactory_broadcom_download_token` ends in
   `FAILED_AUTHENTICATION` instead of staying `SCHEDULED` forever.
+- vCenter calls survive a dropped connection. `connect()` retries with backoff (2, 4, 8, 16 s),
+  calls that are safe to repeat (property reads, `WaitForUpdates`, property filters and container
+  views) are replayed after a transport error, and an expired session logs in again once. Tasks
+  such as clones and power-ons are only replayed when the connection was refused, since a dropped
+  connection doesn't say whether vCenter ran them. zPod deploys no longer fail mid-flow on
+  `RemoteDisconnected` or "Unable to connect to host" when vCenter closes its connections under load.
+- zPods deployed at the same time no longer get the same /24. Deploy prep only skipped subnets
+  that already had an NSX segment, and a zPod's segment is created by its networking task, seconds
+  after prep: two preps close together could pick the same subnet, their zcore shared an IP and one
+  deploy failed waiting for zboxapi. Prep now also skips the subnets other zPods (not yet deleted)
+  hold in the database.
 
 ### Stack and operations
 
@@ -43,6 +54,11 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 - `e2e/`: a live end-to-end suite that drives `zcli` against a running stack and logs into the
   zPods it deploys with the factory key to check zcore itself: VLAN interfaces, masquerade rules,
   storages and their mount units, NFS exports mounted for real. `just selfservice` in `e2e/`.
+
+#### Removed
+
+- The appliance bootstrap no longer looks for a Docker Compose file in zpod-vcf-deployer, which
+  is a `uv run` script and never had one; first boot stops logging that the file is missing.
 
 ## [0.9.2] — 2026-10-29
 

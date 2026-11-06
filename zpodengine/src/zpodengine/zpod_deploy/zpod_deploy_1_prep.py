@@ -1,6 +1,7 @@
 from ipaddress import IPv4Network
 
 from prefect import task
+from sqlmodel import select
 
 from zpodcommon import models as M
 from zpodcommon.enums import ZpodNetworkKind, ZpodStatus
@@ -40,6 +41,22 @@ def zpod_deploy_prep(zpod_id: int):
             session.commit()
             return
 
+        # The /24s of every other zPod not yet DELETED (destroying, kept as
+        # DEPLOY_FAILED, ...). This task holds the atomic_operation lock and
+        # commits its own rows before releasing it, so the next prep sees them.
+        taken = [
+            IPv4Network(cidr)
+            for cidr in session.exec(
+                select(M.ZpodNetwork.cidr)
+                .join(M.Zpod)
+                .where(
+                    M.Zpod.id != zpod.id,
+                    M.Zpod.status != ZpodStatus.DELETED,
+                    M.ZpodNetwork.kind == ZpodNetworkKind.ZPOD.value,
+                )
+            )
+        ]
+
         # Check for custom subnet feature flag
         custom_subnet = DBUtils.get_setting_value(f"ff_zpod_{zpod.name}_subnet")
         if custom_subnet:
@@ -52,17 +69,21 @@ def zpod_deploy_prep(zpod_id: int):
                     )
                     print("Falling back to default subnet allocation")
                     zpod_primary_subnet = get_zpod_primary_subnet(
-                        endpoint=zpod.endpoint
+                        endpoint=zpod.endpoint, taken=taken
                     )
             except ValueError as e:
                 print(
                     f"Invalid subnet format in feature flag ff_zpod_{zpod.name}_subnet: {e}"
                 )
                 print("Falling back to default subnet allocation")
-                zpod_primary_subnet = get_zpod_primary_subnet(endpoint=zpod.endpoint)
+                zpod_primary_subnet = get_zpod_primary_subnet(
+                    endpoint=zpod.endpoint, taken=taken
+                )
         else:
             # Fetching main /24 network for zPod
-            zpod_primary_subnet = get_zpod_primary_subnet(endpoint=zpod.endpoint)
+            zpod_primary_subnet = get_zpod_primary_subnet(
+                endpoint=zpod.endpoint, taken=taken
+            )
 
         # Fetching all 4 x /26 networks for zPod
         zpod_subnets = get_zpod_all_subnets(zpod_primary_subnet)
