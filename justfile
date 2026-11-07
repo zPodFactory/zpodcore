@@ -313,7 +313,7 @@ zpodengine-deploy-all:
 
 # Manually Run Command
 zpodengine-cmd *args:
-  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_HOSTPORT}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" uv run "$@"
+  @cd {{justfile_directory()}}/zpodengine && PREFECT_API_URL="http://${ZPODENGINE_ADMIN_HOSTPORT:-127.0.0.1:8061}/api" PYTHONPATH="{{justfile_directory()}}/zpodcommon/src:{{justfile_directory()}}/zpodengine/src" uv run "$@"
 
 
 # Run command using zpodengine container
