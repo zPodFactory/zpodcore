@@ -209,3 +209,22 @@ def test_component_add_fqdn_within_limit(superadmin_client, deployed_zpod, sessi
     )
     assert response.status_code == 201, response.text
     assert FakeZpodEngineClient.calls[0]["flow_name"] == "zpod_component_add"
+
+
+@pytest.mark.parametrize("status", ["DELETING", "DESTROY_FAILED", "DEPLOY_FAILED"])
+def test_create_zpod_name_of_a_zpod_not_yet_deleted_is_409(
+    superadmin_client, catalog, session, status
+):
+    session.add(M.Zpod(name="test", endpoint_id=1, status=status, profile="vcf910"))
+    session.commit()
+    response = _create_zpod(superadmin_client, "test")
+    assert response.status_code == 409, response.text
+    assert FakeZpodEngineClient.calls == []
+
+
+def test_create_zpod_name_of_a_deleted_zpod_is_free(
+    superadmin_client, catalog, session
+):
+    session.add(M.Zpod(name="test", endpoint_id=1, status="DELETED", profile="vcf910"))
+    session.commit()
+    assert _create_zpod(superadmin_client, "test").status_code == 201

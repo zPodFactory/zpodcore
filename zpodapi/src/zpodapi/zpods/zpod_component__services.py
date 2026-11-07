@@ -164,4 +164,5 @@ class ZpodComponentService(ServiceBase):
             flow_name="zpod_component_remove",
             deployment_name="zpod_component_remove",
             zpod_component_id=zpod_component.id,
+            zpod_id=zpod_component.zpod_id,
         )
