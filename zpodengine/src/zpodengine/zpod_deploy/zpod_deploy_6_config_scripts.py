@@ -3,13 +3,14 @@ from prefect import task
 from zpodcommon import models as M
 from zpodcommon.enums import ZpodStatus
 from zpodengine.lib import database
+from zpodengine.lib.zpod_status import set_zpod_status
 
 
 @task
 def zpod_deploy_config_scripts(*, zpod_id: int):
     with database.get_session_ctx() as session:
         zpod = session.get(M.Zpod, zpod_id)
-        zpod.status = ZpodStatus.CONFIG_SCRIPTS
+        set_zpod_status(zpod, ZpodStatus.CONFIG_SCRIPTS)
         session.add(zpod)
         session.commit()
 

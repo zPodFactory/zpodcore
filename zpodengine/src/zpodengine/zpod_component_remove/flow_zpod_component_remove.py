@@ -27,6 +27,7 @@ def set_flow_name():
 )
 def flow_zpod_component_remove(
     zpod_component_id: int,
+    zpod_id: int,  # only read by a destroy of the zPod to find and cancel this run
 ):
     dns = remove_from_dns.submit(zpod_component_id)
     vc = remove_from_vcenter.submit(zpod_component_id)
