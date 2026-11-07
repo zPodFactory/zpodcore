@@ -3,10 +3,14 @@
 Edit this if your library has no simple https-sourced component available:
 """
 
+import time
+
 import pytest
 
 from e2e import status
 from e2e.insight import Beat, Insight
+from e2e.polling import poll_until
+from e2e.prefect_diag import TERMINAL_STATE_TYPES
 from e2e.profiles import profile_body
 
 # zbox-13.7.1 only - never zcore-*: zcore is the mandatory core component
@@ -202,3 +206,153 @@ def test_remove_component_from_zpod_removes_dns_entry(
     assert result.returncode == 0, f"zpod component remove failed:\n{result.stderr}"
 
     wait_dns_nxdomain(added.fqdn)
+
+
+# A zPod whose deploy is still in a long task when the destroy comes: zcore, esxi11,
+# then a vcsa. The vcsa deploy task runs the vCenter installer (vcsa-deploy) onto
+# esxi11 for ~16 min; without esxi11 the installer's precheck fails in ~12 s. The
+# zcore and ESXi deploy tasks (OVA deploy + power on) only take 10-16 s, less than
+# the ~13 s the destroy's own flow run needs to start and send the cancel.
+VCSA_COMPONENT_UID = "vcsa-9.1.1.0"
+ESXI_COMPONENT_UID = "esxi-9.1.1.0"
+
+
+def _component_deploy_running(prefect_diag, deploy_run_id: str, component_uid: str) -> bool:
+    """A deploy task of `component_uid` is under way."""
+    return any(
+        component_uid in t["name"] and t["name"].endswith(": deploy") and t.get("state_type") == "RUNNING"
+        for t in prefect_diag.task_runs(deploy_run_id)
+    )
+
+
+# moment -> zPod name suffix
+MOMENTS = {"at_once": "destroy-at-once", "during_vcsa_deploy": "destroy-during-vcsa"}
+
+
+@pytest.mark.parametrize("moment", list(MOMENTS))
+def test_destroy_during_deploy_cancels_it(
+    moment, zcli_as, namer, zcore_profile, endpoint, superadmin_client, e2e_config,
+    prefect_diag, poll_zpod_deleted, wait_dns_nxdomain, diag,
+):
+    """Destroying a zPod whose deploy is still running cancels the deploy first.
+
+    `at_once`: the destroy right after the create, the deploy run barely started
+    (nothing created yet). `during_vcsa_deploy`: zcore, esxi11 and a vcsa, the destroy
+    as soon as the vcsa deploy task starts, so it cancels a task still running and cleans
+    up a half-built zPod; that task ends FAILED or CRASHED, killed, not left to
+    finish. Either way the deploy run ends CANCELLED, the zPod reaches DELETED and
+    stays there (the cancelled deploy must not write ACTIVE or DEPLOY_FAILED
+    back), and in the second case the name is free again at once: a new zPod of
+    the same name deploys.
+    """
+    runner = zcli_as("superadmin")
+    zpod_name = namer(MOMENTS[moment])
+    deploy_timeout = e2e_config.deploy_timeout_seconds + 60
+
+    profile = zcore_profile
+    if moment == "during_vcsa_deploy":
+        components = superadmin_client.components_get_all.sync() or []
+        active = {c.component_uid for c in components if c.status == "ACTIVE"}
+        if missing := {VCSA_COMPONENT_UID, ESXI_COMPONENT_UID} - active:
+            pytest.skip(f"{', '.join(sorted(missing))} not ACTIVE - enable it first")
+        profile = namer("profile-destroy-during-vcsa")
+        esxi11 = {"component_uid": ESXI_COMPONENT_UID, "host_id": 11, "hostname": "esxi11", "vcpu": 6, "vmem": 48, "vnics": 4}
+        items = [{"component_uid": e2e_config.zcore_component_uid}, esxi11, {"component_uid": VCSA_COMPONENT_UID}]
+        superadmin_client.profiles_create.sync(body=profile_body(profile, items))
+
+    try:
+        _destroy_during_deploy(
+            moment, runner, zpod_name, profile, zcore_profile, endpoint, superadmin_client,
+            prefect_diag, poll_zpod_deleted, wait_dns_nxdomain, diag, deploy_timeout,
+        )
+    finally:
+        if profile != zcore_profile:
+            try:
+                superadmin_client.profiles_delete.sync(id=f"name={profile}")
+            except Exception:
+                pass
+
+
+def _destroy_during_deploy(
+    moment, runner, zpod_name, profile, zcore_profile, endpoint, superadmin_client,
+    prefect_diag, poll_zpod_deleted, wait_dns_nxdomain, diag, deploy_timeout,
+):
+    result = runner(
+        "zpod", "create", zpod_name, "--endpoint", endpoint.name, "--profile", profile,
+        check=False, timeout=60,
+    )
+    assert result.returncode == 0, f"zpod create failed:\n{result.stdout}\n{result.stderr}"
+    zpod = superadmin_client.zpods_get.sync(id=f"name={zpod_name}")
+    deploy_run = poll_until(
+        lambda: prefect_diag.find_flow_run(f"Deploy {zpod_name}"),
+        is_success=lambda r: r is not None,
+        is_failure=lambda r: False,
+        describe=lambda r: "no deploy run yet" if r is None else r["state_type"],
+        timeout_seconds=60, interval_seconds=2, reason="waiting for the deploy run",
+    )
+    diag.set_hint(prefect_diag.hint(f"Deploy {zpod_name}"))
+
+    fqdns = []
+    if moment == "during_vcsa_deploy":
+        poll_until(
+            lambda: _component_deploy_running(prefect_diag, deploy_run["id"], VCSA_COMPONENT_UID),
+            is_success=bool,
+            is_failure=lambda _: prefect_diag.find_flow_run(f"Deploy {zpod_name}")["state_type"]
+            in TERMINAL_STATE_TYPES,
+            describe=lambda running: f"vcsa deploy task running={running}",
+            timeout_seconds=deploy_timeout, interval_seconds=1,
+            reason="waiting for the vcsa deploy task to start",
+        )
+        live = superadmin_client.zpods_get.sync(id=f"id={zpod.id}")
+        fqdns = [c.fqdn for c in live.components or [] if c.fqdn]
+
+    result = runner("zpod", "destroy", zpod_name, check=False)
+    assert result.returncode == 0, f"zpod destroy failed:\n{result.stdout}\n{result.stderr}"
+    poll_zpod_deleted(superadmin_client, f"id={zpod.id}")
+
+    deploy_run = prefect_diag.find_flow_run(f"Deploy {zpod_name}")
+    assert deploy_run["state_type"] == "CANCELLED", (
+        f"deploy run {deploy_run['name']} ended {deploy_run['state_type']}, expected CANCELLED"
+    )
+    if moment == "during_vcsa_deploy":
+        # The cancel kills a task still running (SIGTERM to the deploy's container);
+        # it does not wait for it to finish.
+        vcsa = next(
+            t for t in prefect_diag.task_runs(deploy_run["id"])
+            if VCSA_COMPONENT_UID in t["name"] and t["name"].endswith(": deploy")
+        )
+        assert vcsa["state_type"] in ("FAILED", "CRASHED"), (
+            f"{vcsa['name']} ended {vcsa['state_type']}: the cancel did not stop it"
+        )
+    destroy_run = prefect_diag.find_flow_run(f"Destroy {zpod_name}")
+    logs = "\n".join(prefect_diag.get_logs(destroy_run["id"]))
+    assert f"run {deploy_run['name']} ({deploy_run['id']})" in logs, (
+        f"destroy run did not log cancelling {deploy_run['name']}:\n{logs[-2000:]}"
+    )
+
+    # The cancelled deploy's last status write, if any, would land about now.
+    time.sleep(30)
+    after = superadmin_client.zpods_get.sync(id=f"id={zpod.id}")
+    assert after.status == status.ZpodStatus.DELETED, (
+        f"zPod {zpod_name} went back to {after.status} after its destroy"
+    )
+    for fqdn in fqdns:
+        wait_dns_nxdomain(fqdn)
+
+    if moment != "during_vcsa_deploy":
+        return
+
+    # The name is free again: a new zPod of the same name deploys normally.
+    result = runner(
+        "zpod", "create", zpod_name, "--endpoint", endpoint.name, "--profile", zcore_profile,
+        "--wait", "--no-spinner", check=False, timeout=deploy_timeout,
+    )
+    try:
+        assert result.returncode == 0, f"recreate failed:\n{result.stdout}\n{result.stderr}"
+        again = superadmin_client.zpods_get.sync(id=f"name={zpod_name}")
+        assert again.id != zpod.id
+        assert again.status == status.ZpodStatus.ACTIVE, f"recreated zPod is {again.status}"
+        assert superadmin_client.zpods_get.sync(id=f"id={zpod.id}").status == status.ZpodStatus.DELETED
+    finally:
+        runner("zpod", "destroy", zpod_name, check=False)
+        poll_zpod_deleted(superadmin_client, f"name={zpod_name}")
