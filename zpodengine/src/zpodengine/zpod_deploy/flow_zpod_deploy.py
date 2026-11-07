@@ -5,6 +5,7 @@ from zpodcommon.enums import ZpodStatus
 from zpodengine.lib import database
 from zpodengine.lib.datastore_floor import zpod_datastore_floor
 from zpodengine.lib.options import task_options_setup
+from zpodengine.lib.zpod_status import GONE
 from zpodengine.zpod_component_add.zpod_component_add import (
     zpod_component_add,
 )
@@ -33,6 +34,9 @@ def flow_failed(flow, flow_run, state):
 
     with database.get_session_ctx() as session:
         zpod = session.get(M.Zpod, flow_run.parameters["zpod_id"])
+        if zpod.status in GONE:
+            logger.info(f"zPod is {zpod.status}: leaving its status alone")
+            return
         zpod.status = ZpodStatus.DEPLOY_FAILED
         session.add(zpod)
         session.commit()

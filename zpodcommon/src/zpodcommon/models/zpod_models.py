@@ -1,6 +1,7 @@
 from ipaddress import IPv4Network
 from typing import TYPE_CHECKING, Any
 
+from sqlalchemy import Index, text
 from sqlmodel import JSON, Column, Field, Relationship, UniqueConstraint
 
 from zpodcommon import enums
@@ -17,6 +18,16 @@ if TYPE_CHECKING:
 
 class Zpod(CommonDatesMixin, ModelBase, table=True):
     __tablename__ = "zpods"
+    # A zPod is soft-deleted; only one row per name may be anything but DELETED.
+    __table_args__ = (
+        Index(
+            "zpods_name_live_key",
+            "name",
+            unique=True,
+            postgresql_where=text("status <> 'DELETED'"),
+            sqlite_where=text("status <> 'DELETED'"),
+        ),
+    )
 
     id: int | None = Field(
         default=None,

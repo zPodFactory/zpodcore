@@ -6,6 +6,10 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# Prefect's non-terminal state types: a run in one of these is still doing something
+# (or about to), CANCELLING included until the worker or runner confirms the kill.
+ACTIVE_STATE_TYPES = ["SCHEDULED", "PENDING", "RUNNING", "PAUSED", "CANCELLING"]
+
 
 class ZpodEngineBase:
     def _check_status(self, response) -> None:
@@ -159,6 +163,41 @@ class ZpodEngineClient(ZpodEngineBase):
         if response.status_code == 404:
             return None
         return _flow_run_summary(self._json(response))
+
+    def get_zpod_flow_runs(self, zpod_id) -> list[dict]:
+        """The top-level runs still working on a zPod: any flow with a ``zpod_id``
+        parameter. Subflows are left out, they die with their parent's container."""
+        response = self.client.post(
+            url="/flow_runs/filter",
+            json={
+                "flow_runs": {
+                    "state": {"type": {"any_": ACTIVE_STATE_TYPES}},
+                    "parent_task_run_id": {"is_null_": True},
+                },
+                "limit": 200,
+            },
+        )
+        return [
+            _flow_run_summary(run)
+            for run in self._json(response)
+            if (run.get("parameters") or {}).get("zpod_id") == zpod_id
+        ]
+
+    def cancel_flow_run(self, flow_run_id, *, message=None, force=False) -> dict:
+        """Ask Prefect to cancel a run: the worker kills a pending one, the runner
+        in its container a running one. ``force`` writes CANCELLED outright,
+        skipping orchestration, for a run whose container is already gone."""
+        response = self.client.post(
+            url=f"/flow_runs/{flow_run_id}/set_state",
+            json={
+                "state": {
+                    "type": "CANCELLED" if force else "CANCELLING",
+                    "message": message,
+                },
+                "force": force,
+            },
+        )
+        return self._json(response)
 
     def create_flow_run_by_name(
         self,

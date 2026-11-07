@@ -12,6 +12,7 @@ from zpodengine.lib.network import (
     get_zpod_all_subnets,
     get_zpod_primary_subnet,
 )
+from zpodengine.lib.zpod_status import set_zpod_status
 
 
 @task(tags=["atomic_operation"])
@@ -19,7 +20,7 @@ def zpod_deploy_prep(zpod_id: int):
     # Add default network
     with database.get_session_ctx() as session:
         zpod = session.get(M.Zpod, zpod_id)
-        zpod.status = ZpodStatus.BUILDING
+        set_zpod_status(zpod, ZpodStatus.BUILDING)
 
         if not zpod.domain:
             domain = DBUtils.get_setting_value("zpodfactory_default_domain")

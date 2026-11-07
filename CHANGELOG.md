@@ -29,9 +29,31 @@ note with `python3 tools/release_notes.py X.Y.Z`.
 
 ## [Unreleased]
 
+### zPod API
+
+#### Fixed
+
+- A zPod name can be live once. The API already refused a name held by a zPod not yet
+  `DELETED` (`DELETING` and `DESTROY_FAILED` included), but a deploy flow still running after a
+  destroy of its zPod wrote `ACTIVE` back over `DELETED`, next to the new zPod of the same name,
+  and two half-deployed, half-destroyed zPods shared it. Migration `7c3f9a2e5b1d` adds a partial
+  unique index on `zpods.name` for rows not `DELETED`, so that write fails instead. The upgrade
+  refuses a database that already holds such duplicates and names them: destroy one, or set its
+  status to `DELETED`, then upgrade again.
+
 ### zPod Engine
 
 #### Fixed
+
+- The deploy flow no longer writes a status (`BUILDING`, `CONFIG_SCRIPTS`, `ACTIVE`,
+  `DEPLOY_FAILED`) onto a zPod that is `DELETING` or `DELETED`: the task fails, or the failure
+  hook leaves the row alone.
+- Destroying a zPod first cancels the Prefect runs still working on it (its deploy, a
+  component add or remove, a disk or routing change) and waits until they are over, then sets
+  `DELETING`. Before, the destroy ran alongside them: the deploy kept creating VMs and networks
+  the destroy was deleting, and whichever finished last wrote the zPod's status. A run that
+  ignores the cancel for five minutes has lost its container and is forced to `CANCELLED`; if
+  it is still active after that, the destroy fails (`DESTROY_FAILED`) naming the run.
 
 - Enabling a Broadcom-gated component without `zpodfactory_broadcom_download_token` ends in
   `FAILED_AUTHENTICATION` instead of staying `SCHEDULED` forever.
