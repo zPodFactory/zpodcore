@@ -65,6 +65,18 @@ class PrefectDiagnostics:
         except httpx.HTTPError:
             return {}
 
+    def task_runs(self, flow_run_id: str) -> list[dict]:
+        """Every task run of a flow run (name, state_type, ...), or [] if Prefect can't say."""
+        try:
+            resp = self._client.post(
+                f"{self.api_url}/task_runs/filter",
+                json={"flow_runs": {"id": {"any_": [flow_run_id]}}, "limit": 200},
+            )
+            resp.raise_for_status()
+            return resp.json()
+        except httpx.HTTPError:
+            return []
+
     def wait_for_flow_run(
         self, name_contains: str, *, timeout_seconds: int, interval_seconds: int = 5
     ) -> dict | None:
