@@ -609,32 +609,45 @@ class vCenter:
 
         resource_pool.CreateVApp(vapp_name, resSpec, configSpec, vmFolderMO)
 
-    def delete_vapp(self, vapp_name, max_retries: int = 5, backoff: float = 2.0):
-        # vCenter serializes operations on a vApp. If a deploy/clone/power-on
-        # task is still settling when we tear the zpod down, PowerOff/Destroy
-        # raise vim.fault.VAppTaskInProgress ("Operation cannot be performed
-        # while a vApp operation is in progress."). Re-fetch and retry with
-        # backoff until the in-flight task clears.
-        for attempt in range(max_retries + 1):
-            try:
-                if vapp := self.get_vapp(vapp_name):
-                    if vapp.summary.vAppState != "stopped":
-                        # Wait for vApp PowerOff operation to complete
-                        task.WaitForTask(vapp.PowerOffVApp_Task(True))
-
-                    # Wait for vApp Destroy operation to complete
+    def delete_vapp(self, vapp_name, timeout: float = 900, poll: float = 10):
+        # vCenter refuses an operation on a VM, or on its vApp, while another
+        # task holds it (vim.fault.TaskInProgress, VAppTaskInProgress for the
+        # vApp): a deploy task still settling, or a DRS vMotion. On a busy
+        # cluster DRS moves the zPod's VMs one after another for minutes, and
+        # a vApp-wide power-off fails as long as any of them is moving. So
+        # power the VMs off one at a time, skipping the ones busy right now:
+        # a powered-off VM is no longer a DRS candidate, and the next pass
+        # takes the rest. Then destroy the vApp, with the same patience.
+        deadline = time.monotonic() + timeout
+        while vapp := self.get_vapp(vapp_name):
+            busy = []
+            for vm in vapp.vm:
+                if vm.runtime.powerState == "poweredOff":
+                    continue
+                try:
+                    task.WaitForTask(vm.PowerOffVM_Task())
+                except vim.fault.TaskInProgress:
+                    busy.append(vm.name)
+                except vim.fault.InvalidPowerState:
+                    pass  # turned off in between
+            if not busy:
+                try:
                     task.WaitForTask(vapp.Destroy_Task())
-                return
-            except vim.fault.VAppTaskInProgress:
-                if attempt >= max_retries:
-                    raise
-                # print() rather than logger.warning so Prefect's
-                # log_prints=True picks it up into the task-run logs.
-                print(
-                    f"vSphere VAppTaskInProgress deleting vApp '{vapp_name}' "
-                    f"(attempt {attempt + 1}/{max_retries + 1}) — retrying"
+                    return
+                except vim.fault.TaskInProgress:
+                    busy.append(vapp_name)
+            if time.monotonic() >= deadline:
+                raise TimeoutError(
+                    f"vApp '{vapp_name}' still busy after {timeout:g}s "
+                    f"(task in progress on {', '.join(busy)})"
                 )
-                time.sleep(backoff * (2**attempt))
+            # print() rather than logger.warning so Prefect's
+            # log_prints=True picks it up into the task-run logs.
+            print(
+                f"vApp '{vapp_name}': task in progress on {', '.join(busy)} "
+                f"(vMotion or deploy task), retrying in {poll:g}s"
+            )
+            time.sleep(poll)
 
     def delete_vm_from_vapp(self, vapp_name: str, vm_name: str):
         print("Delete VM from vApp")
