@@ -54,6 +54,11 @@ note with `python3 tools/release_notes.py X.Y.Z`.
   the destroy was deleting, and whichever finished last wrote the zPod's status. A run that
   ignores the cancel for five minutes has lost its container and is forced to `CANCELLED`; if
   it is still active after that, the destroy fails (`DESTROY_FAILED`) naming the run.
+- Destroying a zPod on a busy cluster no longer fails while DRS is moving its VMs. vCenter
+  refuses to power off a vApp while any of its VMs is being vMotioned, and DRS can keep moving
+  them for minutes (`VAppTaskInProgress` after six attempts in about a minute). The destroy now
+  powers the VMs off one at a time, skipping the ones being moved and coming back for them
+  every 10 s, then deletes the vApp. It fails only if the vApp is still busy after 15 minutes.
 
 - Enabling a Broadcom-gated component without `zpodfactory_broadcom_download_token` ends in
   `FAILED_AUTHENTICATION` instead of staying `SCHEDULED` forever.
